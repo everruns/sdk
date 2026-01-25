@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "Rust SDK for Everruns API"
 license = "MIT"
+readme = "README.md"
 repository = "https://github.com/everruns/sdk"
 documentation = "https://docs.rs/everruns-sdk"
 keywords = ["everruns", "sdk", "api", "ai", "agents"]
