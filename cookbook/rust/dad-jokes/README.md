@@ -24,4 +24,3 @@ cargo run -p dad-jokes
 2. Creates a session
 3. Asks for a dad joke
 4. Streams the response
-5. Cleans up

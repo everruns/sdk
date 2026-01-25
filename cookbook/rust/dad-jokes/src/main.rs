@@ -2,7 +2,7 @@
 //!
 //! Creates a dad jokes agent and asks for a joke.
 
-use cookbook_common::{cleanup, dev_client, init_tracing};
+use cookbook_common::{dev_client, init_tracing};
 use futures::StreamExt;
 
 #[tokio::main]
@@ -38,12 +38,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(event) = stream.next().await {
         match event {
             Ok(e) => {
-                if e.event_type == "content.delta"
-                    && let Some(text) = e.data.get("text").and_then(|v| v.as_str())
-                {
+                if let Some(text) = e.data.get("text").and_then(|v| v.as_str()) {
                     print!("{}", text);
                 }
                 if e.event_type == "turn.completed" {
+                    println!();
                     break;
                 }
             }
@@ -53,10 +52,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    println!();
-
-    // Cleanup
-    cleanup(&client, &session.id, &agent.id).await;
 
     Ok(())
 }
