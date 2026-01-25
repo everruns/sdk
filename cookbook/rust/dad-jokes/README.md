@@ -5,8 +5,9 @@ Creates a dad jokes agent that knows the current time.
 ## Run
 
 ```bash
-# Start the server (from everruns/everruns repo)
-cargo install --git https://github.com/everruns/everruns-control-panel
+# Install and start server
+cargo install --git https://github.com/everruns/everruns everruns-server
+DEV_MODE=1 everruns-server
 
 # Set environment
 export EVERRUNS_ORG=your-org
