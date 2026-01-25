@@ -116,11 +116,26 @@ pub enum MessageRole {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ContentPart {
-    Text { text: String },
-    Image { url: Option<String>, base64: Option<String> },
-    ImageFile { image_id: String },
-    ToolCall { id: String, name: String, arguments: serde_json::Value },
-    ToolResult { tool_call_id: String, result: Option<serde_json::Value>, error: Option<String> },
+    Text {
+        text: String,
+    },
+    Image {
+        url: Option<String>,
+        base64: Option<String>,
+    },
+    ImageFile {
+        image_id: String,
+    },
+    ToolCall {
+        id: String,
+        name: String,
+        arguments: serde_json::Value,
+    },
+    ToolResult {
+        tool_call_id: String,
+        result: Option<serde_json::Value>,
+        error: Option<String>,
+    },
 }
 
 /// Request to create a message

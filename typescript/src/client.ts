@@ -56,7 +56,7 @@ export class Everruns {
   }
 
   async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-    const url = \`\${this.baseUrl}/orgs/\${this.org}\${path}\`;
+    const url = `${this.baseUrl}/orgs/${this.org}${path}`;
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -78,7 +78,7 @@ export class Everruns {
         const retryAfter = response.headers.get("Retry-After");
         throw new RateLimitError(retryAfter ? parseInt(retryAfter, 10) : undefined);
       }
-      throw new ApiError(response.status, \`API error: \${response.statusText}\`, body);
+      throw new ApiError(response.status, `API error: ${response.statusText}`, body);
     }
 
     if (response.status === 204) {
@@ -89,7 +89,7 @@ export class Everruns {
   }
 
   getStreamUrl(path: string): string {
-    return \`\${this.baseUrl}/orgs/\${this.org}\${path}\`;
+    return `${this.baseUrl}/orgs/${this.org}${path}`;
   }
 
   getAuthHeader(): string {
@@ -112,7 +112,7 @@ class AgentsClient {
   }
 
   async get(agentId: string): Promise<Agent> {
-    return this.client.fetch(\`/agents/\${agentId}\`);
+    return this.client.fetch(`/agents/${agentId}`);
   }
 
   async list(): Promise<Agent[]> {
@@ -121,7 +121,7 @@ class AgentsClient {
   }
 
   async delete(agentId: string): Promise<void> {
-    await this.client.fetch(\`/agents/\${agentId}\`, { method: "DELETE" });
+    await this.client.fetch(`/agents/${agentId}`, { method: "DELETE" });
   }
 }
 
@@ -136,12 +136,12 @@ class SessionsClient {
   }
 
   async get(sessionId: string): Promise<Session> {
-    return this.client.fetch(\`/sessions/\${sessionId}\`);
+    return this.client.fetch(`/sessions/${sessionId}`);
   }
 
   async list(agentId?: string): Promise<Session[]> {
-    const query = agentId ? \`?agent_id=\${agentId}\` : "";
-    const response = await this.client.fetch<{ sessions: Session[] }>(\`/sessions\${query}\`);
+    const query = agentId ? `?agent_id=${agentId}` : "";
+    const response = await this.client.fetch<{ sessions: Session[] }>(`/sessions${query}`);
     return response.sessions;
   }
 }
@@ -150,7 +150,7 @@ class MessagesClient {
   constructor(private readonly client: Everruns) {}
 
   async create(sessionId: string, request: CreateMessageRequest): Promise<Message> {
-    return this.client.fetch(\`/sessions/\${sessionId}/messages\`, {
+    return this.client.fetch(`/sessions/${sessionId}/messages`, {
       method: "POST",
       body: JSON.stringify({
         text: request.text,
@@ -161,7 +161,7 @@ class MessagesClient {
 
   async list(sessionId: string): Promise<Message[]> {
     const response = await this.client.fetch<{ messages: Message[] }>(
-      \`/sessions/\${sessionId}/messages\`
+      `/sessions/${sessionId}/messages`
     );
     return response.messages;
   }
@@ -174,9 +174,9 @@ class EventsClient {
     const params = new URLSearchParams();
     if (options?.sinceId) params.set("since_id", options.sinceId);
     if (options?.exclude) params.set("exclude", options.exclude.join(","));
-    const query = params.toString() ? \`?\${params}\` : "";
+    const query = params.toString() ? `?${params}` : "";
     const response = await this.client.fetch<{ events: Event[] }>(
-      \`/sessions/\${sessionId}/events\${query}\`
+      `/sessions/${sessionId}/events${query}`
     );
     return response.events;
   }
@@ -185,8 +185,8 @@ class EventsClient {
     const params = new URLSearchParams();
     if (options?.sinceId) params.set("since_id", options.sinceId);
     if (options?.exclude) params.set("exclude", options.exclude.join(","));
-    const query = params.toString() ? \`?\${params}\` : "";
-    const url = this.client.getStreamUrl(\`/sessions/\${sessionId}/events/stream\${query}\`);
+    const query = params.toString() ? `?${params}` : "";
+    const url = this.client.getStreamUrl(`/sessions/${sessionId}/events/stream${query}`);
     return new EventStream(url, this.client.getAuthHeader());
   }
 }

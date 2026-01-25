@@ -8,22 +8,22 @@ Quick Start:
     >>> agent = await client.agents.create("Assistant", "You are helpful.")
 """
 
-from everruns_sdk.client import Everruns
 from everruns_sdk.auth import ApiKey
+from everruns_sdk.client import Everruns
 from everruns_sdk.errors import (
-    EverrunsError,
     ApiError,
     AuthenticationError,
+    EverrunsError,
     NotFoundError,
     RateLimitError,
 )
 from everruns_sdk.models import (
     Agent,
-    Session,
-    Message,
-    Event,
     ContentPart,
     Controls,
+    Event,
+    Message,
+    Session,
 )
 
 __all__ = [

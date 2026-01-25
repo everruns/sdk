@@ -32,7 +32,7 @@ export class EventStream implements AsyncIterable<Event> {
     while (true) {
       try {
         const url = this.lastEventId
-          ? \`\${this.url}\${this.url.includes("?") ? "&" : "?"}since_id=\${this.lastEventId}\`
+          ? `${this.url}${this.url.includes("?") ? "&" : "?"}since_id=${this.lastEventId}`
           : this.url;
 
         const response = await fetch(url, {
@@ -45,7 +45,7 @@ export class EventStream implements AsyncIterable<Event> {
         });
 
         if (!response.ok) {
-          throw new ConnectionError(\`Stream connection failed: \${response.status}\`);
+          throw new ConnectionError(`Stream connection failed: ${response.status}`);
         }
 
         if (!response.body) {

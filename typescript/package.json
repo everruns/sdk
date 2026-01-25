@@ -11,7 +11,9 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
@@ -20,7 +22,13 @@
     "format": "prettier --write src",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["everruns", "sdk", "api", "ai", "agents"],
+  "keywords": [
+    "everruns",
+    "sdk",
+    "api",
+    "ai",
+    "agents"
+  ],
   "author": "Everruns Contributors",
   "license": "MIT",
   "repository": {
@@ -37,9 +45,11 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
     "eslint": "^9.0.0",
-    "prettier": "^3.4.0"
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   }
 }

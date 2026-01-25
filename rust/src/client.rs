@@ -3,7 +3,7 @@
 use crate::auth::ApiKey;
 use crate::error::{Error, Result};
 use crate::models::*;
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
+use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue};
 use url::Url;
 
 const DEFAULT_BASE_URL: &str = "https://app.everruns.com/api";
@@ -64,22 +64,22 @@ impl Everruns {
     }
 
     /// Get the agents client
-    pub fn agents(&self) -> AgentsClient {
+    pub fn agents(&self) -> AgentsClient<'_> {
         AgentsClient { client: self }
     }
 
     /// Get the sessions client
-    pub fn sessions(&self) -> SessionsClient {
+    pub fn sessions(&self) -> SessionsClient<'_> {
         SessionsClient { client: self }
     }
 
     /// Get the messages client
-    pub fn messages(&self) -> MessagesClient {
+    pub fn messages(&self) -> MessagesClient<'_> {
         MessagesClient { client: self }
     }
 
     /// Get the events client
-    pub fn events(&self) -> EventsClient {
+    pub fn events(&self) -> EventsClient<'_> {
         EventsClient { client: self }
     }
 
@@ -125,6 +125,7 @@ impl Everruns {
         self.handle_response(resp).await
     }
 
+    #[allow(dead_code)]
     pub(crate) async fn patch<T: serde::de::DeserializeOwned, B: serde::Serialize>(
         &self,
         path: &str,
@@ -172,7 +173,12 @@ impl Everruns {
     }
 
     /// Get the SSE URL for a session
-    pub(crate) fn sse_url(&self, session_id: &str, since_id: Option<&str>, exclude: &[&str]) -> Url {
+    pub(crate) fn sse_url(
+        &self,
+        session_id: &str,
+        since_id: Option<&str>,
+        exclude: &[&str],
+    ) -> Url {
         let mut url = self.url(&format!("/sessions/{}/sse", session_id));
         if let Some(id) = since_id {
             url.query_pairs_mut().append_pair("since_id", id);
