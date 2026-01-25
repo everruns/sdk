@@ -65,12 +65,17 @@ jobs:
           workspaces: |
             rust
             cookbook/rust
+      - name: Get everruns-server latest commit
+        id: everruns-sha
+        run: |
+          SHA=$(git ls-remote https://github.com/everruns/everruns.git HEAD | cut -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
       - name: Cache everruns-server binary
         id: cache-server
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/everruns-server
-          key: everruns-server-${{ runner.os }}-v1
+          key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
         run: cargo install --git https://github.com/everruns/everruns everruns-server
