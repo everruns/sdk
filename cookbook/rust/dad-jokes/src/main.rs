@@ -1,8 +1,7 @@
 //! Dad Jokes Agent
 //!
-//! Creates a dad jokes agent and asks for a joke about the current time.
+//! Creates a dad jokes agent and asks for a joke.
 
-use chrono::Local;
 use cookbook_common::{cleanup, dev_client, init_tracing};
 use futures::StreamExt;
 
@@ -18,9 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .agents()
         .create(
             "Dad Jokes Bot",
-            "You are a dad joke expert. You tell cheesy, family-friendly dad jokes. \
-             Always respond with exactly one dad joke, followed by a brief explanation \
-             of why it's funny (because dad jokes need explaining).",
+            "You are a dad joke expert. Tell one short, cheesy dad joke.",
         )
         .await?;
     println!("Created agent: {}", agent.id);
@@ -29,22 +26,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let session = client.sessions().create(&agent.id).await?;
     println!("Created session: {}", session.id);
 
-    // Get current time
-    let now = Local::now();
-    let time_str = now.format("%H:%M").to_string();
-    let prompt = format!(
-        "Tell me a dad joke about the time. It's currently {}. \
-         Make it relevant to this specific time if possible!",
-        time_str
-    );
-    println!("\nAsking: {}", prompt);
-
-    // Send message
-    client.messages().create(&session.id, &prompt).await?;
+    // Ask for a joke
+    println!("\nAsking for a dad joke...\n");
+    client
+        .messages()
+        .create(&session.id, "Tell me a dad joke")
+        .await?;
 
     // Stream response
-    println!("\nAgent response:");
-    println!("---");
     let mut stream = client.events().stream(&session.id);
     while let Some(event) = stream.next().await {
         match event {
@@ -64,11 +53,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    println!("\n---");
+    println!();
 
     // Cleanup
     cleanup(&client, &session.id, &agent.id).await;
-    println!("\nCleaned up agent and session");
 
     Ok(())
 }

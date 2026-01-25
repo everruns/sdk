@@ -1,6 +1,6 @@
 # Dad Jokes Agent
 
-Creates a dad jokes agent that knows the current time.
+Creates a dad jokes agent and asks for a joke.
 
 ## Run
 
@@ -22,6 +22,6 @@ cargo run -p dad-jokes
 
 1. Creates an agent with a dad jokes personality
 2. Creates a session
-3. Asks for a dad joke about the current time
-4. Streams and prints the response
+3. Asks for a dad joke
+4. Streams the response
 5. Cleans up

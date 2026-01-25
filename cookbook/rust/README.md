@@ -21,4 +21,4 @@ cargo run -p dad-jokes
 
 ## Recipes
 
-- [dad-jokes](dad-jokes/) - Dad jokes agent with current time
+- [dad-jokes](dad-jokes/) - Dad jokes agent example

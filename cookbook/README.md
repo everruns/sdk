@@ -26,4 +26,4 @@ cargo run -p dad-jokes
 
 | Recipe | Description |
 |--------|-------------|
-| [dad-jokes](rust/dad-jokes/) | Dad jokes agent with current time |
+| [dad-jokes](rust/dad-jokes/) | Dad jokes agent example |

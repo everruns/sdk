@@ -14,5 +14,3 @@ everruns-sdk.workspace = true
 cookbook-common.workspace = true
 tokio.workspace = true
 futures.workspace = true
-tracing.workspace = true
-chrono.workspace = true
