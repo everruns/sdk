@@ -35,7 +35,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(event) = stream.next().await {
         match event {
             Ok(e) => {
-                println!("[{}] {}", e.event_type, serde_json::to_string(&e.data)?);
+                println!("[{}]", e.event_type);
+                if e.event_type == "output.message.completed" {
+                    if let Some(content) = e.data.get("content") {
+                        println!("{}", serde_json::to_string_pretty(content)?);
+                    }
+                }
                 if e.event_type == "turn.completed" || e.event_type == "turn.failed" {
                     break;
                 }
