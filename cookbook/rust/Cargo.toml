@@ -2,11 +2,7 @@
 resolver = "2"
 members = [
     "common",
-    "error-handling",
-    "streaming-events",
-    "agent-sessions",
-    "file-operations",
-    "image-attachments",
+    "dad-jokes",
 ]
 
 [workspace.package]
@@ -21,3 +17,4 @@ tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = "0.4"

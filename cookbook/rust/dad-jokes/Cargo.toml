@@ -1,12 +1,12 @@
 [package]
-name = "image-attachments"
+name = "dad-jokes"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 publish = false
 
 [[bin]]
-name = "image-attachments"
+name = "dad-jokes"
 path = "src/main.rs"
 
 [dependencies]
@@ -15,3 +15,4 @@ cookbook-common.workspace = true
 tokio.workspace = true
 futures.workspace = true
 tracing.workspace = true
+chrono.workspace = true
