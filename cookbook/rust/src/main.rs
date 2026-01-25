@@ -1,12 +1,14 @@
 //! Dad Jokes Agent - Everruns SDK Example
 //!
 //! Run: cargo run
+//! Run with verbose: cargo run -- --verbose
 
 use everruns_sdk::Everruns;
 use futures::StreamExt;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let verbose = std::env::args().any(|a| a == "--verbose" || a == "-v");
     let client = dev_client()?;
 
     // Create agent
@@ -34,15 +36,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(event) = stream.next().await {
         match event {
             Ok(e) => {
+                if verbose {
+                    println!(
+                        "\n[EVENT] {}: {}",
+                        e.event_type,
+                        serde_json::to_string_pretty(&e.data)?
+                    );
+                }
                 match e.event_type.as_str() {
                     "input.message" => {
                         if let Some(text) = extract_text(&e.data) {
                             println!("Input: {}", text);
+                        } else {
+                            println!("Input (raw): {}", serde_json::to_string_pretty(&e.data)?);
                         }
                     }
                     "output.message.completed" => {
                         if let Some(text) = extract_text(&e.data) {
                             println!("Output: {}", text);
+                        } else {
+                            println!("Output (raw): {}", serde_json::to_string_pretty(&e.data)?);
                         }
                     }
                     "turn.completed" => {
@@ -67,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn extract_text(data: &serde_json::Value) -> Option<String> {
-    let content = data.get("content")?.as_array()?;
+    let content = data.get("message")?.get("content")?.as_array()?;
     let texts: Vec<&str> = content
         .iter()
         .filter_map(|part| {
