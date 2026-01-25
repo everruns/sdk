@@ -4,8 +4,8 @@
 
 ```bash
 # Install and start server
-cargo install --git https://github.com/everruns/everruns everruns-control-panel
-DEV_MODE=1 everruns-control-panel
+cargo install --git https://github.com/everruns/everruns everruns-server
+DEV_MODE=1 everruns-server
 
 # Set environment
 export EVERRUNS_ORG=your-org
