@@ -1,0 +1,17 @@
+[package]
+name = "file-operations"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "file-operations"
+path = "src/main.rs"
+
+[dependencies]
+everruns-sdk.workspace = true
+cookbook-common.workspace = true
+tokio.workspace = true
+futures.workspace = true
+tracing.workspace = true

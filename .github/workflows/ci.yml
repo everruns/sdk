@@ -39,3 +39,21 @@ jobs:
       - run: cd typescript && npm ci
       - run: cd typescript && npm test -- --coverage
       - run: cd typescript && npm run lint && npm run build
+
+  check-cookbooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust
+            cookbook/rust
+      - name: Check cookbooks compile
+        run: cd cookbook/rust && cargo check --all
+      - name: Lint cookbooks
+        run: |
+          cd cookbook/rust
+          cargo fmt --check --all
+          cargo clippy --all -- -D warnings

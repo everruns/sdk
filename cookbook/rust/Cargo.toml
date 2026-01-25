@@ -1,0 +1,23 @@
+[workspace]
+resolver = "2"
+members = [
+    "common",
+    "error-handling",
+    "streaming-events",
+    "agent-sessions",
+    "file-operations",
+    "image-attachments",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/everruns/sdk"
+
+[workspace.dependencies]
+everruns-sdk = { path = "../../rust" }
+cookbook-common = { path = "common" }
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
