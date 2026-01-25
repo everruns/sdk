@@ -28,7 +28,7 @@ npm run lint
 
 ```bash
 cd python
-uv pip install -e ".[dev]"
+uv sync --all-extras
 uv run pytest
 uv run ruff check .
 ```

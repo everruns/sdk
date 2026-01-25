@@ -6,7 +6,7 @@ default:
 # Setup all SDKs
 setup:
     cd rust && cargo build
-    cd python && uv pip install -e ".[dev]"
+    cd python && uv sync --all-extras
     cd typescript && npm ci
 
 # Run all tests
