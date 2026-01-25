@@ -21,10 +21,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create session
     let session = client.sessions().create(&agent.id).await?;
-    println!("Created session: {}", session.id);
+    println!("Created session: {}\n", session.id);
 
     // Send message
-    println!("\nAsking for a dad joke...\n");
     client
         .messages()
         .create(&session.id, "Tell me a dad joke")
@@ -35,14 +34,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(event) = stream.next().await {
         match event {
             Ok(e) => {
-                println!("[{}]", e.event_type);
-                if e.event_type == "output.message.completed" {
-                    if let Some(content) = e.data.get("content") {
-                        println!("{}", serde_json::to_string_pretty(content)?);
+                match e.event_type.as_str() {
+                    "input.message" => {
+                        if let Some(text) = extract_text(&e.data) {
+                            println!("Input: {}", text);
+                        }
                     }
-                }
-                if e.event_type == "turn.completed" || e.event_type == "turn.failed" {
-                    break;
+                    "output.message.completed" => {
+                        if let Some(text) = extract_text(&e.data) {
+                            println!("Output: {}", text);
+                        }
+                    }
+                    "turn.completed" => {
+                        println!("\n[Turn completed]");
+                        break;
+                    }
+                    "turn.failed" => {
+                        println!("\n[Turn failed]");
+                        break;
+                    }
+                    _ => {}
                 }
             }
             Err(e) => {
@@ -53,6 +64,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+fn extract_text(data: &serde_json::Value) -> Option<String> {
+    let content = data.get("content")?.as_array()?;
+    let texts: Vec<&str> = content
+        .iter()
+        .filter_map(|part| {
+            if part.get("type")?.as_str()? == "text" {
+                part.get("text")?.as_str()
+            } else {
+                None
+            }
+        })
+        .collect();
+    if texts.is_empty() {
+        None
+    } else {
+        Some(texts.join(""))
+    }
 }
 
 fn dev_client() -> Result<Everruns, everruns_sdk::Error> {
