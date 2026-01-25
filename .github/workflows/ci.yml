@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      python: ${{ steps.filter.outputs.python }}
+      typescript: ${{ steps.filter.outputs.typescript }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rust:
+              - 'rust/**'
+              - 'openapi/**'
+            python:
+              - 'python/**'
+              - 'openapi/**'
+            typescript:
+              - 'typescript/**'
+              - 'openapi/**'
+
+  test-rust:
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - run: cd rust && cargo test --all-features
+      - run: cd rust && cargo clippy -- -D warnings
+      - run: cd rust && cargo fmt --check
+
+  test-python:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: cd python && uv pip install -e ".[dev]"
+      - run: cd python && uv run pytest --cov=everruns_sdk --cov-report=xml --cov-fail-under=80
+      - run: cd python && uv run ruff check . && uv run ruff format --check .
+
+  test-typescript:
+    needs: changes
+    if: needs.changes.outputs.typescript == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - run: cd typescript && npm ci
+      - run: cd typescript && npm test -- --coverage
+      - run: cd typescript && npm run lint && npm run build
