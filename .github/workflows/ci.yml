@@ -50,10 +50,7 @@ jobs:
           workspaces: |
             rust
             cookbook/rust
-      - name: Check cookbooks compile
-        run: cd cookbook/rust && cargo check --all
-      - name: Lint cookbooks
-        run: |
-          cd cookbook/rust
-          cargo fmt --check --all
-          cargo clippy --all -- -D warnings
+      - name: Check cookbook compiles
+        run: cd cookbook/rust && cargo check
+      - name: Lint cookbook
+        run: cd cookbook/rust && cargo fmt --check && cargo clippy -- -D warnings

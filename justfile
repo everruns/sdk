@@ -63,19 +63,14 @@ publish-dry-run:
     cd python && uv build
     cd typescript && npm run build
 
-# Check Rust cookbooks compile
-check-cookbooks:
-    cd cookbook/rust && cargo check --all
+# Check cookbook compiles
+check-cookbook:
+    cd cookbook/rust && cargo check
 
-# Lint Rust cookbooks
-lint-cookbooks:
-    cd cookbook/rust && cargo fmt --check --all
-    cd cookbook/rust && cargo clippy --all -- -D warnings
+# Lint cookbook
+lint-cookbook:
+    cd cookbook/rust && cargo fmt --check && cargo clippy -- -D warnings
 
-# Format Rust cookbooks
-fmt-cookbooks:
-    cd cookbook/rust && cargo fmt --all
-
-# Run a specific cookbook (requires env vars: EVERRUNS_ORG, EVERRUNS_API_KEY)
-run-cookbook name:
-    cd cookbook/rust && cargo run -p {{name}}
+# Run cookbook (requires EVERRUNS_ORG, EVERRUNS_API_KEY, EVERRUNS_API_URL)
+run-cookbook:
+    cd cookbook/rust && cargo run

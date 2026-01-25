@@ -1,18 +1,15 @@
-//! Dad Jokes Agent
+//! Dad Jokes Agent - Everruns SDK Example
 //!
-//! Creates a dad jokes agent and asks for a joke.
+//! Run: cargo run
 
-use cookbook_common::{dev_client, init_tracing};
+use everruns_sdk::Everruns;
 use futures::StreamExt;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    init_tracing();
-
     let client = dev_client()?;
-    println!("Connected to Everruns API");
 
-    // Create dad jokes agent
+    // Create agent
     let agent = client
         .agents()
         .create(
@@ -26,7 +23,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let session = client.sessions().create(&agent.id).await?;
     println!("Created session: {}", session.id);
 
-    // Ask for a joke
+    // Send message
     println!("\nAsking for a dad joke...\n");
     client
         .messages()
@@ -47,11 +44,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
             Err(e) => {
-                eprintln!("\nStream error: {}", e);
+                eprintln!("Stream error: {}", e);
                 break;
             }
         }
     }
 
     Ok(())
+}
+
+fn dev_client() -> Result<Everruns, everruns_sdk::Error> {
+    let org = std::env::var("EVERRUNS_ORG").expect("EVERRUNS_ORG required");
+    let key = std::env::var("EVERRUNS_API_KEY").expect("EVERRUNS_API_KEY required");
+
+    match std::env::var("EVERRUNS_API_URL") {
+        Ok(url) => Everruns::with_base_url(key, org, &url),
+        Err(_) => Everruns::new(key, org),
+    }
 }
