@@ -30,16 +30,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .create(&session.id, "Tell me a dad joke")
         .await?;
 
-    // Stream response
+    // Stream events
     let mut stream = client.events().stream(&session.id);
     while let Some(event) = stream.next().await {
         match event {
             Ok(e) => {
-                if let Some(text) = e.data.get("text").and_then(|v| v.as_str()) {
-                    print!("{}", text);
-                }
-                if e.event_type == "turn.completed" {
-                    println!();
+                println!("[{}] {}", e.event_type, serde_json::to_string(&e.data)?);
+                if e.event_type == "turn.completed" || e.event_type == "turn.failed" {
                     break;
                 }
             }

@@ -8,3 +8,4 @@ publish = false
 everruns-sdk = { path = "../../rust" }
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
+serde_json = "1"
