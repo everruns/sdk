@@ -65,7 +65,14 @@ jobs:
           workspaces: |
             rust
             cookbook/rust
+      - name: Cache everruns-server binary
+        id: cache-server
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/everruns-server
+          key: everruns-server-${{ runner.os }}-v1
       - name: Install everruns-server
+        if: steps.cache-server.outputs.cache-hit != 'true'
         run: cargo install --git https://github.com/everruns/everruns everruns-server
       - name: Start everruns-server
         run: |
