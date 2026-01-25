@@ -1,0 +1,40 @@
+name: Sync OpenAPI
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest OpenAPI spec
+        run: |
+          curl -sSL -o openapi/openapi.json \
+            https://raw.githubusercontent.com/everruns/everruns/main/docs/api/openapi.json
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet openapi/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Regenerate SDK types
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          echo "TODO: Run type generation"
+
+      - name: Create PR
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore: sync OpenAPI spec"
+          branch: chore/sync-openapi
+          body: |
+            Auto-generated PR to sync OpenAPI spec changes from main repo.
