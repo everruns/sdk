@@ -60,7 +60,7 @@ just generate           # Regenerate types from OpenAPI
 ### TypeScript
 
 - Node 22+, npm
-- `prettier` and `eslint`
+- `prettier` and `oxlint`
 
 ### Pre-PR Checklist
 

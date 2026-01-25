@@ -64,7 +64,7 @@ just coverage          # Generate coverage reports
 
 - **Rust:** `cargo fmt`, `cargo clippy`
 - **Python:** `ruff format`, `ruff check`
-- **TypeScript:** `prettier`, `eslint`
+- **TypeScript:** `prettier`, `oxlint`
 
 ## Regenerating Types
 
