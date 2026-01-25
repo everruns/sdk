@@ -5,14 +5,14 @@ Creates a dad jokes agent and asks for a joke.
 ## Run
 
 ```bash
-# Install and start server
+# Install and start server in dev mode
 cargo install --git https://github.com/everruns/everruns everruns-server
 DEV_MODE=1 everruns-server
 
-# Set environment
-export EVERRUNS_ORG=your-org
-export EVERRUNS_API_KEY=your-key
-export EVERRUNS_API_URL=http://localhost:9000/api
+# Set environment (dev mode values)
+export EVERRUNS_ORG=org_00000000000000000000000000000001
+export EVERRUNS_API_KEY=fake-key
+export EVERRUNS_API_URL=http://localhost:9000
 
 # Run the cookbook
 cargo run -p dad-jokes
