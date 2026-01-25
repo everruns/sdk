@@ -28,7 +28,7 @@ npm run lint
 
 ```bash
 cd python
-uv pip install -e ".[dev]"
+uv sync --all-extras
 uv run pytest
 uv run ruff check .
 ```
@@ -64,7 +64,7 @@ just coverage          # Generate coverage reports
 
 - **Rust:** `cargo fmt`, `cargo clippy`
 - **Python:** `ruff format`, `ruff check`
-- **TypeScript:** `prettier`, `eslint`
+- **TypeScript:** `prettier`, `oxlint`
 
 ## Regenerating Types
 

@@ -30,7 +30,7 @@ export class AuthenticationError extends ApiError {
 
 export class NotFoundError extends ApiError {
   constructor(resource: string) {
-    super(404, \`\${resource} not found\`);
+    super(404, `${resource} not found`);
     this.name = "NotFoundError";
   }
 }

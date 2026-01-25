@@ -1,8 +1,10 @@
 """Tests for Everruns SDK client."""
 
 import os
+
 import pytest
-from everruns_sdk import Everruns, ApiKey
+
+from everruns_sdk import ApiKey, Everruns
 
 
 def test_api_key_creation():
@@ -32,7 +34,7 @@ def test_api_key_from_env_missing():
     """Test API key from missing environment variable."""
     if "EVERRUNS_API_KEY" in os.environ:
         del os.environ["EVERRUNS_API_KEY"]
-    
+
     with pytest.raises(ValueError):
         ApiKey.from_env()
 
@@ -57,6 +59,6 @@ def test_client_missing_api_key():
     """Test client creation fails without API key."""
     if "EVERRUNS_API_KEY" in os.environ:
         del os.environ["EVERRUNS_API_KEY"]
-    
+
     with pytest.raises(ValueError):
         Everruns(org="test-org")

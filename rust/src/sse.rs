@@ -90,7 +90,7 @@ impl EventStream {
                     Err(e) => {
                         tracing::warn!("SSE error: {}", e);
                         // Could implement reconnection logic here
-                        return Err(Error::Sse(e.to_string()));
+                        Err(Error::Sse(e.to_string()))?;
                     }
                 }
             }

@@ -1,6 +1,6 @@
 //! Basic example of using the Everruns SDK
 
-use everruns_sdk::{Everruns, Error};
+use everruns_sdk::{Error, Everruns};
 use futures::StreamExt;
 
 #[tokio::main]
@@ -9,10 +9,13 @@ async fn main() -> Result<(), Error> {
     let client = Everruns::from_env("my-org")?;
 
     // Create an agent
-    let agent = client.agents().create(
-        "Example Assistant",
-        "You are a helpful assistant for examples."
-    ).await?;
+    let agent = client
+        .agents()
+        .create(
+            "Example Assistant",
+            "You are a helpful assistant for examples.",
+        )
+        .await?;
     println!("Created agent: {}", agent.id);
 
     // Create a session
@@ -20,7 +23,10 @@ async fn main() -> Result<(), Error> {
     println!("Created session: {}", session.id);
 
     // Send a message
-    let _message = client.messages().create(&session.id, "Hello, how are you?").await?;
+    let _message = client
+        .messages()
+        .create(&session.id, "Hello, how are you?")
+        .await?;
     println!("Sent message");
 
     // Stream events
