@@ -19,6 +19,7 @@ rust/target/
 node_modules/
 dist/
 *.tsbuildinfo
+coverage/
 
 # IDE
 .idea/
