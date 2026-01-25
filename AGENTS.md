@@ -64,14 +64,12 @@ just generate           # Regenerate types from OpenAPI
 
 ### Pre-PR Checklist
 
-1. `just pre-pr` (runs 2-6 automatically)
-2. Tests pass with coverage ≥80%
-3. Linting passes (clippy, ruff, eslint)
-4. Types regenerate cleanly: `just generate`
-5. Examples run successfully
-6. Rebase on main: `git fetch origin main && git rebase origin/main`
-7. CI green before merge
-8. Resolve all PR comments
+1. Formatters and linters: `just lint`
+2. Tests: `just test`
+3. Rebase on main: `git fetch origin main && git rebase origin/main`
+4. Smoke test new functionality
+5. CI green before merge
+6. Resolve all PR comments
 
 ### CI
 
