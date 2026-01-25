@@ -6,33 +6,7 @@ on:
   pull_request:
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      rust: ${{ steps.filter.outputs.rust }}
-      python: ${{ steps.filter.outputs.python }}
-      typescript: ${{ steps.filter.outputs.typescript }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            rust:
-              - 'rust/**'
-              - 'openapi/**'
-            python:
-              - 'python/**'
-              - 'openapi/**'
-            typescript:
-              - 'typescript/**'
-              - 'openapi/**'
-
   test-rust:
-    needs: changes
-    if: needs.changes.outputs.rust == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,8 +19,6 @@ jobs:
       - run: cd rust && cargo fmt --check
 
   test-python:
-    needs: changes
-    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,8 +28,6 @@ jobs:
       - run: cd python && uv run ruff check . && uv run ruff format --check .
 
   test-typescript:
-    needs: changes
-    if: needs.changes.outputs.typescript == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
