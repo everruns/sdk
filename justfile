@@ -62,3 +62,15 @@ publish-dry-run:
     cd rust && cargo publish --dry-run
     cd python && uv build
     cd typescript && npm run build
+
+# Check cookbook compiles
+check-cookbook:
+    cd cookbook/rust && cargo check
+
+# Lint cookbook
+lint-cookbook:
+    cd cookbook/rust && cargo fmt --check && cargo clippy -- -D warnings
+
+# Run cookbook (requires EVERRUNS_ORG, EVERRUNS_API_KEY, EVERRUNS_API_URL)
+run-cookbook:
+    cd cookbook/rust && cargo run

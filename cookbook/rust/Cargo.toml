@@ -1,0 +1,11 @@
+[package]
+name = "cookbook"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+everruns-sdk = { path = "../../rust" }
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+serde_json = "1"

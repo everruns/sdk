@@ -1,21 +1,15 @@
 # Everruns SDK Cookbook
 
-Practical recipes for common use cases.
+Runnable examples for each SDK.
 
-## Recipes
+## Server Setup
 
-| Recipe | Description |
-|--------|-------------|
-| `error-handling/` | Handle API errors gracefully |
-| `streaming-events/` | Subscribe to SSE events |
-| `agent-sessions/` | Create agents and manage sessions |
-| `file-operations/` | Upload and manage files |
-| `image-attachments/` | Attach images to messages |
+```bash
+cargo install --git https://github.com/everruns/everruns everruns-server
+export DEFAULT_ANTHROPIC_API_KEY=sk-ant-...  # or DEFAULT_OPENAI_API_KEY
+DEV_MODE=1 everruns-server
+```
 
-## Structure
+## Cookbooks
 
-Each recipe has:
-- `README.md` - Explanation
-- `rust/` - Rust implementation
-- `python/` - Python implementation
-- `typescript/` - TypeScript implementation
+- [rust/](rust/) - Rust SDK example
