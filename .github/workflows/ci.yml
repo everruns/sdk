@@ -54,3 +54,41 @@ jobs:
         run: cd cookbook/rust && cargo check
       - name: Lint cookbook
         run: cd cookbook/rust && cargo fmt --check && cargo clippy -- -D warnings
+
+  run-rust-cookbook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust
+            cookbook/rust
+      - name: Get everruns-server latest commit
+        id: everruns-sha
+        run: |
+          SHA=$(git ls-remote https://github.com/everruns/everruns.git HEAD | cut -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+      - name: Cache everruns-server binary
+        id: cache-server
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/everruns-server
+          key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
+      - name: Install everruns-server
+        if: steps.cache-server.outputs.cache-hit != 'true'
+        run: cargo install --git https://github.com/everruns/everruns everruns-server
+      - name: Start everruns-server
+        run: |
+          DEV_MODE=1 everruns-server &
+          sleep 5  # Wait for server to start
+        env:
+          DEFAULT_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEFAULT_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      - name: Run Rust cookbook example
+        run: cd cookbook/rust && cargo run
+        env:
+          EVERRUNS_ORG: org_00000000000000000000000000000001
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
