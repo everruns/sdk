@@ -1,0 +1,23 @@
+[project]
+name = "cookbook"
+version = "0.1.0"
+description = "Everruns SDK cookbook examples"
+requires-python = ">=3.10"
+dependencies = [
+    "everruns-sdk",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.3",
+]
+
+[tool.uv.sources]
+everruns-sdk = { path = "../../python" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]

@@ -16,7 +16,7 @@ test: test-rust test-python test-typescript
 test-rust:
     cd rust && cargo test
 
-# Test Python SDK  
+# Test Python SDK
 test-python:
     cd python && uv run pytest
 
@@ -63,14 +63,49 @@ publish-dry-run:
     cd python && uv build
     cd typescript && npm run build
 
-# Check cookbook compiles
-check-cookbook:
+# Check all cookbooks compile
+check-cookbook: check-cookbook-rust check-cookbook-python check-cookbook-typescript
+
+# Check Rust cookbook
+check-cookbook-rust:
     cd cookbook/rust && cargo check
 
-# Lint cookbook
-lint-cookbook:
+# Check Python cookbook
+check-cookbook-python:
+    cd cookbook/python && uv sync
+    cd cookbook/python && uv run python -m py_compile src/main.py
+
+# Check TypeScript cookbook
+check-cookbook-typescript:
+    cd typescript && npm run build
+    cd cookbook/typescript && npm install
+    cd cookbook/typescript && npm run check
+
+# Lint all cookbooks
+lint-cookbook: lint-cookbook-rust lint-cookbook-python lint-cookbook-typescript
+
+# Lint Rust cookbook
+lint-cookbook-rust:
     cd cookbook/rust && cargo fmt --check && cargo clippy -- -D warnings
 
-# Run cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
-run-cookbook:
+# Lint Python cookbook
+lint-cookbook-python:
+    cd cookbook/python && uv sync
+    cd cookbook/python && uv run ruff check . && uv run ruff format --check .
+
+# Lint TypeScript cookbook
+lint-cookbook-typescript:
+    cd cookbook/typescript && npm install
+    cd cookbook/typescript && npm run lint
+
+# Run Rust cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
+run-cookbook-rust:
     cd cookbook/rust && cargo run
+
+# Run Python cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
+run-cookbook-python:
+    cd cookbook/python && uv run python src/main.py
+
+# Run TypeScript cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
+run-cookbook-typescript:
+    cd cookbook/typescript && npx tsx src/main.ts

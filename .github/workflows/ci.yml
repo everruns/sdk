@@ -44,28 +44,70 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Rust setup
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
             rust
             cookbook/rust
-      - name: Check cookbook compiles
+
+      # Python setup
+      - uses: astral-sh/setup-uv@v5
+
+      # TypeScript setup
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Check Rust cookbook
+      - name: Check Rust cookbook compiles
         run: cd cookbook/rust && cargo check
-      - name: Lint cookbook
+      - name: Lint Rust cookbook
         run: cd cookbook/rust && cargo fmt --check && cargo clippy -- -D warnings
 
-  run-rust-cookbook:
+      # Check Python cookbook
+      - name: Install Python cookbook deps
+        run: cd cookbook/python && uv sync
+      - name: Check Python cookbook syntax
+        run: cd cookbook/python && uv run python -m py_compile src/main.py
+      - name: Lint Python cookbook
+        run: cd cookbook/python && uv run ruff check . && uv run ruff format --check .
+
+      # Check TypeScript cookbook
+      - name: Build TypeScript SDK (required for cookbook)
+        run: cd typescript && npm ci && npm run build
+      - name: Install TypeScript cookbook deps
+        run: cd cookbook/typescript && npm install
+      - name: Check TypeScript cookbook compiles
+        run: cd cookbook/typescript && npm run check
+      - name: Lint TypeScript cookbook
+        run: cd cookbook/typescript && npm run lint
+
+  run-cookbooks:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
+      # Rust setup
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
             rust
             cookbook/rust
+
+      # Python setup
+      - uses: astral-sh/setup-uv@v5
+
+      # TypeScript setup
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Install everruns-server (cached)
       - name: Get everruns-server latest commit
         id: everruns-sha
         run: |
@@ -80,16 +122,42 @@ jobs:
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
         run: cargo install --git https://github.com/everruns/everruns everruns-server
+
+      # Start server
       - name: Start everruns-server
         run: |
           DEV_MODE=1 everruns-server &
-          sleep 5  # Wait for server to start
+          sleep 5
         env:
           DEFAULT_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DEFAULT_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      - name: Run Rust cookbook example
+
+      # Run Rust cookbook
+      - name: Run Rust cookbook
         timeout-minutes: 3
         run: cd cookbook/rust && cargo run
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+
+      # Run Python cookbook
+      - name: Install Python cookbook deps
+        run: cd cookbook/python && uv sync
+      - name: Run Python cookbook
+        timeout-minutes: 3
+        run: cd cookbook/python && uv run python src/main.py
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+
+      # Run TypeScript cookbook
+      - name: Build TypeScript SDK
+        run: cd typescript && npm ci && npm run build
+      - name: Install TypeScript cookbook deps
+        run: cd cookbook/typescript && npm install
+      - name: Run TypeScript cookbook
+        timeout-minutes: 3
+        run: cd cookbook/typescript && npx tsx src/main.ts
         env:
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000

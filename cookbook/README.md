@@ -13,3 +13,5 @@ DEV_MODE=1 everruns-server
 ## Cookbooks
 
 - [rust/](rust/) - Rust SDK example
+- [python/](python/) - Python SDK example
+- [typescript/](typescript/) - TypeScript SDK example

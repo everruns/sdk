@@ -1,0 +1,22 @@
+{
+  "name": "cookbook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "oxlint src && prettier --check src",
+    "format": "prettier --write src",
+    "start": "npx tsx src/main.ts"
+  },
+  "dependencies": {
+    "@everruns/sdk": "file:../../typescript"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "oxlint": "^1.41.0",
+    "prettier": "^3.4.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
