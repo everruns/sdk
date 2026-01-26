@@ -9,7 +9,7 @@ import { Everruns } from "@everruns/sdk";
 
 async function main() {
   // Create client using EVERRUNS_API_KEY env var
-  const client = Everruns.fromEnv("my-org");
+  const client = Everruns.fromEnv();
 
   // Create an agent
   const agent = await client.agents.create({

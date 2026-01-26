@@ -10,7 +10,7 @@
 //! #[tokio::main]
 //! async fn main() -> Result<(), everruns_sdk::Error> {
 //!     // Uses EVERRUNS_API_KEY environment variable
-//!     let client = Everruns::from_env("my-org")?;
+//!     let client = Everruns::from_env()?;
 //!
 //!     // Create an agent
 //!     let agent = client.agents().create(

@@ -17,13 +17,11 @@ import { EventStream } from "./sse.js";
 
 export interface EverrunsOptions {
   apiKey?: string | ApiKey;
-  org: string;
   baseUrl?: string;
 }
 
 export class Everruns {
   private readonly apiKey: ApiKey;
-  private readonly org: string;
   private readonly baseUrl: string;
 
   readonly agents: AgentsClient;
@@ -31,7 +29,7 @@ export class Everruns {
   readonly messages: MessagesClient;
   readonly events: EventsClient;
 
-  constructor(options: EverrunsOptions) {
+  constructor(options: EverrunsOptions = {}) {
     if (options.apiKey instanceof ApiKey) {
       this.apiKey = options.apiKey;
     } else if (options.apiKey) {
@@ -39,7 +37,6 @@ export class Everruns {
     } else {
       this.apiKey = ApiKey.fromEnv();
     }
-    this.org = options.org;
     this.baseUrl = options.baseUrl ?? "https://api.everruns.com";
 
     this.agents = new AgentsClient(this);
@@ -51,12 +48,12 @@ export class Everruns {
   /**
    * Create a client using the EVERRUNS_API_KEY environment variable.
    */
-  static fromEnv(org: string, baseUrl?: string): Everruns {
-    return new Everruns({ org, baseUrl });
+  static fromEnv(baseUrl?: string): Everruns {
+    return new Everruns({ baseUrl });
   }
 
   async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.baseUrl}/orgs/${this.org}${path}`;
+    const url = `${this.baseUrl}${path}`;
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -89,7 +86,7 @@ export class Everruns {
   }
 
   getStreamUrl(path: string): string {
-    return `${this.baseUrl}/orgs/${this.org}${path}`;
+    return `${this.baseUrl}${path}`;
   }
 
   getAuthHeader(): string {

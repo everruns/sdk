@@ -6,7 +6,7 @@ use futures::StreamExt;
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     // Initialize client from environment
-    let client = Everruns::from_env("my-org")?;
+    let client = Everruns::from_env()?;
 
     // Create an agent
     let agent = client

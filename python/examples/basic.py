@@ -7,7 +7,7 @@ from everruns_sdk import Everruns
 
 async def main():
     # Initialize client from environment
-    client = Everruns(org="my-org")
+    client = Everruns()
 
     try:
         # Create an agent

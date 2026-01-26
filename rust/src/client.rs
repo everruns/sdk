@@ -14,41 +14,32 @@ pub struct Everruns {
     http: reqwest::Client,
     base_url: Url,
     api_key: ApiKey,
-    org: String,
 }
 
 impl Everruns {
     /// Create a new client with explicit API key
-    pub fn new(api_key: impl Into<String>, org: impl Into<String>) -> Result<Self> {
-        Self::with_base_url(api_key, org, DEFAULT_BASE_URL)
+    pub fn new(api_key: impl Into<String>) -> Result<Self> {
+        Self::with_base_url(api_key, DEFAULT_BASE_URL)
     }
 
     /// Create a new client using EVERRUNS_API_KEY environment variable
-    pub fn from_env(org: impl Into<String>) -> Result<Self> {
+    pub fn from_env() -> Result<Self> {
         let api_key = ApiKey::from_env()?;
-        Self::with_api_key(api_key, org)
+        Self::with_api_key(api_key)
     }
 
     /// Create a new client with a custom base URL
-    pub fn with_base_url(
-        api_key: impl Into<String>,
-        org: impl Into<String>,
-        base_url: &str,
-    ) -> Result<Self> {
+    pub fn with_base_url(api_key: impl Into<String>, base_url: &str) -> Result<Self> {
         let api_key = ApiKey::new(api_key);
-        Self::with_api_key_and_url(api_key, org, base_url)
+        Self::with_api_key_and_url(api_key, base_url)
     }
 
     /// Create a new client with an ApiKey instance
-    pub fn with_api_key(api_key: ApiKey, org: impl Into<String>) -> Result<Self> {
-        Self::with_api_key_and_url(api_key, org, DEFAULT_BASE_URL)
+    pub fn with_api_key(api_key: ApiKey) -> Result<Self> {
+        Self::with_api_key_and_url(api_key, DEFAULT_BASE_URL)
     }
 
-    fn with_api_key_and_url(
-        api_key: ApiKey,
-        org: impl Into<String>,
-        base_url: &str,
-    ) -> Result<Self> {
+    fn with_api_key_and_url(api_key: ApiKey, base_url: &str) -> Result<Self> {
         let http = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(30))
             .build()?;
@@ -59,7 +50,6 @@ impl Everruns {
             http,
             base_url,
             api_key,
-            org: org.into(),
         })
     }
 
@@ -84,7 +74,7 @@ impl Everruns {
     }
 
     fn url(&self, path: &str) -> Url {
-        let full_path = format!("/v1/orgs/{}{}", self.org, path);
+        let full_path = format!("/v1{}", path);
         self.base_url.join(&full_path).expect("valid URL")
     }
 
@@ -355,7 +345,6 @@ impl std::fmt::Debug for Everruns {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Everruns")
             .field("base_url", &self.base_url.as_str())
-            .field("org", &self.org)
             .field("api_key", &self.api_key)
             .finish()
     }

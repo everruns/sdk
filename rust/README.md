@@ -19,7 +19,7 @@ use everruns_sdk::Everruns;
 #[tokio::main]
 async fn main() -> Result<(), everruns_sdk::Error> {
     // Uses EVERRUNS_API_KEY environment variable
-    let client = Everruns::from_env("my-org")?;
+    let client = Everruns::from_env()?;
 
     // Create an agent
     let agent = client.agents().create(
@@ -43,10 +43,10 @@ The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment va
 
 \`\`\`rust
 // From environment variable
-let client = Everruns::from_env("my-org")?;
+let client = Everruns::from_env()?;
 
 // Explicit key
-let client = Everruns::new("evr_...", "my-org");
+let client = Everruns::new("evr_...")?;
 \`\`\`
 
 ## Streaming Events

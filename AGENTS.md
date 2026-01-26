@@ -28,7 +28,19 @@ Fix root cause. Unsure: read more code; if stuck, ask w/ short options. Unrecogn
 
 ### OpenAPI
 
-`openapi/openapi.json` - Source of truth synced from everruns/everruns.
+`openapi/openapi.json` - Source of truth synced from [everruns/everruns](https://github.com/everruns/everruns).
+
+Source location: `docs/api/openapi.json` in everruns/everruns repo.
+
+To update: `curl -s "https://raw.githubusercontent.com/everruns/everruns/main/docs/api/openapi.json" > openapi/openapi.json`
+
+### GitHub API Access
+
+Public repos (e.g., everruns/everruns) accessible via GitHub API without auth:
+```bash
+curl -s "https://api.github.com/repos/everruns/everruns/contents"
+curl -s "https://raw.githubusercontent.com/everruns/everruns/main/path/to/file"
+```
 
 ### Cloud Agent Start
 

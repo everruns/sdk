@@ -30,18 +30,16 @@ class Everruns:
     """Main client for interacting with the Everruns API.
 
     Args:
-        org: Organization ID
         api_key: API key (optional, defaults to EVERRUNS_API_KEY env var)
         base_url: Base URL for the API (optional)
 
     Example:
-        >>> client = Everruns(org="my-org")
+        >>> client = Everruns()
         >>> agent = await client.agents.create("Assistant", "You are helpful.")
     """
 
     def __init__(
         self,
-        org: str,
         api_key: Optional[str] = None,
         base_url: str = DEFAULT_BASE_URL,
     ):
@@ -54,7 +52,6 @@ class Everruns:
                 )
 
         self._api_key = ApiKey(api_key)
-        self._org = org
         self._base_url = base_url.rstrip("/")
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
@@ -86,7 +83,7 @@ class Everruns:
         return EventsClient(self)
 
     def _url(self, path: str) -> str:
-        return f"/v1/orgs/{self._org}{path}"
+        return f"/v1{path}"
 
     async def _get(self, path: str) -> Any:
         resp = await self._client.get(self._url(path))

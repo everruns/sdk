@@ -41,16 +41,16 @@ def test_api_key_from_env_missing():
 
 def test_client_creation():
     """Test client creation with explicit API key."""
-    client = Everruns(org="test-org", api_key="evr_test_key")
-    assert client._org == "test-org"
+    client = Everruns(api_key="evr_test_key")
+    assert client._api_key.value == "evr_test_key"
 
 
 def test_client_from_env():
     """Test client creation from environment variable."""
     os.environ["EVERRUNS_API_KEY"] = "evr_from_env"
     try:
-        client = Everruns(org="test-org")
-        assert client._org == "test-org"
+        client = Everruns()
+        assert client._api_key.value == "evr_from_env"
     finally:
         del os.environ["EVERRUNS_API_KEY"]
 
@@ -61,4 +61,4 @@ def test_client_missing_api_key():
         del os.environ["EVERRUNS_API_KEY"]
 
     with pytest.raises(ValueError):
-        Everruns(org="test-org")
+        Everruns()

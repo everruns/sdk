@@ -10,7 +10,6 @@ export DEFAULT_ANTHROPIC_API_KEY=sk-ant-...  # or DEFAULT_OPENAI_API_KEY
 DEV_MODE=1 everruns-server
 
 # Terminal 2: Run example
-export EVERRUNS_ORG=org_00000000000000000000000000000001
 export EVERRUNS_API_KEY=fake-key
 export EVERRUNS_API_URL=http://localhost:9000
 cargo run

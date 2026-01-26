@@ -16,7 +16,7 @@ from everruns_sdk import Everruns
 
 async def main():
     # Uses EVERRUNS_API_KEY environment variable
-    client = Everruns(org="my-org")
+    client = Everruns()
     
     # Create an agent
     agent = await client.agents.create(
