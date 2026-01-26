@@ -186,10 +186,6 @@ Consistent error types across all SDKs:
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
-- [API Surface](specs/api-surface.md)
-- [SSE Streaming](specs/sse-streaming.md)
-- [Error Handling](specs/error-handling.md)
-- [Architecture](specs/architecture.md)
 
 ## Examples
 
