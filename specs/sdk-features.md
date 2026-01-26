@@ -8,25 +8,30 @@ Everruns SDKs provide typed clients for the Everruns API. All language implement
 
 ## Client Initialization
 
-### Required Parameters
+### Parameters
 
-| Parameter | Description |
-|-----------|-------------|
-| `org` | Organization ID (required) |
-| `api_key` | API key, defaults to `EVERRUNS_API_KEY` env var |
-| `base_url` | API base URL (optional, for testing/self-hosted) |
+| Parameter | Env Variable | Description |
+|-----------|--------------|-------------|
+| `org` | `EVERRUNS_ORG` | Organization ID |
+| `api_key` | `EVERRUNS_API_KEY` | API key |
+| `base_api_url` | `EVERRUNS_BASE_API_URL` | API base URL (optional, for testing/self-hosted) |
+
+All parameters can be omitted if the corresponding environment variable is set.
 
 ### Initialization Patterns
 
 ```
-# From environment (recommended)
+# From environment (recommended) - all params from env vars
+client = Everruns()
+
+# Explicit org (api_key from env)
 client = Everruns(org="my-org")
 
 # Explicit API key
 client = Everruns(org="my-org", api_key="evr_...")
 
 # Custom base URL
-client = Everruns(org="my-org", base_url="https://custom.example.com")
+client = Everruns(org="my-org", base_api_url="https://custom.example.com/api")
 ```
 
 ## Resource Sub-Clients
@@ -124,19 +129,20 @@ message = client.messages.create_with_options(session_id, CreateMessageRequest(.
 
 ## Pagination
 
-List endpoints return paginated responses:
+List endpoints return offset-based paginated responses:
 
 ```json
 {
   "data": [...],
-  "has_more": true,
-  "next_cursor": "..."
+  "total": 100,
+  "offset": 0,
+  "limit": 20
 }
 ```
 
 SDKs must support:
-- Cursor-based pagination via `cursor` parameter
-- Optional `limit` parameter (default: 20, max: 100)
+- `offset` parameter (number of items to skip)
+- `limit` parameter (max items per page, default: 20)
 - Helper for iterating all pages (nice-to-have for v1)
 
 ## Logging & Debugging
@@ -217,4 +223,3 @@ These are explicitly out of scope for initial release:
 - Automatic pagination iteration
 - Request caching
 - Offline mode
-- Webhook handling
