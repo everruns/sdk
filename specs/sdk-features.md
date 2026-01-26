@@ -14,7 +14,7 @@ Everruns SDKs provide typed clients for the Everruns API. All language implement
 |-----------|--------------|-------------|
 | `org` | `EVERRUNS_ORG` | Organization ID |
 | `api_key` | `EVERRUNS_API_KEY` | API key |
-| `base_api_url` | `EVERRUNS_BASE_API_URL` | API base URL (optional, for testing/self-hosted) |
+| `base_api_url` | `EVERRUNS_API_URL` | API base URL (optional, for testing/self-hosted) |
 
 All parameters can be omitted if the corresponding environment variable is set.
 
