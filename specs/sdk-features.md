@@ -14,7 +14,7 @@ Everruns SDKs provide typed clients for the Everruns API. All language implement
 |-----------|--------------|-------------|
 | `org` | `EVERRUNS_ORG` | Organization ID |
 | `api_key` | `EVERRUNS_API_KEY` | API key |
-| `base_api_url` | `EVERRUNS_API_URL` | API base URL (optional, for testing/self-hosted) |
+| `api_url` | `EVERRUNS_API_URL` | API base URL (optional, for testing/self-hosted) |
 
 All parameters can be omitted if the corresponding environment variable is set.
 
@@ -31,7 +31,7 @@ client = Everruns(org="my-org")
 client = Everruns(org="my-org", api_key="evr_...")
 
 # Custom base URL
-client = Everruns(org="my-org", base_api_url="https://custom.example.com/api")
+client = Everruns(org="my-org", api_url="https://custom.example.com/api")
 ```
 
 ## Resource Sub-Clients
