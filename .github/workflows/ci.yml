@@ -89,6 +89,5 @@ jobs:
       - name: Run Rust cookbook example
         run: cd cookbook/rust && cargo run
         env:
-          EVERRUNS_ORG: org_00000000000000000000000000000001
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000

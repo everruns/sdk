@@ -17,7 +17,6 @@ describe("Everruns", () => {
   it("should create client with explicit key", () => {
     const client = new Everruns({
       apiKey: "evr_test_key",
-      org: "test-org",
     });
     expect(client).toBeDefined();
     expect(client.agents).toBeDefined();
@@ -30,7 +29,6 @@ describe("Everruns", () => {
     const apiKey = new ApiKey("evr_test_key");
     const client = new Everruns({
       apiKey,
-      org: "test-org",
     });
     expect(client).toBeDefined();
   });
@@ -38,11 +36,8 @@ describe("Everruns", () => {
   it("should use custom base URL", () => {
     const client = new Everruns({
       apiKey: "evr_test_key",
-      org: "test-org",
       baseUrl: "https://custom.api.com",
     });
-    expect(client.getStreamUrl("/test")).toBe(
-      "https://custom.api.com/orgs/test-org/test"
-    );
+    expect(client.getStreamUrl("/test")).toBe("https://custom.api.com/test");
   });
 });

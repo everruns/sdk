@@ -99,11 +99,10 @@ fn extract_text(data: &serde_json::Value) -> Option<String> {
 }
 
 fn dev_client() -> Result<Everruns, everruns_sdk::Error> {
-    let org = std::env::var("EVERRUNS_ORG").expect("EVERRUNS_ORG required");
     let key = std::env::var("EVERRUNS_API_KEY").expect("EVERRUNS_API_KEY required");
 
     match std::env::var("EVERRUNS_API_URL") {
-        Ok(url) => Everruns::with_base_url(key, org, &url),
-        Err(_) => Everruns::new(key, org),
+        Ok(url) => Everruns::with_base_url(key, &url),
+        Err(_) => Everruns::new(key),
     }
 }

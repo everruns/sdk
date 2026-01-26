@@ -4,7 +4,7 @@ A typed client for the Everruns API.
 
 Quick Start:
     >>> from everruns_sdk import Everruns
-    >>> client = Everruns(org="my-org")  # uses EVERRUNS_API_KEY
+    >>> client = Everruns()  # uses EVERRUNS_API_KEY
     >>> agent = await client.agents.create("Assistant", "You are helpful.")
 """
 

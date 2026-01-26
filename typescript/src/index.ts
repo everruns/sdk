@@ -6,7 +6,7 @@
  * import { Everruns } from "@everruns/sdk";
  *
  * // Uses EVERRUNS_API_KEY environment variable
- * const client = Everruns.fromEnv("my-org");
+ * const client = Everruns.fromEnv();
  *
  * // Create an agent
  * const agent = await client.agents.create({

@@ -54,8 +54,7 @@ class EventStream:
     def _build_url(self) -> str:
         """Build the SSE URL with query parameters."""
         base = self._client._base_url
-        org = self._client._org
-        url = f"{base}/v1/orgs/{org}/sessions/{self._session_id}/sse"
+        url = f"{base}/v1/sessions/{self._session_id}/sse"
         params = []
 
         since_id = self._last_event_id or self._options.since_id

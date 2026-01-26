@@ -3,7 +3,7 @@
 ## Connection
 
 ```
-GET /v1/orgs/{org}/sessions/{id}/sse
+GET /v1/sessions/{id}/sse
 Accept: text/event-stream
 ```
 

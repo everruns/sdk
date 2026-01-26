@@ -12,7 +12,6 @@ Everruns SDKs provide typed clients for the Everruns API. All language implement
 
 | Parameter | Env Variable | Description |
 |-----------|--------------|-------------|
-| `org` | `EVERRUNS_ORG` | Organization ID |
 | `api_key` | `EVERRUNS_API_KEY` | API key |
 | `api_url` | `EVERRUNS_API_URL` | API base URL (optional, for testing/self-hosted) |
 
@@ -21,17 +20,14 @@ All parameters can be omitted if the corresponding environment variable is set.
 ### Initialization Patterns
 
 ```
-# From environment (recommended) - all params from env vars
+# From environment (recommended) - api_key from env var
 client = Everruns()
 
-# Explicit org (api_key from env)
-client = Everruns(org="my-org")
-
 # Explicit API key
-client = Everruns(org="my-org", api_key="evr_...")
+client = Everruns(api_key="evr_...")
 
 # Custom base URL
-client = Everruns(org="my-org", api_url="https://custom.example.com/api")
+client = Everruns(api_url="https://custom.example.com/api")
 ```
 
 ## Resource Sub-Clients

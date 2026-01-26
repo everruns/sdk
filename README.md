@@ -35,7 +35,7 @@ use futures::StreamExt;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Everruns::from_env("org_...")?;
+    let client = Everruns::from_env()?;
 
     // Create an agent
     let agent = client.agents().create(
@@ -70,7 +70,7 @@ import asyncio
 from everruns_sdk import Everruns
 
 async def main():
-    client = Everruns(org="org_...")
+    client = Everruns()
 
     # Create an agent
     agent = await client.agents.create(
@@ -101,7 +101,7 @@ asyncio.run(main())
 import { Everruns } from "@everruns/sdk";
 
 async function main() {
-  const client = Everruns.fromEnv("org_...");
+  const client = Everruns.fromEnv();
 
   // Create an agent
   const agent = await client.agents.create({
@@ -159,17 +159,17 @@ All SDKs read from `EVERRUNS_API_KEY` environment variable by default, or accept
 
 ```rust
 // Rust
-let client = Everruns::new("evr_...", "org_...");
+let client = Everruns::new("evr_...");
 ```
 
 ```python
 # Python
-client = Everruns(api_key="evr_...", org="org_...")
+client = Everruns(api_key="evr_...")
 ```
 
 ```typescript
 // TypeScript
-const client = new Everruns({ apiKey: "evr_...", org: "org_..." });
+const client = new Everruns({ apiKey: "evr_..." });
 ```
 
 ## Error Handling
