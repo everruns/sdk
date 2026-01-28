@@ -29,6 +29,25 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
     export PATH="$INSTALL_DIR:$PATH"
 fi
 
+# Persist PATH in shell profile if not already present
+ensure_path_in_profile() {
+    local profile=""
+    if [[ -f "$HOME/.bashrc" ]]; then
+        profile="$HOME/.bashrc"
+    elif [[ -f "$HOME/.profile" ]]; then
+        profile="$HOME/.profile"
+    elif [[ -f "$HOME/.zshrc" ]]; then
+        profile="$HOME/.zshrc"
+    fi
+
+    if [[ -n "$profile" ]] && ! grep -q 'cargo/bin' "$profile" 2>/dev/null; then
+        echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> "$profile"
+        info "Added ~/.cargo/bin to PATH in $profile"
+        return 0
+    fi
+    return 1
+}
+
 install_just() {
     if command -v just &> /dev/null; then
         info "just already installed: $(just --version)"
@@ -166,6 +185,12 @@ main() {
     install_gh
     configure_gh_repo
 
+    # Persist PATH for future shells
+    local path_updated=false
+    if ensure_path_in_profile; then
+        path_updated=true
+    fi
+
     END_TIME=$(date +%s)
     ELAPSED=$((END_TIME - START_TIME))
 
@@ -177,6 +202,11 @@ main() {
     echo "  - just $(just --version 2>/dev/null || echo '(not in PATH)')"
     echo "  - gh $(gh --version 2>/dev/null | head -1 || echo '(not in PATH)')"
     echo ""
+    if [[ "$path_updated" == "true" ]]; then
+        echo "PATH updated. Run this to apply now:"
+        echo "  export PATH=\"\$HOME/.cargo/bin:\$PATH\""
+        echo ""
+    fi
     echo "Next steps:"
     echo "  just --list              # See available commands"
     echo "  just start-dev --no-watch  # Quick start (recommended for cloud)"
