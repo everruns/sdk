@@ -97,4 +97,3 @@ fn extract_text(data: &serde_json::Value) -> Option<String> {
         Some(texts.join(""))
     }
 }
-
