@@ -184,8 +184,8 @@ class EventStream:
                 # Clean shutdown
                 break
             else:
-                # Stream ended normally
-                if self._should_retry() and self._last_event_id:
+                # Stream ended normally - always retry to handle read timeout case
+                if self._should_retry():
                     self._retry_count += 1
                     delay = self._get_retry_delay()
                     self._update_backoff()
