@@ -12,9 +12,11 @@ use crate::error::{Error, Result};
 use crate::models::Event;
 use futures::stream::Stream;
 use serde::Deserialize;
+use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
+use tokio::time::{Sleep, sleep};
 
 /// Maximum retry delay for exponential backoff
 const MAX_RETRY_MS: u64 = 30_000;
@@ -111,6 +113,8 @@ pub struct EventStream {
     should_reconnect: bool,
     /// Whether we received a graceful disconnect
     graceful_disconnect: bool,
+    /// Pending delay before reconnection (non-blocking)
+    delay_future: Option<Pin<Box<Sleep>>>,
 }
 
 impl EventStream {
@@ -126,6 +130,7 @@ impl EventStream {
             retry_count: 0,
             should_reconnect: true,
             graceful_disconnect: false,
+            delay_future: None,
         }
     }
 
@@ -138,6 +143,7 @@ impl EventStream {
     pub fn stop(&mut self) {
         self.should_reconnect = false;
         self.inner = None;
+        self.delay_future = None;
     }
 
     /// Get the current retry count
@@ -209,7 +215,7 @@ impl EventStream {
                         if let Ok(event) = serde_json::from_str::<Event>(&msg.data) {
                             yield event;
                         } else {
-                            tracing::trace!("Skipping non-event message: {}", msg.event);
+                            tracing::debug!("Skipping non-event message: {}", msg.event);
                         }
                     }
                     Err(reqwest_eventsource::Error::StreamEnded) => {
@@ -256,6 +262,10 @@ impl EventStream {
             None => true,
         }
     }
+
+    fn schedule_reconnect(&mut self, delay: Duration) {
+        self.delay_future = Some(Box::pin(sleep(delay)));
+    }
 }
 
 impl Stream for EventStream {
@@ -263,6 +273,21 @@ impl Stream for EventStream {
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         loop {
+            // Check if we're waiting for a delay before reconnecting
+            if let Some(ref mut delay) = self.delay_future {
+                match Pin::new(delay).poll(cx) {
+                    Poll::Ready(()) => {
+                        // Delay completed, clear it and reconnect
+                        self.delay_future = None;
+                        self.graceful_disconnect = false;
+                    }
+                    Poll::Pending => {
+                        // Still waiting for delay
+                        return Poll::Pending;
+                    }
+                }
+            }
+
             if self.inner.is_none() {
                 if !self.should_reconnect {
                     return Poll::Ready(None);
@@ -295,10 +320,7 @@ impl Stream for EventStream {
                             self.retry_count += 1;
                             let delay = self.get_retry_delay();
                             tracing::debug!("Graceful reconnect in {:?}", delay);
-
-                            // Schedule reconnection (simplified - in production use tokio::time)
-                            std::thread::sleep(delay);
-                            self.graceful_disconnect = false;
+                            self.schedule_reconnect(delay);
                             continue;
                         } else {
                             return Poll::Ready(None);
@@ -318,19 +340,17 @@ impl Stream for EventStream {
                             delay,
                             self.retry_count
                         );
-
-                        // Schedule reconnection
-                        std::thread::sleep(delay);
+                        self.schedule_reconnect(delay);
                         continue;
                     } else {
                         return Poll::Ready(Some(Err(e)));
                     }
                 }
                 Poll::Ready(None) => {
-                    // Stream ended - attempt reconnection if appropriate
+                    // Stream ended - always retry to handle read timeout case
                     self.inner = None;
 
-                    if self.should_retry() && self.last_event_id.is_some() {
+                    if self.should_retry() {
                         self.retry_count += 1;
                         let delay = self.get_retry_delay();
                         self.update_backoff();
@@ -339,8 +359,7 @@ impl Stream for EventStream {
                             delay,
                             self.retry_count
                         );
-
-                        std::thread::sleep(delay);
+                        self.schedule_reconnect(delay);
                         continue;
                     }
 

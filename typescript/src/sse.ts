@@ -153,8 +153,8 @@ export class EventStream implements AsyncIterable<Event> {
           yield event;
         }
 
-        // Stream ended normally
-        if (this.shouldRetry() && this.lastEventId) {
+        // Stream ended normally - always retry to handle read timeout case
+        if (this.shouldRetry()) {
           this.retryCount++;
           const delay = this.getRetryDelay();
           this.updateBackoff();

@@ -253,7 +253,7 @@ class EventStream:
                             yield event
                         except (json.JSONDecodeError, TypeError, KeyError):
                             # Skip malformed events
-                            logger.trace(f"Skipping malformed event: {sse.event}")  # type: ignore
+                            logger.debug(f"Skipping malformed event: {sse.event}")
 
 
 class _GracefulDisconnectError(Exception):
