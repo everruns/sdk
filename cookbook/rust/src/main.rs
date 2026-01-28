@@ -9,7 +9,7 @@ use futures::StreamExt;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let verbose = std::env::args().any(|a| a == "--verbose" || a == "-v");
-    let client = dev_client()?;
+    let client = Everruns::from_env()?;
 
     // Create agent
     let agent = client
@@ -98,11 +98,3 @@ fn extract_text(data: &serde_json::Value) -> Option<String> {
     }
 }
 
-fn dev_client() -> Result<Everruns, everruns_sdk::Error> {
-    let key = std::env::var("EVERRUNS_API_KEY").expect("EVERRUNS_API_KEY required");
-
-    match std::env::var("EVERRUNS_API_URL") {
-        Ok(url) => Everruns::with_base_url(key, &url),
-        Err(_) => Everruns::new(key),
-    }
-}

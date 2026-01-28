@@ -45,7 +45,9 @@ export class EventStream implements AsyncIterable<Event> {
         });
 
         if (!response.ok) {
-          throw new ConnectionError(`Stream connection failed: ${response.status}`);
+          throw new ConnectionError(
+            `Stream connection failed: ${response.status}`,
+          );
         }
 
         if (!response.body) {
@@ -54,7 +56,7 @@ export class EventStream implements AsyncIterable<Event> {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        
+
         const eventQueue: Event[] = [];
         let resolveNext: ((value: IteratorResult<Event>) => void) | null = null;
 
@@ -81,7 +83,7 @@ export class EventStream implements AsyncIterable<Event> {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          
+
           const chunk = decoder.decode(value, { stream: true });
           parser.feed(chunk);
 
