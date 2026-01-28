@@ -75,7 +75,9 @@ export class Everruns {
         const retryAfter = response.headers.get("Retry-After");
         throw new RateLimitError(retryAfter ? parseInt(retryAfter, 10) : undefined);
       }
-      throw new ApiError(response.status, `API error: ${response.statusText}`, body);
+      // Simplify HTML responses to avoid verbose error messages
+      const simplifiedBody = body && isHtmlResponse(body) ? undefined : body;
+      throw new ApiError(response.status, `API error: ${response.statusText}`, simplifiedBody);
     }
 
     if (response.status === 204) {
@@ -186,4 +188,13 @@ class EventsClient {
     const url = this.client.getStreamUrl(`/sessions/${sessionId}/events/stream${query}`);
     return new EventStream(url, this.client.getAuthHeader());
   }
+}
+
+/** Check if the body looks like an HTML response */
+function isHtmlResponse(body: string): boolean {
+  const trimmed = body.trimStart();
+  return (
+    trimmed.startsWith("<!DOCTYPE") ||
+    trimmed.toLowerCase().startsWith("<html")
+  );
 }

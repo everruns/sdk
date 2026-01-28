@@ -54,6 +54,17 @@ class NotFoundError extends ApiError {}
 class RateLimitError extends ApiError {}
 ```
 
+## HTML Response Handling
+
+When the API returns an HTML response instead of JSON (e.g., from a reverse proxy 404 page), SDKs simplify the error message to avoid verbose HTML in error output.
+
+Detection: Response body starting with `<!DOCTYPE` or `<html` (case-insensitive).
+
+Behavior:
+- Rust: Sets message to `"HTTP {status}"` instead of raw HTML
+- Python: Sets message to `"HTTP {status}"` instead of raw HTML
+- TypeScript: Omits the body from ApiError instead of including raw HTML
+
 ## Retry Strategy
 
 - Retry on 429 (rate limit) with Retry-After header

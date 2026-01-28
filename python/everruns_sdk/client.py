@@ -26,6 +26,12 @@ from everruns_sdk.sse import EventStream, StreamOptions
 DEFAULT_BASE_URL = "https://app.everruns.com/api"
 
 
+def _is_html_response(body: str) -> bool:
+    """Check if the body looks like an HTML response."""
+    trimmed = body.lstrip()
+    return trimmed.startswith("<!DOCTYPE") or trimmed.lower().startswith("<html")
+
+
 class Everruns:
     """Main client for interacting with the Everruns API.
 
@@ -111,7 +117,13 @@ class Everruns:
         try:
             body = resp.json()
         except Exception:
-            body = {"error": {"code": "unknown", "message": resp.text}}
+            # Simplify HTML responses to avoid verbose error messages
+            text = resp.text
+            if _is_html_response(text):
+                message = f"HTTP {resp.status_code}"
+            else:
+                message = text
+            body = {"error": {"code": "unknown", "message": message}}
         raise ApiError.from_response(resp.status_code, body)
 
     async def close(self) -> None:
