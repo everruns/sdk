@@ -199,15 +199,30 @@ class EventsClient {
     return response.events;
   }
 
+  /**
+   * Stream events from a session via SSE with automatic reconnection.
+   *
+   * The stream automatically handles:
+   * - Server-initiated `disconnecting` events (connection cycling)
+   * - Unexpected disconnections with exponential backoff
+   * - Resume from last event ID via `since_id`
+   *
+   * @param sessionId - The session to stream events from
+   * @param options - Optional stream configuration
+   * @returns An async iterable of events
+   *
+   * @example
+   * ```typescript
+   * const stream = client.events.stream(sessionId);
+   * for await (const event of stream) {
+   *   console.log(event.type, event.data);
+   * }
+   * ```
+   */
   stream(sessionId: string, options?: StreamOptions): EventStream {
-    const params = new URLSearchParams();
-    if (options?.sinceId) params.set("since_id", options.sinceId);
-    if (options?.exclude) params.set("exclude", options.exclude.join(","));
-    const query = params.toString() ? `?${params}` : "";
-    const url = this.client.getStreamUrl(
-      `/sessions/${sessionId}/events/stream${query}`,
-    );
-    return new EventStream(url, this.client.getAuthHeader());
+    // Build base URL (without since_id - EventStream handles that for reconnection)
+    const url = this.client.getStreamUrl(`/v1/sessions/${sessionId}/sse`);
+    return new EventStream(url, this.client.getAuthHeader(), options);
   }
 }
 
@@ -215,7 +230,6 @@ class EventsClient {
 function isHtmlResponse(body: string): boolean {
   const trimmed = body.trimStart();
   return (
-    trimmed.startsWith("<!DOCTYPE") ||
-    trimmed.toLowerCase().startsWith("<html")
+    trimmed.startsWith("<!DOCTYPE") || trimmed.toLowerCase().startsWith("<html")
   );
 }

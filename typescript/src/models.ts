@@ -60,4 +60,6 @@ export interface StreamOptions {
   sinceId?: string;
   /** Event types to exclude from the stream */
   exclude?: string[];
+  /** Maximum number of reconnection attempts (undefined = unlimited) */
+  maxRetries?: number;
 }
