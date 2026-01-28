@@ -40,11 +40,14 @@ pub enum Error {
 
 /// API error response from the server
 #[derive(Debug, serde::Deserialize)]
+#[non_exhaustive]
 pub struct ApiErrorResponse {
     pub error: ApiErrorDetail,
 }
 
+/// Detail of an API error
 #[derive(Debug, serde::Deserialize)]
+#[non_exhaustive]
 pub struct ApiErrorDetail {
     pub code: String,
     pub message: String,
