@@ -219,13 +219,7 @@ impl<'a> AgentsClient<'a> {
 
     /// Create a new agent
     pub async fn create(&self, name: &str, system_prompt: &str) -> Result<Agent> {
-        let req = CreateAgentRequest {
-            name: name.to_string(),
-            system_prompt: system_prompt.to_string(),
-            description: None,
-            default_model_id: None,
-            tags: vec![],
-        };
+        let req = CreateAgentRequest::new(name, system_prompt);
         self.client.post("/agents", &req).await
     }
 
@@ -258,11 +252,7 @@ impl<'a> SessionsClient<'a> {
 
     /// Create a new session
     pub async fn create(&self, agent_id: &str) -> Result<Session> {
-        let req = CreateSessionRequest {
-            agent_id: agent_id.to_string(),
-            title: None,
-            model_id: None,
-        };
+        let req = CreateSessionRequest::new(agent_id);
         self.client.post("/sessions", &req).await
     }
 
@@ -300,15 +290,7 @@ impl<'a> MessagesClient<'a> {
 
     /// Create a new message (send text)
     pub async fn create(&self, session_id: &str, text: &str) -> Result<Message> {
-        let req = CreateMessageRequest {
-            message: MessageInput {
-                role: MessageRole::User,
-                content: vec![ContentPart::Text {
-                    text: text.to_string(),
-                }],
-            },
-            controls: None,
-        };
+        let req = CreateMessageRequest::user_text(text);
         self.client
             .post(&format!("/sessions/{}/messages", session_id), &req)
             .await

@@ -74,3 +74,29 @@ result = base + path       // "http://host/api/v1/agents"
 When testing with custom base URLs (e.g., `http://localhost:8080/api`):
 - Rust/Python: Works regardless of trailing slash (normalized internally)
 - TypeScript: Works regardless of trailing slash (normalized internally)
+
+## Forward Compatibility
+
+SDKs must handle API responses with new fields gracefully. The API may add new fields to response objects at any time without a major version bump.
+
+### Requirements
+
+1. **Response parsing**: Extra/unknown fields in API responses must be ignored, not cause errors
+2. **Request construction**: Users should be able to construct request objects without specifying every optional field
+
+### Per-Language Implementation
+
+| Language | Forward Compatibility Mechanism |
+|----------|--------------------------------|
+| Rust | `#[non_exhaustive]` attribute on public structs |
+| Python | Pydantic `BaseModel` ignores extra fields by default |
+| TypeScript | Interfaces are structural; extra fields allowed |
+
+### Rust Details
+
+All public structs must have `#[non_exhaustive]`:
+- Prevents exhaustive pattern matching on structs from external crates
+- Allows adding new fields without breaking existing code
+- Request structs should provide builder methods for ergonomic construction
+
+Reference: https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute

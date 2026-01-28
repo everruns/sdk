@@ -27,6 +27,7 @@ const READ_TIMEOUT_SECS: u64 = 120;
 
 /// Options for SSE streaming
 #[derive(Debug, Clone, Default)]
+#[non_exhaustive]
 pub struct StreamOptions {
     /// Event types to exclude from the stream
     pub exclude: Vec<String>,
@@ -37,6 +38,11 @@ pub struct StreamOptions {
 }
 
 impl StreamOptions {
+    /// Create new empty stream options
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// Create options that exclude delta events (for reduced bandwidth)
     pub fn exclude_deltas() -> Self {
         Self {
@@ -47,6 +53,12 @@ impl StreamOptions {
             since_id: None,
             max_retries: None,
         }
+    }
+
+    /// Set the event types to exclude
+    pub fn with_exclude(mut self, exclude: Vec<String>) -> Self {
+        self.exclude = exclude;
+        self
     }
 
     /// Set the since_id for resuming a stream
