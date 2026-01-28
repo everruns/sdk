@@ -31,8 +31,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .create(&session.id, "Tell me a dad joke")
         .await?;
 
-    // Stream events
-    let mut stream = client.events().stream(&session.id);
+    // Stream events (with retry limit for CI)
+    use everruns_sdk::sse::StreamOptions;
+    let mut stream = client
+        .events()
+        .stream_with_options(&session.id, StreamOptions::default().with_max_retries(3));
     while let Some(event) = stream.next().await {
         match event {
             Ok(e) => {
