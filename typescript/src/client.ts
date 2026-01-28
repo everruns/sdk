@@ -42,7 +42,12 @@ export class Everruns {
     } else {
       this.apiKey = ApiKey.fromEnv();
     }
-    this.baseUrl = options.baseUrl ?? "https://custom.example.com/api";
+    // Normalize base URL: remove trailing slash to avoid double slashes
+    // when joining with paths that start with "/".
+    // Example: "http://host/api/" + "/v1/agents" = "http://host/api//v1/agents" (wrong)
+    //          "http://host/api" + "/v1/agents" = "http://host/api/v1/agents" (correct)
+    const rawBaseUrl = options.baseUrl ?? "https://custom.example.com/api";
+    this.baseUrl = rawBaseUrl.replace(/\/+$/, "");
 
     this.agents = new AgentsClient(this);
     this.sessions = new SessionsClient(this);
@@ -60,8 +65,18 @@ export class Everruns {
     return new Everruns({ baseUrl });
   }
 
+  /**
+   * Build full URL from a path, adding the /v1 prefix.
+   * Path should start with "/" (e.g., "/agents").
+   */
+  private url(path: string): string {
+    // Ensure path starts with "/" for consistency
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${this.baseUrl}/v1${normalizedPath}`;
+  }
+
   async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.baseUrl}${path}`;
+    const url = this.url(path);
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -102,7 +117,7 @@ export class Everruns {
   }
 
   getStreamUrl(path: string): string {
-    return `${this.baseUrl}${path}`;
+    return this.url(path);
   }
 
   getAuthHeader(): string {

@@ -67,7 +67,12 @@ class Everruns:
             base_url = os.environ.get("EVERRUNS_API_URL", DEFAULT_BASE_URL)
 
         self._api_key = ApiKey(api_key)
-        self._base_url = base_url.rstrip("/")
+        # Ensure base URL has trailing slash for correct URL joining.
+        # httpx follows RFC 3986: without trailing slash, relative paths
+        # replace the last path segment instead of appending.
+        # Example: "http://host/api" + "v1/x" = "http://host/v1/x" (wrong)
+        #          "http://host/api/" + "v1/x" = "http://host/api/v1/x" (correct)
+        self._base_url = base_url.rstrip("/") + "/"
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
             headers={
@@ -98,7 +103,10 @@ class Everruns:
         return EventsClient(self)
 
     def _url(self, path: str) -> str:
-        return f"/v1{path}"
+        # Use relative path (no leading slash) for correct joining with base URL.
+        # The path parameter starts with "/" (e.g., "/agents"), so we strip it.
+        path_without_slash = path.lstrip("/")
+        return f"v1/{path_without_slash}"
 
     async def _get(self, path: str) -> Any:
         resp = await self._client.get(self._url(path))
