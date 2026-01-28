@@ -48,7 +48,10 @@ Fresh cloud environment? Run init script first:
 
 ```bash
 ./scripts/init-cloud-env.sh   # Installs just, gh CLI
+export PATH="$HOME/.cargo/bin:$PATH"  # Apply PATH in current shell
 ```
+
+Script persists PATH in shell profile for future sessions.
 
 ### Cloud Agent Start
 
@@ -89,7 +92,7 @@ just generate           # Regenerate types from OpenAPI
 3. Rebase on main: `git fetch origin main && git rebase origin/main`
 4. Smoke test new functionality
 5. CI green before merge
-6. Resolve all PR comments
+6. Resolve all PR comments: `gh pr view <num> --repo everruns/sdk --comments`
 
 ### CI
 
