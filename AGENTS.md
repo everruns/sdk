@@ -108,4 +108,10 @@ Scopes: rust, python, typescript, docs, ci
 
 **REQUIRED:** Use `.github/pull_request_template.md`. Squash and Merge.
 
+Cloud env PR creation (origin uses proxy, not GitHub directly):
+```bash
+# Must specify --repo and --head explicitly
+gh pr create --repo everruns/sdk --head <branch-name> --title "..." --body "..."
+```
+
 See `CONTRIBUTING.md` for details.
