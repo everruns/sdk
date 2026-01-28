@@ -53,7 +53,8 @@ class EventStream:
 
     def _build_url(self) -> str:
         """Build the SSE URL with query parameters."""
-        base = self._client._base_url
+        # base_url already has trailing slash, use relative path
+        base = self._client._base_url.rstrip("/")
         url = f"{base}/v1/sessions/{self._session_id}/sse"
         params = []
 

@@ -48,7 +48,17 @@ impl Everruns {
             .timeout(std::time::Duration::from_secs(30))
             .build()?;
 
-        let base_url = Url::parse(base_url)?;
+        // Ensure base URL has trailing slash for correct URL joining.
+        // Url::join follows RFC 3986: without trailing slash, relative paths
+        // replace the last path segment instead of appending.
+        // Example: "http://host/api" + "v1/x" = "http://host/v1/x" (wrong)
+        //          "http://host/api/" + "v1/x" = "http://host/api/v1/x" (correct)
+        let normalized = if base_url.ends_with('/') {
+            base_url.to_string()
+        } else {
+            format!("{}/", base_url)
+        };
+        let base_url = Url::parse(&normalized)?;
 
         Ok(Self {
             http,
@@ -78,7 +88,10 @@ impl Everruns {
     }
 
     fn url(&self, path: &str) -> Url {
-        let full_path = format!("/v1{}", path);
+        // Use relative path (no leading slash) for correct joining with base URL.
+        // The path parameter starts with "/" (e.g., "/agents"), so we strip it.
+        let path_without_slash = path.strip_prefix('/').unwrap_or(path);
+        let full_path = format!("v1/{}", path_without_slash);
         self.base_url.join(&full_path).expect("valid URL")
     }
 

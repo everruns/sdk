@@ -38,6 +38,18 @@ describe("Everruns", () => {
       apiKey: "evr_test_key",
       baseUrl: "https://custom.api.com",
     });
-    expect(client.getStreamUrl("/test")).toBe("https://custom.api.com/test");
+    // URLs include the /v1 prefix for API versioning
+    expect(client.getStreamUrl("/test")).toBe("https://custom.api.com/v1/test");
+  });
+
+  it("should normalize base URL with trailing slash", () => {
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+      baseUrl: "https://custom.api.com/api/",
+    });
+    // Trailing slash is removed, /v1 prefix is added
+    expect(client.getStreamUrl("/agents")).toBe(
+      "https://custom.api.com/api/v1/agents",
+    );
   });
 });

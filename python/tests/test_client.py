@@ -62,3 +62,24 @@ def test_client_missing_api_key():
 
     with pytest.raises(ValueError):
         Everruns()
+
+
+def test_base_url_normalization_adds_trailing_slash():
+    """Test that base URL without trailing slash gets one added."""
+    client = Everruns(api_key="evr_test_key", base_url="https://custom.example.com/api")
+    # Base URL should have trailing slash for correct URL joining
+    assert client._base_url == "https://custom.example.com/api/"
+
+
+def test_base_url_normalization_preserves_single_trailing_slash():
+    """Test that base URL with trailing slash is normalized correctly."""
+    client = Everruns(api_key="evr_test_key", base_url="https://custom.example.com/api/")
+    assert client._base_url == "https://custom.example.com/api/"
+
+
+def test_url_path_construction():
+    """Test that URL paths are constructed correctly."""
+    client = Everruns(api_key="evr_test_key", base_url="https://custom.example.com/api")
+    # The _url method should produce relative paths without leading slash
+    assert client._url("/agents") == "v1/agents"
+    assert client._url("/sessions/123") == "v1/sessions/123"
