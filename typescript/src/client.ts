@@ -179,16 +179,30 @@ class SessionsClient {
 class MessagesClient {
   constructor(private readonly client: Everruns) {}
 
+  /**
+   * Create a new message (send text).
+   */
+  async create(sessionId: string, text: string): Promise<Message>;
   async create(
     sessionId: string,
     request: CreateMessageRequest,
+  ): Promise<Message>;
+  async create(
+    sessionId: string,
+    textOrRequest: string | CreateMessageRequest,
   ): Promise<Message> {
+    const request: CreateMessageRequest =
+      typeof textOrRequest === "string"
+        ? {
+            message: {
+              role: "user",
+              content: [{ type: "text", text: textOrRequest }],
+            },
+          }
+        : textOrRequest;
     return this.client.fetch(`/sessions/${sessionId}/messages`, {
       method: "POST",
-      body: JSON.stringify({
-        text: request.text,
-        image_urls: request.imageUrls,
-      }),
+      body: JSON.stringify(request),
     });
   }
 
@@ -236,7 +250,7 @@ class EventsClient {
    */
   stream(sessionId: string, options?: StreamOptions): EventStream {
     // Build base URL (without since_id - EventStream handles that for reconnection)
-    const url = this.client.getStreamUrl(`/v1/sessions/${sessionId}/sse`);
+    const url = this.client.getStreamUrl(`/sessions/${sessionId}/sse`);
     return new EventStream(url, this.client.getAuthHeader(), options);
   }
 }

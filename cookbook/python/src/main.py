@@ -10,6 +10,7 @@ import os
 import sys
 
 from everruns_sdk import Everruns
+from everruns_sdk.sse import EventStream, StreamOptions
 
 
 async def main():
@@ -34,8 +35,10 @@ async def main():
             text="Tell me a dad joke",
         )
 
-        # Stream events
-        async for event in client.events.stream(session.id):
+        # Stream events (with retry limit for CI)
+        options = StreamOptions(max_retries=3)
+        stream = EventStream(client, session.id, options)
+        async for event in stream:
             if verbose:
                 print(f"\n[EVENT] {event.type}: {json.dumps(event.data, indent=2)}")
 

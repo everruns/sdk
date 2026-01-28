@@ -24,12 +24,10 @@ async function main() {
   console.log(`Created session: ${session.id}\n`);
 
   // Send message
-  await client.messages.create(session.id, {
-    text: "Tell me a dad joke",
-  });
+  await client.messages.create(session.id, "Tell me a dad joke");
 
-  // Stream events
-  const stream = client.events.stream(session.id);
+  // Stream events (with retry limit for CI)
+  const stream = client.events.stream(session.id, { maxRetries: 3 });
 
   for await (const event of stream) {
     if (verbose) {
