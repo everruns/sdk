@@ -12,7 +12,12 @@ import {
   Event,
   StreamOptions,
 } from "./models.js";
-import { ApiError, AuthenticationError, NotFoundError, RateLimitError } from "./errors.js";
+import {
+  ApiError,
+  AuthenticationError,
+  NotFoundError,
+  RateLimitError,
+} from "./errors.js";
 import { EventStream } from "./sse.js";
 
 export interface EverrunsOptions {
@@ -37,7 +42,7 @@ export class Everruns {
     } else {
       this.apiKey = ApiKey.fromEnv();
     }
-    this.baseUrl = options.baseUrl ?? "https://api.everruns.com";
+    this.baseUrl = options.baseUrl ?? "https://custom.example.com/api";
 
     this.agents = new AgentsClient(this);
     this.sessions = new SessionsClient(this);
@@ -46,9 +51,12 @@ export class Everruns {
   }
 
   /**
-   * Create a client using the EVERRUNS_API_KEY environment variable.
+   * Create a client using environment variables.
+   *
+   * Reads `EVERRUNS_API_KEY` (required) and `EVERRUNS_API_URL` (optional).
    */
-  static fromEnv(baseUrl?: string): Everruns {
+  static fromEnv(): Everruns {
+    const baseUrl = process.env.EVERRUNS_API_URL;
     return new Everruns({ baseUrl });
   }
 
@@ -57,7 +65,7 @@ export class Everruns {
     const response = await fetch(url, {
       ...options,
       headers: {
-        "Authorization": this.apiKey.toHeader(),
+        Authorization: this.apiKey.toHeader(),
         "Content-Type": "application/json",
         ...options.headers,
       },
@@ -73,11 +81,17 @@ export class Everruns {
       }
       if (response.status === 429) {
         const retryAfter = response.headers.get("Retry-After");
-        throw new RateLimitError(retryAfter ? parseInt(retryAfter, 10) : undefined);
+        throw new RateLimitError(
+          retryAfter ? parseInt(retryAfter, 10) : undefined,
+        );
       }
       // Simplify HTML responses to avoid verbose error messages
       const simplifiedBody = body && isHtmlResponse(body) ? undefined : body;
-      throw new ApiError(response.status, `API error: ${response.statusText}`, simplifiedBody);
+      throw new ApiError(
+        response.status,
+        `API error: ${response.statusText}`,
+        simplifiedBody,
+      );
     }
 
     if (response.status === 204) {
@@ -140,7 +154,9 @@ class SessionsClient {
 
   async list(agentId?: string): Promise<Session[]> {
     const query = agentId ? `?agent_id=${agentId}` : "";
-    const response = await this.client.fetch<{ sessions: Session[] }>(`/sessions${query}`);
+    const response = await this.client.fetch<{ sessions: Session[] }>(
+      `/sessions${query}`,
+    );
     return response.sessions;
   }
 }
@@ -148,7 +164,10 @@ class SessionsClient {
 class MessagesClient {
   constructor(private readonly client: Everruns) {}
 
-  async create(sessionId: string, request: CreateMessageRequest): Promise<Message> {
+  async create(
+    sessionId: string,
+    request: CreateMessageRequest,
+  ): Promise<Message> {
     return this.client.fetch(`/sessions/${sessionId}/messages`, {
       method: "POST",
       body: JSON.stringify({
@@ -160,7 +179,7 @@ class MessagesClient {
 
   async list(sessionId: string): Promise<Message[]> {
     const response = await this.client.fetch<{ messages: Message[] }>(
-      `/sessions/${sessionId}/messages`
+      `/sessions/${sessionId}/messages`,
     );
     return response.messages;
   }
@@ -175,7 +194,7 @@ class EventsClient {
     if (options?.exclude) params.set("exclude", options.exclude.join(","));
     const query = params.toString() ? `?${params}` : "";
     const response = await this.client.fetch<{ events: Event[] }>(
-      `/sessions/${sessionId}/events${query}`
+      `/sessions/${sessionId}/events${query}`,
     );
     return response.events;
   }
@@ -185,7 +204,9 @@ class EventsClient {
     if (options?.sinceId) params.set("since_id", options.sinceId);
     if (options?.exclude) params.set("exclude", options.exclude.join(","));
     const query = params.toString() ? `?${params}` : "";
-    const url = this.client.getStreamUrl(`/sessions/${sessionId}/events/stream${query}`);
+    const url = this.client.getStreamUrl(
+      `/sessions/${sessionId}/events/stream${query}`,
+    );
     return new EventStream(url, this.client.getAuthHeader());
   }
 }

@@ -6,7 +6,7 @@ use crate::models::*;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue};
 use url::Url;
 
-const DEFAULT_BASE_URL: &str = "https://app.everruns.com/api";
+const DEFAULT_BASE_URL: &str = "https://custom.example.com/api";
 
 /// Main client for interacting with the Everruns API
 #[derive(Clone)]
@@ -22,10 +22,14 @@ impl Everruns {
         Self::with_base_url(api_key, DEFAULT_BASE_URL)
     }
 
-    /// Create a new client using EVERRUNS_API_KEY environment variable
+    /// Create a new client using environment variables.
+    ///
+    /// Reads `EVERRUNS_API_KEY` (required) and `EVERRUNS_API_URL` (optional).
     pub fn from_env() -> Result<Self> {
         let api_key = ApiKey::from_env()?;
-        Self::with_api_key(api_key)
+        let base_url =
+            std::env::var("EVERRUNS_API_URL").unwrap_or_else(|_| DEFAULT_BASE_URL.to_string());
+        Self::with_api_key_and_url(api_key, &base_url)
     }
 
     /// Create a new client with a custom base URL

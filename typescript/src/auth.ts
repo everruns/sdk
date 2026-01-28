@@ -20,7 +20,7 @@ export class ApiKey {
     if (!key) {
       throw new Error(
         "EVERRUNS_API_KEY environment variable is not set. " +
-        "Set it to your Everruns API key or pass the key explicitly."
+          "Set it to your Everruns API key or pass the key explicitly.",
       );
     }
     return new ApiKey(key);

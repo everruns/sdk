@@ -23,7 +23,7 @@ from everruns_sdk.models import (
 )
 from everruns_sdk.sse import EventStream, StreamOptions
 
-DEFAULT_BASE_URL = "https://app.everruns.com/api"
+DEFAULT_BASE_URL = "https://custom.example.com/api"
 
 
 def _is_html_response(body: str) -> bool:
@@ -47,8 +47,15 @@ class Everruns:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        base_url: str = DEFAULT_BASE_URL,
+        base_url: Optional[str] = None,
     ):
+        """Initialize Everruns client.
+
+        Args:
+            api_key: API key (falls back to EVERRUNS_API_KEY env var)
+            base_url: API base URL (falls back to EVERRUNS_API_URL env var,
+                      then DEFAULT_BASE_URL)
+        """
         if api_key is None:
             api_key = os.environ.get("EVERRUNS_API_KEY")
             if not api_key:
@@ -56,6 +63,8 @@ class Everruns:
                     "API key not provided. Set EVERRUNS_API_KEY environment variable "
                     "or pass api_key parameter."
                 )
+        if base_url is None:
+            base_url = os.environ.get("EVERRUNS_API_URL", DEFAULT_BASE_URL)
 
         self._api_key = ApiKey(api_key)
         self._base_url = base_url.rstrip("/")
