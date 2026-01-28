@@ -83,8 +83,8 @@ install_gh() {
         *)       error "Unsupported architecture: $ARCH" ;;
     esac
 
-    # Get latest version from GitHub API
-    GH_VERSION=$(curl -sS https://api.github.com/repos/cli/cli/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//')
+    # Get latest version from GitHub API (guard with || true to allow fallback)
+    GH_VERSION=$(curl -sS https://api.github.com/repos/cli/cli/releases/latest 2>/dev/null | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//' || true)
 
     if [[ -z "$GH_VERSION" ]]; then
         # Fallback version if API fails
