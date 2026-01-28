@@ -59,13 +59,25 @@ impl Error {
                 status,
             }
         } else {
+            // Simplify HTML responses to avoid verbose error messages
+            let message = if is_html_response(body) {
+                format!("HTTP {status}")
+            } else {
+                body.to_string()
+            };
             Error::Api {
                 code: "unknown".to_string(),
-                message: body.to_string(),
+                message,
                 status,
             }
         }
     }
+}
+
+/// Check if the body looks like an HTML response
+fn is_html_response(body: &str) -> bool {
+    let trimmed = body.trim_start();
+    trimmed.starts_with("<!DOCTYPE") || trimmed.starts_with("<html") || trimmed.starts_with("<HTML")
 }
 
 /// Result type for Everruns SDK operations
