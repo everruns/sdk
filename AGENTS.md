@@ -42,6 +42,14 @@ curl -s "https://api.github.com/repos/everruns/everruns/contents"
 curl -s "https://raw.githubusercontent.com/everruns/everruns/main/path/to/file"
 ```
 
+### Cloud Dev Env
+
+Fresh cloud environment? Run init script first:
+
+```bash
+./scripts/init-cloud-env.sh   # Installs just, gh CLI
+```
+
 ### Cloud Agent Start
 
 ```bash
