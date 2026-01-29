@@ -35,19 +35,36 @@ on:
       - "v*"
 ```
 
+### Required Secrets
+
+Configure in GitHub Settings → Secrets → Actions:
+
+| Secret | Registry | How to obtain |
+|--------|----------|---------------|
+| `CARGO_REGISTRY_TOKEN` | crates.io | https://crates.io/settings/tokens |
+| `NPM_TOKEN` | npm | https://www.npmjs.com/settings/~/tokens |
+
+### PyPI Trusted Publishing
+
+Python uses PyPI Trusted Publishing (no secret needed):
+
+1. Go to https://pypi.org/manage/account/publishing/
+2. Add trusted publisher:
+   - Owner: `everruns`
+   - Repository: `sdk`
+   - Workflow: `publish.yml`
+
 ## Changelog Format
 
+GitHub releases style with PR links:
+
 ```markdown
-## [0.1.0] - 2024-01-25
+## [0.1.0] - 2026-01-29
 
-### Added
-- Initial release
-- Support for agents, sessions, messages
-- SSE streaming with auto-reconnection
+### What's Changed
 
-### Changed
-- ...
+* feat(rust): add Rust SDK implementation ([#2](https://github.com/everruns/sdk/pull/2)) by @username
+* fix: correct URL joining ([#18](https://github.com/everruns/sdk/pull/18)) by @username
 
-### Fixed
-- ...
+**Full Changelog**: https://github.com/everruns/sdk/commits/v0.1.0
 ```
