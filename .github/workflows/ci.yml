@@ -85,6 +85,13 @@ jobs:
       - name: Lint TypeScript cookbook
         run: cd cookbook/typescript && npm run lint
 
+  # Backwards compatibility - branch protection expects this job name
+  run-rust-cookbook:
+    needs: run-cookbooks
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All cookbooks passed"
+
   run-cookbooks:
     runs-on: ubuntu-latest
     timeout-minutes: 15
