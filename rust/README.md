@@ -4,11 +4,8 @@ Rust SDK for the Everruns API.
 
 ## Installation
 
-Add to your `Cargo.toml`:
-
-\`\`\`toml
-[dependencies]
-everruns-sdk = "0.1"
+\`\`\`bash
+cargo add everruns-sdk
 \`\`\`
 
 ## Quick Start
