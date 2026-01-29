@@ -59,10 +59,12 @@ async function main() {
 
       case "turn.completed":
         console.log("\n[Turn completed]");
+        stream.abort();
         return;
 
       case "turn.failed":
         console.log("\n[Turn failed]");
+        stream.abort();
         return;
     }
   }
