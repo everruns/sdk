@@ -42,24 +42,22 @@ Configure in GitHub Settings → Secrets → Actions:
 | Secret | Registry | How to obtain |
 |--------|----------|---------------|
 | `CARGO_REGISTRY_TOKEN` | crates.io | https://crates.io/settings/tokens |
+| `NPM_TOKEN` | npm | https://www.npmjs.com/settings/~/tokens (Granular, with 2FA bypass) |
 
-### Trusted Publishing
+### Trusted Publishing (PyPI)
 
-Python and TypeScript use OIDC Trusted Publishing (no secrets needed):
+Python uses OIDC Trusted Publishing (no secret needed):
 
-**PyPI:**
 1. Go to https://pypi.org/manage/account/publishing/
 2. Add trusted publisher:
    - Owner: `everruns`
    - Repository: `sdk`
    - Workflow: `publish.yml`
 
-**npm:**
-1. Go to https://www.npmjs.com/package/@everruns/sdk/access
-2. Configure publishing access → Require two-factor authentication or an automation or publish access token
-3. Link to GitHub Actions:
-   - Repository: `everruns/sdk`
-   - Workflow: `publish.yml`
+### npm Provenance
+
+npm uses token auth + provenance attestation (`--provenance` flag).
+Provenance links published packages to their source in GitHub Actions.
 
 ## Changelog Format
 
