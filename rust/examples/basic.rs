@@ -16,11 +16,19 @@ async fn main() -> Result<(), Error> {
             "You are a helpful assistant for examples.",
         )
         .await?;
-    println!("Created agent: {}", agent.id);
+    println!("Created agent:");
+    println!("  Name: {}", agent.name);
+    println!("  ID: {}", agent.id);
+    println!("  Status: {:?}", agent.status);
+    println!("  Created: {}", agent.created_at);
 
     // Create a session
     let session = client.sessions().create(&agent.id).await?;
-    println!("Created session: {}", session.id);
+    println!("Created session:");
+    println!("  ID: {}", session.id);
+    println!("  Agent: {}", session.agent_id);
+    println!("  Status: {:?}", session.status);
+    println!("  Created: {}", session.created_at);
 
     // Send a message
     let _message = client

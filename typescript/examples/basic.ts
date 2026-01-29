@@ -16,11 +16,18 @@ async function main() {
     name: "Assistant",
     systemPrompt: "You are a helpful assistant.",
   });
-  console.log("Created agent:", agent.id);
+  console.log("Created agent:");
+  console.log("  Name:", agent.name);
+  console.log("  ID:", agent.id);
+  console.log("  Created:", agent.createdAt);
 
   // Create a session
   const session = await client.sessions.create({ agentId: agent.id });
-  console.log("Created session:", session.id);
+  console.log("Created session:");
+  console.log("  ID:", session.id);
+  console.log("  Agent:", session.agentId);
+  console.log("  Status:", session.status);
+  console.log("  Created:", session.createdAt);
 
   // Send a message
   const message = await client.messages.create(session.id, {
@@ -35,8 +42,8 @@ async function main() {
   });
 
   for await (const event of stream) {
-    console.log(\`[\${event.type}]\`, JSON.stringify(event.data).slice(0, 100));
-    
+    console.log(`[${event.type}]`, JSON.stringify(event.data).slice(0, 100));
+
     if (event.type === "turn.completed" || event.type === "turn.failed") {
       break;
     }
