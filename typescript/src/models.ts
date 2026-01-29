@@ -43,9 +43,18 @@ export interface ContentPart {
   imageUrl?: string;
 }
 
+export interface MessageInput {
+  role: "user";
+  content: ContentPart[];
+}
+
+export interface Controls {
+  modelId?: string;
+}
+
 export interface CreateMessageRequest {
-  text?: string;
-  imageUrls?: string[];
+  message: MessageInput;
+  controls?: Controls;
 }
 
 export interface Event {
