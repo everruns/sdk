@@ -22,8 +22,6 @@ use tokio::time::{Sleep, sleep};
 const MAX_RETRY_MS: u64 = 30_000;
 /// Initial retry delay for exponential backoff
 const INITIAL_BACKOFF_MS: u64 = 1000;
-/// Read timeout for detecting stalled connections (2 minutes)
-const READ_TIMEOUT_SECS: u64 = 120;
 
 /// Options for SSE streaming
 #[derive(Debug, Clone, Default)]
@@ -173,7 +171,7 @@ impl EventStream {
         let exclude: Vec<String> = self.options.exclude.clone();
 
         Box::pin(async_stream::try_stream! {
-            use reqwest_eventsource::{Event as SseEvent, EventSource};
+            use reqwest_eventsource::{Event as SseEvent, RequestBuilderExt};
             use futures::StreamExt;
 
             let exclude_refs: Vec<&str> = exclude.iter().map(|s| s.as_str()).collect();
@@ -181,19 +179,15 @@ impl EventStream {
 
             tracing::debug!("Connecting to SSE: {}", url);
 
-            let http_client = reqwest::Client::builder()
-                .timeout(Duration::from_secs(0)) // No overall timeout for long-running streams
-                .read_timeout(Duration::from_secs(READ_TIMEOUT_SECS)) // Detect stalled connections
-                .build()
-                .map_err(|e| Error::Sse(format!("Failed to create HTTP client: {}", e)))?;
+            let http_client = reqwest::Client::new();
 
-            let request = http_client
-                .get(url)
+            let mut es = http_client
+                .get(url.clone())
                 .header("Authorization", client.auth_header())
                 .header("Accept", "text/event-stream")
-                .header("Cache-Control", "no-cache");
-
-            let mut es = EventSource::new(request).map_err(|e| Error::Sse(e.to_string()))?;
+                .header("Cache-Control", "no-cache")
+                .eventsource()
+                .map_err(|e| Error::Sse(e.to_string()))?;
 
             while let Some(event) = es.next().await {
                 match event {
