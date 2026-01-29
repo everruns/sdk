@@ -15,11 +15,19 @@ async def main():
             name="Example Assistant",
             system_prompt="You are a helpful assistant for examples.",
         )
-        print(f"Created agent: {agent.id}")
+        print("Created agent:")
+        print(f"  Name: {agent.name}")
+        print(f"  ID: {agent.id}")
+        print(f"  Status: {agent.status}")
+        print(f"  Created: {agent.created_at}")
 
         # Create a session
         session = await client.sessions.create(agent_id=agent.id)
-        print(f"Created session: {session.id}")
+        print("Created session:")
+        print(f"  ID: {session.id}")
+        print(f"  Agent: {session.agent_id}")
+        print(f"  Status: {session.status}")
+        print(f"  Created: {session.created_at}")
 
         # Send a message
         message = await client.messages.create(
