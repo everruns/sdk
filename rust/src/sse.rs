@@ -73,7 +73,7 @@ impl StreamOptions {
 }
 
 /// Data from a disconnecting event
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, Deserialize)]
 pub struct DisconnectingData {
     /// Reason for disconnection (e.g., "connection_cycle")
     pub reason: String,

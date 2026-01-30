@@ -48,6 +48,10 @@ SDKs expose resource-specific sub-clients for better ergonomics:
 - All API request/response types auto-generated from OpenAPI
 - Strongly typed in all languages (generics, type hints, interfaces)
 - No `any` types in public API surface
+- **All output/response types must be serializable** (for caching, logging, persistence)
+  - Rust: Derive `Serialize` + `Deserialize`
+  - Python: Support `json.dumps()` via Pydantic or dataclasses
+  - TypeScript: Plain objects serializable with `JSON.stringify()`
 
 ### 2. Async-First Design
 
