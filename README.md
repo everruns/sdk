@@ -5,9 +5,8 @@ Official client libraries for the [Everruns API](https://everruns.com). Build AI
 ## Installation
 
 **Rust**
-```toml
-[dependencies]
-everruns-sdk = "0.1"
+```bash
+cargo add everruns-sdk
 ```
 
 **Python** (3.10+)
