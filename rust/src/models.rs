@@ -299,7 +299,7 @@ impl Controls {
 }
 
 /// Paginated list response
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ListResponse<T> {
     pub data: Vec<T>,
@@ -309,7 +309,7 @@ pub struct ListResponse<T> {
 }
 
 /// SSE Event from the server
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Event {
     pub id: String,
@@ -323,7 +323,7 @@ pub struct Event {
 }
 
 /// Context for an event
-#[derive(Debug, Clone, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[non_exhaustive]
 pub struct EventContext {
     #[serde(default)]
