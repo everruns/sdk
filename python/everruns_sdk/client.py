@@ -196,13 +196,27 @@ class AgentsClient:
         self,
         name: str,
         system_prompt: str,
+        *,
+        id: Optional[str] = None,
         description: Optional[str] = None,
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
     ) -> Agent:
-        """Create a new agent."""
+        """Create a new agent.
+
+        Args:
+            name: Display name of the agent.
+            system_prompt: System prompt defining agent behavior.
+            id: Client-supplied agent ID (format: agent_{32-hex}).
+                If not provided, the server auto-generates one.
+            description: Human-readable description.
+            default_model_id: Default LLM model ID.
+            tags: Tags for organizing agents.
+            capabilities: Capabilities to enable.
+        """
         req = CreateAgentRequest(
+            id=id,
             name=name,
             system_prompt=system_prompt,
             description=description,

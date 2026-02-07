@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import secrets
 from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
+
+
+def generate_agent_id() -> str:
+    """Generate a random agent ID in the format ``agent_<32-hex>``."""
+    return f"agent_{secrets.token_hex(16)}"
 
 
 class AgentCapabilityConfig(BaseModel):
@@ -45,6 +51,10 @@ class Agent(BaseModel):
 class CreateAgentRequest(BaseModel):
     """Request to create an agent."""
 
+    id: Optional[str] = Field(
+        default=None,
+        description="Client-supplied agent ID (format: agent_{32-hex}). Auto-generated if omitted.",
+    )
     name: str
     system_prompt: str
     description: Optional[str] = None

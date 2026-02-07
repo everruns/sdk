@@ -26,6 +26,7 @@ from everruns_sdk.models import (
     Event,
     Message,
     Session,
+    generate_agent_id,
 )
 
 __all__ = [
@@ -44,6 +45,7 @@ __all__ = [
     "Event",
     "ContentPart",
     "Controls",
+    "generate_agent_id",
 ]
 
 __version__ = "0.1.0"

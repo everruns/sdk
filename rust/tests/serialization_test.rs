@@ -4,7 +4,7 @@
 
 use everruns_sdk::{
     Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateSessionRequest, Event,
-    ListResponse, Message, Session,
+    ListResponse, Message, Session, generate_agent_id,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
@@ -348,6 +348,51 @@ fn test_session_without_capabilities() {
     let session: Session =
         serde_json::from_str(json).expect("should deserialize without capabilities");
     assert!(session.capabilities.is_empty());
+}
+
+/// Test generate_agent_id format
+#[test]
+fn test_generate_agent_id_format() {
+    let id = generate_agent_id();
+    assert!(id.starts_with("agent_"), "should start with agent_ prefix");
+    let hex_part = &id["agent_".len()..];
+    assert_eq!(hex_part.len(), 32, "hex part should be 32 chars");
+    assert!(
+        hex_part.chars().all(|c| c.is_ascii_hexdigit()),
+        "hex part should be valid hex"
+    );
+}
+
+/// Test generate_agent_id uniqueness
+#[test]
+fn test_generate_agent_id_unique() {
+    let id1 = generate_agent_id();
+    let id2 = generate_agent_id();
+    assert_ne!(id1, id2, "generated IDs should be unique");
+}
+
+/// Test CreateAgentRequest serialization with client-supplied ID
+#[test]
+fn test_create_agent_request_with_id() {
+    let id = generate_agent_id();
+    let req = CreateAgentRequest::new("Test Agent", "You are helpful.").id(id.clone());
+
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+
+    assert_eq!(raw["id"], id);
+    assert_eq!(raw["name"], "Test Agent");
+}
+
+/// Test CreateAgentRequest serialization without ID omits the field
+#[test]
+fn test_create_agent_request_without_id() {
+    let req = CreateAgentRequest::new("Test Agent", "You are helpful.");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    assert!(
+        !serialized.contains("\"id\""),
+        "id field should be omitted when None"
+    );
 }
 
 /// Test that Event serialization preserves the "type" field name (not "event_type")

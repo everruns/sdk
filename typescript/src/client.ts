@@ -168,6 +168,9 @@ class AgentsClient {
       system_prompt: request.systemPrompt,
       model: request.model,
     };
+    if (request.id) {
+      body.id = request.id;
+    }
     if (request.capabilities?.length) {
       body.capabilities = request.capabilities;
     }

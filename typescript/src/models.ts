@@ -31,10 +31,24 @@ export interface Agent {
 }
 
 export interface CreateAgentRequest {
+  /** Client-supplied agent ID (format: agent_{32-hex}). Auto-generated if omitted. */
+  id?: string;
   name: string;
   systemPrompt: string;
   model?: string;
   capabilities?: AgentCapabilityConfig[];
+}
+
+/**
+ * Generate a random agent ID in the format `agent_<32-hex>`.
+ */
+export function generateAgentId(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `agent_${hex}`;
 }
 
 export interface Session {

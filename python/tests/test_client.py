@@ -220,3 +220,50 @@ def test_session_deserialization_with_capabilities():
     )
     assert len(session.capabilities) == 1
     assert session.capabilities[0].ref == "current_time"
+
+
+def test_generate_agent_id_format():
+    """Test generate_agent_id returns proper format."""
+    from everruns_sdk import generate_agent_id
+
+    agent_id = generate_agent_id()
+    assert agent_id.startswith("agent_")
+    hex_part = agent_id[len("agent_") :]
+    assert len(hex_part) == 32
+    int(hex_part, 16)  # validates it's valid hex
+
+
+def test_generate_agent_id_unique():
+    """Test generate_agent_id returns unique values."""
+    from everruns_sdk import generate_agent_id
+
+    id1 = generate_agent_id()
+    id2 = generate_agent_id()
+    assert id1 != id2
+
+
+def test_create_agent_request_with_id():
+    """Test CreateAgentRequest serialization with client-supplied ID."""
+    from everruns_sdk.models import CreateAgentRequest, generate_agent_id
+
+    agent_id = generate_agent_id()
+    req = CreateAgentRequest(
+        id=agent_id,
+        name="Test Agent",
+        system_prompt="You are helpful.",
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["id"] == agent_id
+    assert data["name"] == "Test Agent"
+
+
+def test_create_agent_request_without_id():
+    """Test CreateAgentRequest omits id when not set."""
+    from everruns_sdk.models import CreateAgentRequest
+
+    req = CreateAgentRequest(
+        name="Test Agent",
+        system_prompt="You are helpful.",
+    )
+    data = req.model_dump(exclude_none=True)
+    assert "id" not in data
