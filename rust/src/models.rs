@@ -4,6 +4,52 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Per-agent capability configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct AgentCapabilityConfig {
+    /// Reference to the capability ID
+    #[serde(rename = "ref")]
+    pub capability_ref: String,
+    /// Per-agent configuration for this capability (capability-specific)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config: Option<serde_json::Value>,
+}
+
+impl AgentCapabilityConfig {
+    /// Create a new capability config with just a ref
+    pub fn new(capability_ref: impl Into<String>) -> Self {
+        Self {
+            capability_ref: capability_ref.into(),
+            config: None,
+        }
+    }
+
+    /// Set the config
+    pub fn config(mut self, config: serde_json::Value) -> Self {
+        self.config = Some(config);
+        self
+    }
+}
+
+/// Public capability information
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct CapabilityInfo {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub status: String,
+    #[serde(default)]
+    pub category: Option<String>,
+    #[serde(default)]
+    pub dependencies: Vec<String>,
+    #[serde(default)]
+    pub icon: Option<String>,
+    #[serde(default)]
+    pub is_mcp: bool,
+}
+
 /// Agent configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -17,6 +63,8 @@ pub struct Agent {
     pub default_model_id: Option<String>,
     #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
+    pub capabilities: Vec<AgentCapabilityConfig>,
     pub status: AgentStatus,
     pub created_at: String,
     pub updated_at: String,
@@ -41,6 +89,8 @@ pub struct CreateAgentRequest {
     pub default_model_id: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub capabilities: Vec<AgentCapabilityConfig>,
 }
 
 impl CreateAgentRequest {
@@ -52,6 +102,7 @@ impl CreateAgentRequest {
             description: None,
             default_model_id: None,
             tags: vec![],
+            capabilities: vec![],
         }
     }
 
@@ -72,6 +123,12 @@ impl CreateAgentRequest {
         self.tags = tags;
         self
     }
+
+    /// Set the capabilities
+    pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
+        self.capabilities = capabilities;
+        self
+    }
 }
 
 /// Session representing an active conversation
@@ -87,6 +144,8 @@ pub struct Session {
     pub tags: Vec<String>,
     #[serde(default)]
     pub model_id: Option<String>,
+    #[serde(default)]
+    pub capabilities: Vec<AgentCapabilityConfig>,
     pub status: SessionStatus,
     pub created_at: String,
     pub updated_at: String,
@@ -123,6 +182,8 @@ pub struct CreateSessionRequest {
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub model_id: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub capabilities: Vec<AgentCapabilityConfig>,
 }
 
 impl CreateSessionRequest {
@@ -132,6 +193,7 @@ impl CreateSessionRequest {
             agent_id: agent_id.into(),
             title: None,
             model_id: None,
+            capabilities: vec![],
         }
     }
 
@@ -144,6 +206,12 @@ impl CreateSessionRequest {
     /// Set the model ID
     pub fn model_id(mut self, model_id: impl Into<String>) -> Self {
         self.model_id = Some(model_id.into());
+        self
+    }
+
+    /// Set the capabilities
+    pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
+        self.capabilities = capabilities;
         self
     }
 }

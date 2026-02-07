@@ -7,6 +7,26 @@ from typing import Any, Literal, Optional
 from pydantic import BaseModel, Field
 
 
+class AgentCapabilityConfig(BaseModel):
+    """Per-agent capability configuration."""
+
+    ref: str = Field(description="Reference to the capability ID")
+    config: Optional[dict[str, Any]] = None
+
+
+class CapabilityInfo(BaseModel):
+    """Public capability information."""
+
+    id: str
+    name: str
+    description: str
+    status: str
+    category: Optional[str] = None
+    dependencies: list[str] = Field(default_factory=list)
+    icon: Optional[str] = None
+    is_mcp: bool = False
+
+
 class Agent(BaseModel):
     """Agent configuration."""
 
@@ -16,6 +36,7 @@ class Agent(BaseModel):
     system_prompt: str
     default_model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
+    capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
     status: Literal["active", "archived"]
     created_at: str
     updated_at: str
@@ -29,6 +50,7 @@ class CreateAgentRequest(BaseModel):
     description: Optional[str] = None
     default_model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
+    capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
 
 
 class Session(BaseModel):
@@ -40,6 +62,7 @@ class Session(BaseModel):
     title: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     model_id: Optional[str] = None
+    capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
     status: Literal["started", "active", "idle"]
     created_at: str
     updated_at: str
@@ -60,6 +83,7 @@ class CreateSessionRequest(BaseModel):
     agent_id: str
     title: Optional[str] = None
     model_id: Optional[str] = None
+    capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
 
 
 class Message(BaseModel):

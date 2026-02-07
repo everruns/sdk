@@ -87,6 +87,11 @@ impl Everruns {
         EventsClient { client: self }
     }
 
+    /// Get the capabilities client
+    pub fn capabilities(&self) -> CapabilitiesClient<'_> {
+        CapabilitiesClient { client: self }
+    }
+
     fn url(&self, path: &str) -> Url {
         // Use relative path (no leading slash) for correct joining with base URL.
         // The path parameter starts with "/" (e.g., "/agents"), so we strip it.
@@ -147,6 +152,41 @@ impl Everruns {
             .await?;
 
         self.handle_response(resp).await
+    }
+
+    pub(crate) async fn post_text<T: serde::de::DeserializeOwned>(
+        &self,
+        path: &str,
+        body: &str,
+    ) -> Result<T> {
+        let mut headers = self.headers();
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/plain"));
+        let resp = self
+            .http
+            .post(self.url(path))
+            .headers(headers)
+            .body(body.to_string())
+            .send()
+            .await?;
+
+        self.handle_response(resp).await
+    }
+
+    pub(crate) async fn get_text(&self, path: &str) -> Result<String> {
+        let resp = self
+            .http
+            .get(self.url(path))
+            .headers(self.headers())
+            .send()
+            .await?;
+
+        if resp.status().is_success() {
+            Ok(resp.text().await?)
+        } else {
+            let status = resp.status().as_u16();
+            let body = resp.text().await.unwrap_or_default();
+            Err(Error::from_api_response(status, &body))
+        }
     }
 
     pub(crate) async fn delete(&self, path: &str) -> Result<()> {
@@ -231,6 +271,18 @@ impl<'a> AgentsClient<'a> {
     /// Delete (archive) an agent
     pub async fn delete(&self, id: &str) -> Result<()> {
         self.client.delete(&format!("/agents/{}", id)).await
+    }
+
+    /// Import an agent from Markdown, YAML, JSON, or plain text
+    pub async fn import(&self, content: &str) -> Result<Agent> {
+        self.client.post_text("/agents/import", content).await
+    }
+
+    /// Export an agent as Markdown with YAML front matter
+    pub async fn export(&self, id: &str) -> Result<String> {
+        self.client
+            .get_text(&format!("/agents/{}/export", id))
+            .await
     }
 }
 
@@ -337,6 +389,23 @@ impl<'a> EventsClient<'a> {
         options: crate::sse::StreamOptions,
     ) -> crate::sse::EventStream {
         crate::sse::EventStream::new(self.client.clone(), session_id.to_string(), options)
+    }
+}
+
+/// Client for capability operations
+pub struct CapabilitiesClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> CapabilitiesClient<'a> {
+    /// List all available capabilities
+    pub async fn list(&self) -> Result<ListResponse<CapabilityInfo>> {
+        self.client.get("/capabilities").await
+    }
+
+    /// Get a specific capability by ID
+    pub async fn get(&self, id: &str) -> Result<CapabilityInfo> {
+        self.client.get(&format!("/capabilities/{}", id)).await
     }
 }
 

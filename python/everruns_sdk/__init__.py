@@ -19,6 +19,8 @@ from everruns_sdk.errors import (
 )
 from everruns_sdk.models import (
     Agent,
+    AgentCapabilityConfig,
+    CapabilityInfo,
     ContentPart,
     Controls,
     Event,
@@ -35,6 +37,8 @@ __all__ = [
     "NotFoundError",
     "RateLimitError",
     "Agent",
+    "AgentCapabilityConfig",
+    "CapabilityInfo",
     "Session",
     "Message",
     "Event",
