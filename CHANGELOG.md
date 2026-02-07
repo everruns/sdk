@@ -2,6 +2,12 @@
 
 ## [0.1.0] - 2026-01-29
 
+### Highlights
+
+- Initial release of Everruns SDKs for Rust, Python, and TypeScript
+- SSE streaming with automatic reconnection support
+- Cookbooks with working examples for all three languages
+
 ### What's Changed
 
 * feat(typescript): add TypeScript SDK implementation ([#4](https://github.com/everruns/sdk/pull/4)) by @chaliy

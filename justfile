@@ -109,3 +109,32 @@ run-cookbook-python:
 # Run TypeScript cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
 run-cookbook-typescript:
     cd cookbook/typescript && npx tsx src/main.ts
+
+# Prepare a release (update versions across all SDKs)
+release-prepare version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "Preparing release v{{version}}..."
+
+    # Update Rust version
+    sed -i 's/^version = ".*"/version = "{{version}}"/' rust/Cargo.toml
+    echo "Updated rust/Cargo.toml to {{version}}"
+
+    # Update Python version
+    sed -i 's/^version = ".*"/version = "{{version}}"/' python/pyproject.toml
+    echo "Updated python/pyproject.toml to {{version}}"
+
+    # Update TypeScript version
+    cd typescript && npm version "{{version}}" --no-git-tag-version && cd ..
+    echo "Updated typescript/package.json to {{version}}"
+
+    echo ""
+    echo "Next steps:"
+    echo "1. Edit CHANGELOG.md to add release notes for {{version}}"
+    echo "2. Run: just release-check"
+    echo "3. Commit with: git commit -m 'chore(release): prepare v{{version}}'"
+    echo "4. Create PR titled: chore(release): prepare v{{version}}"
+
+# Verify release is ready
+release-check: pre-pr publish-dry-run
+    @echo "All release checks passed!"
