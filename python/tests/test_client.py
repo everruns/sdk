@@ -116,3 +116,107 @@ def test_capability_info_model():
     )
     assert info.id == "current_time"
     assert info.is_mcp is False
+
+
+def test_capability_info_full_fields():
+    """Test CapabilityInfo with all fields."""
+    from everruns_sdk import CapabilityInfo
+
+    info = CapabilityInfo(
+        id="web_fetch",
+        name="Web Fetch",
+        description="Fetch web pages",
+        status="active",
+        category="utilities",
+        dependencies=["current_time"],
+        icon="globe",
+        is_mcp=True,
+    )
+    assert info.category == "utilities"
+    assert info.dependencies == ["current_time"]
+    assert info.icon == "globe"
+    assert info.is_mcp is True
+
+
+def test_create_agent_request_with_capabilities():
+    """Test CreateAgentRequest serialization with capabilities."""
+    from everruns_sdk.models import AgentCapabilityConfig, CreateAgentRequest
+
+    req = CreateAgentRequest(
+        name="Test Agent",
+        system_prompt="You are helpful.",
+        capabilities=[
+            AgentCapabilityConfig(ref="current_time"),
+            AgentCapabilityConfig(ref="web_fetch", config={"timeout": 30}),
+        ],
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["name"] == "Test Agent"
+    assert len(data["capabilities"]) == 2
+    assert data["capabilities"][0]["ref"] == "current_time"
+    assert data["capabilities"][1]["ref"] == "web_fetch"
+    assert data["capabilities"][1]["config"] == {"timeout": 30}
+
+
+def test_create_session_request_with_capabilities():
+    """Test CreateSessionRequest serialization with capabilities."""
+    from everruns_sdk.models import AgentCapabilityConfig, CreateSessionRequest
+
+    req = CreateSessionRequest(
+        agent_id="agent_123",
+        capabilities=[AgentCapabilityConfig(ref="current_time")],
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["agent_id"] == "agent_123"
+    assert len(data["capabilities"]) == 1
+    assert data["capabilities"][0]["ref"] == "current_time"
+
+
+def test_agent_deserialization_with_capabilities():
+    """Test Agent model deserialization with capabilities."""
+    from everruns_sdk.models import Agent
+
+    agent = Agent(
+        id="agent_123",
+        name="Test Agent",
+        system_prompt="You are helpful.",
+        status="active",
+        capabilities=[{"ref": "current_time"}, {"ref": "web_fetch", "config": {"timeout": 30}}],
+        created_at="2024-01-01T00:00:00Z",
+        updated_at="2024-01-01T00:00:00Z",
+    )
+    assert len(agent.capabilities) == 2
+    assert agent.capabilities[0].ref == "current_time"
+    assert agent.capabilities[1].config == {"timeout": 30}
+
+
+def test_agent_deserialization_without_capabilities():
+    """Test Agent model backward compat without capabilities."""
+    from everruns_sdk.models import Agent
+
+    agent = Agent(
+        id="agent_123",
+        name="Test Agent",
+        system_prompt="You are helpful.",
+        status="active",
+        created_at="2024-01-01T00:00:00Z",
+        updated_at="2024-01-01T00:00:00Z",
+    )
+    assert agent.capabilities == []
+
+
+def test_session_deserialization_with_capabilities():
+    """Test Session model deserialization with capabilities."""
+    from everruns_sdk.models import Session
+
+    session = Session(
+        id="session_456",
+        organization_id="org_789",
+        agent_id="agent_123",
+        status="active",
+        capabilities=[{"ref": "current_time"}],
+        created_at="2024-01-01T00:00:00Z",
+        updated_at="2024-01-01T00:00:00Z",
+    )
+    assert len(session.capabilities) == 1
+    assert session.capabilities[0].ref == "current_time"

@@ -3,7 +3,8 @@
 //! All output types must be serializable to support caching, logging, and persistence.
 
 use everruns_sdk::{
-    Agent, AgentCapabilityConfig, CapabilityInfo, Event, ListResponse, Message, Session,
+    Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateSessionRequest, Event,
+    ListResponse, Message, Session,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
@@ -260,6 +261,93 @@ fn test_session_with_capabilities() {
     let session: Session = serde_json::from_str(json).expect("should deserialize");
     assert_eq!(session.capabilities.len(), 1);
     assert_eq!(session.capabilities[0].capability_ref, "current_time");
+}
+
+/// Test CreateAgentRequest serialization with capabilities
+#[test]
+fn test_create_agent_request_with_capabilities() {
+    let req = CreateAgentRequest::new("Test Agent", "You are helpful.").capabilities(vec![
+        AgentCapabilityConfig::new("current_time"),
+        AgentCapabilityConfig::new("web_fetch").config(serde_json::json!({"timeout": 30})),
+    ]);
+
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+
+    assert_eq!(raw["name"], "Test Agent");
+    assert_eq!(raw["system_prompt"], "You are helpful.");
+    let caps = raw["capabilities"].as_array().unwrap();
+    assert_eq!(caps.len(), 2);
+    assert_eq!(caps[0]["ref"], "current_time");
+    assert_eq!(caps[1]["ref"], "web_fetch");
+    assert_eq!(caps[1]["config"]["timeout"], 30);
+}
+
+/// Test CreateAgentRequest without capabilities omits empty array
+#[test]
+fn test_create_agent_request_without_capabilities() {
+    let req = CreateAgentRequest::new("Test Agent", "You are helpful.");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    // Empty capabilities vec should be skipped
+    assert!(!serialized.contains("capabilities"));
+}
+
+/// Test CreateSessionRequest serialization with capabilities
+#[test]
+fn test_create_session_request_with_capabilities() {
+    let req = CreateSessionRequest::new("agent_123")
+        .capabilities(vec![AgentCapabilityConfig::new("current_time")]);
+
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+
+    assert_eq!(raw["agent_id"], "agent_123");
+    let caps = raw["capabilities"].as_array().unwrap();
+    assert_eq!(caps.len(), 1);
+    assert_eq!(caps[0]["ref"], "current_time");
+}
+
+/// Test CreateSessionRequest without capabilities omits empty array
+#[test]
+fn test_create_session_request_without_capabilities() {
+    let req = CreateSessionRequest::new("agent_123");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    assert!(!serialized.contains("capabilities"));
+}
+
+/// Test Agent without capabilities field (backward compat)
+#[test]
+fn test_agent_without_capabilities() {
+    let json = r#"{
+        "id": "agent_123",
+        "name": "Test Agent",
+        "system_prompt": "You are helpful.",
+        "tags": [],
+        "status": "active",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }"#;
+
+    let agent: Agent = serde_json::from_str(json).expect("should deserialize without capabilities");
+    assert!(agent.capabilities.is_empty());
+}
+
+/// Test Session without capabilities field (backward compat)
+#[test]
+fn test_session_without_capabilities() {
+    let json = r#"{
+        "id": "session_456",
+        "organization_id": "org_789",
+        "agent_id": "agent_123",
+        "tags": [],
+        "status": "active",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }"#;
+
+    let session: Session =
+        serde_json::from_str(json).expect("should deserialize without capabilities");
+    assert!(session.capabilities.is_empty());
 }
 
 /// Test that Event serialization preserves the "type" field name (not "event_type")
