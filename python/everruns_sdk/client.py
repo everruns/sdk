@@ -11,6 +11,8 @@ from everruns_sdk.auth import ApiKey
 from everruns_sdk.errors import ApiError
 from everruns_sdk.models import (
     Agent,
+    AgentCapabilityConfig,
+    CapabilityInfo,
     ContentPart,
     Controls,
     CreateAgentRequest,
@@ -102,6 +104,11 @@ class Everruns:
         """Get the events client."""
         return EventsClient(self)
 
+    @property
+    def capabilities(self) -> CapabilitiesClient:
+        """Get the capabilities client."""
+        return CapabilitiesClient(self)
+
     def _url(self, path: str) -> str:
         # Use relative path (no leading slash) for correct joining with base URL.
         # The path parameter starts with "/" (e.g., "/agents"), so we strip it.
@@ -112,8 +119,23 @@ class Everruns:
         resp = await self._client.get(self._url(path))
         return await self._handle_response(resp)
 
+    async def _get_text(self, path: str) -> str:
+        resp = await self._client.get(self._url(path))
+        if resp.is_success:
+            return resp.text
+        await self._raise_error(resp)
+        return ""  # unreachable
+
     async def _post(self, path: str, data: Any) -> Any:
         resp = await self._client.post(self._url(path), json=data)
+        return await self._handle_response(resp)
+
+    async def _post_text(self, path: str, content: str) -> Any:
+        resp = await self._client.post(
+            self._url(path),
+            content=content,
+            headers={"Content-Type": "text/plain"},
+        )
         return await self._handle_response(resp)
 
     async def _patch(self, path: str, data: Any) -> Any:
@@ -177,6 +199,7 @@ class AgentsClient:
         description: Optional[str] = None,
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
+        capabilities: Optional[list[AgentCapabilityConfig]] = None,
     ) -> Agent:
         """Create a new agent."""
         req = CreateAgentRequest(
@@ -185,6 +208,7 @@ class AgentsClient:
             description=description,
             default_model_id=default_model_id,
             tags=tags or [],
+            capabilities=capabilities or [],
         )
         resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
         return Agent(**resp)
@@ -192,6 +216,15 @@ class AgentsClient:
     async def delete(self, agent_id: str) -> None:
         """Delete (archive) an agent."""
         await self._client._delete(f"/agents/{agent_id}")
+
+    async def import_agent(self, content: str) -> Agent:
+        """Import an agent from Markdown, YAML, JSON, or plain text."""
+        resp = await self._client._post_text("/agents/import", content)
+        return Agent(**resp)
+
+    async def export(self, agent_id: str) -> str:
+        """Export an agent as Markdown with YAML front matter."""
+        return await self._client._get_text(f"/agents/{agent_id}/export")
 
 
 class SessionsClient:
@@ -218,12 +251,14 @@ class SessionsClient:
         agent_id: str,
         title: Optional[str] = None,
         model_id: Optional[str] = None,
+        capabilities: Optional[list[AgentCapabilityConfig]] = None,
     ) -> Session:
         """Create a new session."""
         req = CreateSessionRequest(
             agent_id=agent_id,
             title=title,
             model_id=model_id,
+            capabilities=capabilities or [],
         )
         resp = await self._client._post("/sessions", req.model_dump(exclude_none=True))
         return Session(**resp)
@@ -289,3 +324,20 @@ class EventsClient:
         """Stream events from a session via SSE."""
         options = StreamOptions(exclude=exclude or [], since_id=since_id)
         return EventStream(self._client, session_id, options)
+
+
+class CapabilitiesClient:
+    """Client for capability operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def list(self) -> list[CapabilityInfo]:
+        """List all available capabilities."""
+        resp = await self._client._get("/capabilities")
+        return [CapabilityInfo(**c) for c in resp.get("data", [])]
+
+    async def get(self, capability_id: str) -> CapabilityInfo:
+        """Get a specific capability by ID."""
+        resp = await self._client._get(f"/capabilities/{capability_id}")
+        return CapabilityInfo(**resp)

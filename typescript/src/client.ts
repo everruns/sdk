@@ -4,6 +4,7 @@
 import { ApiKey } from "./auth.js";
 import {
   Agent,
+  CapabilityInfo,
   CreateAgentRequest,
   Session,
   CreateSessionRequest,
@@ -33,6 +34,7 @@ export class Everruns {
   readonly sessions: SessionsClient;
   readonly messages: MessagesClient;
   readonly events: EventsClient;
+  readonly capabilities: CapabilitiesClient;
 
   constructor(options: EverrunsOptions = {}) {
     if (options.apiKey instanceof ApiKey) {
@@ -53,6 +55,7 @@ export class Everruns {
     this.sessions = new SessionsClient(this);
     this.messages = new MessagesClient(this);
     this.events = new EventsClient(this);
+    this.capabilities = new CapabilitiesClient(this);
   }
 
   /**
@@ -116,6 +119,37 @@ export class Everruns {
     return response.json() as Promise<T>;
   }
 
+  async fetchText(path: string, options: RequestInit = {}): Promise<string> {
+    const url = this.url(path);
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        Authorization: this.apiKey.toHeader(),
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => undefined);
+      if (response.status === 401) throw new AuthenticationError();
+      if (response.status === 404) throw new NotFoundError("Resource");
+      if (response.status === 429) {
+        const retryAfter = response.headers.get("Retry-After");
+        throw new RateLimitError(
+          retryAfter ? parseInt(retryAfter, 10) : undefined,
+        );
+      }
+      const simplifiedBody = body && isHtmlResponse(body) ? undefined : body;
+      throw new ApiError(
+        response.status,
+        `API error: ${response.statusText}`,
+        simplifiedBody,
+      );
+    }
+
+    return response.text();
+  }
+
   getStreamUrl(path: string): string {
     return this.url(path);
   }
@@ -129,13 +163,17 @@ class AgentsClient {
   constructor(private readonly client: Everruns) {}
 
   async create(request: CreateAgentRequest): Promise<Agent> {
+    const body: Record<string, unknown> = {
+      name: request.name,
+      system_prompt: request.systemPrompt,
+      model: request.model,
+    };
+    if (request.capabilities?.length) {
+      body.capabilities = request.capabilities;
+    }
     return this.client.fetch("/agents", {
       method: "POST",
-      body: JSON.stringify({
-        name: request.name,
-        system_prompt: request.systemPrompt,
-        model: request.model,
-      }),
+      body: JSON.stringify(body),
     });
   }
 
@@ -151,15 +189,33 @@ class AgentsClient {
   async delete(agentId: string): Promise<void> {
     await this.client.fetch(`/agents/${agentId}`, { method: "DELETE" });
   }
+
+  /** Import an agent from Markdown, YAML, JSON, or plain text. */
+  async import(content: string): Promise<Agent> {
+    return this.client.fetch("/agents/import", {
+      method: "POST",
+      body: content,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
+  /** Export an agent as Markdown with YAML front matter. */
+  async export(agentId: string): Promise<string> {
+    return this.client.fetchText(`/agents/${agentId}/export`);
+  }
 }
 
 class SessionsClient {
   constructor(private readonly client: Everruns) {}
 
   async create(request: CreateSessionRequest): Promise<Session> {
+    const body: Record<string, unknown> = { agent_id: request.agentId };
+    if (request.capabilities?.length) {
+      body.capabilities = request.capabilities;
+    }
     return this.client.fetch("/sessions", {
       method: "POST",
-      body: JSON.stringify({ agent_id: request.agentId }),
+      body: JSON.stringify(body),
     });
   }
 
@@ -252,6 +308,23 @@ class EventsClient {
     // Build base URL (without since_id - EventStream handles that for reconnection)
     const url = this.client.getStreamUrl(`/sessions/${sessionId}/sse`);
     return new EventStream(url, this.client.getAuthHeader(), options);
+  }
+}
+
+class CapabilitiesClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** List all available capabilities. */
+  async list(): Promise<CapabilityInfo[]> {
+    const response = await this.client.fetch<{
+      data: CapabilityInfo[];
+    }>("/capabilities");
+    return response.data;
+  }
+
+  /** Get a specific capability by ID. */
+  async get(capabilityId: string): Promise<CapabilityInfo> {
+    return this.client.fetch(`/capabilities/${capabilityId}`);
   }
 }
 

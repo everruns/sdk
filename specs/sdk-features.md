@@ -36,10 +36,11 @@ SDKs expose resource-specific sub-clients for better ergonomics:
 
 | Sub-Client | Operations |
 |------------|------------|
-| `client.agents` | CRUD for agents |
+| `client.agents` | CRUD for agents, import/export |
 | `client.sessions` | CRUD for sessions, cancel turn |
 | `client.messages` | Create/list messages |
 | `client.events` | List events, SSE streaming |
+| `client.capabilities` | List/get available capabilities |
 
 ## Core Features
 
@@ -102,6 +103,80 @@ Max retries: 3. Max backoff: 30s.
 Default timeout: 30 seconds.
 
 SDKs should allow per-request timeout override where language idioms support it.
+
+## Capabilities
+
+Capabilities add tools and system prompt modifications to agents and sessions.
+
+### AgentCapabilityConfig
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ref` | string (required) | Capability ID (e.g., `"current_time"`, `"web_fetch"`) |
+| `config` | object (optional) | Per-agent configuration for the capability |
+
+### Setting Capabilities
+
+Capabilities can be set at both agent and session level:
+
+```
+# On agent creation
+agent = client.agents.create("Assistant", "You are helpful.",
+    capabilities=[{ref: "current_time"}, {ref: "web_fetch"}])
+
+# On session creation (additive to agent capabilities)
+session = client.sessions.create(agent_id,
+    capabilities=[{ref: "current_time"}])
+```
+
+### Listing Capabilities
+
+```
+# List all available capabilities
+capabilities = client.capabilities.list()
+
+# Get a specific capability
+capability = client.capabilities.get("current_time")
+```
+
+### CapabilityInfo
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Capability identifier |
+| `name` | string | Display name |
+| `description` | string | What the capability provides |
+| `status` | string | Current status |
+| `category` | string? | Category for grouping |
+| `dependencies` | string[] | IDs of dependent capabilities |
+| `is_mcp` | bool | Whether this is an MCP server capability |
+
+## Agent Import/Export
+
+### Import
+
+Import an agent from Markdown (with YAML front matter), pure YAML, JSON, or plain text:
+
+```
+# Import from markdown
+agent = client.agents.import("---\nname: Assistant\n---\nYou are helpful.")
+
+# Import plain text (treated as system prompt)
+agent = client.agents.import("You are a helpful assistant.")
+```
+
+- Content-Type: `text/plain`
+- Returns: `Agent` object
+
+### Export
+
+Export an agent as Markdown with YAML front matter:
+
+```
+markdown = client.agents.export(agent_id)
+```
+
+- Returns: string (Markdown with YAML front matter)
 
 ## Convenience Methods
 

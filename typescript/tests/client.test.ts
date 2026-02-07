@@ -23,6 +23,7 @@ describe("Everruns", () => {
     expect(client.sessions).toBeDefined();
     expect(client.messages).toBeDefined();
     expect(client.events).toBeDefined();
+    expect(client.capabilities).toBeDefined();
   });
 
   it("should create client with ApiKey instance", () => {

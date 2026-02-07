@@ -2,11 +2,30 @@
  * Core data models for Everruns API.
  */
 
+export interface AgentCapabilityConfig {
+  /** Reference to the capability ID */
+  ref: string;
+  /** Per-agent configuration for this capability (capability-specific) */
+  config?: Record<string, unknown>;
+}
+
+export interface CapabilityInfo {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  category?: string | null;
+  dependencies?: string[];
+  icon?: string | null;
+  isMcp?: boolean;
+}
+
 export interface Agent {
   id: string;
   name: string;
   systemPrompt: string;
   model?: string;
+  capabilities?: AgentCapabilityConfig[];
   createdAt: string;
   updatedAt: string;
 }
@@ -15,18 +34,21 @@ export interface CreateAgentRequest {
   name: string;
   systemPrompt: string;
   model?: string;
+  capabilities?: AgentCapabilityConfig[];
 }
 
 export interface Session {
   id: string;
   agentId: string;
   status: "active" | "completed" | "failed";
+  capabilities?: AgentCapabilityConfig[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateSessionRequest {
   agentId: string;
+  capabilities?: AgentCapabilityConfig[];
 }
 
 export interface Message {

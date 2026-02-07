@@ -2,7 +2,9 @@
 //!
 //! All output types must be serializable to support caching, logging, and persistence.
 
-use everruns_sdk::{Agent, Event, ListResponse, Message, Session};
+use everruns_sdk::{
+    Agent, AgentCapabilityConfig, CapabilityInfo, Event, ListResponse, Message, Session,
+};
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
 #[test]
@@ -15,6 +17,7 @@ fn test_list_response_agent_serialization() {
             "system_prompt": "You are helpful.",
             "default_model_id": null,
             "tags": ["test"],
+            "capabilities": [{"ref": "current_time"}, {"ref": "web_fetch", "config": {"timeout": 30}}],
             "status": "active",
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z"
@@ -166,6 +169,97 @@ fn test_list_response_event_serialization() {
     let roundtrip: ListResponse<Event> =
         serde_json::from_str(&serialized).expect("Round-trip should work");
     assert_eq!(roundtrip.data[0].id, "evt_123");
+}
+
+/// Test AgentCapabilityConfig serialization
+#[test]
+fn test_agent_capability_config_serialization() {
+    let config = AgentCapabilityConfig::new("current_time");
+    let serialized = serde_json::to_string(&config).expect("should serialize");
+    assert!(serialized.contains("\"ref\":\"current_time\""));
+
+    // With config
+    let config_with_opts =
+        AgentCapabilityConfig::new("web_fetch").config(serde_json::json!({"timeout": 30}));
+    let serialized = serde_json::to_string(&config_with_opts).expect("should serialize");
+    assert!(serialized.contains("\"ref\":\"web_fetch\""));
+    assert!(serialized.contains("\"config\":"));
+
+    // Deserialize
+    let json = r#"{"ref": "current_time", "config": {"key": "value"}}"#;
+    let deserialized: AgentCapabilityConfig =
+        serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(deserialized.capability_ref, "current_time");
+    assert!(deserialized.config.is_some());
+}
+
+/// Test CapabilityInfo deserialization
+#[test]
+fn test_capability_info_deserialization() {
+    let json = r#"{
+        "id": "current_time",
+        "name": "Current Time",
+        "description": "Provides the current time",
+        "status": "active",
+        "category": "utilities",
+        "dependencies": [],
+        "icon": "clock",
+        "is_mcp": false
+    }"#;
+
+    let info: CapabilityInfo = serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(info.id, "current_time");
+    assert_eq!(info.name, "Current Time");
+    assert_eq!(info.status, "active");
+    assert!(!info.is_mcp);
+
+    // Round-trip
+    let serialized = serde_json::to_string(&info).expect("should serialize");
+    let roundtrip: CapabilityInfo =
+        serde_json::from_str(&serialized).expect("round-trip should work");
+    assert_eq!(roundtrip.id, "current_time");
+}
+
+/// Test Agent with capabilities deserialization
+#[test]
+fn test_agent_with_capabilities() {
+    let json = r#"{
+        "id": "agent_123",
+        "name": "Test Agent",
+        "system_prompt": "You are helpful.",
+        "tags": [],
+        "capabilities": [
+            {"ref": "current_time"},
+            {"ref": "web_fetch", "config": {"timeout": 30}}
+        ],
+        "status": "active",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }"#;
+
+    let agent: Agent = serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(agent.capabilities.len(), 2);
+    assert_eq!(agent.capabilities[0].capability_ref, "current_time");
+    assert_eq!(agent.capabilities[1].capability_ref, "web_fetch");
+}
+
+/// Test Session with capabilities deserialization
+#[test]
+fn test_session_with_capabilities() {
+    let json = r#"{
+        "id": "session_456",
+        "organization_id": "org_789",
+        "agent_id": "agent_123",
+        "tags": [],
+        "capabilities": [{"ref": "current_time"}],
+        "status": "active",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }"#;
+
+    let session: Session = serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(session.capabilities.len(), 1);
+    assert_eq!(session.capabilities[0].capability_ref, "current_time");
 }
 
 /// Test that Event serialization preserves the "type" field name (not "event_type")

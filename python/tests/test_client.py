@@ -83,3 +83,36 @@ def test_url_path_construction():
     # The _url method should produce relative paths without leading slash
     assert client._url("/agents") == "v1/agents"
     assert client._url("/sessions/123") == "v1/sessions/123"
+
+
+def test_capabilities_subclient():
+    """Test that capabilities sub-client is available."""
+    client = Everruns(api_key="evr_test_key")
+    assert client.capabilities is not None
+
+
+def test_agent_capability_config_model():
+    """Test AgentCapabilityConfig model."""
+    from everruns_sdk import AgentCapabilityConfig
+
+    config = AgentCapabilityConfig(ref="current_time")
+    assert config.ref == "current_time"
+    assert config.config is None
+
+    config_with_opts = AgentCapabilityConfig(ref="web_fetch", config={"timeout": 30})
+    assert config_with_opts.ref == "web_fetch"
+    assert config_with_opts.config == {"timeout": 30}
+
+
+def test_capability_info_model():
+    """Test CapabilityInfo model."""
+    from everruns_sdk import CapabilityInfo
+
+    info = CapabilityInfo(
+        id="current_time",
+        name="Current Time",
+        description="Provides current time",
+        status="active",
+    )
+    assert info.id == "current_time"
+    assert info.is_mcp is False
