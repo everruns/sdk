@@ -196,13 +196,61 @@ class AgentsClient:
         self,
         name: str,
         system_prompt: str,
+        *,
         description: Optional[str] = None,
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
     ) -> Agent:
-        """Create a new agent."""
+        """Create a new agent with a server-assigned ID.
+
+        Args:
+            name: Display name of the agent.
+            system_prompt: System prompt defining agent behavior.
+            description: Human-readable description.
+            default_model_id: Default LLM model ID.
+            tags: Tags for organizing agents.
+            capabilities: Capabilities to enable.
+        """
         req = CreateAgentRequest(
+            name=name,
+            system_prompt=system_prompt,
+            description=description,
+            default_model_id=default_model_id,
+            tags=tags or [],
+            capabilities=capabilities or [],
+        )
+        resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
+        return Agent(**resp)
+
+    async def apply(
+        self,
+        id: str,
+        name: str,
+        system_prompt: str,
+        *,
+        description: Optional[str] = None,
+        default_model_id: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        capabilities: Optional[list[AgentCapabilityConfig]] = None,
+    ) -> Agent:
+        """Create or update an agent with a client-supplied ID (upsert).
+
+        If an agent with the given ID exists, it is updated.
+        If not, a new agent is created with that ID.
+
+        Args:
+            id: Agent ID (format: ``agent_<32-hex>``). Use
+                :func:`~everruns_sdk.generate_agent_id` to create one.
+            name: Display name of the agent.
+            system_prompt: System prompt defining agent behavior.
+            description: Human-readable description.
+            default_model_id: Default LLM model ID.
+            tags: Tags for organizing agents.
+            capabilities: Capabilities to enable.
+        """
+        req = CreateAgentRequest(
+            id=id,
             name=name,
             system_prompt=system_prompt,
             description=description,

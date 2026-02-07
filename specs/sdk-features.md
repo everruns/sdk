@@ -178,6 +178,18 @@ markdown = client.agents.export(agent_id)
 
 - Returns: string (Markdown with YAML front matter)
 
+## Agent ID Generation
+
+SDKs provide a helper to generate properly formatted agent IDs:
+
+| Language | Function |
+|----------|----------|
+| Rust | `generate_agent_id()` |
+| Python | `generate_agent_id()` |
+| TypeScript | `generateAgentId()` |
+
+IDs follow the format `agent_<32-hex>` (16 random bytes, hex-encoded).
+
 ## Convenience Methods
 
 ### Simple Create Methods
@@ -185,12 +197,28 @@ markdown = client.agents.export(agent_id)
 Each resource supports both simple and full-options creation:
 
 ```
-# Simple (common use case)
+# Simple create (server-assigned ID)
 agent = client.agents.create("Assistant", "You are helpful.")
 
-# Full options
+# Full options (may include client-supplied ID)
 agent = client.agents.create_with_options(CreateAgentRequest(...))
 ```
+
+### Agent Upsert (apply)
+
+`apply` creates or updates an agent with a client-supplied ID.
+If the agent exists, it is updated; if not, it is created with that ID.
+
+```
+# Generate a stable ID
+id = generate_agent_id()
+
+# Upsert — safe to call repeatedly
+agent = client.agents.apply(id, "Assistant", "You are helpful.")
+```
+
+This is useful for declarative agent management where the caller controls identity.
+Callers that don't need stable IDs should use `create` instead.
 
 ### Text Message Shorthand
 

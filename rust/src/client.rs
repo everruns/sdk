@@ -257,7 +257,7 @@ impl<'a> AgentsClient<'a> {
         self.client.get(&format!("/agents/{}", id)).await
     }
 
-    /// Create a new agent
+    /// Create a new agent with a server-assigned ID
     pub async fn create(&self, name: &str, system_prompt: &str) -> Result<Agent> {
         let req = CreateAgentRequest::new(name, system_prompt);
         self.client.post("/agents", &req).await
@@ -265,6 +265,25 @@ impl<'a> AgentsClient<'a> {
 
     /// Create an agent with full options
     pub async fn create_with_options(&self, req: CreateAgentRequest) -> Result<Agent> {
+        self.client.post("/agents", &req).await
+    }
+
+    /// Create or update an agent with a client-supplied ID (upsert).
+    ///
+    /// If an agent with the given ID exists, it is updated.
+    /// If not, a new agent is created with that ID.
+    ///
+    /// Use [`generate_agent_id`] to create a properly formatted ID.
+    pub async fn apply(&self, id: &str, name: &str, system_prompt: &str) -> Result<Agent> {
+        let req = CreateAgentRequest::new(name, system_prompt).id(id);
+        self.client.post("/agents", &req).await
+    }
+
+    /// Create or update an agent with full options (upsert).
+    ///
+    /// The `id` parameter is set on the request, overriding any existing value.
+    pub async fn apply_with_options(&self, id: &str, req: CreateAgentRequest) -> Result<Agent> {
+        let req = req.id(id);
         self.client.post("/agents", &req).await
     }
 

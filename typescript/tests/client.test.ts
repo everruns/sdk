@@ -1,10 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { ApiKey } from "../src/auth.js";
 import { Everruns } from "../src/client.js";
-import type {
-  AgentCapabilityConfig,
-  CreateAgentRequest,
-  CreateSessionRequest,
+import {
+  generateAgentId,
+  type AgentCapabilityConfig,
+  type CreateAgentRequest,
+  type CreateSessionRequest,
 } from "../src/models.js";
 
 describe("ApiKey", () => {
@@ -132,5 +133,54 @@ describe("CreateSessionRequest with capabilities", () => {
       agentId: "agent_123",
     };
     expect(request.capabilities).toBeUndefined();
+  });
+});
+
+describe("generateAgentId", () => {
+  it("should return id with agent_ prefix", () => {
+    const id = generateAgentId();
+    expect(id.startsWith("agent_")).toBe(true);
+  });
+
+  it("should have 32 hex characters after prefix", () => {
+    const id = generateAgentId();
+    const hex = id.slice("agent_".length);
+    expect(hex).toHaveLength(32);
+    expect(/^[0-9a-f]{32}$/.test(hex)).toBe(true);
+  });
+
+  it("should generate unique ids", () => {
+    const id1 = generateAgentId();
+    const id2 = generateAgentId();
+    expect(id1).not.toBe(id2);
+  });
+});
+
+describe("CreateAgentRequest with client-supplied ID", () => {
+  it("should include id in request body", () => {
+    const id = generateAgentId();
+    const request: CreateAgentRequest = {
+      id,
+      name: "Test Agent",
+      systemPrompt: "You are helpful.",
+    };
+
+    const body = JSON.stringify({
+      id: request.id,
+      name: request.name,
+      system_prompt: request.systemPrompt,
+    });
+    const parsed = JSON.parse(body);
+
+    expect(parsed.id).toBe(id);
+    expect(parsed.name).toBe("Test Agent");
+  });
+
+  it("should work without id", () => {
+    const request: CreateAgentRequest = {
+      name: "Test Agent",
+      systemPrompt: "You are helpful.",
+    };
+    expect(request.id).toBeUndefined();
   });
 });

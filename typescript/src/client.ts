@@ -162,18 +162,26 @@ export class Everruns {
 class AgentsClient {
   constructor(private readonly client: Everruns) {}
 
+  /** Create a new agent with a server-assigned ID. */
   async create(request: CreateAgentRequest): Promise<Agent> {
-    const body: Record<string, unknown> = {
-      name: request.name,
-      system_prompt: request.systemPrompt,
-      model: request.model,
-    };
-    if (request.capabilities?.length) {
-      body.capabilities = request.capabilities;
-    }
     return this.client.fetch("/agents", {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify(toAgentBody(request)),
+    });
+  }
+
+  /**
+   * Create or update an agent with a client-supplied ID (upsert).
+   *
+   * If an agent with the given ID exists, it is updated.
+   * If not, a new agent is created with that ID.
+   *
+   * Use {@link generateAgentId} to create a properly formatted ID.
+   */
+  async apply(id: string, request: CreateAgentRequest): Promise<Agent> {
+    return this.client.fetch("/agents", {
+      method: "POST",
+      body: JSON.stringify({ ...toAgentBody(request), id }),
     });
   }
 
@@ -326,6 +334,22 @@ class CapabilitiesClient {
   async get(capabilityId: string): Promise<CapabilityInfo> {
     return this.client.fetch(`/capabilities/${capabilityId}`);
   }
+}
+
+/** Build the JSON body for agent creation from a CreateAgentRequest. */
+function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    name: request.name,
+    system_prompt: request.systemPrompt,
+    model: request.model,
+  };
+  if (request.id) {
+    body.id = request.id;
+  }
+  if (request.capabilities?.length) {
+    body.capabilities = request.capabilities;
+  }
+  return body;
 }
 
 /** Check if the body looks like an HTML response */
