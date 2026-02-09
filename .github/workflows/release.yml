@@ -21,13 +21,15 @@ jobs:
 
       - name: Extract version
         id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             # Manual trigger: read version from rust/Cargo.toml
             VERSION=$(grep '^version' rust/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
           else
             # Push trigger: extract from commit message
-            COMMIT_MSG="${{ github.event.head_commit.message }}"
             VERSION=$(echo "$COMMIT_MSG" | sed -n 's/.*prepare v\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p')
           fi
           if [ -z "$VERSION" ]; then
