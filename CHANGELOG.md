@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.1] - 2026-02-09
+
+### Highlights
+
+- Client-supplied agent IDs and `apply()` upsert support across all SDKs
+- Agent capabilities, import/export functionality for Rust, Python, and TypeScript
+- Rust output types are now serializable
+
+### What's Changed
+
+* feat(rust,python,typescript): client-supplied agent IDs and apply() upsert ([#31](https://github.com/everruns/sdk/pull/31)) by @chaliy
+* chore(ci): adopt prep PR release process from bashkit ([#30](https://github.com/everruns/sdk/pull/30)) by @chaliy
+* feat(rust,python,typescript): add capabilities, agent import/export ([#29](https://github.com/everruns/sdk/pull/29)) by @chaliy
+* feat(rust): make all output types serializable ([#28](https://github.com/everruns/sdk/pull/28)) by @chaliy
+* docs: use cargo add for Rust installation ([#27](https://github.com/everruns/sdk/pull/27)) by @chaliy
+* fix(ci): add NPM_TOKEN for npm publish authentication ([#26](https://github.com/everruns/sdk/pull/26)) by @chaliy
+* feat(ci): add workflow_dispatch trigger to publish workflow ([#25](https://github.com/everruns/sdk/pull/25)) by @chaliy
+* feat(ci): use trusted publishing for npm and PyPI ([#24](https://github.com/everruns/sdk/pull/24)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.0...v0.1.1
+
 ## [0.1.0] - 2026-01-29
 
 ### Highlights
