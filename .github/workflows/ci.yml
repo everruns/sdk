@@ -71,7 +71,7 @@ jobs:
       - name: Install Python cookbook deps
         run: cd cookbook/python && uv sync
       - name: Check Python cookbook syntax
-        run: cd cookbook/python && uv run python -m py_compile src/main.py
+        run: cd cookbook/python && uv run python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('src/**/*.py', recursive=True)]"
       - name: Lint Python cookbook
         run: cd cookbook/python && uv run ruff check . && uv run ruff format --check .
 
@@ -133,9 +133,9 @@ jobs:
           DEFAULT_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       # Run Rust cookbook
-      - name: Run Rust cookbook
+      - name: Run Rust cookbook (dad-jokes)
         timeout-minutes: 3
-        run: cd cookbook/rust && cargo run
+        run: cd cookbook/rust && cargo run --bin dad-jokes
         env:
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000
