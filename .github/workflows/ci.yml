@@ -139,13 +139,25 @@ jobs:
         env:
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000
+      - name: Run Rust cookbook (weather-tools)
+        timeout-minutes: 3
+        run: cd cookbook/rust && cargo run --bin weather-tools
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
 
       # Run Python cookbook
       - name: Install Python cookbook deps
         run: cd cookbook/python && uv sync
-      - name: Run Python cookbook
+      - name: Run Python cookbook (main)
         timeout-minutes: 3
         run: cd cookbook/python && uv run python src/main.py
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+      - name: Run Python cookbook (weather-tools)
+        timeout-minutes: 3
+        run: cd cookbook/python && uv run python src/weather_tools.py
         env:
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000
@@ -155,9 +167,15 @@ jobs:
         run: cd typescript && npm ci && npm run build
       - name: Install TypeScript cookbook deps
         run: cd cookbook/typescript && npm install
-      - name: Run TypeScript cookbook
+      - name: Run TypeScript cookbook (main)
         timeout-minutes: 3
         run: cd cookbook/typescript && npx tsx src/main.ts
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+      - name: Run TypeScript cookbook (weather-tools)
+        timeout-minutes: 3
+        run: cd cookbook/typescript && npx tsx src/weather_tools.ts
         env:
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000
