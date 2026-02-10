@@ -351,6 +351,25 @@ class MessagesClient:
         )
         return Message(**resp)
 
+    async def create_tool_results(
+        self,
+        session_id: str,
+        results: list[ContentPart],
+    ) -> Message:
+        """Send tool results back to the session.
+
+        Use after receiving tool calls from an ``output.message.completed``
+        event to provide results from locally-executed tools.
+        """
+        req = CreateMessageRequest(
+            message=MessageInput.tool_results(results),
+        )
+        resp = await self._client._post(
+            f"/sessions/{session_id}/messages",
+            req.model_dump(exclude_none=True),
+        )
+        return Message(**resp)
+
 
 class EventsClient:
     """Client for event operations."""

@@ -5,6 +5,7 @@ import { ApiKey } from "./auth.js";
 import {
   Agent,
   CapabilityInfo,
+  ContentPart,
   CreateAgentRequest,
   Session,
   CreateSessionRequest,
@@ -264,6 +265,25 @@ class MessagesClient {
             },
           }
         : textOrRequest;
+    return this.client.fetch(`/sessions/${sessionId}/messages`, {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  }
+
+  /**
+   * Send tool results back to the session.
+   *
+   * Use after receiving tool calls from an `output.message.completed`
+   * event to provide results from locally-executed tools.
+   */
+  async createToolResults(
+    sessionId: string,
+    results: ContentPart[],
+  ): Promise<Message> {
+    const request: CreateMessageRequest = {
+      message: { role: "tool_result", content: results },
+    };
     return this.client.fetch(`/sessions/${sessionId}/messages`, {
       method: "POST",
       body: JSON.stringify(request),

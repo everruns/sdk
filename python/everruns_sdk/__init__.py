@@ -26,6 +26,8 @@ from everruns_sdk.models import (
     Event,
     Message,
     Session,
+    ToolCallInfo,
+    extract_tool_calls,
     generate_agent_id,
 )
 
@@ -45,6 +47,8 @@ __all__ = [
     "Event",
     "ContentPart",
     "Controls",
+    "ToolCallInfo",
+    "extract_tool_calls",
     "generate_agent_id",
 ]
 

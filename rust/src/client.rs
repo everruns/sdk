@@ -367,6 +367,21 @@ impl<'a> MessagesClient<'a> {
             .await
     }
 
+    /// Send tool results back to the session.
+    ///
+    /// Use this after receiving tool calls from an `output.message.completed`
+    /// event to provide results from locally-executed tools.
+    pub async fn create_tool_results(
+        &self,
+        session_id: &str,
+        results: Vec<ContentPart>,
+    ) -> Result<Message> {
+        let req = CreateMessageRequest::tool_results(results);
+        self.client
+            .post(&format!("/sessions/{}/messages", session_id), &req)
+            .await
+    }
+
     /// Create a message with full options
     pub async fn create_with_options(
         &self,

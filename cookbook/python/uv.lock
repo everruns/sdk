@@ -55,7 +55,7 @@ dev = [{ name = "ruff", specifier = ">=0.3" }]
 
 [[package]]
 name = "everruns-sdk"
-version = "0.1.0"
+version = "0.1.1"
 source = { directory = "../../python" }
 dependencies = [
     { name = "httpx" },
