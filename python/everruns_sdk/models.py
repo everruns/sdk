@@ -124,6 +124,39 @@ class ContentPart(BaseModel):
     result: Optional[Any] = None
     error: Optional[str] = None
 
+    @staticmethod
+    def make_text(text: str) -> "ContentPart":
+        """Create a text content part."""
+        return ContentPart(type="text", text=text)
+
+    @staticmethod
+    def make_tool_result(tool_call_id: str, result: Any) -> "ContentPart":
+        """Create a tool result content part with a successful result."""
+        return ContentPart(type="tool_result", tool_call_id=tool_call_id, result=result)
+
+    @staticmethod
+    def make_tool_error(tool_call_id: str, error: str) -> "ContentPart":
+        """Create a tool result content part with an error."""
+        return ContentPart(type="tool_result", tool_call_id=tool_call_id, error=error)
+
+    def is_tool_call(self) -> bool:
+        """Returns True if this is a tool call content part."""
+        return self.type == "tool_call"
+
+    def as_tool_call(self) -> Optional["ToolCallInfo"]:
+        """Extract tool call info if this is a tool call content part."""
+        if self.type != "tool_call" or self.id is None or self.name is None:
+            return None
+        return ToolCallInfo(id=self.id, name=self.name, arguments=self.arguments or {})
+
+
+class ToolCallInfo(BaseModel):
+    """Extracted tool call information."""
+
+    id: str
+    name: str
+    arguments: dict[str, Any]
+
 
 class CreateMessageRequest(BaseModel):
     """Request to create a message."""
@@ -137,6 +170,11 @@ class MessageInput(BaseModel):
 
     role: Literal["user", "agent", "tool_result"]
     content: list[ContentPart]
+
+    @staticmethod
+    def tool_results(results: list[ContentPart]) -> "MessageInput":
+        """Create a tool result message containing one or more tool results."""
+        return MessageInput(role="tool_result", content=results)
 
 
 class Controls(BaseModel):
@@ -160,6 +198,10 @@ class Event(BaseModel):
     class Config:
         populate_by_name = True
 
+    def tool_calls(self) -> list[ToolCallInfo]:
+        """Extract tool calls from an ``output.message.completed`` event's data."""
+        return extract_tool_calls(self.data)
+
 
 class EventContext(BaseModel):
     """Event context for correlation."""
@@ -175,3 +217,26 @@ class ListResponse(BaseModel):
     total: int
     offset: int
     limit: int
+
+
+def extract_tool_calls(data: dict[str, Any]) -> list[ToolCallInfo]:
+    """Extract tool call info from event data (``data.message.content``)."""
+    message = data.get("message")
+    if not isinstance(message, dict):
+        return []
+    content = message.get("content")
+    if not isinstance(content, list):
+        return []
+    results: list[ToolCallInfo] = []
+    for part in content:
+        if not isinstance(part, dict):
+            continue
+        if part.get("type") != "tool_call":
+            continue
+        call_id = part.get("id")
+        call_name = part.get("name")
+        if call_id and call_name:
+            results.append(
+                ToolCallInfo(id=call_id, name=call_name, arguments=part.get("arguments", {}))
+            )
+    return results

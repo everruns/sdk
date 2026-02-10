@@ -285,6 +285,60 @@ pub enum ContentPart {
     },
 }
 
+impl ContentPart {
+    /// Create a text content part
+    pub fn text(text: impl Into<String>) -> Self {
+        Self::Text { text: text.into() }
+    }
+
+    /// Create a tool result content part with a successful result
+    pub fn tool_result(tool_call_id: impl Into<String>, result: serde_json::Value) -> Self {
+        Self::ToolResult {
+            tool_call_id: tool_call_id.into(),
+            result: Some(result),
+            error: None,
+        }
+    }
+
+    /// Create a tool result content part with an error
+    pub fn tool_error(tool_call_id: impl Into<String>, error: impl Into<String>) -> Self {
+        Self::ToolResult {
+            tool_call_id: tool_call_id.into(),
+            result: None,
+            error: Some(error.into()),
+        }
+    }
+
+    /// Returns true if this is a tool call content part
+    pub fn is_tool_call(&self) -> bool {
+        matches!(self, Self::ToolCall { .. })
+    }
+
+    /// Extract tool call info if this is a tool call content part
+    pub fn as_tool_call(&self) -> Option<ToolCallInfo<'_>> {
+        match self {
+            Self::ToolCall {
+                id,
+                name,
+                arguments,
+            } => Some(ToolCallInfo {
+                id,
+                name,
+                arguments,
+            }),
+            _ => None,
+        }
+    }
+}
+
+/// Borrowed view of a tool call content part
+#[derive(Debug, Clone)]
+pub struct ToolCallInfo<'a> {
+    pub id: &'a str,
+    pub name: &'a str,
+    pub arguments: &'a serde_json::Value,
+}
+
 /// Request to create a message
 #[derive(Debug, Clone, Serialize)]
 #[non_exhaustive]
@@ -306,6 +360,11 @@ impl CreateMessageRequest {
     /// Create a user text message
     pub fn user_text(text: impl Into<String>) -> Self {
         Self::new(MessageInput::user_text(text))
+    }
+
+    /// Create a tool result message containing one or more tool results
+    pub fn tool_results(results: Vec<ContentPart>) -> Self {
+        Self::new(MessageInput::tool_results(results))
     }
 
     /// Set the controls
@@ -335,6 +394,11 @@ impl MessageInput {
             MessageRole::User,
             vec![ContentPart::Text { text: text.into() }],
         )
+    }
+
+    /// Create a tool result message containing one or more tool results
+    pub fn tool_results(results: Vec<ContentPart>) -> Self {
+        Self::new(MessageRole::ToolResult, results)
     }
 }
 
@@ -407,6 +471,39 @@ pub struct Event {
     pub data: serde_json::Value,
     #[serde(default)]
     pub context: EventContext,
+}
+
+impl Event {
+    /// Extract tool calls from an `output.message.completed` event's data.
+    ///
+    /// Returns tool call content parts found in `data.message.content`.
+    pub fn tool_calls(&self) -> Vec<ToolCallInfo<'_>> {
+        extract_tool_calls(&self.data)
+    }
+}
+
+/// Extract tool call info from event data (`data.message.content`).
+pub fn extract_tool_calls(data: &serde_json::Value) -> Vec<ToolCallInfo<'_>> {
+    let Some(content) = data
+        .get("message")
+        .and_then(|m| m.get("content"))
+        .and_then(|c| c.as_array())
+    else {
+        return vec![];
+    };
+    content
+        .iter()
+        .filter_map(|part| {
+            if part.get("type")?.as_str()? != "tool_call" {
+                return None;
+            }
+            Some(ToolCallInfo {
+                id: part.get("id")?.as_str()?,
+                name: part.get("name")?.as_str()?,
+                arguments: part.get("arguments")?,
+            })
+        })
+        .collect()
 }
 
 /// Context for an event

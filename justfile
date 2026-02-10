@@ -73,7 +73,7 @@ check-cookbook-rust:
 # Check Python cookbook
 check-cookbook-python:
     cd cookbook/python && uv sync
-    cd cookbook/python && uv run python -m py_compile src/main.py
+    cd cookbook/python && uv run python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('src/**/*.py', recursive=True)]"
 
 # Check TypeScript cookbook
 check-cookbook-typescript:
@@ -100,7 +100,7 @@ lint-cookbook-typescript:
 
 # Run Rust cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
 run-cookbook-rust:
-    cd cookbook/rust && cargo run
+    cd cookbook/rust && cargo run --bin dad-jokes
 
 # Run Python cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
 run-cookbook-python:
