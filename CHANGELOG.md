@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.2] - 2026-02-12
+
+### Highlights
+
+- Client tool call support across all SDKs
+- Periodic maintenance: spec updates, dependency bumps, and fixes
+
+### What's Changed
+
+* feat(rust,python,typescript): add client tool call support ([#34](https://github.com/everruns/sdk/pull/34)) by @chaliy
+* chore: periodic maintenance — spec, deps, fixes ([#35](https://github.com/everruns/sdk/pull/35)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.1...v0.1.2
+
 ## [0.1.1] - 2026-02-09
 
 ### Highlights
