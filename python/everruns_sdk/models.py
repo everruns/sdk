@@ -5,7 +5,7 @@ from __future__ import annotations
 import secrets
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 def generate_agent_id() -> str:
@@ -195,8 +195,7 @@ class Event(BaseModel):
     data: dict[str, Any]
     context: EventContext = Field(default_factory=lambda: EventContext())
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     def tool_calls(self) -> list[ToolCallInfo]:
         """Extract tool calls from an ``output.message.completed`` event's data."""

@@ -239,6 +239,18 @@ class SessionsClient {
     );
     return response.sessions;
   }
+
+  /** Delete a session. */
+  async delete(sessionId: string): Promise<void> {
+    await this.client.fetch(`/sessions/${sessionId}`, { method: "DELETE" });
+  }
+
+  /** Cancel the current turn in a session. */
+  async cancel(sessionId: string): Promise<void> {
+    await this.client.fetch(`/sessions/${sessionId}/cancel`, {
+      method: "POST",
+    });
+  }
 }
 
 class MessagesClient {
