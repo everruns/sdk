@@ -150,13 +150,23 @@ pub fn generate_agent_id() -> String {
     format!("agent_{}", hex)
 }
 
+/// Generate a random harness ID in the format `harness_<32-hex>`.
+pub fn generate_harness_id() -> String {
+    let mut bytes = [0u8; 16];
+    getrandom::getrandom(&mut bytes).expect("failed to generate random bytes");
+    let hex: String = bytes.iter().map(|b| format!("{:02x}", b)).collect();
+    format!("harness_{}", hex)
+}
+
 /// Session representing an active conversation
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Session {
     pub id: String,
     pub organization_id: String,
-    pub agent_id: String,
+    pub harness_id: String,
+    #[serde(default)]
+    pub agent_id: Option<String>,
     #[serde(default)]
     pub title: Option<String>,
     #[serde(default)]
@@ -178,6 +188,8 @@ pub enum SessionStatus {
     Started,
     Active,
     Idle,
+    #[serde(rename = "waitingfortoolresults")]
+    WaitingForToolResults,
 }
 
 /// Token usage statistics
@@ -196,24 +208,36 @@ pub struct TokenUsage {
 #[derive(Debug, Clone, Serialize)]
 #[non_exhaustive]
 pub struct CreateSessionRequest {
-    pub agent_id: String,
+    pub harness_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub model_id: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub capabilities: Vec<AgentCapabilityConfig>,
 }
 
 impl CreateSessionRequest {
-    /// Create a new request with the agent ID
-    pub fn new(agent_id: impl Into<String>) -> Self {
+    /// Create a new request with the harness ID
+    pub fn new(harness_id: impl Into<String>) -> Self {
         Self {
-            agent_id: agent_id.into(),
+            harness_id: harness_id.into(),
+            agent_id: None,
             title: None,
             model_id: None,
+            tags: vec![],
             capabilities: vec![],
         }
+    }
+
+    /// Set the agent ID
+    pub fn agent_id(mut self, agent_id: impl Into<String>) -> Self {
+        self.agent_id = Some(agent_id.into());
+        self
     }
 
     /// Set the session title
@@ -225,6 +249,12 @@ impl CreateSessionRequest {
     /// Set the model ID
     pub fn model_id(mut self, model_id: impl Into<String>) -> Self {
         self.model_id = Some(model_id.into());
+        self
+    }
+
+    /// Set the tags
+    pub fn tags(mut self, tags: Vec<String>) -> Self {
+        self.tags = tags;
         self
     }
 

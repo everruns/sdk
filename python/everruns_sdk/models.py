@@ -13,6 +13,11 @@ def generate_agent_id() -> str:
     return f"agent_{secrets.token_hex(16)}"
 
 
+def generate_harness_id() -> str:
+    """Generate a random harness ID in the format ``harness_<32-hex>``."""
+    return f"harness_{secrets.token_hex(16)}"
+
+
 class AgentCapabilityConfig(BaseModel):
     """Per-agent capability configuration."""
 
@@ -68,12 +73,13 @@ class Session(BaseModel):
 
     id: str
     organization_id: str
-    agent_id: str
+    harness_id: str
+    agent_id: Optional[str] = None
     title: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     model_id: Optional[str] = None
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
-    status: Literal["started", "active", "idle"]
+    status: Literal["started", "active", "idle", "waitingfortoolresults"]
     created_at: str
     updated_at: str
     usage: Optional[TokenUsage] = None
@@ -90,9 +96,11 @@ class TokenUsage(BaseModel):
 class CreateSessionRequest(BaseModel):
     """Request to create a session."""
 
-    agent_id: str
+    harness_id: str
+    agent_id: Optional[str] = None
     title: Optional[str] = None
     model_id: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
 
 

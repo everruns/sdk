@@ -218,7 +218,21 @@ class SessionsClient {
   constructor(private readonly client: Everruns) {}
 
   async create(request: CreateSessionRequest): Promise<Session> {
-    const body: Record<string, unknown> = { agent_id: request.agentId };
+    const body: Record<string, unknown> = {
+      harness_id: request.harnessId,
+    };
+    if (request.agentId) {
+      body.agent_id = request.agentId;
+    }
+    if (request.title) {
+      body.title = request.title;
+    }
+    if (request.modelId) {
+      body.model_id = request.modelId;
+    }
+    if (request.tags?.length) {
+      body.tags = request.tags;
+    }
     if (request.capabilities?.length) {
       body.capabilities = request.capabilities;
     }

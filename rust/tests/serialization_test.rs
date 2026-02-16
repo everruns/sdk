@@ -4,7 +4,7 @@
 
 use everruns_sdk::{
     Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateSessionRequest, Event,
-    ListResponse, Message, Session, generate_agent_id,
+    ListResponse, Message, Session, generate_agent_id, generate_harness_id,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
@@ -54,6 +54,7 @@ fn test_list_response_session_serialization() {
         "data": [{
             "id": "session_456",
             "organization_id": "org_789",
+            "harness_id": "harness_abc123",
             "agent_id": "agent_123",
             "title": "Test Session",
             "tags": [],
@@ -81,7 +82,49 @@ fn test_list_response_session_serialization() {
     let roundtrip: ListResponse<Session> =
         serde_json::from_str(&serialized).expect("Round-trip should work");
     assert_eq!(roundtrip.data[0].id, "session_456");
+    assert_eq!(roundtrip.data[0].harness_id, "harness_abc123");
+    assert_eq!(roundtrip.data[0].agent_id.as_deref(), Some("agent_123"));
     assert!(roundtrip.data[0].usage.is_some());
+}
+
+/// Test Session without agent_id (agent is optional)
+#[test]
+fn test_session_without_agent_id() {
+    let json = r#"{
+        "id": "session_456",
+        "organization_id": "org_789",
+        "harness_id": "harness_abc123",
+        "tags": [],
+        "status": "started",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }"#;
+
+    let session: Session =
+        serde_json::from_str(json).expect("Session without agent_id should deserialize");
+    assert!(session.agent_id.is_none());
+    assert_eq!(session.harness_id, "harness_abc123");
+}
+
+/// Test Session with waitingfortoolresults status
+#[test]
+fn test_session_waiting_for_tool_results_status() {
+    let json = r#"{
+        "id": "session_456",
+        "organization_id": "org_789",
+        "harness_id": "harness_abc123",
+        "tags": [],
+        "status": "waitingfortoolresults",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }"#;
+
+    let session: Session =
+        serde_json::from_str(json).expect("Session with waitingfortoolresults should deserialize");
+    assert!(matches!(
+        session.status,
+        everruns_sdk::SessionStatus::WaitingForToolResults
+    ));
 }
 
 /// Test that ListResponse<Message> can be serialized
@@ -250,6 +293,7 @@ fn test_session_with_capabilities() {
     let json = r#"{
         "id": "session_456",
         "organization_id": "org_789",
+        "harness_id": "harness_abc123",
         "agent_id": "agent_123",
         "tags": [],
         "capabilities": [{"ref": "current_time"}],
@@ -261,6 +305,7 @@ fn test_session_with_capabilities() {
     let session: Session = serde_json::from_str(json).expect("should deserialize");
     assert_eq!(session.capabilities.len(), 1);
     assert_eq!(session.capabilities[0].capability_ref, "current_time");
+    assert_eq!(session.harness_id, "harness_abc123");
 }
 
 /// Test CreateAgentRequest serialization with capabilities
@@ -295,24 +340,44 @@ fn test_create_agent_request_without_capabilities() {
 /// Test CreateSessionRequest serialization with capabilities
 #[test]
 fn test_create_session_request_with_capabilities() {
-    let req = CreateSessionRequest::new("agent_123")
+    let req = CreateSessionRequest::new("harness_abc123")
+        .agent_id("agent_123")
         .capabilities(vec![AgentCapabilityConfig::new("current_time")]);
 
     let serialized = serde_json::to_string(&req).expect("should serialize");
     let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
 
+    assert_eq!(raw["harness_id"], "harness_abc123");
     assert_eq!(raw["agent_id"], "agent_123");
     let caps = raw["capabilities"].as_array().unwrap();
     assert_eq!(caps.len(), 1);
     assert_eq!(caps[0]["ref"], "current_time");
 }
 
-/// Test CreateSessionRequest without capabilities omits empty array
+/// Test CreateSessionRequest without agent_id omits it
 #[test]
-fn test_create_session_request_without_capabilities() {
-    let req = CreateSessionRequest::new("agent_123");
+fn test_create_session_request_without_agent_id() {
+    let req = CreateSessionRequest::new("harness_abc123");
     let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+
+    assert_eq!(raw["harness_id"], "harness_abc123");
+    assert!(raw.get("agent_id").is_none());
     assert!(!serialized.contains("capabilities"));
+}
+
+/// Test CreateSessionRequest with tags
+#[test]
+fn test_create_session_request_with_tags() {
+    let req = CreateSessionRequest::new("harness_abc123")
+        .tags(vec!["debug".to_string(), "urgent".to_string()]);
+
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+
+    assert_eq!(raw["harness_id"], "harness_abc123");
+    let tags = raw["tags"].as_array().unwrap();
+    assert_eq!(tags.len(), 2);
 }
 
 /// Test Agent without capabilities field (backward compat)
@@ -338,6 +403,7 @@ fn test_session_without_capabilities() {
     let json = r#"{
         "id": "session_456",
         "organization_id": "org_789",
+        "harness_id": "harness_abc123",
         "agent_id": "agent_123",
         "tags": [],
         "status": "active",
@@ -393,6 +459,30 @@ fn test_create_agent_request_without_id() {
         !serialized.contains("\"id\""),
         "id field should be omitted when None"
     );
+}
+
+/// Test generate_harness_id format
+#[test]
+fn test_generate_harness_id_format() {
+    let id = generate_harness_id();
+    assert!(
+        id.starts_with("harness_"),
+        "should start with harness_ prefix"
+    );
+    let hex_part = &id["harness_".len()..];
+    assert_eq!(hex_part.len(), 32, "hex part should be 32 chars");
+    assert!(
+        hex_part.chars().all(|c| c.is_ascii_hexdigit()),
+        "hex part should be valid hex"
+    );
+}
+
+/// Test generate_harness_id uniqueness
+#[test]
+fn test_generate_harness_id_unique() {
+    let id1 = generate_harness_id();
+    let id2 = generate_harness_id();
+    assert_ne!(id1, id2, "generated IDs should be unique");
 }
 
 /// Test that Event serialization preserves the "type" field name (not "event_type")
