@@ -3,7 +3,7 @@
 //! Run: cargo run
 //! Run with verbose: cargo run -- --verbose
 
-use everruns_sdk::{generate_harness_id, Everruns};
+use everruns_sdk::{Everruns, generate_harness_id};
 use futures::StreamExt;
 
 #[tokio::main]
