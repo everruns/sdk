@@ -51,17 +51,37 @@ export function generateAgentId(): string {
   return `agent_${hex}`;
 }
 
+/**
+ * Generate a random harness ID in the format `harness_<32-hex>`.
+ */
+export function generateHarnessId(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `harness_${hex}`;
+}
+
 export interface Session {
   id: string;
-  agentId: string;
-  status: "active" | "completed" | "failed";
+  harnessId: string;
+  agentId?: string | null;
+  status: "started" | "active" | "idle" | "waitingfortoolresults";
+  title?: string | null;
+  tags?: string[];
+  modelId?: string | null;
   capabilities?: AgentCapabilityConfig[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateSessionRequest {
-  agentId: string;
+  harnessId: string;
+  agentId?: string;
+  title?: string;
+  modelId?: string;
+  tags?: string[];
   capabilities?: AgentCapabilityConfig[];
 }
 

@@ -2,7 +2,7 @@
 
 import asyncio
 
-from everruns_sdk import AgentCapabilityConfig, Everruns
+from everruns_sdk import AgentCapabilityConfig, Everruns, generate_harness_id
 
 
 async def main():
@@ -23,13 +23,16 @@ async def main():
         print(f"  Capabilities: {agent.capabilities}")
         print(f"  Created: {agent.created_at}")
 
-        # Create a session (capabilities can also be added at session level)
+        # Create a session with a harness (agent is optional)
+        harness_id = generate_harness_id()
         session = await client.sessions.create(
+            harness_id,
             agent_id=agent.id,
             capabilities=[AgentCapabilityConfig(ref="current_time")],
         )
         print("Created session:")
         print(f"  ID: {session.id}")
+        print(f"  Harness: {session.harness_id}")
         print(f"  Agent: {session.agent_id}")
         print(f"  Status: {session.status}")
         print(f"  Created: {session.created_at}")

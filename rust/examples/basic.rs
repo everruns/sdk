@@ -2,6 +2,7 @@
 
 use everruns_sdk::{
     AgentCapabilityConfig, CreateAgentRequest, CreateSessionRequest, Error, Everruns,
+    generate_harness_id,
 };
 use futures::StreamExt;
 
@@ -28,17 +29,20 @@ async fn main() -> Result<(), Error> {
     println!("  Capabilities: {:?}", agent.capabilities);
     println!("  Created: {}", agent.created_at);
 
-    // Create a session (capabilities can also be added at session level)
+    // Create a session with a harness (agent is optional)
+    let harness_id = generate_harness_id();
     let session = client
         .sessions()
         .create_with_options(
-            CreateSessionRequest::new(&agent.id)
+            CreateSessionRequest::new(&harness_id)
+                .agent_id(&agent.id)
                 .capabilities(vec![AgentCapabilityConfig::new("current_time")]),
         )
         .await?;
     println!("Created session:");
     println!("  ID: {}", session.id);
-    println!("  Agent: {}", session.agent_id);
+    println!("  Harness: {}", session.harness_id);
+    println!("  Agent: {:?}", session.agent_id);
     println!("  Status: {:?}", session.status);
     println!("  Created: {}", session.created_at);
 

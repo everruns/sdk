@@ -3,6 +3,7 @@ import { ApiKey } from "../src/auth.js";
 import { Everruns } from "../src/client.js";
 import {
   generateAgentId,
+  generateHarnessId,
   type AgentCapabilityConfig,
   type CreateAgentRequest,
   type CreateSessionRequest,
@@ -111,28 +112,41 @@ describe("CreateAgentRequest with capabilities", () => {
   });
 });
 
-describe("CreateSessionRequest with capabilities", () => {
-  it("should include capabilities in request body", () => {
+describe("CreateSessionRequest", () => {
+  it("should include harness_id and capabilities in request body", () => {
     const request: CreateSessionRequest = {
+      harnessId: "harness_abc123",
       agentId: "agent_123",
       capabilities: [{ ref: "current_time" }],
     };
 
     const body = JSON.stringify({
+      harness_id: request.harnessId,
       agent_id: request.agentId,
       capabilities: request.capabilities,
     });
     const parsed = JSON.parse(body);
 
+    expect(parsed.harness_id).toBe("harness_abc123");
+    expect(parsed.agent_id).toBe("agent_123");
     expect(parsed.capabilities).toHaveLength(1);
     expect(parsed.capabilities[0].ref).toBe("current_time");
   });
 
-  it("should work without capabilities", () => {
+  it("should work without agentId (agent is optional)", () => {
     const request: CreateSessionRequest = {
-      agentId: "agent_123",
+      harnessId: "harness_abc123",
     };
+    expect(request.agentId).toBeUndefined();
     expect(request.capabilities).toBeUndefined();
+  });
+
+  it("should include tags", () => {
+    const request: CreateSessionRequest = {
+      harnessId: "harness_abc123",
+      tags: ["debug", "urgent"],
+    };
+    expect(request.tags).toEqual(["debug", "urgent"]);
   });
 });
 
@@ -152,6 +166,26 @@ describe("generateAgentId", () => {
   it("should generate unique ids", () => {
     const id1 = generateAgentId();
     const id2 = generateAgentId();
+    expect(id1).not.toBe(id2);
+  });
+});
+
+describe("generateHarnessId", () => {
+  it("should return id with harness_ prefix", () => {
+    const id = generateHarnessId();
+    expect(id.startsWith("harness_")).toBe(true);
+  });
+
+  it("should have 32 hex characters after prefix", () => {
+    const id = generateHarnessId();
+    const hex = id.slice("harness_".length);
+    expect(hex).toHaveLength(32);
+    expect(/^[0-9a-f]{32}$/.test(hex)).toBe(true);
+  });
+
+  it("should generate unique ids", () => {
+    const id1 = generateHarnessId();
+    const id2 = generateHarnessId();
     expect(id1).not.toBe(id2);
   });
 });

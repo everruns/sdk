@@ -6,7 +6,7 @@
 //! Run: cargo run --bin weather-tools
 //! Run with verbose: cargo run --bin weather-tools -- --verbose
 
-use everruns_sdk::{ContentPart, Everruns, extract_tool_calls};
+use everruns_sdk::{ContentPart, Everruns, extract_tool_calls, generate_harness_id};
 use futures::StreamExt;
 
 /// Simulated local weather lookup.
@@ -58,7 +58,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Created agent: {}", agent.id);
 
     // Create session
-    let session = client.sessions().create(&agent.id).await?;
+    let harness_id = generate_harness_id();
+    let session = client.sessions().create(&harness_id).await?;
     println!("Created session: {}\n", session.id);
 
     // Send user message

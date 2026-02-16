@@ -23,12 +23,17 @@ if an agent with that ID exists it is updated, otherwise a new agent is created.
 When `id` is omitted, the server auto-generates one (plain create).
 
 ### Sessions
-- `POST /v1/sessions` - Create session (supports capabilities)
+- `POST /v1/sessions` - Create session (requires harness_id, agent_id optional)
 - `GET /v1/sessions` - List sessions
 - `GET /v1/sessions/{id}` - Get session
 - `PATCH /v1/sessions/{id}` - Update session
 - `DELETE /v1/sessions/{id}` - Delete session
 - `POST /v1/sessions/{id}/cancel` - Cancel turn
+
+#### Harness ID
+
+Sessions require a `harness_id` (format: `harness_<32-hex>`). Use `generate_harness_id()` to create one.
+Agent is optional on session creation — sessions can run without an agent.
 
 ### Capabilities
 - `GET /v1/capabilities` - List available capabilities

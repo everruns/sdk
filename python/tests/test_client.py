@@ -163,13 +163,37 @@ def test_create_session_request_with_capabilities():
     from everruns_sdk.models import AgentCapabilityConfig, CreateSessionRequest
 
     req = CreateSessionRequest(
+        harness_id="harness_abc123",
         agent_id="agent_123",
         capabilities=[AgentCapabilityConfig(ref="current_time")],
     )
     data = req.model_dump(exclude_none=True)
+    assert data["harness_id"] == "harness_abc123"
     assert data["agent_id"] == "agent_123"
     assert len(data["capabilities"]) == 1
     assert data["capabilities"][0]["ref"] == "current_time"
+
+
+def test_create_session_request_without_agent():
+    """Test CreateSessionRequest without agent_id."""
+    from everruns_sdk.models import CreateSessionRequest
+
+    req = CreateSessionRequest(harness_id="harness_abc123")
+    data = req.model_dump(exclude_none=True)
+    assert data["harness_id"] == "harness_abc123"
+    assert "agent_id" not in data
+
+
+def test_create_session_request_with_tags():
+    """Test CreateSessionRequest with tags."""
+    from everruns_sdk.models import CreateSessionRequest
+
+    req = CreateSessionRequest(
+        harness_id="harness_abc123",
+        tags=["debug", "urgent"],
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["tags"] == ["debug", "urgent"]
 
 
 def test_agent_deserialization_with_capabilities():
@@ -212,6 +236,7 @@ def test_session_deserialization_with_capabilities():
     session = Session(
         id="session_456",
         organization_id="org_789",
+        harness_id="harness_abc123",
         agent_id="agent_123",
         status="active",
         capabilities=[{"ref": "current_time"}],
@@ -220,6 +245,38 @@ def test_session_deserialization_with_capabilities():
     )
     assert len(session.capabilities) == 1
     assert session.capabilities[0].ref == "current_time"
+    assert session.harness_id == "harness_abc123"
+
+
+def test_session_deserialization_without_agent():
+    """Test Session model deserialization without agent_id."""
+    from everruns_sdk.models import Session
+
+    session = Session(
+        id="session_456",
+        organization_id="org_789",
+        harness_id="harness_abc123",
+        status="started",
+        created_at="2024-01-01T00:00:00Z",
+        updated_at="2024-01-01T00:00:00Z",
+    )
+    assert session.agent_id is None
+    assert session.harness_id == "harness_abc123"
+
+
+def test_session_waiting_for_tool_results_status():
+    """Test Session with waitingfortoolresults status."""
+    from everruns_sdk.models import Session
+
+    session = Session(
+        id="session_456",
+        organization_id="org_789",
+        harness_id="harness_abc123",
+        status="waitingfortoolresults",
+        created_at="2024-01-01T00:00:00Z",
+        updated_at="2024-01-01T00:00:00Z",
+    )
+    assert session.status == "waitingfortoolresults"
 
 
 def test_generate_agent_id_format():
@@ -239,6 +296,26 @@ def test_generate_agent_id_unique():
 
     id1 = generate_agent_id()
     id2 = generate_agent_id()
+    assert id1 != id2
+
+
+def test_generate_harness_id_format():
+    """Test generate_harness_id returns proper format."""
+    from everruns_sdk import generate_harness_id
+
+    harness_id = generate_harness_id()
+    assert harness_id.startswith("harness_")
+    hex_part = harness_id[len("harness_") :]
+    assert len(hex_part) == 32
+    int(hex_part, 16)  # validates it's valid hex
+
+
+def test_generate_harness_id_unique():
+    """Test generate_harness_id returns unique values."""
+    from everruns_sdk import generate_harness_id
+
+    id1 = generate_harness_id()
+    id2 = generate_harness_id()
     assert id1 != id2
 
 

@@ -296,16 +296,31 @@ class SessionsClient:
 
     async def create(
         self,
-        agent_id: str,
+        harness_id: str,
+        *,
+        agent_id: Optional[str] = None,
         title: Optional[str] = None,
         model_id: Optional[str] = None,
+        tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
     ) -> Session:
-        """Create a new session."""
+        """Create a new session.
+
+        Args:
+            harness_id: Harness ID (format: ``harness_<32-hex>``). Use
+                :func:`~everruns_sdk.generate_harness_id` to create one.
+            agent_id: Agent ID (optional).
+            title: Human-readable title.
+            model_id: LLM model ID override.
+            tags: Tags for organizing sessions.
+            capabilities: Session-level capabilities (additive to agent capabilities).
+        """
         req = CreateSessionRequest(
+            harness_id=harness_id,
             agent_id=agent_id,
             title=title,
             model_id=model_id,
+            tags=tags or [],
             capabilities=capabilities or [],
         )
         resp = await self._client._post("/sessions", req.model_dump(exclude_none=True))

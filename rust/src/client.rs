@@ -321,9 +321,9 @@ impl<'a> SessionsClient<'a> {
         self.client.get(&format!("/sessions/{}", id)).await
     }
 
-    /// Create a new session
-    pub async fn create(&self, agent_id: &str) -> Result<Session> {
-        let req = CreateSessionRequest::new(agent_id);
+    /// Create a new session with a harness ID
+    pub async fn create(&self, harness_id: &str) -> Result<Session> {
+        let req = CreateSessionRequest::new(harness_id);
         self.client.post("/sessions", &req).await
     }
 

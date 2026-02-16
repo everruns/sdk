@@ -10,6 +10,7 @@
 
 import {
   Everruns,
+  generateHarnessId,
   type ContentPart,
   type ToolCallInfo,
   extractToolCalls,
@@ -72,7 +73,11 @@ async function main() {
   console.log(`Created agent: ${agent.id}`);
 
   // Create session
-  const session = await client.sessions.create({ agentId: agent.id });
+  const harnessId = generateHarnessId();
+  const session = await client.sessions.create({
+    harnessId,
+    agentId: agent.id,
+  });
   console.log(`Created session: ${session.id}\n`);
 
   // Send user message
