@@ -21,7 +21,10 @@ async function main() {
 
   // Create session
   const harnessId = generateHarnessId();
-  const session = await client.sessions.create({ harnessId, agentId: agent.id });
+  const session = await client.sessions.create({
+    harnessId,
+    agentId: agent.id,
+  });
   console.log(`Created session: ${session.id}\n`);
 
   // Send message
