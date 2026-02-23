@@ -36,6 +36,10 @@ pub enum Error {
     /// SSE stream error
     #[error("SSE error: {0}")]
     Sse(String),
+
+    /// Server-initiated graceful disconnect with retry hint
+    #[error("Graceful disconnect: reason={reason}, retry_ms={retry_ms}")]
+    GracefulDisconnect { reason: String, retry_ms: u64 },
 }
 
 /// API error response from the server

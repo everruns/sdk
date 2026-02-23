@@ -209,11 +209,16 @@ impl EventStream {
                                     data.reason,
                                     data.retry_ms
                                 );
-                                // Signal graceful disconnect - the stream will handle reconnection
-                                Err(Error::Sse(format!("__graceful_disconnect__:{}", data.retry_ms)))?;
+                                Err(Error::GracefulDisconnect {
+                                    reason: data.reason,
+                                    retry_ms: data.retry_ms,
+                                })?;
                             } else {
                                 tracing::debug!("SSE disconnecting event received (no data)");
-                                Err(Error::Sse("__graceful_disconnect__:100".to_string()))?;
+                                Err(Error::GracefulDisconnect {
+                                    reason: "unknown".to_string(),
+                                    retry_ms: 100,
+                                })?;
                             }
                         }
 
@@ -311,14 +316,8 @@ impl Stream for EventStream {
                 }
                 Poll::Ready(Some(Err(e))) => {
                     // Check if this is a graceful disconnect
-                    let error_msg = e.to_string();
-                    if error_msg.contains("__graceful_disconnect__") {
-                        // Extract retry hint from error message
-                        if let Some(ms_str) = error_msg.split("__graceful_disconnect__:").nth(1)
-                            && let Ok(ms) = ms_str.parse::<u64>()
-                        {
-                            self.server_retry_ms = Some(ms);
-                        }
+                    if let Error::GracefulDisconnect { retry_ms, .. } = &e {
+                        self.server_retry_ms = Some(*retry_ms);
                         self.graceful_disconnect = true;
                         self.inner = None;
 
