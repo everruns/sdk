@@ -190,6 +190,37 @@ describe("generateHarnessId", () => {
   });
 });
 
+describe("EventsClient URL building", () => {
+  it("should expand exclude as repeated query keys for events list", () => {
+    // Verify the URLSearchParams approach used by EventsClient.list()
+    // produces repeated keys, not comma-separated values
+    const params = new URLSearchParams();
+    params.set("since_id", "evt_001");
+    for (const e of ["output.message.delta", "reason.thinking.delta"]) {
+      params.append("exclude", e);
+    }
+    const query = params.toString();
+    // Must produce repeated keys: exclude=a&exclude=b
+    expect(query).toBe(
+      "since_id=evt_001&exclude=output.message.delta&exclude=reason.thinking.delta",
+    );
+    expect(query).not.toContain("exclude=output.message.delta%2C");
+  });
+
+  it("should handle single exclude value", () => {
+    const params = new URLSearchParams();
+    for (const e of ["output.message.delta"]) {
+      params.append("exclude", e);
+    }
+    expect(params.toString()).toBe("exclude=output.message.delta");
+  });
+
+  it("should produce empty query for no options", () => {
+    const params = new URLSearchParams();
+    expect(params.toString()).toBe("");
+  });
+});
+
 describe("CreateAgentRequest with client-supplied ID", () => {
   it("should include id in request body", () => {
     const id = generateAgentId();

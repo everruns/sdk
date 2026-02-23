@@ -17,6 +17,18 @@ Cache-Control: no-cache
 | `since_id` | string | Resume from event ID (UUIDv7, monotonically increasing) |
 | `exclude` | string[] | Array of event types to filter out |
 
+### Array Parameter Expansion
+
+Array parameters like `exclude` MUST be sent as **repeated query keys** (one key per value), not as comma-separated values or bracket syntax. This matches the `style: form, explode: true` convention in the OpenAPI spec.
+
+```
+Correct:   ?exclude=output.message.delta&exclude=reason.thinking.delta
+Wrong:     ?exclude=output.message.delta,reason.thinking.delta
+Wrong:     ?exclude[]=output.message.delta&exclude[]=reason.thinking.delta
+```
+
+Reference: [everruns/everruns#575](https://github.com/everruns/everruns/pull/575) — the server uses `serde_html_form` which only supports the repeated-key format for deserializing arrays.
+
 ## Event Format
 
 ```
@@ -236,7 +248,7 @@ const opts = { exclude: ["output.message.delta", "reason.thinking.delta"] };
 
 ## URL Building
 
-SDKs must build SSE URLs correctly:
+SDKs must build SSE URLs correctly, using repeated keys for array parameters:
 
 ```
 Base:   /v1/sessions/{session_id}/sse
@@ -245,7 +257,7 @@ With exclude:  /v1/sessions/{session_id}/sse?exclude=output.message.delta
 Combined:      /v1/sessions/{session_id}/sse?since_id={id}&exclude=type1&exclude=type2
 ```
 
-Note: URL-encode special characters in `since_id`.
+Note: URL-encode special characters in `since_id`. Each `exclude` value MUST be a separate query key (see [Array Parameter Expansion](#array-parameter-expansion)).
 
 ## Event ID Handling
 
@@ -277,8 +289,9 @@ SDKs MUST test:
 2. **DisconnectingData parsing** - Valid JSON, missing fields, edge cases
 3. **Backoff calculations** - Sequence, max cap, reset
 4. **URL building** - Basic, with params, encoding
-5. **Retry logic** - Graceful vs unexpected, max retries
-6. **State management** - last_event_id, retry_count, stop()
+5. **Argument expansion** - `exclude` uses repeated keys (not comma-separated), combined params, empty arrays
+6. **Retry logic** - Graceful vs unexpected, max retries
+7. **State management** - last_event_id, retry_count, stop()
 
 ## Implementation Checklist
 

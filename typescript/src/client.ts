@@ -330,7 +330,11 @@ class EventsClient {
   async list(sessionId: string, options?: StreamOptions): Promise<Event[]> {
     const params = new URLSearchParams();
     if (options?.sinceId) params.set("since_id", options.sinceId);
-    if (options?.exclude) params.set("exclude", options.exclude.join(","));
+    if (options?.exclude) {
+      for (const e of options.exclude) {
+        params.append("exclude", e);
+      }
+    }
     const query = params.toString() ? `?${params}` : "";
     const response = await this.client.fetch<{ events: Event[] }>(
       `/sessions/${sessionId}/events${query}`,
