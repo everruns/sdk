@@ -217,3 +217,65 @@ class TestEventStreamState:
 
         stream._update_backoff()
         assert stream._current_backoff_ms == 4000
+
+
+class TestArgumentExpansion:
+    """Tests for SSE query parameter argument expansion.
+
+    The server expects array parameters (like `exclude`) to be sent as
+    repeated query keys: ?exclude=a&exclude=b
+    Not as comma-separated: ?exclude=a,b
+    See: everruns/everruns#575
+    """
+
+    def test_exclude_expands_as_repeated_keys(self):
+        """Exclude values must be repeated keys, not comma-separated."""
+        opts = StreamOptions(exclude=["output.message.delta", "reason.thinking.delta"])
+        stream = EventStream(MockClient(), "session_123", opts)
+        url = stream._build_url()
+        assert "exclude=output.message.delta&exclude=reason.thinking.delta" in url
+        assert "," not in url
+
+    def test_single_exclude_value(self):
+        """Single exclude value produces a single key."""
+        opts = StreamOptions(exclude=["output.message.delta"])
+        stream = EventStream(MockClient(), "session_123", opts)
+        url = stream._build_url()
+        assert url.endswith("?exclude=output.message.delta")
+
+    def test_combined_since_id_and_exclude_expansion(self):
+        """Combined since_id and multiple exclude use repeated keys."""
+        opts = StreamOptions(
+            since_id="evt_001",
+            exclude=["output.message.delta", "reason.thinking.delta"],
+        )
+        stream = EventStream(MockClient(), "session_123", opts)
+        url = stream._build_url()
+        assert "since_id=evt_001" in url
+        assert "exclude=output.message.delta" in url
+        assert "exclude=reason.thinking.delta" in url
+        # Verify ordering: since_id first, then exclude params
+        since_idx = url.index("since_id=")
+        exclude_idx = url.index("exclude=")
+        assert since_idx < exclude_idx
+
+    def test_empty_exclude_no_query_params(self):
+        """Empty exclude array produces no exclude query params."""
+        opts = StreamOptions(exclude=[])
+        stream = EventStream(MockClient(), "session_123", opts)
+        url = stream._build_url()
+        assert "exclude" not in url
+        assert url.endswith("/sse")
+
+    def test_exclude_with_three_values(self):
+        """Three exclude values produce three repeated keys."""
+        opts = StreamOptions(
+            exclude=[
+                "output.message.delta",
+                "reason.thinking.delta",
+                "tool.started",
+            ]
+        )
+        stream = EventStream(MockClient(), "session_123", opts)
+        url = stream._build_url()
+        assert url.count("exclude=") == 3

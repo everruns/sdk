@@ -451,3 +451,114 @@ impl std::fmt::Debug for Everruns {
             .finish()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_client() -> Everruns {
+        Everruns::with_base_url("test_key", "https://api.example.com").unwrap()
+    }
+
+    #[test]
+    fn test_sse_url_no_params() {
+        let client = test_client();
+        let url = client.sse_url("session_123", None, &[]);
+        assert_eq!(
+            url.as_str(),
+            "https://api.example.com/v1/sessions/session_123/sse"
+        );
+    }
+
+    #[test]
+    fn test_sse_url_with_since_id() {
+        let client = test_client();
+        let url = client.sse_url("session_123", Some("evt_001"), &[]);
+        assert_eq!(
+            url.as_str(),
+            "https://api.example.com/v1/sessions/session_123/sse?since_id=evt_001"
+        );
+    }
+
+    #[test]
+    fn test_sse_url_exclude_expands_as_repeated_keys() {
+        let client = test_client();
+        let url = client.sse_url(
+            "session_123",
+            None,
+            &["output.message.delta", "reason.thinking.delta"],
+        );
+        let url_str = url.as_str();
+        // Must use repeated keys: ?exclude=a&exclude=b
+        // Not comma-separated: ?exclude=a,b
+        assert!(
+            url_str.contains("exclude=output.message.delta"),
+            "URL missing first exclude: {}",
+            url_str
+        );
+        assert!(
+            url_str.contains("exclude=reason.thinking.delta"),
+            "URL missing second exclude: {}",
+            url_str
+        );
+        assert!(
+            !url_str.contains(','),
+            "URL must not use comma-separated excludes: {}",
+            url_str
+        );
+        assert_eq!(
+            url_str,
+            "https://api.example.com/v1/sessions/session_123/sse?exclude=output.message.delta&exclude=reason.thinking.delta"
+        );
+    }
+
+    #[test]
+    fn test_sse_url_single_exclude() {
+        let client = test_client();
+        let url = client.sse_url("session_123", None, &["output.message.delta"]);
+        assert_eq!(
+            url.as_str(),
+            "https://api.example.com/v1/sessions/session_123/sse?exclude=output.message.delta"
+        );
+    }
+
+    #[test]
+    fn test_sse_url_combined_since_id_and_exclude() {
+        let client = test_client();
+        let url = client.sse_url(
+            "session_123",
+            Some("evt_001"),
+            &["output.message.delta", "reason.thinking.delta"],
+        );
+        assert_eq!(
+            url.as_str(),
+            "https://api.example.com/v1/sessions/session_123/sse?since_id=evt_001&exclude=output.message.delta&exclude=reason.thinking.delta"
+        );
+    }
+
+    #[test]
+    fn test_sse_url_three_exclude_values() {
+        let client = test_client();
+        let url = client.sse_url(
+            "session_123",
+            None,
+            &[
+                "output.message.delta",
+                "reason.thinking.delta",
+                "tool.started",
+            ],
+        );
+        let url_str = url.as_str();
+        assert_eq!(url_str.matches("exclude=").count(), 3);
+    }
+
+    #[test]
+    fn test_sse_url_since_id_special_chars_encoded() {
+        let client = test_client();
+        let url = client.sse_url("session_123", Some("evt&id=1"), &[]);
+        let url_str = url.as_str();
+        // URL should encode special characters
+        assert!(!url_str.contains("evt&id=1"));
+        assert!(url_str.contains("since_id=evt%26id%3D1"));
+    }
+}

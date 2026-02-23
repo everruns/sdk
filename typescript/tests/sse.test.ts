@@ -81,6 +81,48 @@ describe("EventStream", () => {
       const url = (stream as any).buildUrl();
       expect(url).toContain("since_id=event_123%26special%3Dvalue");
     });
+
+    it("should expand exclude as repeated query keys, not comma-separated", () => {
+      const stream = new EventStream("https://api.example.com/sse", "auth", {
+        exclude: ["output.message.delta", "reason.thinking.delta"],
+      });
+      const url = (stream as any).buildUrl();
+      // Must use repeated keys: ?exclude=a&exclude=b
+      // Not comma-separated: ?exclude=a,b
+      expect(url).toBe(
+        "https://api.example.com/sse?exclude=output.message.delta&exclude=reason.thinking.delta",
+      );
+      expect(url).not.toContain(",");
+    });
+
+    it("should expand single exclude as single key", () => {
+      const stream = new EventStream("https://api.example.com/sse", "auth", {
+        exclude: ["output.message.delta"],
+      });
+      const url = (stream as any).buildUrl();
+      expect(url).toBe(
+        "https://api.example.com/sse?exclude=output.message.delta",
+      );
+    });
+
+    it("should combine since_id and multiple exclude as repeated keys", () => {
+      const stream = new EventStream("https://api.example.com/sse", "auth", {
+        sinceId: "evt_001",
+        exclude: ["output.message.delta", "reason.thinking.delta"],
+      });
+      const url = (stream as any).buildUrl();
+      expect(url).toBe(
+        "https://api.example.com/sse?since_id=evt_001&exclude=output.message.delta&exclude=reason.thinking.delta",
+      );
+    });
+
+    it("should handle empty exclude array", () => {
+      const stream = new EventStream("https://api.example.com/sse", "auth", {
+        exclude: [],
+      });
+      const url = (stream as any).buildUrl();
+      expect(url).toBe("https://api.example.com/sse");
+    });
   });
 
   describe("retry logic", () => {
