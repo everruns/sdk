@@ -138,8 +138,8 @@ impl EventStream {
     pub(crate) fn new(client: Everruns, session_id: String, options: StreamOptions) -> Self {
         // Dedicated SSE client: no overall timeout (streams run for hours),
         // reused across reconnections for connection pool / TCP reuse.
+        // reqwest default is no timeout — don't call .timeout() at all.
         let sse_http_client = reqwest::Client::builder()
-            .timeout(Duration::ZERO) // No overall timeout
             .build()
             .unwrap_or_else(|_| reqwest::Client::new());
 
