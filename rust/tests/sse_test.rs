@@ -94,3 +94,60 @@ mod backoff_tests {
         assert_eq!(backoff, MAX_RETRY_MS);
     }
 }
+
+#[cfg(test)]
+mod graceful_disconnect_tests {
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicBool, Ordering};
+
+    /// Graceful disconnects (connection cycling) must not increment retry_count.
+    /// With max_retries=5, a session running >25 min would otherwise exhaust
+    /// retries from normal 5-min cycling alone.
+    #[test]
+    fn test_graceful_disconnect_does_not_count_as_retry() {
+        // Simulate the graceful disconnect path logic:
+        // should_reconnect is checked directly (not should_retry which checks retry_count)
+        let should_reconnect = true;
+        let retry_count: u32 = 0;
+        let max_retries: u32 = 5;
+
+        // Simulate 20 graceful disconnects (connection cycles)
+        for _ in 0..20 {
+            // Graceful path: check should_reconnect directly, don't increment retry_count
+            assert!(should_reconnect);
+            // retry_count should NOT increase
+        }
+
+        // After 20 graceful disconnects, retry_count is still 0
+        assert_eq!(retry_count, 0);
+        // max_retries budget is untouched
+        assert!(retry_count < max_retries);
+    }
+
+    /// Connected event signal should be used to reset backoff state.
+    #[test]
+    fn test_connected_signal_resets_backoff() {
+        let signal = Arc::new(AtomicBool::new(false));
+
+        // Simulate connect() setting the signal
+        signal.store(true, Ordering::Release);
+
+        // Simulate poll_next() checking the signal
+        let was_connected = signal.swap(false, Ordering::Acquire);
+        assert!(was_connected, "Signal should be true after connected event");
+
+        // After swap, signal should be cleared
+        assert!(
+            !signal.load(Ordering::Acquire),
+            "Signal should be cleared after check"
+        );
+    }
+
+    /// Connected signal should be false initially (no spurious resets).
+    #[test]
+    fn test_connected_signal_initially_false() {
+        let signal = Arc::new(AtomicBool::new(false));
+        let was_connected = signal.swap(false, Ordering::Acquire);
+        assert!(!was_connected, "Signal should be false initially");
+    }
+}

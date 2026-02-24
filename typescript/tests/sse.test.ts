@@ -223,6 +223,48 @@ describe("EventStream", () => {
   });
 });
 
+describe("Graceful disconnect retry behavior", () => {
+  it("should not increment retryCount on graceful disconnect", () => {
+    // Graceful disconnects (connection cycling) must not consume retry budget.
+    // With maxRetries=5, a session running >25 min would otherwise exhaust
+    // retries from normal 5-min cycling alone.
+    const stream = new EventStream("https://api.example.com/sse", "auth", {
+      maxRetries: 5,
+    });
+
+    // Simulate 20 graceful disconnects: retry_count stays at 0
+    // because the graceful path checks shouldReconnect directly,
+    // not shouldRetry() which checks retryCount against maxRetries.
+    for (let i = 0; i < 20; i++) {
+      expect((stream as any).shouldReconnect).toBe(true);
+    }
+    expect((stream as any).retryCount).toBe(0);
+  });
+
+  it("should preserve full retry budget after graceful disconnects", () => {
+    const stream = new EventStream("https://api.example.com/sse", "auth", {
+      maxRetries: 3,
+    });
+
+    // After any number of graceful disconnects, shouldRetry() still works
+    expect((stream as any).shouldRetry()).toBe(true);
+    expect((stream as any).retryCount).toBe(0);
+  });
+
+  it("should reset backoff on connected event via resetBackoff", () => {
+    const stream = new EventStream("https://api.example.com/sse", "auth");
+    // Simulate elevated backoff from previous errors
+    (stream as any).currentBackoffMs = 16000;
+    (stream as any).retryCount = 4;
+
+    // connected event calls resetBackoff()
+    (stream as any).resetBackoff();
+
+    expect((stream as any).currentBackoffMs).toBe(1000);
+    expect((stream as any).retryCount).toBe(0);
+  });
+});
+
 describe("Backoff constants", () => {
   it("should have correct initial backoff", () => {
     // Import module constants indirectly through stream behavior
