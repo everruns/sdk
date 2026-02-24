@@ -14,6 +14,8 @@ use futures::stream::Stream;
 use serde::Deserialize;
 use std::future::Future;
 use std::pin::Pin;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::task::{Context, Poll};
 use std::time::Duration;
 use tokio::time::{Sleep, sleep};
@@ -125,10 +127,22 @@ pub struct EventStream {
     graceful_disconnect: bool,
     /// Pending delay before reconnection (non-blocking)
     delay_future: Option<Pin<Box<Sleep>>>,
+    /// Shared flag set by connect() when `connected` event is received.
+    /// Checked by poll_next() to reset backoff — proves connection is healthy.
+    connected_signal: Arc<AtomicBool>,
+    /// Shared reqwest client reused across reconnections for connection pooling
+    sse_http_client: reqwest::Client,
 }
 
 impl EventStream {
     pub(crate) fn new(client: Everruns, session_id: String, options: StreamOptions) -> Self {
+        // Dedicated SSE client: no overall timeout (streams run for hours),
+        // reused across reconnections for connection pool / TCP reuse.
+        // reqwest default is no timeout — don't call .timeout() at all.
+        let sse_http_client = reqwest::Client::builder()
+            .build()
+            .unwrap_or_else(|_| reqwest::Client::new());
+
         Self {
             client,
             session_id,
@@ -141,6 +155,8 @@ impl EventStream {
             should_reconnect: true,
             graceful_disconnect: false,
             delay_future: None,
+            connected_signal: Arc::new(AtomicBool::new(false)),
+            sse_http_client,
         }
     }
 
@@ -169,6 +185,8 @@ impl EventStream {
             .clone()
             .or_else(|| self.options.since_id.clone());
         let exclude: Vec<String> = self.options.exclude.clone();
+        let connected_signal = self.connected_signal.clone();
+        let http_client = self.sse_http_client.clone();
 
         Box::pin(async_stream::try_stream! {
             use reqwest_eventsource::{Event as SseEvent, RequestBuilderExt};
@@ -178,8 +196,6 @@ impl EventStream {
             let url = client.sse_url(&session_id, since_id.as_deref(), &exclude_refs);
 
             tracing::debug!("Connecting to SSE: {}", url);
-
-            let http_client = reqwest::Client::new();
 
             let mut es = http_client
                 .get(url.clone())
@@ -198,6 +214,9 @@ impl EventStream {
                         // Handle special lifecycle events
                         if msg.event == "connected" {
                             tracing::debug!("SSE connected event received");
+                            // Signal outer EventStream to reset backoff —
+                            // proves the connection is healthy.
+                            connected_signal.store(true, Ordering::Release);
                             continue;
                         }
 
@@ -299,6 +318,12 @@ impl Stream for EventStream {
                 }
             }
 
+            // Check if connect() received a `connected` event — proves
+            // the connection is healthy, so reset backoff/retry state.
+            if self.connected_signal.swap(false, Ordering::Acquire) {
+                self.reset_backoff();
+            }
+
             if self.inner.is_none() {
                 if !self.should_reconnect {
                     return Poll::Ready(None);
@@ -321,8 +346,10 @@ impl Stream for EventStream {
                         self.graceful_disconnect = true;
                         self.inner = None;
 
-                        if self.should_retry() {
-                            self.retry_count += 1;
+                        // Graceful disconnects are planned server behavior (connection
+                        // cycling), not errors. Don't increment retry_count so they
+                        // never exhaust max_retries.
+                        if self.should_reconnect {
                             let delay = self.get_retry_delay();
                             tracing::debug!("Graceful reconnect in {:?}", delay);
                             self.schedule_reconnect(delay);

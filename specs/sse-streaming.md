@@ -120,12 +120,14 @@ graceful_disconnect: bool        # Whether last disconnect was graceful
 2. Log at DEBUG level (expected behavior, not an error)
 3. Reconnect after `retry_ms` delay (default 100ms if not provided)
 4. Include `since_id` query parameter with last received event ID
+5. **Do NOT increment `retry_count`** — graceful disconnects are planned server behavior, not errors. They must never exhaust `max_retries`.
 
 ```python
 # Pseudocode
 if event.type == "disconnecting":
     log.debug(f"Graceful disconnect: {event.reason}")
     await sleep(event.retry_ms / 1000)
+    # NOTE: do NOT increment retry_count here
     reconnect(since_id=last_event_id)
 ```
 
@@ -145,12 +147,26 @@ on_disconnect():
     log.warn(f"Unexpected disconnect, retrying in {backoff_ms}ms")
     await sleep(backoff_ms / 1000)
     backoff_ms = min(backoff_ms * 2, MAX_BACKOFF_MS)
+    retry_count += 1
     reconnect(since_id=last_event_id)
 
 on_event_received():
     backoff_ms = 1000  # Reset
     retry_count = 0
 ```
+
+#### On `connected` Event
+
+The server sends a `connected` event immediately after the SSE connection is established. SDKs MUST reset backoff and retry state upon receiving this event:
+
+```python
+# Pseudocode
+if event.type == "connected":
+    backoff_ms = 1000   # Reset to initial
+    retry_count = 0     # Clear retry counter
+```
+
+This ensures that a successful reconnection clears any accumulated error backoff, even before data events arrive. Without this, a stream that reconnects during an idle period would retain elevated backoff from prior errors.
 
 ### Backoff Constants
 
@@ -170,6 +186,15 @@ Attempt 4: 8000ms (8s)
 Attempt 5: 16000ms (16s)
 Attempt 6+: 30000ms (30s) - capped
 ```
+
+### HTTP Client Reuse
+
+SDKs MUST reuse the HTTP client across reconnections. Creating a new HTTP client per reconnect:
+- Discards the connection pool, forcing fresh TCP/TLS handshakes
+- Prevents HTTP/2 multiplexing across reconnects
+- Increases latency on every reconnection cycle
+
+SDKs should create a dedicated SSE HTTP client once (with SSE-appropriate timeouts) and reuse it for all reconnection attempts.
 
 ### Long-Running Stream Support
 
@@ -285,6 +310,7 @@ for event in stream:
 
 SDKs MUST test:
 
+### Unit Tests
 1. **StreamOptions** - Default, exclude_deltas, since_id, max_retries
 2. **DisconnectingData parsing** - Valid JSON, missing fields, edge cases
 3. **Backoff calculations** - Sequence, max cap, reset
@@ -292,6 +318,12 @@ SDKs MUST test:
 5. **Argument expansion** - `exclude` uses repeated keys (not comma-separated), combined params, empty arrays
 6. **Retry logic** - Graceful vs unexpected, max retries
 7. **State management** - last_event_id, retry_count, stop()
+
+### Smoke / Integration Tests
+8. **Graceful disconnect reconnection** - Mock SSE server sends `connected` → event → `disconnecting`, verify stream reconnects, receives events from second connection, and `retry_count` stays 0
+9. **Backoff reset on reconnection** - After unexpected disconnect (elevated backoff), verify successful reconnection with `connected` event resets backoff to initial values
+10. **Multiple graceful disconnects** - Verify stream survives many sequential graceful disconnects without exhausting `max_retries`
+11. **HTTP client reuse** - Verify the same HTTP client instance is used across reconnections
 
 ## Implementation Checklist
 
@@ -305,7 +337,9 @@ For new language SDKs:
 - [ ] Read timeout (2 minutes)
 - [ ] No overall timeout
 - [ ] since_id tracking
-- [ ] Backoff reset on success
+- [ ] Backoff reset on success and on `connected` event
+- [ ] Graceful disconnects do NOT increment retry_count
+- [ ] HTTP client reused across reconnections
 - [ ] stop/abort method
 - [ ] URL building with encoding
 - [ ] Unit tests for all above

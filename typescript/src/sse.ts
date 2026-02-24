@@ -167,12 +167,13 @@ export class EventStream implements AsyncIterable<Event> {
         break;
       } catch (error) {
         if (error instanceof GracefulDisconnect) {
-          // Server-initiated graceful disconnect
+          // Server-initiated graceful disconnect (connection cycling).
+          // Not an error — don't increment retryCount so we never
+          // exhaust maxRetries from normal cycling.
           this.serverRetryMs = error.retryMs;
           this.gracefulDisconnect = true;
 
-          if (this.shouldRetry()) {
-            this.retryCount++;
+          if (this.shouldReconnect) {
             const delay = this.getRetryDelay();
             console.debug(`Graceful reconnect in ${delay}ms`);
             await this.sleep(delay);
@@ -256,6 +257,8 @@ export class EventStream implements AsyncIterable<Event> {
           // Handle special lifecycle events
           if (event.event === "connected") {
             console.debug("SSE connected event received");
+            // Proves connection is healthy — reset backoff/retry state
+            this.resetBackoff();
             return;
           }
 

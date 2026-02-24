@@ -87,6 +87,10 @@ class EventStream:
         self._retry_count: int = 0
         self._should_reconnect: bool = True
         self._graceful_disconnect: bool = False
+        # Reuse HTTP client across reconnections for connection pooling.
+        # Created once with SSE-appropriate timeouts (long read timeout,
+        # no overall timeout) instead of fresh client per connection.
+        self._http: Optional[httpx.AsyncClient] = None
 
     @property
     def last_event_id(self) -> Optional[str]:
@@ -101,6 +105,24 @@ class EventStream:
     def stop(self) -> None:
         """Stop the stream and prevent further reconnection attempts."""
         self._should_reconnect = False
+
+    async def aclose(self) -> None:
+        """Close the underlying HTTP client."""
+        if self._http is not None:
+            await self._http.aclose()
+            self._http = None
+
+    def _get_http_client(self) -> httpx.AsyncClient:
+        """Get or create the shared HTTP client for SSE connections."""
+        if self._http is None or self._http.is_closed:
+            timeout = httpx.Timeout(
+                connect=30.0,
+                read=READ_TIMEOUT_SECS,  # Detect stalled connections
+                write=30.0,
+                pool=30.0,
+            )
+            self._http = httpx.AsyncClient(timeout=timeout)
+        return self._http
 
     def _build_url(self) -> str:
         """Build the SSE URL with query parameters."""
@@ -155,12 +177,13 @@ class EventStream:
                 async for event in self._connect():
                     yield event
             except _GracefulDisconnectError as e:
-                # Server-initiated graceful disconnect
+                # Server-initiated graceful disconnect (connection cycling).
+                # Not an error — don't increment retry_count so we never
+                # exhaust max_retries from normal cycling.
                 self._server_retry_ms = e.retry_ms
                 self._graceful_disconnect = True
 
-                if self._should_retry():
-                    self._retry_count += 1
+                if self._should_reconnect:
                     delay = self._get_retry_delay()
                     logger.debug(f"Graceful reconnect in {delay}s")
                     await asyncio.sleep(delay)
@@ -202,59 +225,53 @@ class EventStream:
         url = self._build_url()
         logger.debug(f"Connecting to SSE: {url}")
 
-        # Use long timeouts for SSE - connections can last hours
-        timeout = httpx.Timeout(
-            connect=30.0,
-            read=READ_TIMEOUT_SECS,  # Detect stalled connections
-            write=30.0,
-            pool=30.0,
-        )
+        http = self._get_http_client()
+        async with aconnect_sse(
+            http,
+            "GET",
+            url,
+            headers={
+                "Authorization": self._client._api_key.value,
+                "Accept": "text/event-stream",
+                "Cache-Control": "no-cache",
+            },
+        ) as event_source:
+            async for sse in event_source.aiter_sse():
+                # Handle special lifecycle events
+                if sse.event == "connected":
+                    logger.debug("SSE connected event received")
+                    # Proves connection is healthy — reset backoff/retry state
+                    self._reset_backoff()
+                    continue
 
-        async with httpx.AsyncClient(timeout=timeout) as http:
-            async with aconnect_sse(
-                http,
-                "GET",
-                url,
-                headers={
-                    "Authorization": self._client._api_key.value,
-                    "Accept": "text/event-stream",
-                    "Cache-Control": "no-cache",
-                },
-            ) as event_source:
-                async for sse in event_source.aiter_sse():
-                    # Handle special lifecycle events
-                    if sse.event == "connected":
-                        logger.debug("SSE connected event received")
-                        continue
+                if sse.event == "disconnecting":
+                    # Parse disconnecting data for retry hint
+                    try:
+                        data = json.loads(sse.data)
+                        disconnect_data = DisconnectingData(
+                            reason=data.get("reason", "unknown"),
+                            retry_ms=data.get("retry_ms", 100),
+                        )
+                        logger.debug(
+                            f"SSE disconnecting: reason={disconnect_data.reason}, "
+                            f"retry_ms={disconnect_data.retry_ms}"
+                        )
+                        raise _GracefulDisconnectError(disconnect_data.retry_ms)
+                    except (json.JSONDecodeError, KeyError):
+                        logger.debug("SSE disconnecting event received (no data)")
+                        raise _GracefulDisconnectError(100)
 
-                    if sse.event == "disconnecting":
-                        # Parse disconnecting data for retry hint
-                        try:
-                            data = json.loads(sse.data)
-                            disconnect_data = DisconnectingData(
-                                reason=data.get("reason", "unknown"),
-                                retry_ms=data.get("retry_ms", 100),
-                            )
-                            logger.debug(
-                                f"SSE disconnecting: reason={disconnect_data.reason}, "
-                                f"retry_ms={disconnect_data.retry_ms}"
-                            )
-                            raise _GracefulDisconnectError(disconnect_data.retry_ms)
-                        except (json.JSONDecodeError, KeyError):
-                            logger.debug("SSE disconnecting event received (no data)")
-                            raise _GracefulDisconnectError(100)
-
-                    # Parse and yield regular events
-                    if sse.event == "message" or sse.event:
-                        try:
-                            data = json.loads(sse.data)
-                            event = Event(**data)
-                            self._last_event_id = event.id
-                            self._reset_backoff()
-                            yield event
-                        except (json.JSONDecodeError, TypeError, KeyError):
-                            # Skip malformed events
-                            logger.debug(f"Skipping malformed event: {sse.event}")
+                # Parse and yield regular events
+                if sse.event == "message" or sse.event:
+                    try:
+                        data = json.loads(sse.data)
+                        event = Event(**data)
+                        self._last_event_id = event.id
+                        self._reset_backoff()
+                        yield event
+                    except (json.JSONDecodeError, TypeError, KeyError):
+                        # Skip malformed events
+                        logger.debug(f"Skipping malformed event: {sse.event}")
 
 
 class _GracefulDisconnectError(Exception):
