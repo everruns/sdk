@@ -140,9 +140,9 @@ impl EventStream {
         // reused across reconnections for connection pool / TCP reuse.
         // read_timeout detects half-open TCP connections when the server cycles
         // SSE connections and the `disconnecting` event is lost in transit.
-        // 90s is well under the 300s cycle interval (SSE_REALTIME_CYCLE_SECS).
+        // 60s is well under the 300s cycle interval (SSE_REALTIME_CYCLE_SECS).
         let sse_http_client = reqwest::Client::builder()
-            .read_timeout(Duration::from_secs(90))
+            .read_timeout(Duration::from_secs(60))
             .build()
             .unwrap_or_else(|_| reqwest::Client::new());
 
