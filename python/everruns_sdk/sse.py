@@ -32,8 +32,8 @@ DEFAULT_RETRY_MS = 1000
 MAX_RETRY_MS = 30_000
 # Initial retry delay for exponential backoff
 INITIAL_BACKOFF_MS = 1000
-# Read timeout for detecting stalled connections (2 minutes)
-READ_TIMEOUT_SECS = 120
+# Read timeout for detecting stalled connections (90s)
+READ_TIMEOUT_SECS = 90
 
 
 @dataclass

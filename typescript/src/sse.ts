@@ -16,8 +16,8 @@ import { ConnectionError } from "./errors.js";
 const MAX_RETRY_MS = 30_000;
 /** Initial retry delay for exponential backoff */
 const INITIAL_BACKOFF_MS = 1000;
-/** Read timeout for detecting stalled connections (2 minutes) */
-const READ_TIMEOUT_MS = 120_000;
+/** Read timeout for detecting stalled connections (90s) */
+const READ_TIMEOUT_MS = 90_000;
 
 /**
  * Data from a disconnecting event.

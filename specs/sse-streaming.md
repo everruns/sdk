@@ -174,7 +174,7 @@ This ensures that a successful reconnection clears any accumulated error backoff
 |----------|-------|-------------|
 | INITIAL_BACKOFF_MS | 1000 | Initial retry delay |
 | MAX_BACKOFF_MS | 30000 | Maximum retry delay |
-| READ_TIMEOUT_SECS | 120 | Detect stalled connections |
+| READ_TIMEOUT_SECS | 90 | Detect stalled connections |
 
 ### Exponential Backoff Sequence
 
