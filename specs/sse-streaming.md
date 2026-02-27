@@ -362,6 +362,6 @@ The read timeout is a client-side workaround. The proper fix is server-side hear
 2. **Client resets read timeout on each heartbeat** — no false positives during idle periods
 3. **Missing heartbeats = stalled connection** — client can use a shorter timeout (e.g., 45s) with confidence
 
-This eliminates the ~6% silent-stall problem at the source rather than detecting it after the fact. Tracked in [everruns/everruns#608](https://github.com/everruns/everruns/issues/608).
+This eliminates the ~6% silent-stall problem at the source rather than detecting it after the fact. Tracked in [everruns/everruns#603](https://github.com/everruns/everruns/issues/603).
 
 Until heartbeats ship, the 60s read timeout + automatic retry is the mitigation.
