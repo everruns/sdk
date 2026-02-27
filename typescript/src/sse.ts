@@ -17,8 +17,9 @@ const MAX_RETRY_MS = 30_000;
 /** Initial retry delay for exponential backoff */
 const INITIAL_BACKOFF_MS = 1000;
 /** Read timeout for detecting stalled/half-open SSE connections (ms).
- * Must be well under the server's 300s connection cycle interval. */
-export const READ_TIMEOUT_MS = 60_000;
+ * The server sends heartbeat comments every 30s. Missing a heartbeat
+ * indicates a stalled connection, so 45s reliably detects them. */
+export const READ_TIMEOUT_MS = 45_000;
 
 /**
  * Data from a disconnecting event.
@@ -94,6 +95,12 @@ export class EventStream implements AsyncIterable<Event> {
 
     if (this.lastEventId) {
       params.push(`since_id=${encodeURIComponent(this.lastEventId)}`);
+    }
+
+    if (this.options.types) {
+      for (const t of this.options.types) {
+        params.push(`types=${encodeURIComponent(t)}`);
+      }
     }
 
     if (this.options.exclude) {

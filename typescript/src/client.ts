@@ -195,6 +195,11 @@ class AgentsClient {
     return response.agents;
   }
 
+  /** Copy an agent, creating a new agent with the same configuration. */
+  async copy(agentId: string): Promise<Agent> {
+    return this.client.fetch(`/agents/${agentId}/copy`, { method: "POST" });
+  }
+
   async delete(agentId: string): Promise<void> {
     await this.client.fetch(`/agents/${agentId}`, { method: "DELETE" });
   }
@@ -265,6 +270,20 @@ class SessionsClient {
       method: "POST",
     });
   }
+
+  /** Pin a session for the current user. */
+  async pin(sessionId: string): Promise<void> {
+    await this.client.fetch(`/sessions/${sessionId}/pin`, {
+      method: "PUT",
+    });
+  }
+
+  /** Unpin a session for the current user. */
+  async unpin(sessionId: string): Promise<void> {
+    await this.client.fetch(`/sessions/${sessionId}/pin`, {
+      method: "DELETE",
+    });
+  }
 }
 
 class MessagesClient {
@@ -330,6 +349,11 @@ class EventsClient {
   async list(sessionId: string, options?: StreamOptions): Promise<Event[]> {
     const params = new URLSearchParams();
     if (options?.sinceId) params.set("since_id", options.sinceId);
+    if (options?.types) {
+      for (const t of options.types) {
+        params.append("types", t);
+      }
+    }
     if (options?.exclude) {
       for (const e of options.exclude) {
         params.append("exclude", e);

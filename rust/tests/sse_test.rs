@@ -66,17 +66,16 @@ fn test_disconnecting_data_parse_zero_retry() {
 }
 
 #[test]
-fn test_read_timeout_under_cycle_interval() {
-    // Server cycles SSE connections every 300s (SSE_REALTIME_CYCLE_SECS).
-    // Read timeout must be well under that to detect stalled connections
-    // before the next cycle, but long enough to avoid false positives
-    // during legitimate idle periods.
-    assert_eq!(READ_TIMEOUT_SECS, 60);
+fn test_read_timeout_above_heartbeat_interval() {
+    // Server sends heartbeat comments every 30s. Read timeout must be
+    // above that to avoid false positives, but close enough to quickly
+    // detect stalled connections.
+    assert_eq!(READ_TIMEOUT_SECS, 45);
+    assert!(READ_TIMEOUT_SECS > 30, "must be above heartbeat interval");
     assert!(
         READ_TIMEOUT_SECS < 300,
         "must be under server cycle interval"
     );
-    assert!(READ_TIMEOUT_SECS >= 30, "must tolerate normal idle periods");
 }
 
 #[cfg(test)]

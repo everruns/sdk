@@ -142,6 +142,11 @@ class Everruns:
         resp = await self._client.patch(self._url(path), json=data)
         return await self._handle_response(resp)
 
+    async def _put_empty(self, path: str) -> None:
+        resp = await self._client.put(self._url(path))
+        if not resp.is_success:
+            await self._raise_error(resp)
+
     async def _delete(self, path: str) -> None:
         resp = await self._client.delete(self._url(path))
         if not resp.is_success:
@@ -261,6 +266,11 @@ class AgentsClient:
         resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
         return Agent(**resp)
 
+    async def copy(self, agent_id: str) -> Agent:
+        """Copy an agent, creating a new agent with the same configuration."""
+        resp = await self._client._post(f"/agents/{agent_id}/copy", {})
+        return Agent(**resp)
+
     async def delete(self, agent_id: str) -> None:
         """Delete (archive) an agent."""
         await self._client._delete(f"/agents/{agent_id}")
@@ -334,6 +344,14 @@ class SessionsClient:
         """Cancel the current turn in a session."""
         await self._client._post(f"/sessions/{session_id}/cancel", {})
 
+    async def pin(self, session_id: str) -> None:
+        """Pin a session for the current user."""
+        await self._client._put_empty(f"/sessions/{session_id}/pin")
+
+    async def unpin(self, session_id: str) -> None:
+        """Unpin a session for the current user."""
+        await self._client._delete(f"/sessions/{session_id}/pin")
+
 
 class MessagesClient:
     """Client for message operations."""
@@ -392,19 +410,37 @@ class EventsClient:
     def __init__(self, client: Everruns):
         self._client = client
 
-    async def list(self, session_id: str) -> list[Event]:
+    async def list(
+        self,
+        session_id: str,
+        *,
+        types: Optional[list[str]] = None,
+        exclude: Optional[list[str]] = None,
+    ) -> list[Event]:
         """List events in a session."""
-        resp = await self._client._get(f"/sessions/{session_id}/events")
+        path = f"/sessions/{session_id}/events"
+        params = []
+        if types:
+            for t in types:
+                params.append(f"types={t}")
+        if exclude:
+            for e in exclude:
+                params.append(f"exclude={e}")
+        if params:
+            path += "?" + "&".join(params)
+        resp = await self._client._get(path)
         return [Event(**e) for e in resp.get("data", [])]
 
     def stream(
         self,
         session_id: str,
+        *,
+        types: Optional[list[str]] = None,
         exclude: Optional[list[str]] = None,
         since_id: Optional[str] = None,
     ) -> EventStream:
         """Stream events from a session via SSE."""
-        options = StreamOptions(exclude=exclude or [], since_id=since_id)
+        options = StreamOptions(types=types or [], exclude=exclude or [], since_id=since_id)
         return EventStream(self._client, session_id, options)
 
 

@@ -15,17 +15,21 @@ Cache-Control: no-cache
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `since_id` | string | Resume from event ID (UUIDv7, monotonically increasing) |
-| `exclude` | string[] | Array of event types to filter out |
+| `types` | string[] | Positive type filter: only return events matching these types |
+| `exclude` | string[] | Event types to exclude (applied after `types` filter) |
 
 ### Array Parameter Expansion
 
-Array parameters like `exclude` MUST be sent as **repeated query keys** (one key per value), not as comma-separated values or bracket syntax. This matches the `style: form, explode: true` convention in the OpenAPI spec.
+Array parameters like `types` and `exclude` MUST be sent as **repeated query keys** (one key per value), not as comma-separated values or bracket syntax. This matches the `style: form, explode: true` convention in the OpenAPI spec.
 
 ```
+Correct:   ?types=turn.started&types=turn.completed
 Correct:   ?exclude=output.message.delta&exclude=reason.thinking.delta
 Wrong:     ?exclude=output.message.delta,reason.thinking.delta
 Wrong:     ?exclude[]=output.message.delta&exclude[]=reason.thinking.delta
 ```
+
+When both `types` and `exclude` are provided, `types` narrows first (positive filter), then `exclude` removes from that set (negative filter). Both accept only known event types (max 25 per parameter). Unknown types return 400.
 
 Reference: [everruns/everruns#575](https://github.com/everruns/everruns/pull/575) — the server uses `serde_html_form` which only supports the repeated-key format for deserializing arrays.
 
@@ -174,17 +178,15 @@ This ensures that a successful reconnection clears any accumulated error backoff
 |----------|-------|-------------|
 | INITIAL_BACKOFF_MS | 1000 | Initial retry delay |
 | MAX_BACKOFF_MS | 30000 | Maximum retry delay |
-| READ_TIMEOUT_SECS | 60 | Detect stalled connections |
+| READ_TIMEOUT_SECS | 45 | Detect stalled connections |
 
-#### Why 60s for READ_TIMEOUT
+#### Why 45s for READ_TIMEOUT
 
-The server cycles SSE connections every 300s (`SSE_REALTIME_CYCLE_SECS`). When the `disconnecting` event is lost in transit (~6% of connections under load), the TCP connection becomes half-open: the client blocks on read forever.
+The server sends heartbeat comments (`: heartbeat\n\n`) every 30s ([everruns/everruns#603](https://github.com/everruns/everruns/issues/603)). These reset the TCP read timer but are ignored by spec-compliant SSE parsers.
 
-- **Must be < 300s** — detect the stall before the next cycle
-- **Must be > ~30s** — avoid false positives during legitimate idle periods (model thinking, waiting for user input)
-- **60s** — detects stalls within 1 minute; retry logic reconnects transparently with no data loss (via `since_id`)
-
-This is a **detection-only** mitigation. See [Future: Server-Side Heartbeats](#future-server-side-heartbeats) for the proper fix.
+- **Must be > 30s** — allow at least one heartbeat interval
+- **45s** — missing a single heartbeat reliably indicates a stalled connection
+- Retry logic reconnects transparently with no data loss (via `since_id`)
 
 ### Exponential Backoff Sequence
 
@@ -211,14 +213,14 @@ SDKs should create a dedicated SSE HTTP client once (with SSE-appropriate timeou
 SSE streams can run for hours. SDKs MUST:
 
 1. **Disable overall request timeout** - Set to 0/None/infinite
-2. **Use read timeout** - 60s to detect stalled connections (see [Why 60s](#why-60s-for-read_timeout))
-3. **Handle keep-alive** - Process periodic events to reset timeouts
+2. **Use read timeout** - 45s to detect stalled connections (see [Why 45s](#why-45s-for-read_timeout))
+3. **Handle heartbeats** - Server sends `: heartbeat\n\n` every 30s; these reset the read timer automatically
 
 ```python
 # Python example
 timeout = httpx.Timeout(
     connect=30.0,
-    read=READ_TIMEOUT_SECS,  # 60s — detect stalled connections
+    read=READ_TIMEOUT_SECS,  # 45s — detect stalled connections
     write=30.0,
     pool=30.0,
 )
@@ -227,7 +229,7 @@ timeout = httpx.Timeout(
 ```rust
 // Rust example
 let client = reqwest::Client::builder()
-    .read_timeout(Duration::from_secs(READ_TIMEOUT_SECS)) // 60s
+    .read_timeout(Duration::from_secs(READ_TIMEOUT_SECS)) // 45s
     .build()?;
 ```
 
@@ -265,7 +267,10 @@ interface StreamOptions {
   // Resume from this event ID
   sinceId?: string;
 
-  // Event types to exclude (reduces bandwidth)
+  // Positive type filter: only return events matching these types
+  types?: string[];
+
+  // Event types to exclude (applied after types filter)
   exclude?: string[];
 
   // Max reconnection attempts (undefined = unlimited)
@@ -285,13 +290,14 @@ const opts = { exclude: ["output.message.delta", "reason.thinking.delta"] };
 SDKs must build SSE URLs correctly, using repeated keys for array parameters:
 
 ```
-Base:   /v1/sessions/{session_id}/sse
-With since_id: /v1/sessions/{session_id}/sse?since_id={event_id}
-With exclude:  /v1/sessions/{session_id}/sse?exclude=output.message.delta
-Combined:      /v1/sessions/{session_id}/sse?since_id={id}&exclude=type1&exclude=type2
+Base:      /v1/sessions/{session_id}/sse
+since_id:  /v1/sessions/{session_id}/sse?since_id={event_id}
+types:     /v1/sessions/{session_id}/sse?types=turn.started&types=turn.completed
+exclude:   /v1/sessions/{session_id}/sse?exclude=output.message.delta
+Combined:  /v1/sessions/{session_id}/sse?since_id={id}&types=turn.started&exclude=output.message.delta
 ```
 
-Note: URL-encode special characters in `since_id`. Each `exclude` value MUST be a separate query key (see [Array Parameter Expansion](#array-parameter-expansion)).
+Note: URL-encode special characters in `since_id`. Each `types` and `exclude` value MUST be a separate query key (see [Array Parameter Expansion](#array-parameter-expansion)).
 
 ## Event ID Handling
 
@@ -324,10 +330,10 @@ SDKs MUST test:
 2. **DisconnectingData parsing** - Valid JSON, missing fields, edge cases
 3. **Backoff calculations** - Sequence, max cap, reset
 4. **URL building** - Basic, with params, encoding
-5. **Argument expansion** - `exclude` uses repeated keys (not comma-separated), combined params, empty arrays
+5. **Argument expansion** - `types` and `exclude` use repeated keys (not comma-separated), combined params, empty arrays
 6. **Retry logic** - Graceful vs unexpected, max retries
 7. **State management** - last_event_id, retry_count, stop()
-8. **Read timeout** - Constant value is 60s, under cycle interval, HTTP client configured with it
+8. **Read timeout** - Constant value is 45s, above heartbeat interval (30s), HTTP client configured with it
 
 ### Smoke / Integration Tests
 8. **Graceful disconnect reconnection** - Mock SSE server sends `connected` → event → `disconnecting`, verify stream reconnects, receives events from second connection, and `retry_count` stays 0
@@ -339,12 +345,12 @@ SDKs MUST test:
 
 For new language SDKs:
 
-- [ ] StreamOptions with sinceId, exclude, maxRetries
+- [ ] StreamOptions with sinceId, types, exclude, maxRetries
 - [ ] DisconnectingData model
 - [ ] EventStream async iterator
 - [ ] Graceful disconnect handling (debug log)
 - [ ] Exponential backoff (1s-30s)
-- [ ] Read timeout (60s)
+- [ ] Read timeout (45s)
 - [ ] No overall timeout
 - [ ] since_id tracking
 - [ ] Backoff reset on success and on `connected` event
@@ -354,14 +360,28 @@ For new language SDKs:
 - [ ] URL building with encoding
 - [ ] Unit tests for all above
 
-## Future: Server-Side Heartbeats
+## Server-Side Heartbeats
 
-The read timeout is a client-side workaround. The proper fix is server-side heartbeat events:
+The server sends periodic SSE comment heartbeats every 30s ([everruns/everruns#603](https://github.com/everruns/everruns/issues/603)):
 
-1. **Server sends periodic heartbeats** (e.g., SSE comment `:heartbeat\n\n` every 30s)
-2. **Client resets read timeout on each heartbeat** — no false positives during idle periods
-3. **Missing heartbeats = stalled connection** — client can use a shorter timeout (e.g., 45s) with confidence
+```
+: heartbeat
 
-This eliminates the ~6% silent-stall problem at the source rather than detecting it after the fact. Tracked in [everruns/everruns#608](https://github.com/everruns/everruns/issues/608).
+```
 
-Until heartbeats ship, the 60s read timeout + automatic retry is the mitigation.
+These are SSE comments (lines starting with `:`) — spec-compliant parsers ignore them automatically. They reset the TCP read timer, allowing reliable detection of stalled connections.
+
+### How Heartbeats Work
+
+1. **Server sends `: heartbeat\n\n` every 30s** across all SSE streams
+2. **Read timeout (45s) > heartbeat interval (30s)** — a missing heartbeat means the connection is stalled
+3. **No SDK code changes needed for parsing** — SSE parsers already ignore comment lines
+4. **Read timeout triggers reconnection** — retry logic reconnects transparently via `since_id`
+
+### Configuration (Server-Side)
+
+| Setting | Default | Env Var |
+|---------|---------|---------|
+| Heartbeat interval | 30s | `SSE_HEARTBEAT_INTERVAL_SECS` |
+
+Heartbeats fire continuously regardless of other server activity and are orthogonal to the 300s connection cycle.

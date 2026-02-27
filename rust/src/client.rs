@@ -189,6 +189,23 @@ impl Everruns {
         }
     }
 
+    pub(crate) async fn put_empty(&self, path: &str) -> Result<()> {
+        let resp = self
+            .http
+            .put(self.url(path))
+            .headers(self.headers())
+            .send()
+            .await?;
+
+        if resp.status().is_success() {
+            Ok(())
+        } else {
+            let status = resp.status().as_u16();
+            let body = resp.text().await.unwrap_or_default();
+            Err(Error::from_api_response(status, &body))
+        }
+    }
+
     pub(crate) async fn delete(&self, path: &str) -> Result<()> {
         let resp = self
             .http
@@ -224,11 +241,15 @@ impl Everruns {
         &self,
         session_id: &str,
         since_id: Option<&str>,
+        types: &[&str],
         exclude: &[&str],
     ) -> Url {
         let mut url = self.url(&format!("/sessions/{}/sse", session_id));
         if let Some(id) = since_id {
             url.query_pairs_mut().append_pair("since_id", id);
+        }
+        for t in types {
+            url.query_pairs_mut().append_pair("types", t);
         }
         for e in exclude {
             url.query_pairs_mut().append_pair("exclude", e);
@@ -287,6 +308,13 @@ impl<'a> AgentsClient<'a> {
         self.client.post("/agents", &req).await
     }
 
+    /// Copy an agent, creating a new agent with the same configuration
+    pub async fn copy(&self, id: &str) -> Result<Agent> {
+        self.client
+            .post::<Agent, _>(&format!("/agents/{}/copy", id), &())
+            .await
+    }
+
     /// Delete (archive) an agent
     pub async fn delete(&self, id: &str) -> Result<()> {
         self.client.delete(&format!("/agents/{}", id)).await
@@ -343,6 +371,18 @@ impl<'a> SessionsClient<'a> {
             .post::<serde_json::Value, _>(&format!("/sessions/{}/cancel", id), &())
             .await?;
         Ok(())
+    }
+
+    /// Pin a session for the current user
+    pub async fn pin(&self, id: &str) -> Result<()> {
+        self.client
+            .put_empty(&format!("/sessions/{}/pin", id))
+            .await
+    }
+
+    /// Unpin a session for the current user
+    pub async fn unpin(&self, id: &str) -> Result<()> {
+        self.client.delete(&format!("/sessions/{}/pin", id)).await
     }
 }
 
@@ -463,7 +503,7 @@ mod tests {
     #[test]
     fn test_sse_url_no_params() {
         let client = test_client();
-        let url = client.sse_url("session_123", None, &[]);
+        let url = client.sse_url("session_123", None, &[], &[]);
         assert_eq!(
             url.as_str(),
             "https://api.example.com/v1/sessions/session_123/sse"
@@ -473,7 +513,7 @@ mod tests {
     #[test]
     fn test_sse_url_with_since_id() {
         let client = test_client();
-        let url = client.sse_url("session_123", Some("evt_001"), &[]);
+        let url = client.sse_url("session_123", Some("evt_001"), &[], &[]);
         assert_eq!(
             url.as_str(),
             "https://api.example.com/v1/sessions/session_123/sse?since_id=evt_001"
@@ -486,6 +526,7 @@ mod tests {
         let url = client.sse_url(
             "session_123",
             None,
+            &[],
             &["output.message.delta", "reason.thinking.delta"],
         );
         let url_str = url.as_str();
@@ -515,7 +556,7 @@ mod tests {
     #[test]
     fn test_sse_url_single_exclude() {
         let client = test_client();
-        let url = client.sse_url("session_123", None, &["output.message.delta"]);
+        let url = client.sse_url("session_123", None, &[], &["output.message.delta"]);
         assert_eq!(
             url.as_str(),
             "https://api.example.com/v1/sessions/session_123/sse?exclude=output.message.delta"
@@ -528,6 +569,7 @@ mod tests {
         let url = client.sse_url(
             "session_123",
             Some("evt_001"),
+            &[],
             &["output.message.delta", "reason.thinking.delta"],
         );
         assert_eq!(
@@ -542,6 +584,7 @@ mod tests {
         let url = client.sse_url(
             "session_123",
             None,
+            &[],
             &[
                 "output.message.delta",
                 "reason.thinking.delta",
@@ -555,10 +598,40 @@ mod tests {
     #[test]
     fn test_sse_url_since_id_special_chars_encoded() {
         let client = test_client();
-        let url = client.sse_url("session_123", Some("evt&id=1"), &[]);
+        let url = client.sse_url("session_123", Some("evt&id=1"), &[], &[]);
         let url_str = url.as_str();
         // URL should encode special characters
         assert!(!url_str.contains("evt&id=1"));
         assert!(url_str.contains("since_id=evt%26id%3D1"));
+    }
+
+    #[test]
+    fn test_sse_url_with_types() {
+        let client = test_client();
+        let url = client.sse_url(
+            "session_123",
+            None,
+            &["turn.started", "turn.completed"],
+            &[],
+        );
+        assert_eq!(
+            url.as_str(),
+            "https://api.example.com/v1/sessions/session_123/sse?types=turn.started&types=turn.completed"
+        );
+    }
+
+    #[test]
+    fn test_sse_url_with_types_and_exclude() {
+        let client = test_client();
+        let url = client.sse_url(
+            "session_123",
+            Some("evt_001"),
+            &["turn.started"],
+            &["output.message.delta"],
+        );
+        assert_eq!(
+            url.as_str(),
+            "https://api.example.com/v1/sessions/session_123/sse?since_id=evt_001&types=turn.started&exclude=output.message.delta"
+        );
     }
 }

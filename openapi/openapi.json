@@ -397,6 +397,69 @@
         }
       }
     },
+    "/v1/agents/{agent_id}/copy": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "POST /v1/agents/{agent_id}/copy - Copy an agent",
+        "description": "Creates a new agent with the same configuration as the source agent.\nThe new agent's name will be \"{original name} (copy)\".",
+        "operationId": "copy_agent",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Source agent ID to copy",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Agent copied successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Agent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid agent ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agents/{agent_id}/export": {
       "get": {
         "tags": [
@@ -2683,6 +2746,7 @@
           "events"
         ],
         "summary": "GET /v1/sessions/{session_id}/events - List events (JSON)",
+        "description": "Returns events for a session as a JSON array. Supports filtering by event type\nvia `types` (positive: only these types) and `exclude` (negative: remove these types).\nWhen both are provided, `types` narrows first, then `exclude` removes from that set.\nBoth accept only known event types (max 25 per parameter). Unknown types return 400.",
         "operationId": "list_events",
         "parameters": [
           {
@@ -2711,9 +2775,23 @@
             }
           },
           {
+            "name": "types",
+            "in": "query",
+            "description": "Positive type filter: only return events matching these types (can be specified multiple times).\nWhen empty, all types are returned. Example: ?types=turn.started&types=turn.completed",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
             "name": "exclude",
             "in": "query",
-            "description": "Event types to exclude from the response (can be specified multiple times).\nCommon delta events to exclude: output.message.delta, reason.thinking.delta",
+            "description": "Event types to exclude from the response (can be specified multiple times).\nApplied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta",
             "required": false,
             "schema": {
               "type": "array",
@@ -2737,7 +2815,7 @@
             }
           },
           "400": {
-            "description": "Invalid session ID"
+            "description": "Invalid session ID or invalid event type filter"
           },
           "404": {
             "description": "Session not found"
@@ -3307,13 +3385,85 @@
         }
       }
     },
+    "/v1/sessions/{session_id}/pin": {
+      "put": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "PUT /v1/sessions/{session_id}/pin - Pin session for current user",
+        "operationId": "pin_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID (prefixed, e.g., session_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Session pinned successfully"
+          },
+          "400": {
+            "description": "Invalid session ID"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "404": {
+            "description": "Session not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "DELETE /v1/sessions/{session_id}/pin - Unpin session for current user",
+        "operationId": "unpin_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID (prefixed, e.g., session_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Session unpinned successfully"
+          },
+          "400": {
+            "description": "Invalid session ID"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "404": {
+            "description": "Session not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v1/sessions/{session_id}/sse": {
       "get": {
         "tags": [
           "events"
         ],
         "summary": "GET /v1/sessions/{session_id}/sse - Stream events (SSE notifications)",
-        "description": "Establishes a Server-Sent Events (SSE) connection for real-time event streaming.\n\n## Connection Lifecycle Events\n\n- **connected**: Sent immediately when the stream is established.\n  Data: `{\"status\":\"connected\"}`\n\n- **disconnecting**: Sent before the server closes the connection for graceful cycling.\n  Data: `{\"reason\":\"connection_cycle\",\"retry_ms\":100}`\n  Clients should reconnect immediately using the `since_id` of the last received event.\n\n## Connection Cycling\n\nConnections are automatically cycled every 5 minutes to prevent stale connections\nthrough proxies and load balancers. Before closing, the server sends a `disconnecting`\nevent so clients can reconnect seamlessly without missing events.\n\n## Retry Hints\n\nEach SSE event includes a `retry:` field (in milliseconds) that hints how long\nclients should wait before reconnecting if the connection is lost:\n- During active streaming: 100ms (fast reconnect)\n- During idle periods: increases with backoff up to 500ms\n- After `disconnecting` event: 100ms (immediate reconnect)\n\n## Resuming Streams\n\nUse the `since_id` query parameter to resume from a specific event. The server\nwill only send events with IDs greater than the specified value. Event IDs are\nUUID v7 (monotonically increasing), ensuring reliable ordering.",
+        "description": "Establishes a Server-Sent Events (SSE) connection for real-time event streaming.\n\n## Connection Lifecycle Events\n\n- **connected**: Sent immediately when the stream is established.\n  Data: `{\"status\":\"connected\"}`\n\n- **disconnecting**: Sent before the server closes the connection for graceful cycling.\n  Data: `{\"reason\":\"connection_cycle\",\"retry_ms\":100}`\n  Clients should reconnect immediately using the `since_id` of the last received event.\n\n## Connection Cycling\n\nConnections are automatically cycled every 5 minutes to prevent stale connections\nthrough proxies and load balancers. Before closing, the server sends a `disconnecting`\nevent so clients can reconnect seamlessly without missing events.\n\n## Retry Hints\n\nEach SSE event includes a `retry:` field (in milliseconds) that hints how long\nclients should wait before reconnecting if the connection is lost:\n- During active streaming: 100ms (fast reconnect)\n- During idle periods: increases with backoff up to 500ms\n- After `disconnecting` event: 100ms (immediate reconnect)\n\n## Resuming Streams\n\nUse the `since_id` query parameter to resume from a specific event. The server\nwill only send events with IDs greater than the specified value. Event IDs are\nUUID v7 (monotonically increasing), ensuring reliable ordering.\n\n## Event Type Filtering\n\nUse `types` for positive filtering (only return these types) and `exclude` for\nnegative filtering (remove these types). When both are provided, `types` narrows\nfirst, then `exclude` removes from that set. Both accept only known event types\n(max 25 per parameter). Unknown types return 400.",
         "operationId": "stream_sse",
         "parameters": [
           {
@@ -3342,9 +3492,23 @@
             }
           },
           {
+            "name": "types",
+            "in": "query",
+            "description": "Positive type filter: only return events matching these types (can be specified multiple times).\nWhen empty, all types are returned. Example: ?types=turn.started&types=turn.completed",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
             "name": "exclude",
             "in": "query",
-            "description": "Event types to exclude from the response (can be specified multiple times).\nCommon delta events to exclude: output.message.delta, reason.thinking.delta",
+            "description": "Event types to exclude from the response (can be specified multiple times).\nApplied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta",
             "required": false,
             "schema": {
               "type": "array",
@@ -4097,6 +4261,13 @@
             "type": "string",
             "description": "Tool description for LLM"
           },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name for UI rendering (e.g., \"Get Current Time\" for `get_current_time`)"
+          },
           "name": {
             "type": "string",
             "description": "Tool name (used by LLM and for registry lookup)"
@@ -4165,6 +4336,13 @@
             "type": "string",
             "description": "Description of what this capability provides"
           },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "UI feature strings this capability contributes to.\nMultiple capabilities can contribute the same feature."
+          },
           "icon": {
             "type": [
               "string",
@@ -4179,6 +4357,10 @@
           "is_mcp": {
             "type": "boolean",
             "description": "Whether this is an MCP server capability (for UI badge)"
+          },
+          "is_skill": {
+            "type": "boolean",
+            "description": "Whether this is an Agent Skill capability (for UI badge)"
           },
           "name": {
             "type": "string",
@@ -4216,6 +4398,13 @@
           "description": {
             "type": "string",
             "description": "Tool description for LLM"
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name for UI rendering"
           },
           "name": {
             "type": "string",
@@ -5703,6 +5892,13 @@
                   "type": "string",
                   "description": "Description of what this capability provides"
                 },
+                "features": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "UI feature strings this capability contributes to.\nMultiple capabilities can contribute the same feature."
+                },
                 "icon": {
                   "type": [
                     "string",
@@ -5717,6 +5913,10 @@
                 "is_mcp": {
                   "type": "boolean",
                   "description": "Whether this is an MCP server capability (for UI badge)"
+                },
+                "is_skill": {
+                  "type": "boolean",
+                  "description": "Whether this is an Agent Skill capability (for UI badge)"
                 },
                 "name": {
                   "type": "string",
@@ -7642,6 +7842,15 @@
                 "updated_at"
               ],
               "properties": {
+                "active_schedule_count": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32",
+                  "description": "Number of active (enabled) schedules for this session.\nPopulated when the session is fetched for API responses.",
+                  "minimum": 0
+                },
                 "agent_id": {
                   "type": [
                     "string",
@@ -7662,6 +7871,13 @@
                   "format": "date-time",
                   "description": "Timestamp when the session was created."
                 },
+                "features": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Aggregated UI features from all active capabilities (harness + agent + session).\nComputed at read time from the capability registry.\nKnown features: \"file_system\", \"schedules\", \"secrets\", \"key_value\", \"sql_database\"."
+                },
                 "finished_at": {
                   "type": [
                     "string",
@@ -7679,6 +7895,13 @@
                   "type": "string",
                   "description": "Unique identifier for the session (format: session_{32-hex}).",
                   "example": "session_01933b5a00007000800000000000001"
+                },
+                "is_pinned": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context."
                 },
                 "model_id": {
                   "type": [
@@ -8366,6 +8589,15 @@
           "updated_at"
         ],
         "properties": {
+          "active_schedule_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Number of active (enabled) schedules for this session.\nPopulated when the session is fetched for API responses.",
+            "minimum": 0
+          },
           "agent_id": {
             "type": [
               "string",
@@ -8386,6 +8618,13 @@
             "format": "date-time",
             "description": "Timestamp when the session was created."
           },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Aggregated UI features from all active capabilities (harness + agent + session).\nComputed at read time from the capability registry.\nKnown features: \"file_system\", \"schedules\", \"secrets\", \"key_value\", \"sql_database\"."
+          },
           "finished_at": {
             "type": [
               "string",
@@ -8403,6 +8642,13 @@
             "type": "string",
             "description": "Unique identifier for the session (format: session_{32-hex}).",
             "example": "session_01933b5a00007000800000000000001"
+          },
+          "is_pinned": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context."
           },
           "model_id": {
             "type": [
@@ -9043,6 +9289,13 @@
           "name"
         ],
         "properties": {
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name for UI rendering"
+          },
           "id": {
             "type": "string"
           },
@@ -9061,6 +9314,13 @@
           "status"
         ],
         "properties": {
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name for UI rendering"
+          },
           "duration_ms": {
             "type": [
               "integer",
@@ -9168,6 +9428,13 @@
             "type": "string",
             "description": "Tool description"
           },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name for UI rendering"
+          },
           "name": {
             "type": "string",
             "description": "Tool name"
@@ -9210,6 +9477,13 @@
           "tool_call"
         ],
         "properties": {
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name for UI rendering"
+          },
           "tool_call": {
             "$ref": "#/components/schemas/ToolCall",
             "description": "The tool call being executed"
