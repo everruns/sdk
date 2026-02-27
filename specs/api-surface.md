@@ -14,6 +14,7 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 - `DELETE /v1/agents/{id}` - Archive agent
 - `POST /v1/agents/import` - Import agent from Markdown/YAML/JSON/text
 - `GET /v1/agents/{id}/export` - Export agent as Markdown
+- `POST /v1/agents/{id}/copy` - Copy an agent
 
 #### Client-Supplied Agent IDs
 
@@ -29,6 +30,8 @@ When `id` is omitted, the server auto-generates one (plain create).
 - `PATCH /v1/sessions/{id}` - Update session
 - `DELETE /v1/sessions/{id}` - Delete session
 - `POST /v1/sessions/{id}/cancel` - Cancel turn
+- `PUT /v1/sessions/{id}/pin` - Pin session for current user
+- `DELETE /v1/sessions/{id}/pin` - Unpin session for current user
 
 #### Harness ID
 

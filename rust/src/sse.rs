@@ -25,14 +25,17 @@ const MAX_RETRY_MS: u64 = 30_000;
 /// Initial retry delay for exponential backoff
 const INITIAL_BACKOFF_MS: u64 = 1000;
 /// Read timeout for detecting stalled/half-open SSE connections (seconds).
-/// Must be well under the server's 300s connection cycle interval.
-pub const READ_TIMEOUT_SECS: u64 = 60;
+/// The server sends heartbeat comments every 30s. Missing a heartbeat
+/// indicates a stalled connection, so 45s reliably detects them.
+pub const READ_TIMEOUT_SECS: u64 = 45;
 
 /// Options for SSE streaming
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
 pub struct StreamOptions {
-    /// Event types to exclude from the stream
+    /// Positive type filter: only return events matching these types
+    pub types: Vec<String>,
+    /// Event types to exclude from the stream (applied after `types` filter)
     pub exclude: Vec<String>,
     /// Resume from a specific event ID
     pub since_id: Option<String>,
@@ -49,6 +52,7 @@ impl StreamOptions {
     /// Create options that exclude delta events (for reduced bandwidth)
     pub fn exclude_deltas() -> Self {
         Self {
+            types: vec![],
             exclude: vec![
                 "output.message.delta".to_string(),
                 "reason.thinking.delta".to_string(),
@@ -56,6 +60,12 @@ impl StreamOptions {
             since_id: None,
             max_retries: None,
         }
+    }
+
+    /// Set the positive type filter
+    pub fn with_types(mut self, types: Vec<String>) -> Self {
+        self.types = types;
+        self
     }
 
     /// Set the event types to exclude
@@ -190,6 +200,7 @@ impl EventStream {
             .last_event_id
             .clone()
             .or_else(|| self.options.since_id.clone());
+        let types: Vec<String> = self.options.types.clone();
         let exclude: Vec<String> = self.options.exclude.clone();
         let connected_signal = self.connected_signal.clone();
         let http_client = self.sse_http_client.clone();
@@ -198,8 +209,9 @@ impl EventStream {
             use reqwest_eventsource::{Event as SseEvent, RequestBuilderExt};
             use futures::StreamExt;
 
+            let types_refs: Vec<&str> = types.iter().map(|s| s.as_str()).collect();
             let exclude_refs: Vec<&str> = exclude.iter().map(|s| s.as_str()).collect();
-            let url = client.sse_url(&session_id, since_id.as_deref(), &exclude_refs);
+            let url = client.sse_url(&session_id, since_id.as_deref(), &types_refs, &exclude_refs);
 
             tracing::debug!("Connecting to SSE: {}", url);
 

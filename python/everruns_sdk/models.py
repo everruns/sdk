@@ -36,6 +36,9 @@ class CapabilityInfo(BaseModel):
     dependencies: list[str] = Field(default_factory=list)
     icon: Optional[str] = None
     is_mcp: bool = False
+    display_name: Optional[str] = None
+    features: list[str] = Field(default_factory=list)
+    is_skill: bool = False
 
 
 class Agent(BaseModel):
@@ -83,6 +86,9 @@ class Session(BaseModel):
     created_at: str
     updated_at: str
     usage: Optional[TokenUsage] = None
+    active_schedule_count: Optional[int] = None
+    features: list[str] = Field(default_factory=list)
+    is_pinned: Optional[bool] = None
 
 
 class TokenUsage(BaseModel):

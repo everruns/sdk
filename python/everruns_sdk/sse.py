@@ -32,14 +32,16 @@ DEFAULT_RETRY_MS = 1000
 MAX_RETRY_MS = 30_000
 # Initial retry delay for exponential backoff
 INITIAL_BACKOFF_MS = 1000
-# Read timeout for detecting stalled connections (60s)
-READ_TIMEOUT_SECS = 60
+# Read timeout for detecting stalled connections.
+# Server sends heartbeat comments every 30s; 45s reliably detects stalls.
+READ_TIMEOUT_SECS = 45
 
 
 @dataclass
 class StreamOptions:
     """Options for SSE streaming."""
 
+    types: list[str] = field(default_factory=list)
     exclude: list[str] = field(default_factory=list)
     since_id: Optional[str] = None
     max_retries: Optional[int] = None
@@ -134,6 +136,9 @@ class EventStream:
         since_id = self._last_event_id or self._options.since_id
         if since_id:
             params.append(f"since_id={since_id}")
+
+        for t in self._options.types:
+            params.append(f"types={t}")
 
         for e in self._options.exclude:
             params.append(f"exclude={e}")

@@ -134,13 +134,13 @@ class TestReadTimeout:
     """Tests for SSE read timeout configuration."""
 
     def test_read_timeout_constant(self):
-        """Read timeout must be 60s, consistent across all SDKs."""
-        assert READ_TIMEOUT_SECS == 60
+        """Read timeout must be 45s, above heartbeat interval (30s)."""
+        assert READ_TIMEOUT_SECS == 45
 
-    def test_read_timeout_under_cycle_interval(self):
-        """Read timeout must be well under the server's 300s cycle interval."""
-        assert READ_TIMEOUT_SECS < 300
-        assert READ_TIMEOUT_SECS >= 30  # Tolerate normal idle periods
+    def test_read_timeout_above_heartbeat_interval(self):
+        """Read timeout must be above heartbeat interval and under cycle interval."""
+        assert READ_TIMEOUT_SECS > 30  # Above heartbeat interval
+        assert READ_TIMEOUT_SECS < 300  # Under server cycle interval
 
     def test_http_client_has_read_timeout(self):
         """HTTP client must be created with read timeout to detect stalled connections."""

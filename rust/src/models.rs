@@ -48,6 +48,15 @@ pub struct CapabilityInfo {
     pub icon: Option<String>,
     #[serde(default)]
     pub is_mcp: bool,
+    /// Human-readable display name for UI rendering
+    #[serde(default)]
+    pub display_name: Option<String>,
+    /// UI feature strings this capability contributes to
+    #[serde(default)]
+    pub features: Vec<String>,
+    /// Whether this is an Agent Skill capability
+    #[serde(default)]
+    pub is_skill: bool,
 }
 
 /// Agent configuration
@@ -180,6 +189,15 @@ pub struct Session {
     pub updated_at: String,
     #[serde(default)]
     pub usage: Option<TokenUsage>,
+    /// Number of active (enabled) schedules for this session
+    #[serde(default)]
+    pub active_schedule_count: Option<i32>,
+    /// Aggregated UI features from all active capabilities
+    #[serde(default)]
+    pub features: Vec<String>,
+    /// Whether this session is pinned by the current user
+    #[serde(default)]
+    pub is_pinned: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

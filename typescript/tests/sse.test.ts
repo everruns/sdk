@@ -266,13 +266,13 @@ describe("Graceful disconnect retry behavior", () => {
 });
 
 describe("Read timeout", () => {
-  it("should be 60 seconds, consistent across all SDKs", () => {
-    expect(READ_TIMEOUT_MS).toBe(60_000);
+  it("should be 45 seconds, above heartbeat interval (30s)", () => {
+    expect(READ_TIMEOUT_MS).toBe(45_000);
   });
 
-  it("should be under the server's 300s connection cycle interval", () => {
+  it("should be above heartbeat interval and under cycle interval", () => {
+    expect(READ_TIMEOUT_MS).toBeGreaterThan(30_000);
     expect(READ_TIMEOUT_MS).toBeLessThan(300_000);
-    expect(READ_TIMEOUT_MS).toBeGreaterThanOrEqual(30_000);
   });
 });
 

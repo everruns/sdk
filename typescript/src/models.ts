@@ -18,6 +18,12 @@ export interface CapabilityInfo {
   dependencies?: string[];
   icon?: string | null;
   isMcp?: boolean;
+  /** Human-readable display name for UI rendering */
+  displayName?: string | null;
+  /** UI feature strings this capability contributes to */
+  features?: string[];
+  /** Whether this is an Agent Skill capability */
+  isSkill?: boolean;
 }
 
 export interface Agent {
@@ -74,6 +80,12 @@ export interface Session {
   capabilities?: AgentCapabilityConfig[];
   createdAt: string;
   updatedAt: string;
+  /** Number of active (enabled) schedules for this session */
+  activeScheduleCount?: number | null;
+  /** Aggregated UI features from all active capabilities */
+  features?: string[];
+  /** Whether this session is pinned by the current user */
+  isPinned?: boolean | null;
 }
 
 export interface CreateSessionRequest {
@@ -187,7 +199,9 @@ export interface Event {
 export interface StreamOptions {
   /** Resume from this event ID */
   sinceId?: string;
-  /** Event types to exclude from the stream */
+  /** Positive type filter: only return events matching these types */
+  types?: string[];
+  /** Event types to exclude from the stream (applied after `types` filter) */
   exclude?: string[];
   /** Maximum number of reconnection attempts (undefined = unlimited) */
   maxRetries?: number;
