@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { EventStream } from "../src/sse.js";
+import { EventStream, READ_TIMEOUT_MS } from "../src/sse.js";
 
 describe("EventStream", () => {
   describe("configuration", () => {
@@ -262,6 +262,17 @@ describe("Graceful disconnect retry behavior", () => {
 
     expect((stream as any).currentBackoffMs).toBe(1000);
     expect((stream as any).retryCount).toBe(0);
+  });
+});
+
+describe("Read timeout", () => {
+  it("should be 60 seconds, consistent across all SDKs", () => {
+    expect(READ_TIMEOUT_MS).toBe(60_000);
+  });
+
+  it("should be under the server's 300s connection cycle interval", () => {
+    expect(READ_TIMEOUT_MS).toBeLessThan(300_000);
+    expect(READ_TIMEOUT_MS).toBeGreaterThanOrEqual(30_000);
   });
 });
 
