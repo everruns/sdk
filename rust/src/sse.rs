@@ -138,8 +138,11 @@ impl EventStream {
     pub(crate) fn new(client: Everruns, session_id: String, options: StreamOptions) -> Self {
         // Dedicated SSE client: no overall timeout (streams run for hours),
         // reused across reconnections for connection pool / TCP reuse.
-        // reqwest default is no timeout — don't call .timeout() at all.
+        // read_timeout detects half-open TCP connections when the server cycles
+        // SSE connections and the `disconnecting` event is lost in transit.
+        // 90s is well under the 300s cycle interval (SSE_REALTIME_CYCLE_SECS).
         let sse_http_client = reqwest::Client::builder()
+            .read_timeout(Duration::from_secs(90))
             .build()
             .unwrap_or_else(|_| reqwest::Client::new());
 
