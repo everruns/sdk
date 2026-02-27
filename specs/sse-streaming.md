@@ -176,6 +176,16 @@ This ensures that a successful reconnection clears any accumulated error backoff
 | MAX_BACKOFF_MS | 30000 | Maximum retry delay |
 | READ_TIMEOUT_SECS | 60 | Detect stalled connections |
 
+#### Why 60s for READ_TIMEOUT
+
+The server cycles SSE connections every 300s (`SSE_REALTIME_CYCLE_SECS`). When the `disconnecting` event is lost in transit (~6% of connections under load), the TCP connection becomes half-open: the client blocks on read forever.
+
+- **Must be < 300s** — detect the stall before the next cycle
+- **Must be > ~30s** — avoid false positives during legitimate idle periods (model thinking, waiting for user input)
+- **60s** — detects stalls within 1 minute; retry logic reconnects transparently with no data loss (via `since_id`)
+
+This is a **detection-only** mitigation. See [Future: Server-Side Heartbeats](#future-server-side-heartbeats) for the proper fix.
+
 ### Exponential Backoff Sequence
 
 ```
@@ -201,14 +211,14 @@ SDKs should create a dedicated SSE HTTP client once (with SSE-appropriate timeou
 SSE streams can run for hours. SDKs MUST:
 
 1. **Disable overall request timeout** - Set to 0/None/infinite
-2. **Use read timeout** - ~2 minutes to detect stalled connections
+2. **Use read timeout** - 60s to detect stalled connections (see [Why 60s](#why-60s-for-read_timeout))
 3. **Handle keep-alive** - Process periodic events to reset timeouts
 
 ```python
 # Python example
 timeout = httpx.Timeout(
     connect=30.0,
-    read=120.0,      # 2 minute read timeout
+    read=READ_TIMEOUT_SECS,  # 60s — detect stalled connections
     write=30.0,
     pool=30.0,
 )
@@ -217,8 +227,7 @@ timeout = httpx.Timeout(
 ```rust
 // Rust example
 let client = reqwest::Client::builder()
-    .timeout(Duration::from_secs(0))     // No overall timeout
-    .read_timeout(Duration::from_secs(120))
+    .read_timeout(Duration::from_secs(READ_TIMEOUT_SECS)) // 60s
     .build()?;
 ```
 
@@ -318,6 +327,7 @@ SDKs MUST test:
 5. **Argument expansion** - `exclude` uses repeated keys (not comma-separated), combined params, empty arrays
 6. **Retry logic** - Graceful vs unexpected, max retries
 7. **State management** - last_event_id, retry_count, stop()
+8. **Read timeout** - Constant value is 60s, under cycle interval, HTTP client configured with it
 
 ### Smoke / Integration Tests
 8. **Graceful disconnect reconnection** - Mock SSE server sends `connected` → event → `disconnecting`, verify stream reconnects, receives events from second connection, and `retry_count` stays 0
@@ -334,7 +344,7 @@ For new language SDKs:
 - [ ] EventStream async iterator
 - [ ] Graceful disconnect handling (debug log)
 - [ ] Exponential backoff (1s-30s)
-- [ ] Read timeout (2 minutes)
+- [ ] Read timeout (60s)
 - [ ] No overall timeout
 - [ ] since_id tracking
 - [ ] Backoff reset on success and on `connected` event
@@ -343,3 +353,15 @@ For new language SDKs:
 - [ ] stop/abort method
 - [ ] URL building with encoding
 - [ ] Unit tests for all above
+
+## Future: Server-Side Heartbeats
+
+The read timeout is a client-side workaround. The proper fix is server-side heartbeat events:
+
+1. **Server sends periodic heartbeats** (e.g., SSE comment `:heartbeat\n\n` every 30s)
+2. **Client resets read timeout on each heartbeat** — no false positives during idle periods
+3. **Missing heartbeats = stalled connection** — client can use a shorter timeout (e.g., 45s) with confidence
+
+This eliminates the ~6% silent-stall problem at the source rather than detecting it after the fact. Tracked in [everruns/everruns#608](https://github.com/everruns/everruns/issues/608).
+
+Until heartbeats ship, the 60s read timeout + automatic retry is the mitigation.

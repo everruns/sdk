@@ -26,4 +26,4 @@ export { Everruns, type EverrunsOptions } from "./client.js";
 export { ApiKey } from "./auth.js";
 export * from "./models.js";
 export * from "./errors.js";
-export { EventStream } from "./sse.js";
+export { EventStream, READ_TIMEOUT_MS } from "./sse.js";

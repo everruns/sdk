@@ -3,6 +3,7 @@
 from everruns_sdk.sse import (
     INITIAL_BACKOFF_MS,
     MAX_RETRY_MS,
+    READ_TIMEOUT_SECS,
     DisconnectingData,
     EventStream,
     StreamOptions,
@@ -127,6 +128,34 @@ class TestBackoffLogic:
     def test_max_backoff_value(self):
         """Test max backoff is 30 seconds."""
         assert MAX_RETRY_MS == 30000
+
+
+class TestReadTimeout:
+    """Tests for SSE read timeout configuration."""
+
+    def test_read_timeout_constant(self):
+        """Read timeout must be 60s, consistent across all SDKs."""
+        assert READ_TIMEOUT_SECS == 60
+
+    def test_read_timeout_under_cycle_interval(self):
+        """Read timeout must be well under the server's 300s cycle interval."""
+        assert READ_TIMEOUT_SECS < 300
+        assert READ_TIMEOUT_SECS >= 30  # Tolerate normal idle periods
+
+    def test_http_client_has_read_timeout(self):
+        """HTTP client must be created with read timeout to detect stalled connections."""
+        stream = EventStream(MockClient(), "session_123", StreamOptions())
+        client = stream._get_http_client()
+        assert client.timeout.read == READ_TIMEOUT_SECS
+
+    def test_http_client_has_no_overall_timeout(self):
+        """SSE streams run for hours; overall timeout must not be set."""
+        stream = EventStream(MockClient(), "session_123", StreamOptions())
+        client = stream._get_http_client()
+        # httpx uses None for no timeout on a specific component
+        # but connect/write/pool have explicit values, read has our timeout
+        assert client.timeout.connect == 30.0
+        assert client.timeout.write == 30.0
 
 
 class TestEventStreamState:

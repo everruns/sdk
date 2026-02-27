@@ -24,6 +24,9 @@ use tokio::time::{Sleep, sleep};
 const MAX_RETRY_MS: u64 = 30_000;
 /// Initial retry delay for exponential backoff
 const INITIAL_BACKOFF_MS: u64 = 1000;
+/// Read timeout for detecting stalled/half-open SSE connections (seconds).
+/// Must be well under the server's 300s connection cycle interval.
+pub const READ_TIMEOUT_SECS: u64 = 60;
 
 /// Options for SSE streaming
 #[derive(Debug, Clone, Default)]
@@ -142,7 +145,7 @@ impl EventStream {
         // SSE connections and the `disconnecting` event is lost in transit.
         // 60s is well under the 300s cycle interval (SSE_REALTIME_CYCLE_SECS).
         let sse_http_client = reqwest::Client::builder()
-            .read_timeout(Duration::from_secs(60))
+            .read_timeout(Duration::from_secs(READ_TIMEOUT_SECS))
             .build()
             .unwrap_or_else(|_| reqwest::Client::new());
 
