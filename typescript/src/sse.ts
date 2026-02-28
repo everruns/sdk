@@ -20,6 +20,9 @@ const INITIAL_BACKOFF_MS = 1000;
  * The server sends heartbeat comments every 30s. Missing a heartbeat
  * indicates a stalled connection, so 45s reliably detects them. */
 export const READ_TIMEOUT_MS = 45_000;
+/** Default idle timeout for detecting half-open connections (ms).
+ * Same as READ_TIMEOUT_MS. Configurable via StreamOptions.idleTimeoutMs. */
+export const DEFAULT_IDLE_TIMEOUT_MS = 45_000;
 
 /**
  * Data from a disconnecting event.
@@ -219,10 +222,12 @@ export class EventStream implements AsyncIterable<Event> {
     const url = this.buildUrl();
     console.debug(`Connecting to SSE: ${url}`);
 
+    const idleMs = this.options.idleTimeoutMs ?? DEFAULT_IDLE_TIMEOUT_MS;
+
     // Create abort controller with timeout for stalled connections
     const timeoutId = setTimeout(() => {
       this.abortController?.abort();
-    }, READ_TIMEOUT_MS);
+    }, idleMs);
 
     try {
       const response = await fetch(url, {
@@ -255,9 +260,9 @@ export class EventStream implements AsyncIterable<Event> {
       const resetReadTimeout = () => {
         clearTimeout(readTimeoutId);
         readTimeoutId = setTimeout(() => {
-          console.debug("SSE read timeout, triggering reconnect");
+          console.debug("SSE idle timeout, triggering reconnect");
           reader.cancel();
-        }, READ_TIMEOUT_MS);
+        }, idleMs);
       };
 
       const parser = createParser({

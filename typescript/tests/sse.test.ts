@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { EventStream, READ_TIMEOUT_MS } from "../src/sse.js";
+import { EventStream, READ_TIMEOUT_MS, DEFAULT_IDLE_TIMEOUT_MS } from "../src/sse.js";
 
 describe("EventStream", () => {
   describe("configuration", () => {
@@ -273,6 +273,28 @@ describe("Read timeout", () => {
   it("should be above heartbeat interval and under cycle interval", () => {
     expect(READ_TIMEOUT_MS).toBeGreaterThan(30_000);
     expect(READ_TIMEOUT_MS).toBeLessThan(300_000);
+  });
+});
+
+describe("Idle timeout", () => {
+  it("should default to 45 seconds", () => {
+    expect(DEFAULT_IDLE_TIMEOUT_MS).toBe(45_000);
+  });
+
+  it("should be above heartbeat interval (30s)", () => {
+    expect(DEFAULT_IDLE_TIMEOUT_MS).toBeGreaterThan(30_000);
+  });
+
+  it("should be configurable via StreamOptions.idleTimeoutMs", () => {
+    const stream = new EventStream("https://api.example.com/sse", "auth", {
+      idleTimeoutMs: 120_000,
+    });
+    expect((stream as any).options.idleTimeoutMs).toBe(120_000);
+  });
+
+  it("should use default when idleTimeoutMs is not set", () => {
+    const stream = new EventStream("https://api.example.com/sse", "auth");
+    expect((stream as any).options.idleTimeoutMs).toBeUndefined();
   });
 });
 

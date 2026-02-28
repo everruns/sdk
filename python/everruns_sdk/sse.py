@@ -32,9 +32,14 @@ DEFAULT_RETRY_MS = 1000
 MAX_RETRY_MS = 30_000
 # Initial retry delay for exponential backoff
 INITIAL_BACKOFF_MS = 1000
-# Read timeout for detecting stalled connections.
+# Read timeout for detecting stalled connections (secondary safety net).
 # Server sends heartbeat comments every 30s; 45s reliably detects stalls.
 READ_TIMEOUT_SECS = 45
+# Default idle timeout for detecting half-open connections (seconds).
+# httpx's read timeout may be unreliable on streaming SSE responses,
+# so EventStream wraps iteration with asyncio.timeout() as primary
+# stall detection. 45s = 1.5× the server's 30s heartbeat interval.
+DEFAULT_IDLE_TIMEOUT_SECS = 45
 
 
 @dataclass
@@ -45,6 +50,10 @@ class StreamOptions:
     exclude: list[str] = field(default_factory=list)
     since_id: Optional[str] = None
     max_retries: Optional[int] = None
+    idle_timeout: float = DEFAULT_IDLE_TIMEOUT_SECS
+    """Idle timeout in seconds for detecting half-open connections.
+    When no events are yielded within this duration, the stream reconnects.
+    Default: 45s (1.5× the server's 30s heartbeat interval)."""
 
     @classmethod
     def exclude_deltas(cls) -> "StreamOptions":
@@ -179,8 +188,26 @@ class EventStream:
         """Iterate over SSE events with automatic reconnection."""
         while self._should_reconnect:
             try:
-                async for event in self._connect():
-                    yield event
+                async with asyncio.timeout(self._options.idle_timeout) as cm:
+                    async for event in self._connect():
+                        # Reset idle timer on every yielded event
+                        cm.reschedule(asyncio.get_event_loop().time() + self._options.idle_timeout)
+                        yield event
+            except TimeoutError:
+                # Idle timeout fired — no events within idle_timeout.
+                # Likely a half-open TCP connection; reconnect.
+                logger.warning(
+                    "SSE idle timeout (%ss), reconnecting",
+                    self._options.idle_timeout,
+                )
+                self._graceful_disconnect = False
+                if self._should_retry():
+                    self._retry_count += 1
+                    delay = self._get_retry_delay()
+                    self._update_backoff()
+                    await asyncio.sleep(delay)
+                    continue
+                break
             except _GracefulDisconnectError as e:
                 # Server-initiated graceful disconnect (connection cycling).
                 # Not an error — don't increment retry_count so we never
