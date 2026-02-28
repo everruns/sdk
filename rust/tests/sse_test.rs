@@ -1,6 +1,9 @@
 //! Tests for SSE streaming and retry logic
 
-use everruns_sdk::sse::{DisconnectingData, READ_TIMEOUT_SECS, StreamOptions};
+use everruns_sdk::sse::{
+    DEFAULT_IDLE_TIMEOUT_SECS, DisconnectingData, READ_TIMEOUT_SECS, StreamOptions,
+};
+use std::time::Duration;
 
 #[test]
 fn test_stream_options_default() {
@@ -39,6 +42,37 @@ fn test_stream_options_builder_chain() {
     assert!(opts.exclude.contains(&"output.message.delta".to_string()));
     assert_eq!(opts.since_id, Some("event_abc".to_string()));
     assert_eq!(opts.max_retries, Some(5));
+    // idle_timeout should still be the default
+    assert_eq!(
+        opts.idle_timeout,
+        Duration::from_secs(DEFAULT_IDLE_TIMEOUT_SECS)
+    );
+}
+
+#[test]
+fn test_stream_options_with_idle_timeout() {
+    let opts = StreamOptions::default().with_idle_timeout(Duration::from_secs(120));
+    assert_eq!(opts.idle_timeout, Duration::from_secs(120));
+}
+
+#[test]
+fn test_stream_options_default_idle_timeout() {
+    let opts = StreamOptions::default();
+    assert_eq!(
+        opts.idle_timeout,
+        Duration::from_secs(DEFAULT_IDLE_TIMEOUT_SECS)
+    );
+    assert_eq!(opts.idle_timeout, Duration::from_secs(45));
+}
+
+#[test]
+fn test_idle_timeout_constant_above_heartbeat_interval() {
+    // Server heartbeats every 30s. Idle timeout must be above that.
+    assert_eq!(DEFAULT_IDLE_TIMEOUT_SECS, 45);
+    assert!(
+        DEFAULT_IDLE_TIMEOUT_SECS > 30,
+        "idle timeout must be above heartbeat interval"
+    );
 }
 
 #[test]

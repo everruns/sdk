@@ -114,6 +114,8 @@ current_backoff_ms: int          # Current backoff delay
 retry_count: int                 # Consecutive retry attempts
 should_reconnect: bool           # Whether to continue reconnecting
 graceful_disconnect: bool        # Whether last disconnect was graceful
+idle_deadline: timer | null      # Poll-level idle timer (reset on each yielded event)
+idle_timeout: duration           # Configurable idle timeout duration (default 45s)
 ```
 
 ### Reconnection Strategy
@@ -178,7 +180,8 @@ This ensures that a successful reconnection clears any accumulated error backoff
 |----------|-------|-------------|
 | INITIAL_BACKOFF_MS | 1000 | Initial retry delay |
 | MAX_BACKOFF_MS | 30000 | Maximum retry delay |
-| READ_TIMEOUT_SECS | 45 | Detect stalled connections |
+| READ_TIMEOUT_SECS | 45 | Secondary safety net for stalled connections |
+| DEFAULT_IDLE_TIMEOUT_SECS | 45 | Poll-level idle timeout (primary stall detection) |
 
 #### Why 45s for READ_TIMEOUT
 
@@ -187,6 +190,25 @@ The server sends heartbeat comments (`: heartbeat\n\n`) every 30s ([everruns/eve
 - **Must be > 30s** — allow at least one heartbeat interval
 - **45s** — missing a single heartbeat reliably indicates a stalled connection
 - Retry logic reconnects transparently with no data loss (via `since_id`)
+
+#### Poll-Level Idle Timeout (Primary Stall Detection)
+
+**`reqwest::Client::read_timeout` is ineffective on already-streaming SSE responses.** Despite documentation saying it applies to "time between receiving bytes," it does not fire once `reqwest_eventsource` takes over the response stream. Additionally, SSE heartbeat comments (`: heartbeat\n\n`) are consumed silently by `reqwest_eventsource` and never reach `EventStream::poll_next()`.
+
+**Result:** When a TCP connection goes half-open (server closed, client doesn't know), `stream.next()` returns `Poll::Pending` forever. No timeout, no error, no recovery.
+
+**Fix:** SDKs MUST implement a poll-level idle timeout inside the stream's poll function that races against the inner stream. When no events are yielded within `idle_timeout`, the stream drops the connection and reconnects.
+
+```rust
+// In poll_next():
+// 1. Start idle timer when connection is established
+// 2. Reset idle timer on every yielded event
+// 3. If idle timer fires → drop connection, schedule reconnect
+```
+
+The idle timeout is configurable via `StreamOptions::with_idle_timeout()`. Default: 45s.
+
+**Important:** The idle timer only resets on yielded business events, not on SSE comments (which are invisible to the SDK). Callers with long-idle sessions can increase the timeout.
 
 ### Exponential Backoff Sequence
 
@@ -213,8 +235,9 @@ SDKs should create a dedicated SSE HTTP client once (with SSE-appropriate timeou
 SSE streams can run for hours. SDKs MUST:
 
 1. **Disable overall request timeout** - Set to 0/None/infinite
-2. **Use read timeout** - 45s to detect stalled connections (see [Why 45s](#why-45s-for-read_timeout))
-3. **Handle heartbeats** - Server sends `: heartbeat\n\n` every 30s; these reset the read timer automatically
+2. **Use read timeout** - 45s as secondary safety net (see [Why 45s](#why-45s-for-read_timeout))
+3. **Implement poll-level idle timeout** - 45s default, primary stall detection (see [Poll-Level Idle Timeout](#poll-level-idle-timeout-primary-stall-detection))
+4. **Handle heartbeats** - Server sends `: heartbeat\n\n` every 30s; these reset the read timer but NOT the idle timer (SSE parsers consume comments silently)
 
 ```python
 # Python example
@@ -275,6 +298,9 @@ interface StreamOptions {
 
   // Max reconnection attempts (undefined = unlimited)
   maxRetries?: number;
+
+  // Poll-level idle timeout for detecting half-open connections (default: 45s)
+  idleTimeout?: Duration;
 }
 ```
 
@@ -326,7 +352,7 @@ for event in stream:
 SDKs MUST test:
 
 ### Unit Tests
-1. **StreamOptions** - Default, exclude_deltas, since_id, max_retries
+1. **StreamOptions** - Default, exclude_deltas, since_id, max_retries, idle_timeout
 2. **DisconnectingData parsing** - Valid JSON, missing fields, edge cases
 3. **Backoff calculations** - Sequence, max cap, reset
 4. **URL building** - Basic, with params, encoding
@@ -334,23 +360,26 @@ SDKs MUST test:
 6. **Retry logic** - Graceful vs unexpected, max retries
 7. **State management** - last_event_id, retry_count, stop()
 8. **Read timeout** - Constant value is 45s, above heartbeat interval (30s), HTTP client configured with it
+9. **Idle timeout** - Default is 45s, configurable via `with_idle_timeout()`
 
 ### Smoke / Integration Tests
-8. **Graceful disconnect reconnection** - Mock SSE server sends `connected` → event → `disconnecting`, verify stream reconnects, receives events from second connection, and `retry_count` stays 0
-9. **Backoff reset on reconnection** - After unexpected disconnect (elevated backoff), verify successful reconnection with `connected` event resets backoff to initial values
-10. **Multiple graceful disconnects** - Verify stream survives many sequential graceful disconnects without exhausting `max_retries`
-11. **HTTP client reuse** - Verify the same HTTP client instance is used across reconnections
+10. **Graceful disconnect reconnection** - Mock SSE server sends `connected` → event → `disconnecting`, verify stream reconnects, receives events from second connection, and `retry_count` stays 0
+11. **Backoff reset on reconnection** - After unexpected disconnect (elevated backoff), verify successful reconnection with `connected` event resets backoff to initial values
+12. **Multiple graceful disconnects** - Verify stream survives many sequential graceful disconnects without exhausting `max_retries`
+13. **HTTP client reuse** - Verify the same HTTP client instance is used across reconnections
+14. **Idle timeout reconnection** - Mock SSE server sends `connected` then hangs silent; verify idle timeout fires, stream reconnects, and receives events from second connection
 
 ## Implementation Checklist
 
 For new language SDKs:
 
-- [ ] StreamOptions with sinceId, types, exclude, maxRetries
+- [ ] StreamOptions with sinceId, types, exclude, maxRetries, idleTimeout
 - [ ] DisconnectingData model
 - [ ] EventStream async iterator
 - [ ] Graceful disconnect handling (debug log)
 - [ ] Exponential backoff (1s-30s)
-- [ ] Read timeout (45s)
+- [ ] Read timeout (45s, secondary safety net)
+- [ ] Poll-level idle timeout (45s default, primary stall detection)
 - [ ] No overall timeout
 - [ ] since_id tracking
 - [ ] Backoff reset on success and on `connected` event
