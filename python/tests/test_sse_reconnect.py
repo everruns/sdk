@@ -5,7 +5,10 @@ to verify:
 - Bug 1: Graceful disconnects don't consume retry budget
 - Bug 2: Connected event resets backoff after errors
 - Bug 3: HTTP client reused across reconnections
+- Bug 4: Idle timeout triggers reconnection on silent half-open connections
 """
+
+import asyncio
 
 import pytest
 
@@ -142,6 +145,49 @@ async def test_http_client_reused_across_reconnections():
 
     # Cleanup
     await stream.aclose()
+
+
+@pytest.mark.asyncio
+async def test_idle_timeout_triggers_reconnect_on_silent_connection():
+    """Idle timeout must trigger reconnection when _connect() hangs.
+
+    Simulates a half-open TCP connection: the first _connect() yields nothing
+    and hangs forever. The idle timeout fires, the stream reconnects, and the
+    second _connect() delivers an event.
+    """
+    opts = StreamOptions(max_retries=5, idle_timeout=0.5)  # 500ms for fast test
+    stream = EventStream(MockClient(), "sess_1", opts)
+    call_count = 0
+
+    async def mock_connect():
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            # First connection: simulate connected event, then hang forever
+            stream._reset_backoff()
+            # Never yield an event — simulate half-open connection
+            await asyncio.sleep(300)
+            # unreachable, but needed for generator
+            yield make_event("unreachable", "unreachable")  # pragma: no cover
+        else:
+            # Second connection: deliver an event
+            stream._reset_backoff()
+            yield make_event("evt_idle_1", "session.idled")
+
+    stream._connect = mock_connect
+
+    events = []
+    async for event in stream:
+        events.append(event)
+        if len(events) >= 1:
+            stream.stop()
+
+    assert len(events) == 1
+    assert events[0].id == "evt_idle_1"
+    assert events[0].type == "session.idled"
+
+    # Proves reconnection happened
+    assert call_count >= 2, f"Should have reconnected (got {call_count} connections)"
 
 
 @pytest.mark.asyncio

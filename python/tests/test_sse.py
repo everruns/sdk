@@ -1,6 +1,7 @@
 """Tests for SSE streaming and retry logic."""
 
 from everruns_sdk.sse import (
+    DEFAULT_IDLE_TIMEOUT_SECS,
     INITIAL_BACKOFF_MS,
     MAX_RETRY_MS,
     READ_TIMEOUT_SECS,
@@ -51,16 +52,29 @@ class TestStreamOptions:
         opts = StreamOptions(max_retries=10)
         assert opts.max_retries == 10
 
+    def test_default_idle_timeout(self):
+        """Test default idle timeout is 45s."""
+        opts = StreamOptions()
+        assert opts.idle_timeout == DEFAULT_IDLE_TIMEOUT_SECS
+        assert opts.idle_timeout == 45
+
+    def test_custom_idle_timeout(self):
+        """Test custom idle timeout."""
+        opts = StreamOptions(idle_timeout=120)
+        assert opts.idle_timeout == 120
+
     def test_full_configuration(self):
         """Test fully configured options."""
         opts = StreamOptions(
             exclude=["output.message.delta"],
             since_id="event_abc",
             max_retries=5,
+            idle_timeout=60,
         )
         assert opts.exclude == ["output.message.delta"]
         assert opts.since_id == "event_abc"
         assert opts.max_retries == 5
+        assert opts.idle_timeout == 60
 
 
 class TestDisconnectingData:
@@ -156,6 +170,23 @@ class TestReadTimeout:
         # but connect/write/pool have explicit values, read has our timeout
         assert client.timeout.connect == 30.0
         assert client.timeout.write == 30.0
+
+
+class TestIdleTimeout:
+    """Tests for SSE idle timeout configuration."""
+
+    def test_idle_timeout_constant(self):
+        """Idle timeout constant must be 45s."""
+        assert DEFAULT_IDLE_TIMEOUT_SECS == 45
+
+    def test_idle_timeout_above_heartbeat_interval(self):
+        """Idle timeout must be above heartbeat interval (30s)."""
+        assert DEFAULT_IDLE_TIMEOUT_SECS > 30
+
+    def test_exclude_deltas_preserves_default_idle_timeout(self):
+        """exclude_deltas() must not change idle_timeout."""
+        opts = StreamOptions.exclude_deltas()
+        assert opts.idle_timeout == DEFAULT_IDLE_TIMEOUT_SECS
 
 
 class TestEventStreamState:

@@ -205,4 +205,8 @@ export interface StreamOptions {
   exclude?: string[];
   /** Maximum number of reconnection attempts (undefined = unlimited) */
   maxRetries?: number;
+  /** Idle timeout in ms for detecting half-open connections.
+   * When no chunks arrive within this duration, the stream reconnects.
+   * Default: 45000 (1.5× the server's 30s heartbeat interval). */
+  idleTimeoutMs?: number;
 }

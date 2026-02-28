@@ -5,6 +5,7 @@
  * to verify:
  * - Bug 1: Graceful disconnects don't consume retry budget
  * - Bug 2: Connected event resets backoff after errors
+ * - Bug 4: Idle timeout triggers reconnection on silent half-open connections
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { EventStream } from "../src/sse.js";
@@ -216,4 +217,60 @@ describe("SSE reconnection smoke tests", () => {
     expect(stream.getRetryCount()).toBe(0);
     expect(callCount).toBe(5);
   });
+
+  it("idle timeout triggers reconnect on silent connection", async () => {
+    let callCount = 0;
+
+    globalThis.fetch = vi.fn(async () => {
+      callCount++;
+
+      if (callCount === 1) {
+        // First connection: send connected event then hang (never close).
+        // Creates a ReadableStream that sends connected then stalls.
+        const encoder = new TextEncoder();
+        return new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                encoder.encode(sseEvent("connected", "{}")),
+              );
+              // Never close or enqueue again — simulates half-open TCP
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "text/event-stream" } },
+        );
+      }
+
+      // Second connection: connected + business event
+      return new Response(
+        createSseStream([
+          sseEvent("connected", "{}"),
+          sseEvent(
+            "session.idled",
+            makeEventJson("evt_idle_1", "session.idled"),
+          ),
+        ]),
+        { status: 200, headers: { "Content-Type": "text/event-stream" } },
+      );
+    }) as typeof fetch;
+
+    const stream = new EventStream("https://api.example.com/sse", "auth", {
+      maxRetries: 5,
+      idleTimeoutMs: 500, // 500ms for fast test
+    });
+
+    const events: unknown[] = [];
+    for await (const event of stream) {
+      events.push(event);
+      if (events.length >= 1) {
+        stream.abort();
+      }
+    }
+
+    expect(events).toHaveLength(1);
+    expect((events[0] as { id: string }).id).toBe("evt_idle_1");
+
+    // Proves reconnection happened (2+ connections)
+    expect(callCount).toBeGreaterThanOrEqual(2);
+  }, 15_000);
 });
