@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.1.3] - 2026-02-28
+
+### Highlights
+
+- Poll-level idle timeout for half-open SSE connections across all SDKs
+- Harness support with optional agent parameter
+- SSE read timeout and disconnect retry improvements
+
+### What's Changed
+
+* feat(rust,python,typescript): add harness support, make agent optional ([#37](https://github.com/everruns/sdk/pull/37))
+* fix(typescript): use repeated keys for exclude param, add expansion tests ([#38](https://github.com/everruns/sdk/pull/38))
+* refactor(rust): use structured enum for graceful disconnect signaling ([#39](https://github.com/everruns/sdk/pull/39))
+* fix(rust,python,typescript): fix SSE disconnect retry, backoff reset, client reuse ([#40](https://github.com/everruns/sdk/pull/40))
+* fix: add 60s SSE read timeout to detect stalled connections ([#42](https://github.com/everruns/sdk/pull/42))
+* test: add read timeout tests and document decision rationale ([#43](https://github.com/everruns/sdk/pull/43))
+* feat(rust,python,typescript): sync SDK with everruns/everruns#603 ([#45](https://github.com/everruns/sdk/pull/45))
+* fix(rust): add poll-level idle timeout for half-open SSE connections ([#46](https://github.com/everruns/sdk/pull/46))
+* fix(python,typescript): add poll-level idle timeout for half-open SSE connections ([#47](https://github.com/everruns/sdk/pull/47))
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.2...v0.1.3
+
 ## [0.1.2] - 2026-02-12
 
 ### Highlights
