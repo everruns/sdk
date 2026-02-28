@@ -28,9 +28,14 @@ const INITIAL_BACKOFF_MS: u64 = 1000;
 /// The server sends heartbeat comments every 30s. Missing a heartbeat
 /// indicates a stalled connection, so 45s reliably detects them.
 pub const READ_TIMEOUT_SECS: u64 = 45;
+/// Default idle timeout for detecting half-open connections at the poll level
+/// (seconds). reqwest's read_timeout is ineffective on already-streaming SSE
+/// responses, so EventStream races this timer against inner.poll_next().
+/// 45s = 1.5× the server's 30s heartbeat interval.
+pub const DEFAULT_IDLE_TIMEOUT_SECS: u64 = 45;
 
 /// Options for SSE streaming
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 #[non_exhaustive]
 pub struct StreamOptions {
     /// Positive type filter: only return events matching these types
@@ -41,6 +46,22 @@ pub struct StreamOptions {
     pub since_id: Option<String>,
     /// Maximum number of reconnection attempts (None = unlimited)
     pub max_retries: Option<u32>,
+    /// Idle timeout for detecting half-open connections at the poll level.
+    /// When no events are yielded within this duration, the stream reconnects.
+    /// Default: 45s (1.5× the server's 30s heartbeat interval).
+    pub idle_timeout: Duration,
+}
+
+impl Default for StreamOptions {
+    fn default() -> Self {
+        Self {
+            types: vec![],
+            exclude: vec![],
+            since_id: None,
+            max_retries: None,
+            idle_timeout: Duration::from_secs(DEFAULT_IDLE_TIMEOUT_SECS),
+        }
+    }
 }
 
 impl StreamOptions {
@@ -52,13 +73,11 @@ impl StreamOptions {
     /// Create options that exclude delta events (for reduced bandwidth)
     pub fn exclude_deltas() -> Self {
         Self {
-            types: vec![],
             exclude: vec![
                 "output.message.delta".to_string(),
                 "reason.thinking.delta".to_string(),
             ],
-            since_id: None,
-            max_retries: None,
+            ..Self::default()
         }
     }
 
@@ -83,6 +102,18 @@ impl StreamOptions {
     /// Set maximum retry attempts
     pub fn with_max_retries(mut self, max_retries: u32) -> Self {
         self.max_retries = Some(max_retries);
+        self
+    }
+
+    /// Set idle timeout for detecting half-open connections.
+    ///
+    /// When no events are yielded within this duration, the stream assumes
+    /// the connection is stale and reconnects. This catches half-open TCP
+    /// connections that reqwest's read_timeout misses on streaming responses.
+    ///
+    /// Default: 45s (1.5× the server's 30s heartbeat interval).
+    pub fn with_idle_timeout(mut self, timeout: Duration) -> Self {
+        self.idle_timeout = timeout;
         self
     }
 }
@@ -145,19 +176,26 @@ pub struct EventStream {
     connected_signal: Arc<AtomicBool>,
     /// Shared reqwest client reused across reconnections for connection pooling
     sse_http_client: reqwest::Client,
+    /// Poll-level idle timer. Fires when no events are yielded within
+    /// `idle_timeout`, triggering reconnection. Catches half-open TCP
+    /// connections that reqwest's read_timeout misses on streaming SSE.
+    idle_deadline: Option<Pin<Box<Sleep>>>,
+    /// Duration before idle_deadline fires
+    idle_timeout: Duration,
 }
 
 impl EventStream {
     pub(crate) fn new(client: Everruns, session_id: String, options: StreamOptions) -> Self {
         // Dedicated SSE client: no overall timeout (streams run for hours),
         // reused across reconnections for connection pool / TCP reuse.
-        // read_timeout detects half-open TCP connections when the server cycles
-        // SSE connections and the `disconnecting` event is lost in transit.
-        // 60s is well under the 300s cycle interval (SSE_REALTIME_CYCLE_SECS).
+        // read_timeout is kept as a secondary safety net, but the primary
+        // stall detection is the poll-level idle_deadline (see poll_next).
         let sse_http_client = reqwest::Client::builder()
             .read_timeout(Duration::from_secs(READ_TIMEOUT_SECS))
             .build()
             .unwrap_or_else(|_| reqwest::Client::new());
+
+        let idle_timeout = options.idle_timeout;
 
         Self {
             client,
@@ -173,6 +211,8 @@ impl EventStream {
             delay_future: None,
             connected_signal: Arc::new(AtomicBool::new(false)),
             sse_http_client,
+            idle_deadline: None,
+            idle_timeout,
         }
     }
 
@@ -186,6 +226,7 @@ impl EventStream {
         self.should_reconnect = false;
         self.inner = None;
         self.delay_future = None;
+        self.idle_deadline = None;
     }
 
     /// Get the current retry count
@@ -347,14 +388,38 @@ impl Stream for EventStream {
                     return Poll::Ready(None);
                 }
                 self.inner = Some(self.connect());
+                // Start idle timer when a new connection is established
+                self.idle_deadline = Some(Box::pin(sleep(self.idle_timeout)));
+            }
+
+            // Check idle timeout — detects half-open TCP connections where
+            // reqwest's read_timeout is ineffective on streaming SSE.
+            if let Some(ref mut idle) = self.idle_deadline
+                && Pin::new(idle).poll(cx).is_ready()
+            {
+                tracing::warn!(
+                    timeout_secs = self.idle_timeout.as_secs(),
+                    "SSE idle timeout, reconnecting"
+                );
+                self.inner = None;
+                self.idle_deadline = None;
+                if self.should_retry() {
+                    self.retry_count += 1;
+                    let delay = self.get_retry_delay();
+                    self.update_backoff();
+                    self.schedule_reconnect(delay);
+                    continue;
+                }
+                return Poll::Ready(None);
             }
 
             let inner = self.inner.as_mut().unwrap();
             match Pin::new(inner).poll_next(cx) {
                 Poll::Ready(Some(Ok(event))) => {
-                    // Successfully received an event - reset backoff
+                    // Successfully received an event - reset backoff and idle timer
                     self.reset_backoff();
                     self.last_event_id = Some(event.id.clone());
+                    self.idle_deadline = Some(Box::pin(sleep(self.idle_timeout)));
                     return Poll::Ready(Some(Ok(event)));
                 }
                 Poll::Ready(Some(Err(e))) => {
@@ -363,6 +428,7 @@ impl Stream for EventStream {
                         self.server_retry_ms = Some(*retry_ms);
                         self.graceful_disconnect = true;
                         self.inner = None;
+                        self.idle_deadline = None;
 
                         // Graceful disconnects are planned server behavior (connection
                         // cycling), not errors. Don't increment retry_count so they
@@ -380,6 +446,7 @@ impl Stream for EventStream {
                     // Unexpected error - use exponential backoff
                     self.graceful_disconnect = false;
                     self.inner = None;
+                    self.idle_deadline = None;
 
                     if self.should_retry() {
                         self.retry_count += 1;
@@ -399,6 +466,7 @@ impl Stream for EventStream {
                 Poll::Ready(None) => {
                     // Stream ended - always retry to handle read timeout case
                     self.inner = None;
+                    self.idle_deadline = None;
 
                     if self.should_retry() {
                         self.retry_count += 1;
@@ -444,9 +512,20 @@ mod tests {
     fn test_stream_options_builder() {
         let opts = StreamOptions::default()
             .with_since_id("event_123")
-            .with_max_retries(5);
+            .with_max_retries(5)
+            .with_idle_timeout(Duration::from_secs(60));
         assert_eq!(opts.since_id, Some("event_123".to_string()));
         assert_eq!(opts.max_retries, Some(5));
+        assert_eq!(opts.idle_timeout, Duration::from_secs(60));
+    }
+
+    #[test]
+    fn test_stream_options_default_idle_timeout() {
+        let opts = StreamOptions::default();
+        assert_eq!(
+            opts.idle_timeout,
+            Duration::from_secs(DEFAULT_IDLE_TIMEOUT_SECS)
+        );
     }
 
     #[test]

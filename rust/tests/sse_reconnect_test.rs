@@ -5,11 +5,13 @@
 //! - Bug 1: Graceful disconnects don't consume retry budget
 //! - Bug 2: Connected event resets backoff after errors
 //! - Bug 3: HTTP client reused across reconnections (verified via request count)
+//! - Bug 4: Idle timeout triggers reconnection on silent half-open connections
 
 use everruns_sdk::Everruns;
 use futures::StreamExt;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Duration;
 use wiremock::matchers::{method, path_regex};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -177,4 +179,89 @@ async fn test_connected_event_resets_backoff_after_error() {
 
     // Two connections were made
     assert_eq!(call_count.load(Ordering::SeqCst), 2);
+}
+
+/// Idle timeout must trigger reconnection when a connection goes silent.
+///
+/// Simulates a half-open TCP connection: the first connection sends `connected`
+/// then hangs indefinitely (Poll::Pending). The idle timeout fires, the stream
+/// reconnects, and the second connection delivers an event.
+///
+/// Uses a raw TCP server because wiremock returns bodies immediately (stream
+/// ends with Poll::Ready(None)) and can't simulate a hanging connection.
+#[tokio::test]
+async fn test_idle_timeout_triggers_reconnect_on_silent_connection() {
+    use tokio::io::AsyncWriteExt;
+    use tokio::net::TcpListener;
+
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let connection_count = Arc::new(AtomicUsize::new(0));
+    let count = connection_count.clone();
+
+    // Spawn a mock SSE server
+    tokio::spawn(async move {
+        loop {
+            let (mut socket, _) = listener.accept().await.unwrap();
+            let n = count.fetch_add(1, Ordering::SeqCst);
+
+            tokio::spawn(async move {
+                // Read the HTTP request (consume it so we can respond)
+                let mut buf = vec![0u8; 4096];
+                let _ = tokio::io::AsyncReadExt::read(&mut socket, &mut buf).await;
+
+                let connected = "event: connected\ndata: {}\n\n";
+
+                if n == 0 {
+                    // First connection: send connected, then hang forever
+                    let response = format!(
+                        "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\n\r\n{}",
+                        connected
+                    );
+                    let _ = socket.write_all(response.as_bytes()).await;
+                    let _ = socket.flush().await;
+                    // Keep connection open — hang forever (simulate half-open)
+                    tokio::time::sleep(Duration::from_secs(300)).await;
+                } else {
+                    // Second connection: send connected + business event
+                    let event_json = format!(
+                        r#"{{"id":"evt_idle_1","type":"session.idled","ts":"2024-01-01T00:00:00Z","session_id":"sess_idle","data":{{}}}}"#
+                    );
+                    let event = format!("event: session.idled\ndata: {}\n\n", event_json);
+                    let response = format!(
+                        "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\n\r\n{}{}",
+                        connected, event
+                    );
+                    let _ = socket.write_all(response.as_bytes()).await;
+                    let _ = socket.flush().await;
+                }
+            });
+        }
+    });
+
+    let base_url = format!("http://{}", addr);
+    let client = Everruns::with_base_url("test_key", &base_url).unwrap();
+    let opts = everruns_sdk::sse::StreamOptions::default()
+        .with_idle_timeout(Duration::from_secs(2)) // 2s for fast test
+        .with_max_retries(5);
+    let mut stream = client.events().stream_with_options("sess_idle", opts);
+
+    // Should reconnect after 2s idle timeout, get event from 2nd connection
+    let result = tokio::time::timeout(Duration::from_secs(15), stream.next())
+        .await
+        .expect("should not timeout at 15s")
+        .expect("stream should yield an item")
+        .expect("item should be Ok");
+
+    assert_eq!(result.id, "evt_idle_1");
+    assert_eq!(result.event_type, "session.idled");
+
+    // Proves reconnection happened (2+ connections)
+    assert!(
+        connection_count.load(Ordering::SeqCst) >= 2,
+        "Should have made at least 2 connections (got {})",
+        connection_count.load(Ordering::SeqCst)
+    );
+
+    stream.stop();
 }
