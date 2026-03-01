@@ -41,6 +41,12 @@ lint-python:
 lint-typescript:
     cd typescript && npm run lint
 
+# Auto-fix formatting across all SDKs
+fmt:
+    cd rust && cargo fmt
+    cd python && uv run ruff format .
+    cd typescript && npx prettier --write "src/**/*.ts"
+
 # Generate types from OpenAPI spec
 generate:
     cd rust && cargo build

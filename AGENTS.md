@@ -25,6 +25,7 @@ Fix root cause. Unsure: read more code; if stuck, ask w/ short options. Unrecogn
 - `specs/sse-streaming.md` - SSE reconnection, since_id, event types
 - `specs/error-handling.md` - Error types per language, retry patterns
 - `specs/release-process.md` - Versioning, changelog, publishing to registries
+- `specs/shipping.md` - Ship workflow phases, quality core, test coverage requirements
 
 ### OpenAPI
 
@@ -84,6 +85,18 @@ just generate           # Regenerate types from OpenAPI
 
 - Node 22+, npm
 - `prettier` and `oxlint`
+
+### Commands
+
+`.claude/commands/` contains agent commands.
+
+- `ship.md` - Full shipping workflow: test, verify artifacts, smoke test, push, PR, merge
+
+### Shipping
+
+"Ship" means: the change is **merged to main**. Not just "PR created" — merged. The full flow: implement with comprehensive test coverage (positive and negative paths), complete the Pre-PR Checklist, create PR, wait for CI green, squash-merge, confirm merge. Shipping is not done until the PR is merged.
+
+Use the [`/ship`](.claude/commands/ship.md) command to execute the full shipping workflow. When asked to "ship", "fix and ship", or "ship it" — run all 8 phases through to merge. Do not stop at PR creation.
 
 ### Pre-PR Checklist
 
