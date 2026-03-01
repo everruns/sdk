@@ -25,6 +25,7 @@ Fix root cause. Unsure: read more code; if stuck, ask w/ short options. Unrecogn
 - `specs/sse-streaming.md` - SSE reconnection, since_id, event types
 - `specs/error-handling.md` - Error types per language, retry patterns
 - `specs/release-process.md` - Versioning, changelog, publishing to registries
+- `specs/shipping.md` - Ship workflow phases, quality core, test coverage requirements
 
 ### OpenAPI
 
@@ -84,6 +85,18 @@ just generate           # Regenerate types from OpenAPI
 
 - Node 22+, npm
 - `prettier` and `oxlint`
+
+### Commands
+
+`.claude/commands/` contains agent commands.
+
+- `ship.md` - Full shipping workflow: test, verify artifacts, smoke test, push, PR, merge
+
+### Shipping
+
+"Ship" means: implement with comprehensive test coverage (positive and negative paths), complete the full Pre-PR Checklist (especially smoke testing impacted SDKs), create PR, and merge when CI is green.
+
+Use the [`/ship`](.claude/commands/ship.md) command to execute the full shipping workflow. It covers test coverage verification, artifact updates (specs, docs, cookbooks), smoke testing, quality gates, PR creation, and merge. When asked to "fix and ship", implement the fix first, then run `/ship`.
 
 ### Pre-PR Checklist
 
