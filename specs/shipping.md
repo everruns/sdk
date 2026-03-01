@@ -4,9 +4,9 @@ Defines the SDK "ship" workflow — the canonical process for delivering changes
 
 ## Definition
 
-"Ship" means: implement with comprehensive test coverage (positive and negative paths), complete the Pre-PR Checklist, create PR, and merge when CI is green.
+"Ship" means: the change is **merged to main**. Not just "PR created" — merged. The full flow: implement with comprehensive test coverage (positive and negative paths), complete the Pre-PR Checklist, create PR, wait for CI green, squash-merge, confirm merge.
 
-This is NOT just "push and merge". Shipping includes quality verification, artifact sync, and smoke testing.
+Shipping is not done until the PR is merged. This is NOT just "push and create PR". Shipping includes quality verification, artifact sync, smoke testing, AND the final merge.
 
 ## Phases
 

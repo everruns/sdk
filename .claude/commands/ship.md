@@ -1,8 +1,8 @@
 # Ship
 
-Run the full ship flow: verify quality, ensure test coverage, update artifacts, then push, create PR, and merge when CI is green.
+Run the full ship flow through to **merge on main**. Shipping is not done until the PR is merged.
 
-This command implements the complete "Shipping" definition and Pre-PR Checklist from AGENTS.md. When the user says "ship" or "fix and ship", execute ALL phases below — not just the push/merge steps.
+This command implements the complete "Shipping" definition and Pre-PR Checklist from AGENTS.md. When the user says "ship", "fix and ship", or "ship it", execute ALL 8 phases below — do NOT stop at PR creation. The final deliverable is a merged PR.
 
 ## Arguments
 

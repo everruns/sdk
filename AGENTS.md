@@ -94,9 +94,9 @@ just generate           # Regenerate types from OpenAPI
 
 ### Shipping
 
-"Ship" means: implement with comprehensive test coverage (positive and negative paths), complete the full Pre-PR Checklist (especially smoke testing impacted SDKs), create PR, and merge when CI is green.
+"Ship" means: the change is **merged to main**. Not just "PR created" — merged. The full flow: implement with comprehensive test coverage (positive and negative paths), complete the Pre-PR Checklist, create PR, wait for CI green, squash-merge, confirm merge. Shipping is not done until the PR is merged.
 
-Use the [`/ship`](.claude/commands/ship.md) command to execute the full shipping workflow. It covers test coverage verification, artifact updates (specs, docs, cookbooks), smoke testing, quality gates, PR creation, and merge. When asked to "fix and ship", implement the fix first, then run `/ship`.
+Use the [`/ship`](.claude/commands/ship.md) command to execute the full shipping workflow. When asked to "ship", "fix and ship", or "ship it" — run all 8 phases through to merge. Do not stop at PR creation.
 
 ### Pre-PR Checklist
 
