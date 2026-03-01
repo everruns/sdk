@@ -2,7 +2,7 @@
 
 Run the full ship flow through to **merge on main**. Shipping is not done until the PR is merged.
 
-This command implements the complete "Shipping" definition and Pre-PR Checklist from AGENTS.md. When the user says "ship", "fix and ship", or "ship it", execute ALL 8 phases below — do NOT stop at PR creation. The final deliverable is a merged PR.
+This command implements the complete "Shipping" definition and Pre-PR Checklist from AGENTS.md. When the user says "ship", "fix and ship", or "ship it", execute ALL 10 phases below — do NOT stop at PR creation. The final deliverable is a merged PR.
 
 ## Arguments
 
@@ -52,7 +52,40 @@ Only test languages/cookbooks affected by the changes, not all.
 
 If smoke testing reveals issues, fix them and loop back to Phase 2 (tests must still pass).
 
-### Phase 5: Quality Gates
+### Phase 5: Code Simplification
+
+Review all changed code on this branch for opportunities to simplify:
+
+1. **Read every changed file** — use `git diff origin/main...HEAD` to identify all modifications
+2. **Check for duplication** — look for repeated logic that could be extracted into a shared helper
+3. **Check for over-engineering** — unnecessary abstractions, premature generalization, unused parameters, dead code paths
+4. **Check for clarity** — confusing names, overly complex conditionals, deeply nested logic that could be flattened
+5. **Check for consistency** — ensure new code follows existing patterns and conventions in the codebase
+6. **Simplify** — apply fixes directly. Less code is better code. If a helper is used once, inline it. If a name is unclear, rename it.
+7. If changes were made, run `just test` to confirm nothing broke
+
+### Phase 6: Security Review
+
+Analyze all changed code for security vulnerabilities:
+
+1. **Review every changed file** for OWASP Top 10 and common vulnerability patterns:
+   - **Injection** — command injection, SQL injection, code injection in any string interpolation or shell calls
+   - **Broken auth** — hardcoded secrets, credentials in logs, missing auth checks
+   - **Sensitive data exposure** — API keys, tokens, or PII logged, leaked in errors, or stored insecurely
+   - **XXE/deserialization** — unsafe parsing of XML, YAML, JSON, or pickle from untrusted sources
+   - **Broken access control** — missing permission checks, IDOR, path traversal
+   - **Security misconfiguration** — overly permissive defaults, debug modes, unnecessary features enabled
+   - **XSS** — unsanitized user input in HTML/JS output
+   - **Insecure dependencies** — known vulnerable versions, unnecessary dependencies
+   - **SSRF** — user-controlled URLs used in server-side requests without validation
+2. **Check for SDK-specific risks**:
+   - API key handling: keys must use `secrecy`/redaction, never appear in logs or debug output
+   - TLS verification: must not be disabled by default
+   - Input validation at SDK boundaries: malformed server responses must not crash the SDK
+3. **Fix any issues found** — do not just report them, fix them
+4. If changes were made, run `just test` to confirm nothing broke
+
+### Phase 7: Quality Gates
 
 ```bash
 git fetch origin main && git rebase origin/main
@@ -73,7 +106,7 @@ just pre-pr
 
 - If it fails, stop and report the failures
 
-### Phase 6: Push and PR
+### Phase 8: Push and PR
 
 ```bash
 git push -u origin <current-branch>
@@ -93,14 +126,14 @@ If no PR exists, create one using the PR template (`.github/pull_request_templat
 
 If a PR already exists, update it if needed and report its URL.
 
-### Phase 7: Wait for CI and Merge
+### Phase 9: Wait for CI and Merge
 
 - Check CI status with `gh pr checks --repo everruns/sdk` (poll every 30s, up to 15 minutes)
 - If CI is green, merge with `gh pr merge --repo everruns/sdk --squash --auto`
 - If CI fails, report the failing checks and stop
 - **NEVER** merge when CI is red
 
-### Phase 8: Post-merge
+### Phase 10: Post-merge
 
 After successful merge:
 
@@ -110,6 +143,6 @@ After successful merge:
 ## Notes
 
 - This is the canonical shipping workflow for the SDK repo.
-- Phases 2-4 (tests, artifacts, smoke testing) are the quality core — do NOT skip them.
+- Phases 2-6 (tests, artifacts, smoke testing, simplification, security) are the quality core — do NOT skip them.
 - The `$ARGUMENTS` context helps scope which tests, specs, and smoke tests are relevant.
 - For "fix and ship" requests: implement the fix first, then run `/ship` to validate and merge.

@@ -16,14 +16,16 @@ Shipping is not done until the PR is merged. This is NOT just "push and create P
 | 2 | Test Coverage | Identify changed code paths, write/verify tests |
 | 3 | Artifact Updates | Sync specs, docs, cookbooks, OpenAPI |
 | 4 | Smoke Testing | End-to-end verification of affected SDKs |
-| 5 | Quality Gates | Rebase, lint, pre-pr checks |
-| 6 | Push and PR | Push branch, create/update PR with template |
-| 7 | CI and Merge | Poll CI, squash-merge when green |
-| 8 | Post-merge | Report completion |
+| 5 | Code Simplification | Review for duplication, over-engineering, clarity |
+| 6 | Security Review | OWASP Top 10, SDK-specific risks, fix vulnerabilities |
+| 7 | Quality Gates | Rebase, lint, pre-pr checks |
+| 8 | Push and PR | Push branch, create/update PR with template |
+| 9 | CI and Merge | Poll CI, squash-merge when green |
+| 10 | Post-merge | Report completion |
 
 ## Quality Core
 
-Phases 2-4 are the quality core. They must NOT be skipped. The ship command enforces this by running all phases sequentially — there is no "fast ship" that bypasses tests or artifact checks.
+Phases 2-6 are the quality core. They must NOT be skipped. The ship command enforces this by running all phases sequentially — there is no "fast ship" that bypasses tests, simplification, or security checks.
 
 ## Test Coverage Requirements
 
@@ -32,6 +34,26 @@ Every shipped change must have:
 - **Positive tests** — happy path, valid inputs, expected behavior
 - **Negative tests** — invalid inputs, error conditions, boundary cases
 - **Per-language coverage** — changes in any SDK (Rust, Python, TypeScript) need corresponding tests in that language
+
+## Code Simplification
+
+Every shipped change must be reviewed for simplification opportunities:
+
+- **Duplication** — repeated logic extracted into shared helpers
+- **Over-engineering** — unnecessary abstractions, premature generalization, dead code removed
+- **Clarity** — confusing names renamed, complex conditionals flattened
+- **Consistency** — new code follows existing codebase patterns
+
+Less code is better code. Simplify first, then re-run tests.
+
+## Security Review
+
+Every shipped change must be analyzed for security vulnerabilities:
+
+- **OWASP Top 10** — injection, broken auth, sensitive data exposure, XXE, broken access control, misconfiguration, XSS, insecure dependencies, SSRF
+- **SDK-specific risks** — API key redaction (secrecy crate / no log leaks), TLS verification enabled by default, graceful handling of malformed server responses
+
+Fix vulnerabilities directly — do not just report them.
 
 ## Artifact Sync
 
