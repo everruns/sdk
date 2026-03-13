@@ -12,7 +12,7 @@ import json
 import os
 import sys
 
-from everruns_sdk import ContentPart, Everruns, extract_tool_calls
+from everruns_sdk import ContentPart, Everruns, extract_tool_calls, generate_harness_id
 from everruns_sdk.sse import EventStream, StreamOptions
 
 SYSTEM_PROMPT = (
@@ -73,7 +73,8 @@ async def main():
         print(f"Created agent: {agent.id}")
 
         # Create session
-        session = await client.sessions.create(agent_id=agent.id)
+        harness_id = generate_harness_id()
+        session = await client.sessions.create(harness_id, agent_id=agent.id)
         print(f"Created session: {session.id}\n")
 
         # Send user message
