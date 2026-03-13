@@ -4,8 +4,8 @@
 
 use everruns_sdk::{
     Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateMessageRequest,
-    CreateSessionRequest, Event, ExternalActor, ListResponse, Message, Session,
-    generate_agent_id, generate_harness_id,
+    CreateSessionRequest, Event, ExternalActor, ListResponse, Message, Session, generate_agent_id,
+    generate_harness_id,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)

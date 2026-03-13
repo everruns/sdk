@@ -380,7 +380,7 @@ def test_external_actor_minimal():
 
 def test_message_with_external_actor_and_phase():
     """Test Message with external_actor and phase fields."""
-    from everruns_sdk.models import Message, ExternalActor
+    from everruns_sdk.models import ExternalActor, Message
 
     msg = Message(
         id="msg_123",
