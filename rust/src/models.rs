@@ -302,6 +302,30 @@ pub struct ExternalActor {
     pub metadata: Option<std::collections::HashMap<String, String>>,
 }
 
+impl ExternalActor {
+    /// Create a new ExternalActor with required fields
+    pub fn new(actor_id: impl Into<String>, source: impl Into<String>) -> Self {
+        Self {
+            actor_id: actor_id.into(),
+            source: source.into(),
+            actor_name: None,
+            metadata: None,
+        }
+    }
+
+    /// Set the display name
+    pub fn actor_name(mut self, name: impl Into<String>) -> Self {
+        self.actor_name = Some(name.into());
+        self
+    }
+
+    /// Set metadata
+    pub fn metadata(mut self, metadata: std::collections::HashMap<String, String>) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+}
+
 /// Message in a session
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
