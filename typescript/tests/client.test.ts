@@ -140,10 +140,9 @@ describe("CreateSessionRequest", () => {
     expect(parsed.capabilities[0].ref).toBe("current_time");
   });
 
-  it("should work without agentId (agent is optional)", () => {
-    const request: CreateSessionRequest = {
-      harnessId: "harness_abc123",
-    };
+  it("should work without agentId or harnessId (both optional)", () => {
+    const request: CreateSessionRequest = {};
+    expect(request.harnessId).toBeUndefined();
     expect(request.agentId).toBeUndefined();
     expect(request.capabilities).toBeUndefined();
   });

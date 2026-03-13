@@ -228,10 +228,11 @@ class AgentsClient {
 class SessionsClient {
   constructor(private readonly client: Everruns) {}
 
-  async create(request: CreateSessionRequest): Promise<Session> {
-    const body: Record<string, unknown> = {
-      harness_id: request.harnessId,
-    };
+  async create(request: CreateSessionRequest = {}): Promise<Session> {
+    const body: Record<string, unknown> = {};
+    if (request.harnessId) {
+      body.harness_id = request.harnessId;
+    }
     if (request.agentId) {
       body.agent_id = request.agentId;
     }

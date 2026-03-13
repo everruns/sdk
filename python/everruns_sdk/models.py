@@ -103,7 +103,7 @@ class TokenUsage(BaseModel):
 class CreateSessionRequest(BaseModel):
     """Request to create a session."""
 
-    harness_id: str
+    harness_id: Optional[str] = None
     agent_id: Optional[str] = None
     title: Optional[str] = None
     model_id: Optional[str] = None

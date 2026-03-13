@@ -328,7 +328,7 @@ class SessionsClient:
 
     async def create(
         self,
-        harness_id: str,
+        harness_id: Optional[str] = None,
         *,
         agent_id: Optional[str] = None,
         title: Optional[str] = None,
@@ -339,8 +339,8 @@ class SessionsClient:
         """Create a new session.
 
         Args:
-            harness_id: Harness ID (format: ``harness_<32-hex>``). Use
-                :func:`~everruns_sdk.generate_harness_id` to create one.
+            harness_id: Harness ID (format: ``harness_<32-hex>``). Optional;
+                server defaults to the Generic harness if omitted.
             agent_id: Agent ID (optional).
             title: Human-readable title.
             model_id: LLM model ID override.

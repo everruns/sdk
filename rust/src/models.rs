@@ -229,7 +229,8 @@ pub struct TokenUsage {
 #[derive(Debug, Clone, Serialize)]
 #[non_exhaustive]
 pub struct CreateSessionRequest {
-    pub harness_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub harness_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -242,17 +243,29 @@ pub struct CreateSessionRequest {
     pub capabilities: Vec<AgentCapabilityConfig>,
 }
 
+impl Default for CreateSessionRequest {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CreateSessionRequest {
-    /// Create a new request with the harness ID
-    pub fn new(harness_id: impl Into<String>) -> Self {
+    /// Create a new request (server defaults to Generic harness)
+    pub fn new() -> Self {
         Self {
-            harness_id: harness_id.into(),
+            harness_id: None,
             agent_id: None,
             title: None,
             model_id: None,
             tags: vec![],
             capabilities: vec![],
         }
+    }
+
+    /// Set the harness ID
+    pub fn harness_id(mut self, harness_id: impl Into<String>) -> Self {
+        self.harness_id = Some(harness_id.into());
+        self
     }
 
     /// Set the agent ID

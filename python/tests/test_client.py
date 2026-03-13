@@ -175,12 +175,12 @@ def test_create_session_request_with_capabilities():
 
 
 def test_create_session_request_without_agent():
-    """Test CreateSessionRequest without agent_id."""
+    """Test CreateSessionRequest without agent_id or harness_id."""
     from everruns_sdk.models import CreateSessionRequest
 
-    req = CreateSessionRequest(harness_id="harness_abc123")
+    req = CreateSessionRequest()
     data = req.model_dump(exclude_none=True)
-    assert data["harness_id"] == "harness_abc123"
+    assert "harness_id" not in data
     assert "agent_id" not in data
 
 
