@@ -33,7 +33,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/everruns/sdk.git",
+    "url": "git+https://github.com/everruns/sdk.git",
     "directory": "typescript"
   },
   "homepage": "https://github.com/everruns/sdk#readme",
