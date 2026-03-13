@@ -6,7 +6,9 @@
 //! Run: cargo run --bin weather-tools
 //! Run with verbose: cargo run --bin weather-tools -- --verbose
 
-use everruns_sdk::{ContentPart, CreateSessionRequest, Everruns, extract_tool_calls, generate_harness_id};
+use everruns_sdk::{
+    ContentPart, CreateSessionRequest, Everruns, extract_tool_calls, generate_harness_id,
+};
 use futures::StreamExt;
 
 /// Simulated local weather lookup.
