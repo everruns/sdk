@@ -24,6 +24,8 @@ export interface CapabilityInfo {
   features?: string[];
   /** Whether this is an Agent Skill capability */
   isSkill?: boolean;
+  /** Risk level for approval requirements (TM-AGENT-005) */
+  riskLevel?: "low" | "medium" | "high" | null;
 }
 
 export interface Agent {
@@ -97,12 +99,28 @@ export interface CreateSessionRequest {
   capabilities?: AgentCapabilityConfig[];
 }
 
+/** External actor identity for messages from external channels (Slack, Discord, etc.) */
+export interface ExternalActor {
+  /** Opaque actor identifier from the source channel */
+  actorId: string;
+  /** Source channel identifier (e.g. "slack", "discord") */
+  source: string;
+  /** Resolved display name (falls back to actorId if absent) */
+  actorName?: string | null;
+  /** Channel-specific metadata */
+  metadata?: Record<string, string> | null;
+}
+
 export interface Message {
   id: string;
   sessionId: string;
   role: "user" | "assistant" | "tool_result";
   content: ContentPart[];
   createdAt: string;
+  /** External actor identity (for messages from external channels) */
+  externalActor?: ExternalActor | null;
+  /** Execution phase for multi-step tool-calling flows */
+  phase?: "Commentary" | "FinalAnswer" | null;
 }
 
 export interface ContentPart {
@@ -132,18 +150,12 @@ export interface ToolCallInfo {
 }
 
 /** Create a tool result content part with a successful result */
-export function toolResult(
-  toolCallId: string,
-  result: unknown,
-): ContentPart {
+export function toolResult(toolCallId: string, result: unknown): ContentPart {
   return { type: "tool_result", tool_call_id: toolCallId, result };
 }
 
 /** Create a tool result content part with an error */
-export function toolError(
-  toolCallId: string,
-  error: string,
-): ContentPart {
+export function toolError(toolCallId: string, error: string): ContentPart {
   return { type: "tool_result", tool_call_id: toolCallId, error };
 }
 
@@ -151,9 +163,7 @@ export function toolError(
 export function extractToolCalls(
   data: Record<string, unknown>,
 ): ToolCallInfo[] {
-  const message = data.message as
-    | { content?: unknown[] }
-    | undefined;
+  const message = data.message as { content?: unknown[] } | undefined;
   const content = message?.content;
   if (!Array.isArray(content)) return [];
 
@@ -187,6 +197,8 @@ export interface Controls {
 export interface CreateMessageRequest {
   message: MessageInput;
   controls?: Controls;
+  /** External actor identity (for messages from external channels like Slack) */
+  externalActor?: ExternalActor;
 }
 
 export interface Event {
@@ -194,6 +206,14 @@ export interface Event {
   type: string;
   data: Record<string, unknown>;
   createdAt: string;
+}
+
+/** Options for backward pagination on event list endpoints */
+export interface ListEventsOptions {
+  /** Max events to return (backward pagination, 1-1000) */
+  limit?: number;
+  /** Cursor for backward pagination: only return events with sequence < this value */
+  beforeSequence?: number;
 }
 
 export interface StreamOptions {

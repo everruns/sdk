@@ -344,3 +344,119 @@ def test_create_agent_request_without_id():
     )
     data = req.model_dump(exclude_none=True)
     assert "id" not in data
+
+
+def test_external_actor_round_trip():
+    """Test ExternalActor model round-trip."""
+    from everruns_sdk import ExternalActor
+
+    actor = ExternalActor(
+        actor_id="U12345",
+        source="slack",
+        actor_name="Alice",
+        metadata={"channel": "general"},
+    )
+    data = actor.model_dump()
+    assert data["actor_id"] == "U12345"
+    assert data["source"] == "slack"
+    assert data["actor_name"] == "Alice"
+    assert data["metadata"]["channel"] == "general"
+
+    # Round-trip via JSON
+    json_str = actor.model_dump_json()
+    roundtrip = ExternalActor.model_validate_json(json_str)
+    assert roundtrip.actor_id == "U12345"
+    assert roundtrip.source == "slack"
+
+
+def test_external_actor_minimal():
+    """Test ExternalActor with only required fields."""
+    from everruns_sdk import ExternalActor
+
+    actor = ExternalActor(actor_id="bot1", source="discord")
+    assert actor.actor_name is None
+    assert actor.metadata is None
+
+
+def test_message_with_external_actor_and_phase():
+    """Test Message with external_actor and phase fields."""
+    from everruns_sdk.models import ExternalActor, Message
+
+    msg = Message(
+        id="msg_123",
+        session_id="session_456",
+        sequence=1,
+        role="user",
+        content=[{"type": "text", "text": "hello"}],
+        created_at="2024-01-01T00:00:00Z",
+        external_actor=ExternalActor(actor_id="U99", source="slack"),
+        phase="Commentary",
+    )
+    assert msg.external_actor.actor_id == "U99"
+    assert msg.phase == "Commentary"
+
+
+def test_message_without_external_actor():
+    """Test Message without external_actor (backward compat)."""
+    from everruns_sdk.models import Message
+
+    msg = Message(
+        id="msg_123",
+        session_id="session_456",
+        sequence=2,
+        role="agent",
+        content=[{"type": "text", "text": "hi"}],
+        created_at="2024-01-01T00:00:00Z",
+    )
+    assert msg.external_actor is None
+    assert msg.phase is None
+
+
+def test_capability_info_with_risk_level():
+    """Test CapabilityInfo with risk_level field."""
+    from everruns_sdk.models import CapabilityInfo
+
+    info = CapabilityInfo(
+        id="shell_exec",
+        name="Shell Exec",
+        description="Execute shell commands",
+        status="active",
+        risk_level="high",
+    )
+    assert info.risk_level == "high"
+
+
+def test_capability_info_without_risk_level():
+    """Test CapabilityInfo without risk_level (backward compat)."""
+    from everruns_sdk.models import CapabilityInfo
+
+    info = CapabilityInfo(
+        id="current_time",
+        name="Current Time",
+        description="Get current time",
+        status="active",
+    )
+    assert info.risk_level is None
+
+
+def test_create_message_request_with_external_actor():
+    """Test CreateMessageRequest with external_actor."""
+    from everruns_sdk.models import CreateMessageRequest, ExternalActor
+
+    req = CreateMessageRequest(
+        message={"role": "user", "content": [{"type": "text", "text": "hello"}]},
+        external_actor=ExternalActor(actor_id="U12345", source="slack"),
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["external_actor"]["actor_id"] == "U12345"
+
+
+def test_create_message_request_without_external_actor():
+    """Test CreateMessageRequest without external_actor omits it."""
+    from everruns_sdk.models import CreateMessageRequest
+
+    req = CreateMessageRequest(
+        message={"role": "user", "content": [{"type": "text", "text": "hello"}]},
+    )
+    data = req.model_dump(exclude_none=True)
+    assert "external_actor" not in data

@@ -23,6 +23,20 @@
         ],
         "summary": "GET /v1/agents - List all active agents",
         "operationId": "list_agents",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by name or description (case-insensitive substring match).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of agents",
@@ -583,6 +597,9 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication required"
+          },
           "404": {
             "description": "Execution not found",
             "content": {
@@ -666,6 +683,9 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication required"
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -714,6 +734,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           },
           "409": {
             "description": "Schedule name already exists",
@@ -768,6 +791,9 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication required"
+          },
           "404": {
             "description": "Schedule not found",
             "content": {
@@ -811,6 +837,9 @@
         "responses": {
           "204": {
             "description": "Schedule deleted"
+          },
+          "401": {
+            "description": "Authentication required"
           },
           "404": {
             "description": "Schedule not found",
@@ -882,6 +911,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           },
           "404": {
             "description": "Schedule not found",
@@ -967,6 +999,9 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication required"
+          },
           "404": {
             "description": "Schedule not found",
             "content": {
@@ -1019,6 +1054,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           },
           "404": {
             "description": "Schedule not found",
@@ -1073,6 +1111,9 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication required"
+          },
           "404": {
             "description": "Schedule not found",
             "content": {
@@ -1126,6 +1167,9 @@
               }
             }
           },
+          "401": {
+            "description": "Authentication required"
+          },
           "404": {
             "description": "Schedule not found",
             "content": {
@@ -1178,6 +1222,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           },
           "404": {
             "description": "Schedule not found",
@@ -1874,6 +1921,20 @@
         ],
         "summary": "GET /v1/mcp-servers - List all MCP servers",
         "operationId": "list_mcp_servers",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by name or description (case-insensitive substring match).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of MCP servers",
@@ -2287,6 +2348,18 @@
               ]
             },
             "example": "agent_01933b5a00007000800000000000001"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by title (case-insensitive substring match).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
           },
           {
             "name": "offset",
@@ -2746,7 +2819,7 @@
           "events"
         ],
         "summary": "GET /v1/sessions/{session_id}/events - List events (JSON)",
-        "description": "Returns events for a session as a JSON array. Supports filtering by event type\nvia `types` (positive: only these types) and `exclude` (negative: remove these types).\nWhen both are provided, `types` narrows first, then `exclude` removes from that set.\nBoth accept only known event types (max 25 per parameter). Unknown types return 400.",
+        "description": "Returns events for a session as a JSON array. Supports filtering by event type\nvia `types` (positive: only these types) and `exclude` (negative: remove these types).\nWhen both are provided, `types` narrows first, then `exclude` removes from that set.\nBoth accept only known event types (max 25 per parameter). Unknown types return 400.\n\n## Pagination\n\nSupports backward pagination via `limit` and `before_sequence`:\n- `limit=200` returns the last 200 events (oldest→newest)\n- `limit=200&before_sequence=4500` returns 200 events before sequence 4500\n- When `limit` is provided, the response includes an `X-Total-Count` header\n  with the count of non-delta events for the session\n- Turn boundary snapping: when fetching older pages, the batch boundary\n  snaps to the nearest `turn.started` event to avoid splitting turns\n- Without `limit`, all events are returned (backward compatible)",
         "operationId": "list_events",
         "parameters": [
           {
@@ -2801,11 +2874,48 @@
             },
             "style": "form",
             "explode": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max events to return (backward pagination). When set, returns the last N events\n(or last N before `before_sequence`). Results are ordered oldest→newest.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "maximum": 1000,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "before_sequence",
+            "in": "query",
+            "description": "Cursor for backward pagination: only return events with sequence < this value.\nUsed with `limit` to paginate backward through event history.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Events list",
+            "headers": {
+              "X-Total-Count": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "description": "Total non-delta event count for the session (only present when limit is used)"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3289,6 +3399,9 @@
           "400": {
             "description": "Invalid session ID or directory not empty"
           },
+          "403": {
+            "description": "Cannot delete readonly file or directory containing readonly files"
+          },
           "500": {
             "description": "Internal server error"
           }
@@ -3463,7 +3576,7 @@
           "events"
         ],
         "summary": "GET /v1/sessions/{session_id}/sse - Stream events (SSE notifications)",
-        "description": "Establishes a Server-Sent Events (SSE) connection for real-time event streaming.\n\n## Connection Lifecycle Events\n\n- **connected**: Sent immediately when the stream is established.\n  Data: `{\"status\":\"connected\"}`\n\n- **disconnecting**: Sent before the server closes the connection for graceful cycling.\n  Data: `{\"reason\":\"connection_cycle\",\"retry_ms\":100}`\n  Clients should reconnect immediately using the `since_id` of the last received event.\n\n## Connection Cycling\n\nConnections are automatically cycled every 5 minutes to prevent stale connections\nthrough proxies and load balancers. Before closing, the server sends a `disconnecting`\nevent so clients can reconnect seamlessly without missing events.\n\n## Retry Hints\n\nEach SSE event includes a `retry:` field (in milliseconds) that hints how long\nclients should wait before reconnecting if the connection is lost:\n- During active streaming: 100ms (fast reconnect)\n- During idle periods: increases with backoff up to 500ms\n- After `disconnecting` event: 100ms (immediate reconnect)\n\n## Resuming Streams\n\nUse the `since_id` query parameter to resume from a specific event. The server\nwill only send events with IDs greater than the specified value. Event IDs are\nUUID v7 (monotonically increasing), ensuring reliable ordering.\n\n## Event Type Filtering\n\nUse `types` for positive filtering (only return these types) and `exclude` for\nnegative filtering (remove these types). When both are provided, `types` narrows\nfirst, then `exclude` removes from that set. Both accept only known event types\n(max 25 per parameter). Unknown types return 400.",
+        "description": "Establishes a Server-Sent Events (SSE) connection for real-time event streaming.\n\n## Connection Lifecycle Events\n\n- **connected**: Sent immediately when the stream is established.\n  Data: `{\"status\":\"connected\"}`\n\n- **disconnecting**: Sent before the server closes the connection for graceful cycling.\n  Data: `{\"reason\":\"connection_cycle\",\"retry_ms\":100}`\n  Clients should reconnect immediately using the `since_id` of the last received event.\n\n## Connection Cycling\n\nConnections are automatically cycled every 5 minutes to prevent stale connections\nthrough proxies and load balancers. Before closing, the server sends a `disconnecting`\nevent so clients can reconnect seamlessly without missing events.\n\n## Retry Hints\n\nEach SSE event includes a `retry:` field (in milliseconds) that hints how long\nclients should wait before reconnecting if the connection is lost:\n- During active streaming: 100ms (fast reconnect)\n- During idle periods: increases with backoff up to 500ms\n- After `disconnecting` event: 100ms (immediate reconnect)\n\n## Resuming Streams\n\nUse the `since_id` query parameter to resume from a specific event. The server\nresolves the event ID to its sequence number and returns all subsequent events\nordered by sequence, ensuring reliable ordering even under concurrent writes.\n\n## Event Type Filtering\n\nUse `types` for positive filtering (only return these types) and `exclude` for\nnegative filtering (remove these types). When both are provided, `types` narrows\nfirst, then `exclude` removes from that set. Both accept only known event types\n(max 25 per parameter). Unknown types return 400.",
         "operationId": "stream_sse",
         "parameters": [
           {
@@ -3518,6 +3631,34 @@
             },
             "style": "form",
             "explode": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max events to return (backward pagination). When set, returns the last N events\n(or last N before `before_sequence`). Results are ordered oldest→newest.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "maximum": 1000,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "before_sequence",
+            "in": "query",
+            "description": "Cursor for backward pagination: only return events with sequence < this value.\nUsed with `limit` to paginate backward through event history.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32"
+            }
           }
         ],
         "responses": {
@@ -3677,6 +3818,20 @@
         ],
         "summary": "GET /v1/skills - List all skills",
         "operationId": "list_skills",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by name or description (case-insensitive substring match).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of skills",
@@ -3985,8 +4140,8 @@
         "tags": [
           "users"
         ],
-        "summary": "GET /v1/users - List all users",
-        "description": "Lists all users in the system with optional search filtering.\nRequires authentication (admin access recommended).",
+        "summary": "GET /v1/users - List users in current organization",
+        "description": "Lists users that belong to the current organization with optional search filtering.\nTM-TENANT-008: Enforces org isolation to prevent cross-tenant user enumeration.",
         "operationId": "list_users",
         "parameters": [
           {
@@ -4001,7 +4156,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of users",
+            "description": "List of users in organization",
             "content": {
               "application/json": {
                 "schema": {
@@ -4257,6 +4412,17 @@
           "parameters"
         ],
         "properties": {
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Category for tool_search namespace grouping (from parent capability)"
+          },
+          "deferrable": {
+            "$ref": "#/components/schemas/DeferrablePolicy",
+            "description": "Whether this tool's schema can be deferred via tool_search"
+          },
           "description": {
             "type": "string",
             "description": "Tool description for LLM"
@@ -4366,6 +4532,10 @@
             "type": "string",
             "description": "Display name"
           },
+          "risk_level": {
+            "$ref": "#/components/schemas/RiskLevel",
+            "description": "TM-AGENT-005: Risk level. High-risk capabilities require admin approval."
+          },
           "status": {
             "type": "string",
             "description": "Current status"
@@ -4395,6 +4565,17 @@
           "parameters"
         ],
         "properties": {
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Category for tool_search namespace grouping (from parent capability)"
+          },
+          "deferrable": {
+            "$ref": "#/components/schemas/DeferrablePolicy",
+            "description": "Whether this tool's schema can be deferred via tool_search"
+          },
           "description": {
             "type": "string",
             "description": "Tool description for LLM"
@@ -4873,6 +5054,17 @@
               }
             ]
           },
+          "external_actor": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExternalActor",
+                "description": "External actor identity (for messages from external channels like Slack)"
+              }
+            ]
+          },
           "message": {
             "$ref": "#/components/schemas/InputMessage",
             "description": "The message to create"
@@ -5083,6 +5275,15 @@
             "type": "string"
           }
         }
+      },
+      "DeferrablePolicy": {
+        "type": "string",
+        "description": "Controls whether a tool's full schema can be deferred (tool_search).\n\nWhen tool_search is active and a model supports it, tools marked as\n`Automatic` or `Always` will have `defer_loading: true` set, meaning\nonly the name+description are sent upfront and full parameter schemas\nare loaded on-demand by the model.",
+        "enum": [
+          "never",
+          "automatic",
+          "always"
+        ]
       },
       "DeleteQuery": {
         "type": "object",
@@ -5308,6 +5509,52 @@
             "content": [],
             "id": "...",
             "role": "user"
+          }
+        }
+      },
+      "ExecutionPhase": {
+        "type": "string",
+        "description": "Execution phase for assistant messages in multi-step tool-calling flows.\n\nProviders that natively support phases (OpenAI GPT-5.x) send the phase value\ndirectly in the API request. For providers without native support (Anthropic,\nGemini), the phase is still tracked internally and derived from state in the\nReasonAtom, but is not sent to the provider API.\n\nSerialized as lowercase strings for backward compatibility with existing\npersisted messages: `\"commentary\"` and `\"final_answer\"`.\n\nLegacy values `\"in_progress\"` and `\"completed\"` are accepted during\ndeserialization for backward compatibility.",
+        "enum": [
+          "Commentary",
+          "FinalAnswer"
+        ]
+      },
+      "ExternalActor": {
+        "type": "object",
+        "description": "External actor identity for messages originating from external channels\n(Slack, Discord, Teams, etc.).\n\nChannel adapters populate this to identify the sender without coupling\ncore logic to any specific channel. The ReasonAtom uses this to prefix\nuser messages so the LLM knows who is speaking.",
+        "required": [
+          "actor_id",
+          "source"
+        ],
+        "properties": {
+          "actor_id": {
+            "type": "string",
+            "description": "Opaque actor identifier from the source channel (e.g. Slack user ID \"U0123456789\")"
+          },
+          "actor_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Resolved display name (e.g. \"Alice\"). Falls back to actor_id if absent."
+          },
+          "metadata": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Channel-specific metadata (e.g. team_id, channel_id)",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "type": "string",
+            "description": "Source channel identifier (e.g. \"slack\", \"discord\")"
           }
         }
       },
@@ -5921,6 +6168,10 @@
                 "name": {
                   "type": "string",
                   "description": "Display name"
+                },
+                "risk_level": {
+                  "$ref": "#/components/schemas/RiskLevel",
+                  "description": "TM-AGENT-005: Risk level. High-risk capabilities require admin approval."
                 },
                 "status": {
                   "type": "string",
@@ -6558,6 +6809,17 @@
                   "type": "string",
                   "format": "date-time"
                 },
+                "external_actor": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExternalActor",
+                      "description": "External actor identity (for messages from external channels like Slack)"
+                    }
+                  ]
+                },
                 "id": {
                   "type": "string",
                   "description": "Unique message ID (format: message_{32-hex})",
@@ -6744,6 +7006,10 @@
                 "updated_at": {
                   "type": "string",
                   "format": "date-time"
+                },
+                "user_invocable": {
+                  "type": "boolean",
+                  "description": "Whether this skill appears as a /slash command for users"
                 },
                 "version": {
                   "type": "string"
@@ -7155,6 +7421,14 @@
             "format": "int32",
             "description": "Maximum context window size in tokens"
           },
+          "input": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Maximum input tokens (if different from context - output)"
+          },
           "output": {
             "type": "integer",
             "format": "int32",
@@ -7289,6 +7563,10 @@
             "type": "boolean",
             "description": "Whether the model supports structured output (JSON mode)"
           },
+          "supports_phases": {
+            "type": "boolean",
+            "description": "Whether the model supports native execution phases (\"commentary\" / \"final_answer\").\nWhen true, the driver sends the `phase` field on assistant messages in the wire format.\nCurrently supported by GPT-5.4+ via OpenAI Responses API."
+          },
           "temperature": {
             "type": "boolean",
             "description": "Whether temperature control is supported"
@@ -7296,6 +7574,10 @@
           "tool_call": {
             "type": "boolean",
             "description": "Whether the model supports tool/function calling"
+          },
+          "tool_search": {
+            "type": "boolean",
+            "description": "Whether the model supports tool_search (deferred tool loading).\nWhen true, the driver can use namespaces and defer_loading to reduce\ntoken usage for large tool sets. Currently supported by GPT-5.4+."
           }
         }
       },
@@ -7609,6 +7891,17 @@
             "format": "date-time",
             "description": "Timestamp when the message was created"
           },
+          "external_actor": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExternalActor",
+                "description": "External actor identity (for messages from external channels like Slack)"
+              }
+            ]
+          },
           "id": {
             "type": "string",
             "description": "Unique message ID (format: message_{32-hex})",
@@ -7620,6 +7913,17 @@
               "null"
             ],
             "description": "Message-level metadata"
+          },
+          "phase": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExecutionPhase",
+                "description": "Execution phase for this message.\n\nHelps LLMs distinguish between intermediate working commentary and completed\nanswers in multi-step tool-calling flows. Only set on agent (assistant) messages.\nProviders with native phase support (OpenAI GPT-5.x) send this value in the API\nrequest; others derive it from state but don't send it to the provider."
+              }
+            ]
           },
           "role": {
             "$ref": "#/components/schemas/MessageRole",
@@ -7804,6 +8108,15 @@
           "turn_id"
         ],
         "properties": {
+          "iteration": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Current iteration number within this turn (1-based).\nUseful for UI to show progress during multi-step tool-calling flows.",
+            "minimum": 0
+          },
           "model": {
             "type": [
               "string",
@@ -8255,6 +8568,15 @@
             "description": "The API value (e.g., \"low\", \"medium\")"
           }
         }
+      },
+      "RiskLevel": {
+        "type": "string",
+        "description": "Risk classification for capabilities (TM-AGENT-005).\n\nUsed to enforce approval requirements when assigning capabilities.",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ]
       },
       "ScheduleExecutionResponse": {
         "type": "object",
@@ -8946,6 +9268,10 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "user_invocable": {
+            "type": "boolean",
+            "description": "Whether this skill appears as a /slash command for users"
           },
           "version": {
             "type": "string"

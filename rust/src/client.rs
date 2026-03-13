@@ -92,7 +92,7 @@ impl Everruns {
         CapabilitiesClient { client: self }
     }
 
-    fn url(&self, path: &str) -> Url {
+    pub(crate) fn url(&self, path: &str) -> Url {
         // Use relative path (no leading slash) for correct joining with base URL.
         // The path parameter starts with "/" (e.g., "/agents"), so we strip it.
         let path_without_slash = path.strip_prefix('/').unwrap_or(path);
@@ -117,6 +117,12 @@ impl Everruns {
             .headers(self.headers())
             .send()
             .await?;
+
+        self.handle_response(resp).await
+    }
+
+    pub(crate) async fn get_url<T: serde::de::DeserializeOwned>(&self, url: Url) -> Result<T> {
+        let resp = self.http.get(url).headers(self.headers()).send().await?;
 
         self.handle_response(resp).await
     }
@@ -273,6 +279,13 @@ impl<'a> AgentsClient<'a> {
         self.client.get("/agents").await
     }
 
+    /// List agents matching a search query (case-insensitive name/description match)
+    pub async fn search(&self, query: &str) -> Result<ListResponse<Agent>> {
+        let mut url = self.client.url("/agents");
+        url.query_pairs_mut().append_pair("search", query);
+        self.client.get_url(url).await
+    }
+
     /// Get an agent by ID
     pub async fn get(&self, id: &str) -> Result<Agent> {
         self.client.get(&format!("/agents/{}", id)).await
@@ -342,6 +355,13 @@ impl<'a> SessionsClient<'a> {
     /// List all sessions
     pub async fn list(&self) -> Result<ListResponse<Session>> {
         self.client.get("/sessions").await
+    }
+
+    /// List sessions matching a search query (case-insensitive title match)
+    pub async fn search(&self, query: &str) -> Result<ListResponse<Session>> {
+        let mut url = self.client.url("/sessions");
+        url.query_pairs_mut().append_pair("search", query);
+        self.client.get_url(url).await
     }
 
     /// Get a session by ID
@@ -439,12 +459,49 @@ pub struct EventsClient<'a> {
     client: &'a Everruns,
 }
 
+/// Options for listing events with backward pagination
+#[derive(Debug, Clone, Default)]
+pub struct ListEventsOptions {
+    /// Positive type filter
+    pub types: Vec<String>,
+    /// Event types to exclude
+    pub exclude: Vec<String>,
+    /// Max events to return (backward pagination)
+    pub limit: Option<u32>,
+    /// Cursor for backward pagination: only return events with sequence < this value
+    pub before_sequence: Option<i32>,
+}
+
 impl<'a> EventsClient<'a> {
     /// List events in a session
     pub async fn list(&self, session_id: &str) -> Result<ListResponse<Event>> {
         self.client
             .get(&format!("/sessions/{}/events", session_id))
             .await
+    }
+
+    /// List events with options (filtering, backward pagination)
+    pub async fn list_with_options(
+        &self,
+        session_id: &str,
+        options: &ListEventsOptions,
+    ) -> Result<ListResponse<Event>> {
+        let mut url = self.client.url(&format!("/sessions/{}/events", session_id));
+        for t in &options.types {
+            url.query_pairs_mut().append_pair("types", t);
+        }
+        for e in &options.exclude {
+            url.query_pairs_mut().append_pair("exclude", e);
+        }
+        if let Some(limit) = options.limit {
+            url.query_pairs_mut()
+                .append_pair("limit", &limit.to_string());
+        }
+        if let Some(seq) = options.before_sequence {
+            url.query_pairs_mut()
+                .append_pair("before_sequence", &seq.to_string());
+        }
+        self.client.get_url(url).await
     }
 
     /// Stream events from a session via SSE

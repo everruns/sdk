@@ -57,6 +57,9 @@ pub struct CapabilityInfo {
     /// Whether this is an Agent Skill capability
     #[serde(default)]
     pub is_skill: bool,
+    /// Risk level for approval requirements (TM-AGENT-005)
+    #[serde(default)]
+    pub risk_level: Option<String>,
 }
 
 /// Agent configuration
@@ -283,6 +286,46 @@ impl CreateSessionRequest {
     }
 }
 
+/// External actor identity for messages from external channels (Slack, Discord, etc.)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ExternalActor {
+    /// Opaque actor identifier from the source channel
+    pub actor_id: String,
+    /// Source channel identifier (e.g. "slack", "discord")
+    pub source: String,
+    /// Resolved display name (falls back to actor_id if absent)
+    #[serde(default)]
+    pub actor_name: Option<String>,
+    /// Channel-specific metadata
+    #[serde(default)]
+    pub metadata: Option<std::collections::HashMap<String, String>>,
+}
+
+impl ExternalActor {
+    /// Create a new ExternalActor with required fields
+    pub fn new(actor_id: impl Into<String>, source: impl Into<String>) -> Self {
+        Self {
+            actor_id: actor_id.into(),
+            source: source.into(),
+            actor_name: None,
+            metadata: None,
+        }
+    }
+
+    /// Set the display name
+    pub fn actor_name(mut self, name: impl Into<String>) -> Self {
+        self.actor_name = Some(name.into());
+        self
+    }
+
+    /// Set metadata
+    pub fn metadata(mut self, metadata: std::collections::HashMap<String, String>) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+}
+
 /// Message in a session
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -297,6 +340,12 @@ pub struct Message {
     #[serde(default)]
     pub tags: Vec<String>,
     pub created_at: String,
+    /// External actor identity (for messages from external channels)
+    #[serde(default)]
+    pub external_actor: Option<ExternalActor>,
+    /// Execution phase for multi-step tool-calling flows
+    #[serde(default)]
+    pub phase: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -394,6 +443,9 @@ pub struct CreateMessageRequest {
     pub message: MessageInput,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub controls: Option<Controls>,
+    /// External actor identity (for messages from external channels like Slack)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_actor: Option<ExternalActor>,
 }
 
 impl CreateMessageRequest {
@@ -402,6 +454,7 @@ impl CreateMessageRequest {
         Self {
             message,
             controls: None,
+            external_actor: None,
         }
     }
 
@@ -418,6 +471,12 @@ impl CreateMessageRequest {
     /// Set the controls
     pub fn controls(mut self, controls: Controls) -> Self {
         self.controls = Some(controls);
+        self
+    }
+
+    /// Set the external actor identity
+    pub fn external_actor(mut self, actor: ExternalActor) -> Self {
+        self.external_actor = Some(actor);
         self
     }
 }

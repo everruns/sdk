@@ -3,8 +3,9 @@
 //! All output types must be serializable to support caching, logging, and persistence.
 
 use everruns_sdk::{
-    Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateSessionRequest, Event,
-    ListResponse, Message, Session, generate_agent_id, generate_harness_id,
+    Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateMessageRequest,
+    CreateSessionRequest, Event, ExternalActor, ListResponse, Message, Session, generate_agent_id,
+    generate_harness_id,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
@@ -511,4 +512,153 @@ fn test_event_type_field_rename() {
         raw.get("event_type").is_none(),
         "Serialized Event should NOT have 'event_type' field"
     );
+}
+
+/// Test ExternalActor serialization round-trip
+#[test]
+fn test_external_actor_round_trip() {
+    let json = r#"{
+        "actor_id": "U12345",
+        "source": "slack",
+        "actor_name": "Alice",
+        "metadata": {"channel": "general"}
+    }"#;
+
+    let actor: ExternalActor = serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(actor.actor_id, "U12345");
+    assert_eq!(actor.source, "slack");
+    assert_eq!(actor.actor_name.as_deref(), Some("Alice"));
+    assert_eq!(
+        actor.metadata.as_ref().unwrap().get("channel").unwrap(),
+        "general"
+    );
+
+    let serialized = serde_json::to_string(&actor).expect("should serialize");
+    let roundtrip: ExternalActor =
+        serde_json::from_str(&serialized).expect("round-trip should work");
+    assert_eq!(roundtrip.actor_id, "U12345");
+    assert_eq!(roundtrip.source, "slack");
+}
+
+/// Test ExternalActor with minimal fields
+#[test]
+fn test_external_actor_minimal() {
+    let json = r#"{"actor_id": "bot1", "source": "discord"}"#;
+    let actor: ExternalActor = serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(actor.actor_id, "bot1");
+    assert_eq!(actor.source, "discord");
+    assert!(actor.actor_name.is_none());
+    assert!(actor.metadata.is_none());
+}
+
+/// Test Message with external_actor and phase fields
+#[test]
+fn test_message_with_external_actor_and_phase() {
+    let json = r#"{
+        "id": "msg_123",
+        "session_id": "session_456",
+        "sequence": 1,
+        "role": "user",
+        "content": [{"type": "text", "text": "hello"}],
+        "tags": [],
+        "created_at": "2024-01-01T00:00:00Z",
+        "external_actor": {
+            "actor_id": "U99",
+            "source": "slack",
+            "actor_name": "Bob"
+        },
+        "phase": "Commentary"
+    }"#;
+
+    let msg: Message = serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(msg.id, "msg_123");
+    let actor = msg.external_actor.as_ref().unwrap();
+    assert_eq!(actor.actor_id, "U99");
+    assert_eq!(actor.source, "slack");
+    assert_eq!(msg.phase.as_deref(), Some("Commentary"));
+
+    // Round-trip
+    let serialized = serde_json::to_string(&msg).expect("should serialize");
+    let roundtrip: Message = serde_json::from_str(&serialized).expect("round-trip should work");
+    assert!(roundtrip.external_actor.is_some());
+    assert_eq!(roundtrip.phase.as_deref(), Some("Commentary"));
+}
+
+/// Test Message without external_actor and phase (backward compat)
+#[test]
+fn test_message_without_external_actor() {
+    let json = r#"{
+        "id": "msg_123",
+        "session_id": "session_456",
+        "sequence": 1,
+        "role": "agent",
+        "content": [{"type": "text", "text": "hi"}],
+        "tags": [],
+        "created_at": "2024-01-01T00:00:00Z"
+    }"#;
+
+    let msg: Message = serde_json::from_str(json).expect("should deserialize");
+    assert!(msg.external_actor.is_none());
+    assert!(msg.phase.is_none());
+}
+
+/// Test CapabilityInfo with risk_level
+#[test]
+fn test_capability_info_with_risk_level() {
+    let json = r#"{
+        "id": "shell_exec",
+        "name": "Shell Exec",
+        "description": "Execute shell commands",
+        "status": "active",
+        "category": "tools",
+        "dependencies": [],
+        "icon": "terminal",
+        "is_mcp": false,
+        "risk_level": "high"
+    }"#;
+
+    let info: CapabilityInfo = serde_json::from_str(json).expect("should deserialize");
+    assert_eq!(info.risk_level.as_deref(), Some("high"));
+
+    let serialized = serde_json::to_string(&info).expect("should serialize");
+    let roundtrip: CapabilityInfo =
+        serde_json::from_str(&serialized).expect("round-trip should work");
+    assert_eq!(roundtrip.risk_level.as_deref(), Some("high"));
+}
+
+/// Test CapabilityInfo without risk_level (backward compat)
+#[test]
+fn test_capability_info_without_risk_level() {
+    let json = r#"{
+        "id": "current_time",
+        "name": "Current Time",
+        "description": "Get current time",
+        "status": "active",
+        "is_mcp": false
+    }"#;
+
+    let info: CapabilityInfo = serde_json::from_str(json).expect("should deserialize");
+    assert!(info.risk_level.is_none());
+}
+
+/// Test CreateMessageRequest with external_actor
+#[test]
+fn test_create_message_request_with_external_actor() {
+    let req = CreateMessageRequest::user_text("hello from slack")
+        .external_actor(ExternalActor::new("U12345", "slack").actor_name("Alice"));
+
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+
+    assert!(raw.get("external_actor").is_some());
+    assert_eq!(raw["external_actor"]["actor_id"], "U12345");
+    assert_eq!(raw["external_actor"]["source"], "slack");
+}
+
+/// Test CreateMessageRequest without external_actor omits the field
+#[test]
+fn test_create_message_request_without_external_actor() {
+    let req = CreateMessageRequest::user_text("hello");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    assert!(!serialized.contains("external_actor"));
 }

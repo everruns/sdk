@@ -4,9 +4,16 @@ import { Everruns } from "../src/client.js";
 import {
   generateAgentId,
   generateHarnessId,
+  extractToolCalls,
+  toolResult,
+  toolError,
   type AgentCapabilityConfig,
+  type CapabilityInfo,
   type CreateAgentRequest,
+  type CreateMessageRequest,
   type CreateSessionRequest,
+  type ExternalActor,
+  type Message,
 } from "../src/models.js";
 
 describe("ApiKey", () => {
@@ -247,5 +254,165 @@ describe("CreateAgentRequest with client-supplied ID", () => {
       systemPrompt: "You are helpful.",
     };
     expect(request.id).toBeUndefined();
+  });
+});
+
+describe("ExternalActor", () => {
+  it("should serialize with all fields", () => {
+    const actor: ExternalActor = {
+      actorId: "U12345",
+      source: "slack",
+      actorName: "Alice",
+      metadata: { channel: "general" },
+    };
+    expect(actor.actorId).toBe("U12345");
+    expect(actor.source).toBe("slack");
+    expect(actor.actorName).toBe("Alice");
+    expect(actor.metadata?.channel).toBe("general");
+  });
+
+  it("should work with minimal fields", () => {
+    const actor: ExternalActor = {
+      actorId: "bot1",
+      source: "discord",
+    };
+    expect(actor.actorId).toBe("bot1");
+    expect(actor.actorName).toBeUndefined();
+    expect(actor.metadata).toBeUndefined();
+  });
+});
+
+describe("Message with new fields", () => {
+  it("should include external_actor and phase", () => {
+    const msg: Message = {
+      id: "msg_123",
+      sessionId: "session_456",
+      role: "user",
+      content: [{ type: "text", text: "hello" }],
+      createdAt: "2024-01-01T00:00:00Z",
+      externalActor: { actorId: "U99", source: "slack" },
+      phase: "Commentary",
+    };
+    expect(msg.externalActor?.actorId).toBe("U99");
+    expect(msg.phase).toBe("Commentary");
+  });
+
+  it("should work without external_actor and phase", () => {
+    const msg: Message = {
+      id: "msg_123",
+      sessionId: "session_456",
+      role: "assistant",
+      content: [{ type: "text", text: "hi" }],
+      createdAt: "2024-01-01T00:00:00Z",
+    };
+    expect(msg.externalActor).toBeUndefined();
+    expect(msg.phase).toBeUndefined();
+  });
+});
+
+describe("CapabilityInfo with riskLevel", () => {
+  it("should include riskLevel", () => {
+    const info: CapabilityInfo = {
+      id: "shell_exec",
+      name: "Shell Exec",
+      description: "Execute shell commands",
+      status: "active",
+      riskLevel: "high",
+    };
+    expect(info.riskLevel).toBe("high");
+  });
+
+  it("should work without riskLevel", () => {
+    const info: CapabilityInfo = {
+      id: "current_time",
+      name: "Current Time",
+      description: "Get current time",
+      status: "active",
+    };
+    expect(info.riskLevel).toBeUndefined();
+  });
+});
+
+describe("CreateMessageRequest with external_actor", () => {
+  it("should include external_actor", () => {
+    const req: CreateMessageRequest = {
+      message: {
+        role: "user",
+        content: [{ type: "text", text: "hello" }],
+      },
+      externalActor: { actorId: "U12345", source: "slack" },
+    };
+    expect(req.externalActor?.actorId).toBe("U12345");
+  });
+
+  it("should work without external_actor", () => {
+    const req: CreateMessageRequest = {
+      message: {
+        role: "user",
+        content: [{ type: "text", text: "hello" }],
+      },
+    };
+    expect(req.externalActor).toBeUndefined();
+  });
+});
+
+describe("extractToolCalls", () => {
+  it("should extract tool calls from event data", () => {
+    const data = {
+      message: {
+        content: [
+          { type: "text", text: "thinking..." },
+          {
+            type: "tool_call",
+            id: "tc_1",
+            name: "web_search",
+            arguments: { query: "test" },
+          },
+          {
+            type: "tool_call",
+            id: "tc_2",
+            name: "read_file",
+            arguments: { path: "/tmp/test" },
+          },
+        ],
+      },
+    };
+
+    const calls = extractToolCalls(data);
+    expect(calls).toHaveLength(2);
+    expect(calls[0].id).toBe("tc_1");
+    expect(calls[0].name).toBe("web_search");
+    expect(calls[0].arguments).toEqual({ query: "test" });
+    expect(calls[1].id).toBe("tc_2");
+    expect(calls[1].name).toBe("read_file");
+  });
+
+  it("should return empty array for no tool calls", () => {
+    const data = {
+      message: {
+        content: [{ type: "text", text: "just text" }],
+      },
+    };
+    expect(extractToolCalls(data)).toHaveLength(0);
+  });
+
+  it("should return empty array for missing message", () => {
+    expect(extractToolCalls({})).toHaveLength(0);
+  });
+});
+
+describe("toolResult and toolError helpers", () => {
+  it("should create tool result content part", () => {
+    const part = toolResult("tc_1", { answer: 42 });
+    expect(part.type).toBe("tool_result");
+    expect(part.tool_call_id).toBe("tc_1");
+    expect(part.result).toEqual({ answer: 42 });
+  });
+
+  it("should create tool error content part", () => {
+    const part = toolError("tc_1", "something failed");
+    expect(part.type).toBe("tool_result");
+    expect(part.tool_call_id).toBe("tc_1");
+    expect(part.error).toBe("something failed");
   });
 });
