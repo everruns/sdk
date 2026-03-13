@@ -12,6 +12,7 @@ import {
   Message,
   CreateMessageRequest,
   Event,
+  ListEventsOptions,
   StreamOptions,
 } from "./models.js";
 import {
@@ -190,8 +191,13 @@ class AgentsClient {
     return this.client.fetch(`/agents/${agentId}`);
   }
 
-  async list(): Promise<Agent[]> {
-    const response = await this.client.fetch<{ agents: Agent[] }>("/agents");
+  async list(options?: { search?: string }): Promise<Agent[]> {
+    const query = options?.search
+      ? `?search=${encodeURIComponent(options.search)}`
+      : "";
+    const response = await this.client.fetch<{ agents: Agent[] }>(
+      `/agents${query}`,
+    );
     return response.agents;
   }
 
@@ -251,8 +257,14 @@ class SessionsClient {
     return this.client.fetch(`/sessions/${sessionId}`);
   }
 
-  async list(agentId?: string): Promise<Session[]> {
-    const query = agentId ? `?agent_id=${agentId}` : "";
+  async list(options?: {
+    agentId?: string;
+    search?: string;
+  }): Promise<Session[]> {
+    const params = new URLSearchParams();
+    if (options?.agentId) params.set("agent_id", options.agentId);
+    if (options?.search) params.set("search", options.search);
+    const query = params.toString() ? `?${params}` : "";
     const response = await this.client.fetch<{ sessions: Session[] }>(
       `/sessions${query}`,
     );
@@ -346,7 +358,10 @@ class MessagesClient {
 class EventsClient {
   constructor(private readonly client: Everruns) {}
 
-  async list(sessionId: string, options?: StreamOptions): Promise<Event[]> {
+  async list(
+    sessionId: string,
+    options?: StreamOptions & ListEventsOptions,
+  ): Promise<Event[]> {
     const params = new URLSearchParams();
     if (options?.sinceId) params.set("since_id", options.sinceId);
     if (options?.types) {
@@ -359,6 +374,9 @@ class EventsClient {
         params.append("exclude", e);
       }
     }
+    if (options?.limit != null) params.set("limit", String(options.limit));
+    if (options?.beforeSequence != null)
+      params.set("before_sequence", String(options.beforeSequence));
     const query = params.toString() ? `?${params}` : "";
     const response = await this.client.fetch<{ events: Event[] }>(
       `/sessions/${sessionId}/events${query}`,

@@ -8,7 +8,7 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 
 ### Agents
 - `POST /v1/agents` - Create agent (server-assigned ID) or upsert with client-supplied ID
-- `GET /v1/agents` - List agents
+- `GET /v1/agents` - List agents (supports `search` query param)
 - `GET /v1/agents/{id}` - Get agent
 - `PATCH /v1/agents/{id}` - Update agent
 - `DELETE /v1/agents/{id}` - Archive agent
@@ -25,7 +25,7 @@ When `id` is omitted, the server auto-generates one (plain create).
 
 ### Sessions
 - `POST /v1/sessions` - Create session (requires harness_id, agent_id optional)
-- `GET /v1/sessions` - List sessions
+- `GET /v1/sessions` - List sessions (supports `search` query param)
 - `GET /v1/sessions/{id}` - Get session
 - `PATCH /v1/sessions/{id}` - Update session
 - `DELETE /v1/sessions/{id}` - Delete session
@@ -43,12 +43,12 @@ Agent is optional on session creation — sessions can run without an agent.
 - `GET /v1/capabilities/{id}` - Get capability details
 
 ### Messages
-- `POST /v1/sessions/{id}/messages` - Create message
+- `POST /v1/sessions/{id}/messages` - Create message (supports `external_actor` for channel identity)
 - `GET /v1/sessions/{id}/messages` - List messages
 
 ### Events
-- `GET /v1/sessions/{id}/events` - List events (polling)
-- `GET /v1/sessions/{id}/sse` - SSE stream
+- `GET /v1/sessions/{id}/events` - List events (polling, supports `limit`/`before_sequence` backward pagination)
+- `GET /v1/sessions/{id}/sse` - SSE stream (supports `limit`/`before_sequence` backward pagination)
 
 ### Images
 - `POST /v1/images` - Upload image

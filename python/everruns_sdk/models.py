@@ -39,6 +39,7 @@ class CapabilityInfo(BaseModel):
     display_name: Optional[str] = None
     features: list[str] = Field(default_factory=list)
     is_skill: bool = False
+    risk_level: Optional[str] = None
 
 
 class Agent(BaseModel):
@@ -110,6 +111,15 @@ class CreateSessionRequest(BaseModel):
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
 
 
+class ExternalActor(BaseModel):
+    """External actor identity for messages from external channels (Slack, Discord, etc.)."""
+
+    actor_id: str
+    source: str
+    actor_name: Optional[str] = None
+    metadata: Optional[dict[str, str]] = None
+
+
 class Message(BaseModel):
     """Message in a session."""
 
@@ -121,6 +131,8 @@ class Message(BaseModel):
     thinking: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     created_at: str
+    external_actor: Optional[ExternalActor] = None
+    phase: Optional[Literal["Commentary", "FinalAnswer"]] = None
 
 
 class ContentPart(BaseModel):
@@ -177,6 +189,7 @@ class CreateMessageRequest(BaseModel):
 
     message: MessageInput
     controls: Optional[Controls] = None
+    external_actor: Optional[ExternalActor] = None
 
 
 class MessageInput(BaseModel):

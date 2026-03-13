@@ -187,9 +187,16 @@ class AgentsClient:
     def __init__(self, client: Everruns):
         self._client = client
 
-    async def list(self) -> list[Agent]:
-        """List all agents."""
-        resp = await self._client._get("/agents")
+    async def list(self, *, search: Optional[str] = None) -> list[Agent]:
+        """List all agents.
+
+        Args:
+            search: Case-insensitive name/description search.
+        """
+        path = "/agents"
+        if search:
+            path += f"?search={search}"
+        resp = await self._client._get(path)
         return [Agent(**a) for a in resp.get("data", [])]
 
     async def get(self, agent_id: str) -> Agent:
@@ -291,11 +298,26 @@ class SessionsClient:
     def __init__(self, client: Everruns):
         self._client = client
 
-    async def list(self, agent_id: Optional[str] = None) -> list[Session]:
-        """List all sessions."""
-        path = "/sessions"
+    async def list(
+        self,
+        agent_id: Optional[str] = None,
+        *,
+        search: Optional[str] = None,
+    ) -> list[Session]:
+        """List all sessions.
+
+        Args:
+            agent_id: Filter by agent ID.
+            search: Case-insensitive title search.
+        """
+        params: list[str] = []
         if agent_id:
-            path += f"?agent_id={agent_id}"
+            params.append(f"agent_id={agent_id}")
+        if search:
+            params.append(f"search={search}")
+        path = "/sessions"
+        if params:
+            path += "?" + "&".join(params)
         resp = await self._client._get(path)
         return [Session(**s) for s in resp.get("data", [])]
 
@@ -416,16 +438,30 @@ class EventsClient:
         *,
         types: Optional[list[str]] = None,
         exclude: Optional[list[str]] = None,
+        limit: Optional[int] = None,
+        before_sequence: Optional[int] = None,
     ) -> list[Event]:
-        """List events in a session."""
+        """List events in a session.
+
+        Args:
+            session_id: Session ID.
+            types: Positive type filter.
+            exclude: Event types to exclude.
+            limit: Max events to return (backward pagination).
+            before_sequence: Cursor for backward pagination (sequence < value).
+        """
         path = f"/sessions/{session_id}/events"
-        params = []
+        params: list[str] = []
         if types:
             for t in types:
                 params.append(f"types={t}")
         if exclude:
             for e in exclude:
                 params.append(f"exclude={e}")
+        if limit is not None:
+            params.append(f"limit={limit}")
+        if before_sequence is not None:
+            params.append(f"before_sequence={before_sequence}")
         if params:
             path += "?" + "&".join(params)
         resp = await self._client._get(path)
