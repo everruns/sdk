@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.4] - 2026-03-14
+
+### Highlights
+
+- Session initial_files support for pre-populating session file systems
+- Sync SDK with latest everruns API changes including optional harness_id
+- Periodic maintenance with dependency updates and fixes
+
+### What's Changed
+
+* chore: periodic maintenance ([#56](https://github.com/everruns/sdk/pull/56))
+* feat: add session initial_files support ([#54](https://github.com/everruns/sdk/pull/54))
+* docs(docs): clarify latest-main workflow for worktrees ([#55](https://github.com/everruns/sdk/pull/55))
+* fix(typescript): normalize repository.url in package.json ([#52](https://github.com/everruns/sdk/pull/52))
+* fix(rust,python,typescript): make harness_id optional in session creation ([#53](https://github.com/everruns/sdk/pull/53))
+* feat(rust,python,typescript): sync SDK with latest everruns API changes ([#50](https://github.com/everruns/sdk/pull/50))
+* chore(docs): adopt everruns attribution standards ([#51](https://github.com/everruns/sdk/pull/51))
+* feat(docs): adopt /ship command and shipping workflow ([#49](https://github.com/everruns/sdk/pull/49))
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.3...v0.1.4
+
 ## [0.1.3] - 2026-02-28
 
 ### Highlights
