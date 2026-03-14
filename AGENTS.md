@@ -132,12 +132,14 @@ All commits **MUST** be attributed to the real human user, never to a coding age
 **Identity resolution** (implemented in `scripts/lib/common.sh`):
 
 1. Check current `git config user.name` / `user.email`
-2. If present and human → use as-is
-3. If missing or agent-like (matches `claude|cursor|copilot|github-actions|bot|ai-agent|openai|anthropic|gpt`) → fall back to `GIT_USER_NAME` / `GIT_USER_EMAIL` env vars
+2. **If both are present and represent a real human → use as-is. No env vars needed.**
+3. Only if missing or agent-like (matches `claude|cursor|copilot|github-actions|bot|ai-agent|openai|anthropic|gpt`) → fall back to `GIT_USER_NAME` / `GIT_USER_EMAIL` env vars
 4. If env vars also missing → **stop and ask the user** — do not commit with default/bot identity
 
+`GIT_USER_NAME` and `GIT_USER_EMAIL` are **only required** when `git config user.name` / `user.email` are missing or resolve to an agent identity. If the existing git config already has a real human name and email, no environment variables are needed.
+
 ```bash
-# Configure identity from env vars (when git config is missing or agent-like)
+# Only needed when git config is missing or agent-like:
 export GIT_USER_NAME="Your Name"
 export GIT_USER_EMAIL="your@email.com"
 
