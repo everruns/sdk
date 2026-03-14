@@ -10,7 +10,7 @@ setup:
     cd typescript && npm ci
 
 # Run all tests
-test: test-rust test-python test-typescript
+test: test-rust test-python test-typescript check-examples
 
 # Test Rust SDK
 test-rust:
@@ -23,6 +23,22 @@ test-python:
 # Test TypeScript SDK
 test-typescript:
     cd typescript && npm test
+
+# Check SDK examples compile/syntax-check
+check-examples: check-examples-rust check-examples-python check-examples-typescript
+
+# Check Rust examples
+check-examples-rust:
+    cd rust && cargo check --examples
+
+# Check Python examples
+check-examples-python:
+    cd python && uv run python -m py_compile examples/basic.py examples/initial_files.py
+
+# Check TypeScript examples
+check-examples-typescript:
+    cd typescript && npm run build
+    cd typescript && npx tsc --noEmit examples/basic.ts examples/initial-files.ts
 
 # Lint all SDKs
 lint: lint-rust lint-python lint-typescript

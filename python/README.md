@@ -41,6 +41,33 @@ async def main():
 asyncio.run(main())
 ```
 
+## Initial Files
+
+```python
+from everruns_sdk import Everruns, InitialFile
+
+client = Everruns()
+
+session = await client.sessions.create(
+    agent_id="agent_...",
+    initial_files=[
+        InitialFile(
+            path="/workspace/README.md",
+            content="# Demo Project\n",
+            encoding="text",
+            is_readonly=True,
+        ),
+        InitialFile(
+            path="/workspace/src/app.py",
+            content='print("hello")\n',
+            encoding="text",
+        ),
+    ],
+)
+```
+
+Runnable example: [`examples/initial_files.py`](examples/initial_files.py)
+
 ## License
 
 MIT

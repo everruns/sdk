@@ -248,6 +248,14 @@ class SessionsClient {
     if (request.capabilities?.length) {
       body.capabilities = request.capabilities;
     }
+    if (request.initialFiles !== undefined) {
+      body.initial_files = request.initialFiles.map((file) => ({
+        path: file.path,
+        content: file.content,
+        encoding: file.encoding,
+        is_readonly: file.isReadonly,
+      }));
+    }
     return this.client.fetch("/sessions", {
       method: "POST",
       body: JSON.stringify(body),

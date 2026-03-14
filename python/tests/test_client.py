@@ -1,10 +1,13 @@
 """Tests for Everruns SDK client."""
 
+import json
 import os
 
+import httpx
 import pytest
+import respx
 
-from everruns_sdk import ApiKey, Everruns
+from everruns_sdk import ApiError, ApiKey, Everruns, InitialFile
 
 
 def test_api_key_creation():
@@ -194,6 +197,15 @@ def test_create_session_request_with_tags():
     )
     data = req.model_dump(exclude_none=True)
     assert data["tags"] == ["debug", "urgent"]
+
+
+def test_api_error_from_response_handles_string_error_body():
+    """Test ApiError parsing when error payload is a string."""
+    err = ApiError.from_response(400, {"error": "harness not found"})
+
+    assert err.code == "unknown"
+    assert err.message == "harness not found"
+    assert err.status_code == 400
 
 
 def test_agent_deserialization_with_capabilities():
@@ -460,3 +472,59 @@ def test_create_message_request_without_external_actor():
     )
     data = req.model_dump(exclude_none=True)
     assert "external_actor" not in data
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_session_with_initial_files():
+    route = respx.post("https://custom.example.com/api/v1/sessions").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": "session_123",
+                "organization_id": "org_123",
+                "harness_id": "harness_123",
+                "agent_id": "agent_123",
+                "title": "Session with files",
+                "status": "started",
+                "created_at": "2026-03-13T00:00:00Z",
+                "updated_at": "2026-03-13T00:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        session = await client.sessions.create(
+            agent_id="agent_123",
+            title="Session with files",
+            model_id="model_123",
+            initial_files=[
+                InitialFile(
+                    path="/workspace/README.md",
+                    content="# hello\n",
+                    encoding="text",
+                    is_readonly=True,
+                )
+            ],
+        )
+    finally:
+        await client.close()
+
+    assert session.id == "session_123"
+    assert route.called
+    assert json.loads(route.calls[0].request.content) == {
+        "agent_id": "agent_123",
+        "title": "Session with files",
+        "model_id": "model_123",
+        "tags": [],
+        "capabilities": [],
+        "initial_files": [
+            {
+                "path": "/workspace/README.md",
+                "content": "# hello\n",
+                "encoding": "text",
+                "is_readonly": True,
+            }
+        ],
+    }

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiKey } from "../src/auth.js";
 import { Everruns } from "../src/client.js";
 import {
@@ -15,6 +15,11 @@ import {
   type ExternalActor,
   type Message,
 } from "../src/models.js";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 describe("ApiKey", () => {
   it("should create from string", () => {
@@ -65,6 +70,65 @@ describe("Everruns", () => {
     // Trailing slash is removed, /v1 prefix is added
     expect(client.getStreamUrl("/agents")).toBe(
       "https://custom.api.com/api/v1/agents",
+    );
+  });
+
+  it("should create session with initial files", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: "session_123",
+        harness_id: "harness_123",
+        agent_id: "agent_123",
+        status: "active",
+        created_at: "2026-03-13T00:00:00Z",
+        updated_at: "2026-03-13T00:00:00Z",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+    });
+
+    await client.sessions.create({
+      agentId: "agent_123",
+      title: "Session with files",
+      modelId: "model_123",
+      initialFiles: [
+        {
+          path: "/workspace/README.md",
+          content: "# hello\n",
+          encoding: "text",
+          isReadonly: true,
+        },
+      ],
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          agent_id: "agent_123",
+          title: "Session with files",
+          model_id: "model_123",
+          initial_files: [
+            {
+              path: "/workspace/README.md",
+              content: "# hello\n",
+              encoding: "text",
+              is_readonly: true,
+            },
+          ],
+        }),
+        headers: expect.objectContaining({
+          Authorization: "evr_test_key",
+          "Content-Type": "application/json",
+        }),
+      }),
     );
   });
 });

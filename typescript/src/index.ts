@@ -18,7 +18,7 @@
  * const session = await client.sessions.create({ agentId: agent.id });
  *
  * // Send a message
- * await client.messages.create(session.id, { text: "Hello!" });
+ * await client.messages.create(session.id, "Hello!");
  * ```
  */
 

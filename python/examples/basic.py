@@ -2,7 +2,7 @@
 
 import asyncio
 
-from everruns_sdk import AgentCapabilityConfig, Everruns, generate_harness_id
+from everruns_sdk import AgentCapabilityConfig, Everruns
 
 
 async def main():
@@ -23,10 +23,8 @@ async def main():
         print(f"  Capabilities: {agent.capabilities}")
         print(f"  Created: {agent.created_at}")
 
-        # Create a session with a harness (agent is optional)
-        harness_id = generate_harness_id()
+        # Create a session (agent is optional)
         session = await client.sessions.create(
-            harness_id,
             agent_id=agent.id,
             capabilities=[AgentCapabilityConfig(ref="current_time")],
         )
@@ -47,7 +45,7 @@ async def main():
         # Stream events
         async for event in client.events.stream(session.id):
             print(f"Event: {event.type}")
-            if event.type == "turn.completed":
+            if event.type in {"output.message.completed", "turn.completed", "turn.failed"}:
                 break
 
         # Clean up

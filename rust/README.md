@@ -11,7 +11,7 @@ cargo add everruns-sdk
 ## Quick Start
 
 \`\`\`rust
-use everruns_sdk::Everruns;
+use everruns_sdk::{CreateSessionRequest, Everruns};
 
 #[tokio::main]
 async fn main() -> Result<(), everruns_sdk::Error> {
@@ -25,7 +25,10 @@ async fn main() -> Result<(), everruns_sdk::Error> {
     ).await?;
 
     // Create a session
-    let session = client.sessions().create(&agent.id).await?;
+    let session = client
+        .sessions()
+        .create_with_options(CreateSessionRequest::new().agent_id(&agent.id))
+        .await?;
 
     // Send a message
     client.messages().create(&session.id, "Hello!").await?;
@@ -33,6 +36,29 @@ async fn main() -> Result<(), everruns_sdk::Error> {
     Ok(())
 }
 \`\`\`
+
+## Initial Files
+
+\`\`\`rust
+use everruns_sdk::{CreateSessionRequest, InitialFile};
+
+let session = client
+    .sessions()
+    .create_with_options(
+        CreateSessionRequest::new()
+            .agent_id(&agent.id)
+            .initial_files(vec![
+                InitialFile::new("/workspace/README.md", "# Demo Project\n")
+                    .encoding("text")
+                    .is_readonly(true),
+                InitialFile::new("/workspace/src/app.py", "print(\"hello\")\n")
+                    .encoding("text"),
+            ]),
+    )
+    .await?;
+\`\`\`
+
+Runnable example: [`examples/initial_files.rs`](examples/initial_files.rs)
 
 ## Authentication
 

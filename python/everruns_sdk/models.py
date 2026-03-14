@@ -100,6 +100,15 @@ class TokenUsage(BaseModel):
     cache_read_tokens: int = 0
 
 
+class InitialFile(BaseModel):
+    """Starter file copied into a new session workspace."""
+
+    path: str
+    content: str
+    encoding: Optional[Literal["text", "base64"]] = None
+    is_readonly: Optional[bool] = None
+
+
 class CreateSessionRequest(BaseModel):
     """Request to create a session."""
 
@@ -109,6 +118,7 @@ class CreateSessionRequest(BaseModel):
     model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
+    initial_files: Optional[list[InitialFile]] = None
 
 
 class ExternalActor(BaseModel):

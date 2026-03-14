@@ -52,6 +52,24 @@ agent = client.agents.create(
 session = client.sessions.create(agent_id=agent.id)
 ```
 
+### 4a. Start a Session with Initial Files
+
+```python
+from everruns_sdk import InitialFile
+
+session = client.sessions.create(
+    agent_id=agent.id,
+    initial_files=[
+        InitialFile(
+            path="/workspace/README.md",
+            content="# Demo Project\n",
+            encoding="text",
+            is_readonly=True,
+        )
+    ],
+)
+```
+
 ### 5. Send a Message
 
 ```python

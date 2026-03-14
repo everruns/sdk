@@ -5234,6 +5234,13 @@
             "description": "ID of the harness for this session (format: harness_{32-hex}).\nDefaults to the Generic harness if omitted (backward compat with older SDKs).",
             "example": "harness_01933b5a00007000800000000000001"
           },
+          "initial_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Starter files copied into the session workspace when the session is created."
+          },
           "model_id": {
             "type": [
               "string",
@@ -5322,6 +5329,32 @@
           "automatic",
           "always"
         ]
+      },
+      "InitialFile": {
+        "type": "object",
+        "description": "Starter file copied into a new session workspace.",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "File content: plain text or base64-encoded binary."
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Content encoding: \"text\" or \"base64\"."
+          },
+          "is_readonly": {
+            "type": "boolean",
+            "description": "Prevent session-side edits or deletes when true."
+          },
+          "path": {
+            "type": "string",
+            "description": "Absolute path within the session workspace."
+          }
+        }
       },
       "DeleteQuery": {
         "type": "object",

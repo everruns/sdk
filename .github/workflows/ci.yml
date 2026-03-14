@@ -40,6 +40,37 @@ jobs:
       - run: cd typescript && npm test -- --coverage
       - run: cd typescript && npm run lint && npm run build
 
+  check-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Check Rust examples compile
+        run: cd rust && cargo check --examples
+
+      - name: Install Python SDK deps
+        run: cd python && uv sync --all-extras
+      - name: Check Python examples syntax
+        run: cd python && uv run python -m py_compile examples/basic.py examples/initial_files.py
+
+      - name: Install TypeScript SDK deps
+        run: cd typescript && npm ci
+      - name: Check TypeScript examples compile
+        run: cd typescript && npx tsc --noEmit examples/basic.ts examples/initial-files.ts
+
   check-cookbooks:
     runs-on: ubuntu-latest
     steps:
@@ -176,6 +207,91 @@ jobs:
       - name: Run TypeScript cookbook (weather-tools)
         timeout-minutes: 3
         run: cd cookbook/typescript && npx tsx src/weather_tools.ts
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+
+  run-examples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Get everruns-server latest commit
+        id: everruns-sha
+        run: |
+          SHA=$(git ls-remote https://github.com/everruns/everruns.git HEAD | cut -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+      - name: Cache everruns-server binary
+        id: cache-server
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/everruns-server
+          key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
+      - name: Install everruns-server
+        if: steps.cache-server.outputs.cache-hit != 'true'
+        run: cargo install --git https://github.com/everruns/everruns everruns-server
+
+      - name: Start everruns-server
+        run: |
+          DEV_MODE=1 everruns-server &
+          sleep 5
+        env:
+          DEFAULT_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEFAULT_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Run Rust basic example
+        timeout-minutes: 3
+        run: cd rust && cargo run --example basic
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+      - name: Run Rust initial_files example
+        timeout-minutes: 3
+        run: cd rust && cargo run --example initial_files
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+
+      - name: Install Python SDK deps
+        run: cd python && uv sync --all-extras
+      - name: Run Python basic example
+        timeout-minutes: 3
+        run: cd python && uv run python examples/basic.py
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+      - name: Run Python initial_files example
+        timeout-minutes: 3
+        run: cd python && uv run python examples/initial_files.py
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+
+      - name: Install TypeScript SDK deps
+        run: cd typescript && npm ci
+      - name: Run TypeScript basic example
+        timeout-minutes: 3
+        run: cd typescript && npx tsx examples/basic.ts
+        env:
+          EVERRUNS_API_KEY: fake-key
+          EVERRUNS_API_URL: http://localhost:9000
+      - name: Run TypeScript initial-files example
+        timeout-minutes: 3
+        run: cd typescript && npx tsx examples/initial-files.ts
         env:
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000

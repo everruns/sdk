@@ -19,6 +19,7 @@ from everruns_sdk.models import (
     CreateMessageRequest,
     CreateSessionRequest,
     Event,
+    InitialFile,
     Message,
     MessageInput,
     Session,
@@ -335,6 +336,7 @@ class SessionsClient:
         model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        initial_files: Optional[list[InitialFile]] = None,
     ) -> Session:
         """Create a new session.
 
@@ -346,6 +348,7 @@ class SessionsClient:
             model_id: LLM model ID override.
             tags: Tags for organizing sessions.
             capabilities: Session-level capabilities (additive to agent capabilities).
+            initial_files: Starter files copied into the session workspace.
         """
         req = CreateSessionRequest(
             harness_id=harness_id,
@@ -354,6 +357,7 @@ class SessionsClient:
             model_id=model_id,
             tags=tags or [],
             capabilities=capabilities or [],
+            initial_files=initial_files,
         )
         resp = await self._client._post("/sessions", req.model_dump(exclude_none=True))
         return Session(**resp)

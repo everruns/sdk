@@ -90,6 +90,13 @@ export interface Session {
   isPinned?: boolean | null;
 }
 
+export interface InitialFile {
+  path: string;
+  content: string;
+  encoding?: "text" | "base64";
+  isReadonly?: boolean;
+}
+
 export interface CreateSessionRequest {
   harnessId?: string;
   agentId?: string;
@@ -97,6 +104,7 @@ export interface CreateSessionRequest {
   modelId?: string;
   tags?: string[];
   capabilities?: AgentCapabilityConfig[];
+  initialFiles?: InitialFile[];
 }
 
 /** External actor identity for messages from external channels (Slack, Discord, etc.) */

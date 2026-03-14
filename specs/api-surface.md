@@ -26,6 +26,7 @@ When `id` is omitted, the server auto-generates one (plain create).
 ### Sessions
 - `POST /v1/sessions` - Create session (harness_id optional, defaults to Generic harness)
 - `GET /v1/sessions` - List sessions (supports `search` query param)
+  Request supports optional `agent_id`, optional `title`, optional `model_id`, optional `tags`, optional `capabilities`, and optional `initial_files` starter files.
 - `GET /v1/sessions/{id}` - Get session
 - `PATCH /v1/sessions/{id}` - Update session
 - `DELETE /v1/sessions/{id}` - Delete session
