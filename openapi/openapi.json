@@ -2436,8 +2436,8 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid agent ID"
+          "404": {
+            "description": "Harness, Agent, or Model not found"
           },
           "500": {
             "description": "Internal server error"
@@ -3570,6 +3570,33 @@
         }
       }
     },
+    "/v1/sessions/{session_id}/resources": {
+      "get": {
+        "tags": [
+          "session-resources"
+        ],
+        "summary": "List lifecycle-managed resources for a session.",
+        "operationId": "list_resources",
+        "responses": {
+          "200": {
+            "description": "Session leased resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LeasedResource"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    },
     "/v1/sessions/{session_id}/sse": {
       "get": {
         "tags": [
@@ -4246,6 +4273,13 @@
             "description": "Number of failed tool calls",
             "minimum": 0
           },
+          "headline": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable headline for the completed batch"
+          },
           "success_count": {
             "type": "integer",
             "format": "int32",
@@ -4261,6 +4295,13 @@
           "tool_calls"
         ],
         "properties": {
+          "headline": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable headline for the batch"
+          },
           "tool_calls": {
             "type": "array",
             "items": {
@@ -4933,9 +4974,9 @@
             "description": "Human-readable display name for the model.",
             "example": "GPT-4o"
           },
-          "is_default": {
+          "installed": {
             "type": "boolean",
-            "description": "Whether this model should be the default for the provider.\nOnly one model per provider can be the default.",
+            "description": "Whether this model should be installed (visible in UI model pickers).",
             "example": false
           },
           "is_favorite": {
@@ -5172,9 +5213,6 @@
       "CreateSessionRequest": {
         "type": "object",
         "description": "Request to create a session",
-        "required": [
-          "harness_id"
-        ],
         "properties": {
           "agent_id": {
             "type": [
@@ -5193,7 +5231,7 @@
           },
           "harness_id": {
             "type": "string",
-            "description": "ID of the harness for this session (format: harness_{32-hex}).",
+            "description": "ID of the harness for this session (format: harness_{32-hex}).\nDefaults to the Generic harness if omitted (backward compat with older SDKs).",
             "example": "harness_01933b5a00007000800000000000001"
           },
           "model_id": {
@@ -5500,6 +5538,18 @@
           },
           {
             "$ref": "#/components/schemas/SessionIdledData"
+          },
+          {
+            "$ref": "#/components/schemas/SubagentEventData"
+          },
+          {
+            "$ref": "#/components/schemas/SubagentEventData"
+          },
+          {
+            "$ref": "#/components/schemas/SubagentEventData"
+          },
+          {
+            "$ref": "#/components/schemas/SubagentEventData"
           }
         ],
         "title": "EventData",
@@ -5970,6 +6020,135 @@
             "description": "The stored value"
           }
         }
+      },
+      "LeasedResource": {
+        "type": "object",
+        "description": "A lifecycle-managed external resource owned by a session-capable workflow.",
+        "required": [
+          "id",
+          "provider",
+          "resource_type",
+          "external_id",
+          "status",
+          "lease_duration_seconds",
+          "last_touched_at",
+          "lease_expires_at",
+          "cleanup_attempts",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "cleanup_attempts": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of cleanup attempts so far.",
+            "minimum": 0
+          },
+          "cleanup_completed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Cleanup completion time for released resources."
+          },
+          "cleanup_started_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Cleanup attempt start time when the resource is currently claimed."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional user-facing label."
+          },
+          "external_id": {
+            "type": "string",
+            "description": "Stable provider identifier for cleanup calls."
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier (format: resource_{32-hex}).",
+            "example": "resource_01933b5a00007000800000000000001"
+          },
+          "last_cleanup_error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Last cleanup error message, if any."
+          },
+          "last_touched_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last successful touch from tool activity."
+          },
+          "lease_duration_seconds": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Lease duration used when refreshing the lease.",
+            "minimum": 0
+          },
+          "lease_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Absolute deadline after which cleanup becomes due."
+          },
+          "metadata": {
+            "description": "Provider-specific non-secret metadata for UI/debugging.\nTHREAT[TM-API-015]: This field is returned by the session resources API\nand rendered in the UI, so providers must never persist bearer tokens or\nother secrets here."
+          },
+          "owner_user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "User connection owner used for provider cleanup, if known."
+          },
+          "provider": {
+            "type": "string",
+            "description": "External provider responsible for the resource (e.g. \"daytona\")."
+          },
+          "resource_type": {
+            "type": "string",
+            "description": "Provider-specific resource type (e.g. \"sandbox\", \"browser_session\")."
+          },
+          "session_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Session that currently owns the resource, if still attached.",
+            "example": "session_01933b5a00007000800000000000001"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LeasedResourceStatus",
+            "description": "Current lifecycle status."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LeasedResourceStatus": {
+        "type": "string",
+        "description": "Runtime status for a leased resource.",
+        "enum": [
+          "active",
+          "cleaning",
+          "released",
+          "cleanup_failed"
+        ]
       },
       "ListExecutionsQuery": {
         "type": "object",
@@ -6468,8 +6647,8 @@
                 "model_id",
                 "display_name",
                 "capabilities",
-                "is_default",
                 "is_favorite",
+                "installed",
                 "status",
                 "source",
                 "created_at",
@@ -6493,8 +6672,9 @@
                   "type": "string",
                   "example": "model_01933b5a00007000800000000000001"
                 },
-                "is_default": {
-                  "type": "boolean"
+                "installed": {
+                  "type": "boolean",
+                  "description": "Whether this model is installed (available in UI model pickers).\nAll models are available via API regardless of this flag."
                 },
                 "is_favorite": {
                   "type": "boolean"
@@ -6541,8 +6721,8 @@
                 "model_id",
                 "display_name",
                 "capabilities",
-                "is_default",
                 "is_favorite",
+                "installed",
                 "status",
                 "source",
                 "created_at",
@@ -6568,8 +6748,9 @@
                   "type": "string",
                   "example": "model_01933b5a00007000800000000000001"
                 },
-                "is_default": {
-                  "type": "boolean"
+                "installed": {
+                  "type": "boolean",
+                  "description": "Whether this model is installed (available in UI model pickers)"
                 },
                 "is_favorite": {
                   "type": "boolean"
@@ -7329,8 +7510,8 @@
           "model_id",
           "display_name",
           "capabilities",
-          "is_default",
           "is_favorite",
+          "installed",
           "status",
           "source",
           "created_at",
@@ -7354,8 +7535,9 @@
             "type": "string",
             "example": "model_01933b5a00007000800000000000001"
           },
-          "is_default": {
-            "type": "boolean"
+          "installed": {
+            "type": "boolean",
+            "description": "Whether this model is installed (available in UI model pickers).\nAll models are available via API regardless of this flag."
           },
           "is_favorite": {
             "type": "boolean"
@@ -7607,8 +7789,8 @@
           "model_id",
           "display_name",
           "capabilities",
-          "is_default",
           "is_favorite",
+          "installed",
           "status",
           "source",
           "created_at",
@@ -7634,8 +7816,9 @@
             "type": "string",
             "example": "model_01933b5a00007000800000000000001"
           },
-          "is_default": {
-            "type": "boolean"
+          "installed": {
+            "type": "boolean",
+            "description": "Whether this model is installed (available in UI model pickers)"
           },
           "is_favorite": {
             "type": "boolean"
@@ -8189,7 +8372,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "description": "Aggregated UI features from all active capabilities (harness + agent + session).\nComputed at read time from the capability registry.\nKnown features: \"file_system\", \"schedules\", \"secrets\", \"key_value\", \"sql_database\"."
+                  "description": "Aggregated UI features from all active capabilities (harness + agent + session).\nComputed at read time from the capability registry.\nKnown features: \"file_system\", \"schedules\", \"secrets\", \"key_value\",\n\"sql_database\", \"leased_resources\"."
                 },
                 "finished_at": {
                   "type": [
@@ -8236,6 +8419,13 @@
                   ],
                   "description": "Preview text from the last assistant response (truncated)."
                 },
+                "parent_session_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Parent session that spawned this subagent. NULL for top-level sessions."
+                },
                 "preview": {
                   "type": [
                     "string",
@@ -8254,6 +8444,31 @@
                 "status": {
                   "$ref": "#/components/schemas/SessionStatus",
                   "description": "Current execution status of the session."
+                },
+                "subagent_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Human-readable subagent name (\"Test Runner\"), unique per parent."
+                },
+                "subagent_status": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SubagentStatus",
+                      "description": "Subagent lifecycle status: spawning, running, completed, failed, cancelled."
+                    }
+                  ]
+                },
+                "subagent_task": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Original task description given to this subagent."
                 },
                 "tags": {
                   "type": "array",
@@ -8945,7 +9160,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Aggregated UI features from all active capabilities (harness + agent + session).\nComputed at read time from the capability registry.\nKnown features: \"file_system\", \"schedules\", \"secrets\", \"key_value\", \"sql_database\"."
+            "description": "Aggregated UI features from all active capabilities (harness + agent + session).\nComputed at read time from the capability registry.\nKnown features: \"file_system\", \"schedules\", \"secrets\", \"key_value\",\n\"sql_database\", \"leased_resources\"."
           },
           "finished_at": {
             "type": [
@@ -8992,6 +9207,13 @@
             ],
             "description": "Preview text from the last assistant response (truncated)."
           },
+          "parent_session_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Parent session that spawned this subagent. NULL for top-level sessions."
+          },
           "preview": {
             "type": [
               "string",
@@ -9010,6 +9232,31 @@
           "status": {
             "$ref": "#/components/schemas/SessionStatus",
             "description": "Current execution status of the session."
+          },
+          "subagent_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable subagent name (\"Test Runner\"), unique per parent."
+          },
+          "subagent_status": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SubagentStatus",
+                "description": "Subagent lifecycle status: spawning, running, completed, failed, cancelled."
+              }
+            ]
+          },
+          "subagent_task": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Original task description given to this subagent."
           },
           "tags": {
             "type": "array",
@@ -9378,6 +9625,60 @@
           }
         }
       },
+      "SubagentEventData": {
+        "type": "object",
+        "description": "Data for subagent lifecycle events (spawned, completed, failed, cancelled).",
+        "required": [
+          "subagent_session_id",
+          "subagent_name",
+          "task",
+          "status"
+        ],
+        "properties": {
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Error message (only for failed)"
+          },
+          "result": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Result summary (only for completed/failed)"
+          },
+          "status": {
+            "type": "string",
+            "description": "Subagent status (spawning, running, completed, failed, cancelled)"
+          },
+          "subagent_name": {
+            "type": "string",
+            "description": "Human-readable subagent name"
+          },
+          "subagent_session_id": {
+            "type": "string",
+            "description": "The subagent's child session ID"
+          },
+          "task": {
+            "type": "string",
+            "description": "Task description"
+          }
+        }
+      },
+      "SubagentStatus": {
+        "type": "string",
+        "description": "Subagent lifecycle status.",
+        "enum": [
+          "spawning",
+          "running",
+          "completed",
+          "failed",
+          "cancelled",
+          "max_iterations_reached"
+        ]
+      },
       "SubmitToolResultsRequest": {
         "type": "object",
         "description": "Request to submit client-side tool results",
@@ -9598,12 +9899,26 @@
           "tool_calls"
         ],
         "properties": {
+          "headline": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable headline for the requested batch"
+          },
           "tool_calls": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ToolCall"
             },
             "description": "Tool calls that need to be executed by the client"
+          },
+          "tool_summaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolCallSummary"
+            },
+            "description": "Optional summaries with display names and narration for UI rendering"
           }
         }
       },
@@ -9627,6 +9942,13 @@
           },
           "name": {
             "type": "string"
+          },
+          "narration": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable narration for timeline rendering"
           }
         }
       },
@@ -9662,6 +9984,13 @@
               "null"
             ],
             "description": "Error message if failed"
+          },
+          "narration": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable narration for timeline rendering"
           },
           "result": {
             "type": [
@@ -9809,6 +10138,13 @@
               "null"
             ],
             "description": "Human-readable display name for UI rendering"
+          },
+          "narration": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable narration for timeline rendering"
           },
           "tool_call": {
             "$ref": "#/components/schemas/ToolCall",
@@ -10113,12 +10449,12 @@
             "description": "Human-readable display name for the model.",
             "example": "GPT-4o Mini"
           },
-          "is_default": {
+          "installed": {
             "type": [
               "boolean",
               "null"
             ],
-            "description": "Whether this model should be the default for the provider.",
+            "description": "Whether this model should be installed (visible in UI model pickers).",
             "example": true
           },
           "is_favorite": {
@@ -10506,6 +10842,10 @@
     {
       "name": "filesystem",
       "description": "Session virtual filesystem endpoints"
+    },
+    {
+      "name": "session-resources",
+      "description": "Session leased-resource visibility endpoints"
     },
     {
       "name": "mcp-servers",

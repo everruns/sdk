@@ -18,9 +18,8 @@
 //!         "You are a helpful assistant."
 //!     ).await?;
 //!
-//!     // Create a session with a harness
-//!     let harness_id = everruns_sdk::generate_harness_id();
-//!     let session = client.sessions().create(&harness_id).await?;
+//!     // Create a session
+//!     let session = client.sessions().create().await?;
 //!
 //!     // Send a message
 //!     client.messages().create(&session.id, "Hello!").await?;

@@ -5,7 +5,7 @@
  * Run with verbose: npx tsx src/main.ts --verbose
  */
 
-import { Everruns, generateHarnessId } from "@everruns/sdk";
+import { Everruns } from "@everruns/sdk";
 
 async function main() {
   const verbose =
@@ -20,9 +20,7 @@ async function main() {
   console.log(`Created agent: ${agent.id}`);
 
   // Create session
-  const harnessId = generateHarnessId();
   const session = await client.sessions.create({
-    harnessId,
     agentId: agent.id,
   });
   console.log(`Created session: ${session.id}\n`);

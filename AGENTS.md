@@ -43,24 +43,26 @@ curl -s "https://api.github.com/repos/everruns/everruns/contents"
 curl -s "https://raw.githubusercontent.com/everruns/everruns/main/path/to/file"
 ```
 
-### Cloud Dev Env
+### Cloud Agent Start
 
-Fresh cloud environment? Run init script first:
+Fresh cloud environment? Install tools, then use Doppler for all secret-backed commands:
 
 ```bash
-./scripts/init-cloud-env.sh   # Installs just, gh CLI
+./scripts/init-cloud-env.sh   # Installs just, gh CLI, doppler
 export PATH="$HOME/.cargo/bin:$PATH"  # Apply PATH in current shell
 ```
 
-Script persists PATH in shell profile for future sessions.
-
-### Cloud Agent Start
+Use Doppler for GitHub CLI and any command needing secrets:
 
 ```bash
-just setup              # Install deps for all SDKs
-just test               # Run all tests
-just lint               # Run all linters
+export GH_TOKEN=$(doppler secrets get GITHUB_TOKEN --plain)
+gh auth status                # Verify GitHub access
+just setup                    # Install deps for all SDKs
+just test                     # Run all tests
+just lint                     # Run all linters
 ```
+
+`DOPPLER_TOKEN` is pre-set in cloud environments. All secrets (`GITHUB_TOKEN`, API keys) live in Doppler.
 
 ### Per-Language Dev
 

@@ -91,7 +91,7 @@ export interface Session {
 }
 
 export interface CreateSessionRequest {
-  harnessId: string;
+  harnessId?: string;
   agentId?: string;
   title?: string;
   modelId?: string;

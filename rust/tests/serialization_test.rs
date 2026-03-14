@@ -341,7 +341,8 @@ fn test_create_agent_request_without_capabilities() {
 /// Test CreateSessionRequest serialization with capabilities
 #[test]
 fn test_create_session_request_with_capabilities() {
-    let req = CreateSessionRequest::new("harness_abc123")
+    let req = CreateSessionRequest::new()
+        .harness_id("harness_abc123")
         .agent_id("agent_123")
         .capabilities(vec![AgentCapabilityConfig::new("current_time")]);
 
@@ -355,14 +356,14 @@ fn test_create_session_request_with_capabilities() {
     assert_eq!(caps[0]["ref"], "current_time");
 }
 
-/// Test CreateSessionRequest without agent_id omits it
+/// Test CreateSessionRequest without optional fields omits them
 #[test]
 fn test_create_session_request_without_agent_id() {
-    let req = CreateSessionRequest::new("harness_abc123");
+    let req = CreateSessionRequest::new();
     let serialized = serde_json::to_string(&req).expect("should serialize");
     let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
 
-    assert_eq!(raw["harness_id"], "harness_abc123");
+    assert!(raw.get("harness_id").is_none());
     assert!(raw.get("agent_id").is_none());
     assert!(!serialized.contains("capabilities"));
 }
@@ -370,7 +371,8 @@ fn test_create_session_request_without_agent_id() {
 /// Test CreateSessionRequest with tags
 #[test]
 fn test_create_session_request_with_tags() {
-    let req = CreateSessionRequest::new("harness_abc123")
+    let req = CreateSessionRequest::new()
+        .harness_id("harness_abc123")
         .tags(vec!["debug".to_string(), "urgent".to_string()]);
 
     let serialized = serde_json::to_string(&req).expect("should serialize");
