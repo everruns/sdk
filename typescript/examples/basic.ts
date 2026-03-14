@@ -56,6 +56,7 @@ async function main() {
       event.type === "turn.completed" ||
       event.type === "turn.failed"
     ) {
+      stream.abort();
       break;
     }
   }
