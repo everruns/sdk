@@ -29,7 +29,7 @@ export EVERRUNS_API_KEY=evr_your_key_here
 ### Rust
 
 ```rust
-use everruns_sdk::Everruns;
+use everruns_sdk::{CreateSessionRequest, Everruns};
 use futures::StreamExt;
 
 #[tokio::main]
@@ -43,7 +43,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ).await?;
 
     // Start a session
-    let session = client.sessions().create(&agent.id).await?;
+    let session = client
+        .sessions()
+        .create_with_options(CreateSessionRequest::new().agent_id(&agent.id))
+        .await?;
 
     // Send a message
     client.messages().create(&session.id, "Hello!").await?;
@@ -112,7 +115,7 @@ async function main() {
   const session = await client.sessions.create({ agentId: agent.id });
 
   // Send a message
-  await client.messages.create(session.id, { text: "Hello!" });
+  await client.messages.create(session.id, "Hello!");
 
   // Stream the response
   for await (const event of client.events.stream(session.id)) {
@@ -192,8 +195,11 @@ See the [`cookbook/`](cookbook/) directory for runnable examples, including a co
 
 Each SDK also has basic examples:
 - [`rust/examples/basic.rs`](rust/examples/basic.rs)
+- [`rust/examples/initial_files.rs`](rust/examples/initial_files.rs)
 - [`python/examples/basic.py`](python/examples/basic.py)
+- [`python/examples/initial_files.py`](python/examples/initial_files.py)
 - [`typescript/examples/basic.ts`](typescript/examples/basic.ts)
+- [`typescript/examples/initial-files.ts`](typescript/examples/initial-files.ts)
 
 ## Development
 

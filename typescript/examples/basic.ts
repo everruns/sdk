@@ -5,7 +5,7 @@
  * export EVERRUNS_API_KEY=evr_...
  * npx tsx examples/basic.ts
  */
-import { Everruns, generateHarnessId } from "@everruns/sdk";
+import { Everruns, generateHarnessId } from "../src/index.js";
 
 async function main() {
   // Create client using EVERRUNS_API_KEY env var

@@ -225,6 +225,42 @@ pub struct TokenUsage {
     pub cache_read_tokens: u64,
 }
 
+/// Starter file copied into a new session workspace
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct InitialFile {
+    pub path: String,
+    pub content: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub encoding: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_readonly: Option<bool>,
+}
+
+impl InitialFile {
+    /// Create a new initial file with required fields
+    pub fn new(path: impl Into<String>, content: impl Into<String>) -> Self {
+        Self {
+            path: path.into(),
+            content: content.into(),
+            encoding: None,
+            is_readonly: None,
+        }
+    }
+
+    /// Set the content encoding
+    pub fn encoding(mut self, encoding: impl Into<String>) -> Self {
+        self.encoding = Some(encoding.into());
+        self
+    }
+
+    /// Set the readonly flag
+    pub fn is_readonly(mut self, is_readonly: bool) -> Self {
+        self.is_readonly = Some(is_readonly);
+        self
+    }
+}
+
 /// Request to create a session
 #[derive(Debug, Clone, Serialize)]
 #[non_exhaustive]
@@ -241,6 +277,8 @@ pub struct CreateSessionRequest {
     pub tags: Vec<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub capabilities: Vec<AgentCapabilityConfig>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub initial_files: Vec<InitialFile>,
 }
 
 impl Default for CreateSessionRequest {
@@ -259,6 +297,7 @@ impl CreateSessionRequest {
             model_id: None,
             tags: vec![],
             capabilities: vec![],
+            initial_files: vec![],
         }
     }
 
@@ -295,6 +334,12 @@ impl CreateSessionRequest {
     /// Set the capabilities
     pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
         self.capabilities = capabilities;
+        self
+    }
+
+    /// Set the initial files copied into the session workspace
+    pub fn initial_files(mut self, initial_files: Vec<InitialFile>) -> Self {
+        self.initial_files = initial_files;
         self
     }
 }
