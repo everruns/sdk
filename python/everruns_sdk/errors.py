@@ -1,5 +1,7 @@
 """Error types for Everruns SDK."""
 
+from typing import Any
+
 
 class EverrunsError(Exception):
     """Base exception for Everruns SDK errors."""
@@ -23,11 +25,15 @@ class ApiError(EverrunsError):
         super().__init__(f"{code}: {message}")
 
     @classmethod
-    def from_response(cls, status_code: int, body: dict) -> "ApiError":
+    def from_response(cls, status_code: int, body: Any) -> "ApiError":
         """Create an ApiError from an API response."""
-        error = body.get("error", {})
-        code = error.get("code", "unknown")
-        message = error.get("message", str(body))
+        error = body.get("error", {}) if isinstance(body, dict) else {}
+        if isinstance(error, dict):
+            code = error.get("code", "unknown")
+            message = error.get("message", str(body))
+        else:
+            code = "unknown"
+            message = str(error)
 
         # Return specific error types for common status codes
         if status_code == 401:

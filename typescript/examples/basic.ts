@@ -5,7 +5,7 @@
  * export EVERRUNS_API_KEY=evr_...
  * npx tsx examples/basic.ts
  */
-import { Everruns, generateHarnessId } from "../src/index.js";
+import { Everruns } from "../src/index.js";
 
 async function main() {
   // Create client using EVERRUNS_API_KEY env var
@@ -23,10 +23,8 @@ async function main() {
   console.log("  Capabilities:", agent.capabilities);
   console.log("  Created:", agent.createdAt);
 
-  // Create a session with a harness (agent is optional)
-  const harnessId = generateHarnessId();
+  // Create a session (agent is optional)
   const session = await client.sessions.create({
-    harnessId,
     agentId: agent.id,
     capabilities: [{ ref: "current_time" }],
   });

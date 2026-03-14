@@ -7,7 +7,7 @@ import httpx
 import pytest
 import respx
 
-from everruns_sdk import ApiKey, Everruns, InitialFile
+from everruns_sdk import ApiError, ApiKey, Everruns, InitialFile
 
 
 def test_api_key_creation():
@@ -197,6 +197,15 @@ def test_create_session_request_with_tags():
     )
     data = req.model_dump(exclude_none=True)
     assert data["tags"] == ["debug", "urgent"]
+
+
+def test_api_error_from_response_handles_string_error_body():
+    """Test ApiError parsing when error payload is a string."""
+    err = ApiError.from_response(400, {"error": "harness not found"})
+
+    assert err.code == "unknown"
+    assert err.message == "harness not found"
+    assert err.status_code == 400
 
 
 def test_agent_deserialization_with_capabilities():
