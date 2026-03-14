@@ -161,6 +161,33 @@ def test_create_agent_request_with_capabilities():
     assert data["capabilities"][1]["config"] == {"timeout": 30}
 
 
+def test_create_agent_request_with_initial_files():
+    """Test CreateAgentRequest serialization with initial_files."""
+    from everruns_sdk.models import CreateAgentRequest
+
+    req = CreateAgentRequest(
+        name="Starter Agent",
+        system_prompt="You keep files ready.",
+        initial_files=[
+            InitialFile(
+                path="/workspace/README.md",
+                content="# starter\n",
+                encoding="text",
+                is_readonly=True,
+            )
+        ],
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["initial_files"] == [
+        {
+            "path": "/workspace/README.md",
+            "content": "# starter\n",
+            "encoding": "text",
+            "is_readonly": True,
+        }
+    ]
+
+
 def test_create_session_request_with_capabilities():
     """Test CreateSessionRequest serialization with capabilities."""
     from everruns_sdk.models import AgentCapabilityConfig, CreateSessionRequest
@@ -197,6 +224,15 @@ def test_create_session_request_with_tags():
     )
     data = req.model_dump(exclude_none=True)
     assert data["tags"] == ["debug", "urgent"]
+
+
+def test_create_session_request_with_locale():
+    """Test CreateSessionRequest serialization with locale."""
+    from everruns_sdk.models import CreateSessionRequest
+
+    req = CreateSessionRequest(locale="uk-UA")
+    data = req.model_dump(exclude_none=True)
+    assert data["locale"] == "uk-UA"
 
 
 def test_api_error_from_response_handles_string_error_body():
@@ -528,3 +564,88 @@ async def test_create_session_with_initial_files():
             }
         ],
     }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_agent_with_initial_files():
+    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": "agent_123",
+                "name": "Starter Agent",
+                "system_prompt": "You keep files ready.",
+                "initial_files": [
+                    {
+                        "path": "/workspace/README.md",
+                        "content": "# starter\n",
+                        "encoding": "text",
+                        "is_readonly": True,
+                    }
+                ],
+                "status": "active",
+                "created_at": "2026-03-13T00:00:00Z",
+                "updated_at": "2026-03-13T00:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        agent = await client.agents.create(
+            "Starter Agent",
+            "You keep files ready.",
+            initial_files=[
+                InitialFile(
+                    path="/workspace/README.md",
+                    content="# starter\n",
+                    encoding="text",
+                    is_readonly=True,
+                )
+            ],
+        )
+    finally:
+        await client.close()
+
+    assert agent.id == "agent_123"
+    assert route.called
+    assert json.loads(route.calls[0].request.content)["initial_files"] == [
+        {
+            "path": "/workspace/README.md",
+            "content": "# starter\n",
+            "encoding": "text",
+            "is_readonly": True,
+        }
+    ]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_session_with_locale():
+    route = respx.post("https://custom.example.com/api/v1/sessions").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": "session_456",
+                "organization_id": "org_123",
+                "harness_id": "harness_123",
+                "title": "Localized session",
+                "locale": "uk-UA",
+                "status": "started",
+                "created_at": "2026-03-13T00:00:00Z",
+                "updated_at": "2026-03-13T00:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        session = await client.sessions.create(title="Localized session", locale="uk-UA")
+    finally:
+        await client.close()
+
+    assert session.id == "session_456"
+    assert session.locale == "uk-UA"
+    assert route.called
+    assert json.loads(route.calls[0].request.content)["locale"] == "uk-UA"

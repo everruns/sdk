@@ -4,14 +4,14 @@
 
 use everruns_sdk::{
     Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateMessageRequest,
-    CreateSessionRequest, Event, ExternalActor, ListResponse, Message, Session, generate_agent_id,
-    generate_harness_id,
+    CreateSessionRequest, Event, ExternalActor, InitialFile, ListResponse, Message, Session,
+    generate_agent_id, generate_harness_id,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
 #[test]
 fn test_list_response_agent_serialization() {
-    let json = r#"{
+    let json = r##"{
         "data": [{
             "id": "agent_123",
             "name": "Test Agent",
@@ -20,6 +20,11 @@ fn test_list_response_agent_serialization() {
             "default_model_id": null,
             "tags": ["test"],
             "capabilities": [{"ref": "current_time"}, {"ref": "web_fetch", "config": {"timeout": 30}}],
+            "initial_files": [{
+                "path": "/workspace/README.md",
+                "content": "# starter\n",
+                "encoding": "text"
+            }],
             "status": "active",
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z"
@@ -27,13 +32,14 @@ fn test_list_response_agent_serialization() {
         "total": 1,
         "offset": 0,
         "limit": 20
-    }"#;
+    }"##;
 
     // Deserialize
     let response: ListResponse<Agent> =
         serde_json::from_str(json).expect("ListResponse<Agent> should deserialize");
     assert_eq!(response.data.len(), 1);
     assert_eq!(response.data[0].id, "agent_123");
+    assert_eq!(response.data[0].initial_files.len(), 1);
 
     // Serialize back (this is the key test - output types must be serializable)
     let serialized =
@@ -59,6 +65,7 @@ fn test_list_response_session_serialization() {
             "agent_id": "agent_123",
             "title": "Test Session",
             "tags": [],
+            "locale": "uk-UA",
             "model_id": "claude-3-opus",
             "status": "active",
             "created_at": "2024-01-01T00:00:00Z",
@@ -85,7 +92,34 @@ fn test_list_response_session_serialization() {
     assert_eq!(roundtrip.data[0].id, "session_456");
     assert_eq!(roundtrip.data[0].harness_id, "harness_abc123");
     assert_eq!(roundtrip.data[0].agent_id.as_deref(), Some("agent_123"));
+    assert_eq!(roundtrip.data[0].locale.as_deref(), Some("uk-UA"));
     assert!(roundtrip.data[0].usage.is_some());
+}
+
+#[test]
+fn test_create_agent_request_with_initial_files() {
+    let request =
+        CreateAgentRequest::new("Starter Agent", "You keep files ready.").initial_files(vec![
+            InitialFile::new("/workspace/README.md", "# starter\n").encoding("text"),
+        ]);
+
+    let value = serde_json::to_value(&request).expect("request should serialize");
+    assert_eq!(
+        value.get("initial_files"),
+        Some(&serde_json::json!([{
+            "path": "/workspace/README.md",
+            "content": "# starter\n",
+            "encoding": "text"
+        }]))
+    );
+}
+
+#[test]
+fn test_create_session_request_with_locale() {
+    let request = CreateSessionRequest::new().locale("uk-UA");
+
+    let value = serde_json::to_value(&request).expect("request should serialize");
+    assert_eq!(value.get("locale"), Some(&serde_json::json!("uk-UA")));
 }
 
 /// Test Session without agent_id (agent is optional)

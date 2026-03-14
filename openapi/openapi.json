@@ -4355,6 +4355,13 @@
             "description": "External identifier (agent_<32-hex>). Shown as \"id\" in API.\nClient-supplied or auto-generated.",
             "example": "agent_01933b5a000070008000000000000001"
           },
+          "initial_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Starter files copied into each new session for this agent."
+          },
           "name": {
             "type": "string",
             "description": "Display name of the agent."
@@ -4872,6 +4879,13 @@
             "description": "Client-supplied agent ID (format: agent_{32-hex}).\nIf not provided, one is auto-generated.",
             "example": "agent_01933b5a00007000800000000000001"
           },
+          "initial_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Starter files copied into each new session for this agent."
+          },
           "name": {
             "type": "string",
             "description": "The name of the agent. Used for display purposes.",
@@ -5234,12 +5248,13 @@
             "description": "ID of the harness for this session (format: harness_{32-hex}).\nDefaults to the Generic harness if omitted (backward compat with older SDKs).",
             "example": "harness_01933b5a00007000800000000000001"
           },
-          "initial_files": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InitialFile"
-            },
-            "description": "Starter files copied into the session workspace when the session is created."
+          "locale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Session locale (BCP 47, e.g. `uk-UA`).",
+            "example": "uk-UA"
           },
           "model_id": {
             "type": [
@@ -5329,32 +5344,6 @@
           "automatic",
           "always"
         ]
-      },
-      "InitialFile": {
-        "type": "object",
-        "description": "Starter file copied into a new session workspace.",
-        "required": [
-          "path",
-          "content"
-        ],
-        "properties": {
-          "content": {
-            "type": "string",
-            "description": "File content: plain text or base64-encoded binary."
-          },
-          "encoding": {
-            "type": "string",
-            "description": "Content encoding: \"text\" or \"base64\"."
-          },
-          "is_readonly": {
-            "type": "boolean",
-            "description": "Prevent session-side edits or deletes when true."
-          },
-          "path": {
-            "type": "string",
-            "description": "Absolute path within the session workspace."
-          }
-        }
       },
       "DeleteQuery": {
         "type": "object",
@@ -5919,6 +5908,32 @@
           }
         }
       },
+      "InitialFile": {
+        "type": "object",
+        "description": "Starter file copied into a new session from an agent or harness.",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "File content: plain text or base64-encoded binary."
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Content encoding: `text` or `base64`."
+          },
+          "is_readonly": {
+            "type": "boolean",
+            "description": "Prevent session-side edits or deletes when true."
+          },
+          "path": {
+            "type": "string",
+            "description": "Absolute path within the session workspace. `/workspace` prefix is accepted."
+          }
+        }
+      },
       "InputContentPart": {
         "oneOf": [
           {
@@ -6265,6 +6280,13 @@
                   "type": "string",
                   "description": "External identifier (agent_<32-hex>). Shown as \"id\" in API.\nClient-supplied or auto-generated.",
                   "example": "agent_01933b5a000070008000000000000001"
+                },
+                "initial_files": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InitialFile"
+                  },
+                  "description": "Starter files copied into each new session for this agent."
                 },
                 "name": {
                   "type": "string",
@@ -8432,6 +8454,13 @@
                   ],
                   "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context."
                 },
+                "locale": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`)."
+                },
                 "model_id": {
                   "type": [
                     "string",
@@ -9219,6 +9248,13 @@
               "null"
             ],
             "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context."
+          },
+          "locale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`)."
           },
           "model_id": {
             "type": [
@@ -10377,6 +10413,16 @@
             "description": "A human-readable description of what the agent does.",
             "example": "Updated description for the agent"
           },
+          "initial_files": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Starter files copied into each new session for this agent."
+          },
           "name": {
             "type": [
               "string",
@@ -10733,6 +10779,14 @@
         "type": "object",
         "description": "Request to update a session. Only provided fields will be updated.",
         "properties": {
+          "locale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Session locale (BCP 47, e.g. `uk-UA`).",
+            "example": "uk-UA"
+          },
           "tags": {
             "type": [
               "array",

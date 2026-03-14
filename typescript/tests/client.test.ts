@@ -131,6 +131,103 @@ describe("Everruns", () => {
       }),
     );
   });
+
+  it("should create agent with initial files", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: "agent_123",
+        name: "Starter Agent",
+        system_prompt: "You keep files ready.",
+        initial_files: [
+          {
+            path: "/workspace/README.md",
+            content: "# starter\n",
+            encoding: "text",
+            is_readonly: true,
+          },
+        ],
+        status: "active",
+        created_at: "2026-03-13T00:00:00Z",
+        updated_at: "2026-03-13T00:00:00Z",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+    });
+
+    await client.agents.create({
+      name: "Starter Agent",
+      systemPrompt: "You keep files ready.",
+      initialFiles: [
+        {
+          path: "/workspace/README.md",
+          content: "# starter\n",
+          encoding: "text",
+          isReadonly: true,
+        },
+      ],
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/agents",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          name: "Starter Agent",
+          system_prompt: "You keep files ready.",
+          initial_files: [
+            {
+              path: "/workspace/README.md",
+              content: "# starter\n",
+              encoding: "text",
+              is_readonly: true,
+            },
+          ],
+        }),
+      }),
+    );
+  });
+
+  it("should create session with locale", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: "session_456",
+        harness_id: "harness_123",
+        title: "Localized session",
+        locale: "uk-UA",
+        status: "active",
+        created_at: "2026-03-13T00:00:00Z",
+        updated_at: "2026-03-13T00:00:00Z",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+    });
+
+    await client.sessions.create({
+      title: "Localized session",
+      locale: "uk-UA",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          title: "Localized session",
+          locale: "uk-UA",
+        }),
+      }),
+    );
+  });
 });
 
 describe("AgentCapabilityConfig", () => {

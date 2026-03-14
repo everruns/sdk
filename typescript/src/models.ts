@@ -34,6 +34,7 @@ export interface Agent {
   systemPrompt: string;
   model?: string;
   capabilities?: AgentCapabilityConfig[];
+  initialFiles?: InitialFile[];
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +46,7 @@ export interface CreateAgentRequest {
   systemPrompt: string;
   model?: string;
   capabilities?: AgentCapabilityConfig[];
+  initialFiles?: InitialFile[];
 }
 
 /**
@@ -78,6 +80,7 @@ export interface Session {
   status: "started" | "active" | "idle" | "waitingfortoolresults";
   title?: string | null;
   tags?: string[];
+  locale?: string | null;
   modelId?: string | null;
   capabilities?: AgentCapabilityConfig[];
   createdAt: string;
@@ -101,6 +104,7 @@ export interface CreateSessionRequest {
   harnessId?: string;
   agentId?: string;
   title?: string;
+  locale?: string;
   modelId?: string;
   tags?: string[];
   capabilities?: AgentCapabilityConfig[];
