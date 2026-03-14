@@ -3,7 +3,7 @@
 //! Run: cargo run
 //! Run with verbose: cargo run -- --verbose
 
-use everruns_sdk::{CreateSessionRequest, Everruns, generate_harness_id};
+use everruns_sdk::Everruns;
 use futures::StreamExt;
 
 #[tokio::main]
@@ -22,11 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Created agent: {}", agent.id);
 
     // Create session
-    let harness_id = generate_harness_id();
-    let session = client
-        .sessions()
-        .create_with_options(CreateSessionRequest::new().harness_id(&harness_id))
-        .await?;
+    let session = client.sessions().create().await?;
     println!("Created session: {}\n", session.id);
 
     // Send message
