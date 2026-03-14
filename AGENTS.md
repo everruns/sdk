@@ -104,12 +104,13 @@ Use the [`/ship`](.claude/commands/ship.md) command to execute the full shipping
 
 ### Pre-PR Checklist
 
-1. Formatters and linters: `just lint`
-2. Tests: `just test`
-3. Rebase on main: `git fetch origin main && git rebase origin/main`
-4. Smoke test new functionality
-5. CI green before merge
-6. Resolve all PR comments: `gh pr view <num> --repo everruns/sdk --comments`
+1. Pre-push checks: `just pre-push` (lint + commit attribution ~30s)
+2. Formatters and linters: `just lint`
+3. Tests: `just test`
+4. Rebase on main: `git fetch origin main && git rebase origin/main`
+5. Smoke test new functionality
+6. CI green before merge
+7. Resolve all PR comments: `gh pr view <num> --repo everruns/sdk --comments`
 
 ### CI
 
@@ -128,13 +129,28 @@ Scopes: rust, python, typescript, docs, ci
 
 All commits **MUST** be attributed to the real human user, never to a coding agent or bot.
 
-- If current git config already resolves to a real human identity, use it as-is
-- If current git config is missing or agent-like, set `GIT_USER_NAME` and `GIT_USER_EMAIL`, then configure git:
-  ```bash
-  git config user.name "$GIT_USER_NAME"
-  git config user.email "$GIT_USER_EMAIL"
-  ```
-- Only require these variables when the current identity is missing or agent-like. If missing, **stop and ask the user** — do not commit with default/bot identity
+**Identity resolution** (implemented in `scripts/lib/common.sh`):
+
+1. Check current `git config user.name` / `user.email`
+2. If present and human → use as-is
+3. If missing or agent-like (matches `claude|cursor|copilot|github-actions|bot|ai-agent|openai|anthropic|gpt`) → fall back to `GIT_USER_NAME` / `GIT_USER_EMAIL` env vars
+4. If env vars also missing → **stop and ask the user** — do not commit with default/bot identity
+
+```bash
+# Configure identity from env vars (when git config is missing or agent-like)
+export GIT_USER_NAME="Your Name"
+export GIT_USER_EMAIL="your@email.com"
+
+# Or use the helper directly
+source scripts/lib/common.sh
+configure_commit_git_identity_if_needed
+```
+
+**Enforcement:**
+
+- `just pre-push` validates commit identity + scans outgoing commits for agent authors
+- `just test-git-identity` runs the identity helper test suite
+- CI and pre-push checks will reject agent-authored commits
 
 **Prohibited:**
 

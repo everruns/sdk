@@ -75,6 +75,14 @@ coverage:
     cd python && uv run pytest --cov=everruns_sdk --cov-report=xml
     cd typescript && npm test -- --coverage
 
+# Pre-push checks (~30s): lint + commit attribution
+pre-push:
+    bash scripts/lib/pre-push.sh
+
+# Test git identity helpers
+test-git-identity:
+    bash scripts/test-git-identity.sh
+
 # Pre-PR checks
 pre-pr: lint test
     @echo "All checks passed!"
