@@ -295,6 +295,3 @@ jobs:
         env:
           EVERRUNS_API_KEY: fake-key
           EVERRUNS_API_URL: http://localhost:9000
-        env:
-          EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
