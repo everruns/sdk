@@ -1,5 +1,7 @@
 ## Coding-agent guidance
 
+Always make sure you are working on top of latest main from remote. Especially in worktrees: fetch `origin/main`, branch from it, rebase onto it before shipping.
+
 ### Style
 
 Telegraph. Drop filler/grammar. Min tokens.
