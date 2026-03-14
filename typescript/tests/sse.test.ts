@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { EventStream, READ_TIMEOUT_MS, DEFAULT_IDLE_TIMEOUT_MS } from "../src/sse.js";
+import {
+  EventStream,
+  READ_TIMEOUT_MS,
+  DEFAULT_IDLE_TIMEOUT_MS,
+} from "../src/sse.js";
 
 describe("EventStream", () => {
   describe("configuration", () => {

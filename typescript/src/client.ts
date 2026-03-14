@@ -239,6 +239,9 @@ class SessionsClient {
     if (request.title) {
       body.title = request.title;
     }
+    if (request.locale) {
+      body.locale = request.locale;
+    }
     if (request.modelId) {
       body.model_id = request.modelId;
     }
@@ -449,6 +452,14 @@ function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
   }
   if (request.capabilities?.length) {
     body.capabilities = request.capabilities;
+  }
+  if (request.initialFiles?.length) {
+    body.initial_files = request.initialFiles.map((file) => ({
+      path: file.path,
+      content: file.content,
+      encoding: file.encoding,
+      is_readonly: file.isReadonly,
+    }));
   }
   return body;
 }

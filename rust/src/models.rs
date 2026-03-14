@@ -77,6 +77,8 @@ pub struct Agent {
     pub tags: Vec<String>,
     #[serde(default)]
     pub capabilities: Vec<AgentCapabilityConfig>,
+    #[serde(default)]
+    pub initial_files: Vec<InitialFile>,
     pub status: AgentStatus,
     pub created_at: String,
     pub updated_at: String,
@@ -107,6 +109,8 @@ pub struct CreateAgentRequest {
     pub tags: Vec<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub capabilities: Vec<AgentCapabilityConfig>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub initial_files: Vec<InitialFile>,
 }
 
 impl CreateAgentRequest {
@@ -120,6 +124,7 @@ impl CreateAgentRequest {
             default_model_id: None,
             tags: vec![],
             capabilities: vec![],
+            initial_files: vec![],
         }
     }
 
@@ -150,6 +155,12 @@ impl CreateAgentRequest {
     /// Set the capabilities
     pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
         self.capabilities = capabilities;
+        self
+    }
+
+    /// Set the starter files copied into each new session for this agent
+    pub fn initial_files(mut self, initial_files: Vec<InitialFile>) -> Self {
+        self.initial_files = initial_files;
         self
     }
 }
@@ -183,6 +194,8 @@ pub struct Session {
     pub title: Option<String>,
     #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
+    pub locale: Option<String>,
     #[serde(default)]
     pub model_id: Option<String>,
     #[serde(default)]
@@ -272,6 +285,8 @@ pub struct CreateSessionRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub model_id: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
@@ -294,6 +309,7 @@ impl CreateSessionRequest {
             harness_id: None,
             agent_id: None,
             title: None,
+            locale: None,
             model_id: None,
             tags: vec![],
             capabilities: vec![],
@@ -316,6 +332,12 @@ impl CreateSessionRequest {
     /// Set the session title
     pub fn title(mut self, title: impl Into<String>) -> Self {
         self.title = Some(title.into());
+        self
+    }
+
+    /// Set the session locale
+    pub fn locale(mut self, locale: impl Into<String>) -> Self {
+        self.locale = Some(locale.into());
         self
     }
 

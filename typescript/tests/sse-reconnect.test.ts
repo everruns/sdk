@@ -231,9 +231,7 @@ describe("SSE reconnection smoke tests", () => {
         return new Response(
           new ReadableStream({
             start(controller) {
-              controller.enqueue(
-                encoder.encode(sseEvent("connected", "{}")),
-              );
+              controller.enqueue(encoder.encode(sseEvent("connected", "{}")));
               // Never close or enqueue again — simulates half-open TCP
             },
           }),

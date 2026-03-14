@@ -214,6 +214,7 @@ class AgentsClient:
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        initial_files: Optional[list[InitialFile]] = None,
     ) -> Agent:
         """Create a new agent with a server-assigned ID.
 
@@ -224,6 +225,7 @@ class AgentsClient:
             default_model_id: Default LLM model ID.
             tags: Tags for organizing agents.
             capabilities: Capabilities to enable.
+            initial_files: Starter files copied into each new session for this agent.
         """
         req = CreateAgentRequest(
             name=name,
@@ -232,6 +234,7 @@ class AgentsClient:
             default_model_id=default_model_id,
             tags=tags or [],
             capabilities=capabilities or [],
+            initial_files=initial_files or [],
         )
         resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
         return Agent(**resp)
@@ -246,6 +249,7 @@ class AgentsClient:
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        initial_files: Optional[list[InitialFile]] = None,
     ) -> Agent:
         """Create or update an agent with a client-supplied ID (upsert).
 
@@ -261,6 +265,7 @@ class AgentsClient:
             default_model_id: Default LLM model ID.
             tags: Tags for organizing agents.
             capabilities: Capabilities to enable.
+            initial_files: Starter files copied into each new session for this agent.
         """
         req = CreateAgentRequest(
             id=id,
@@ -270,6 +275,7 @@ class AgentsClient:
             default_model_id=default_model_id,
             tags=tags or [],
             capabilities=capabilities or [],
+            initial_files=initial_files or [],
         )
         resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
         return Agent(**resp)
@@ -333,6 +339,7 @@ class SessionsClient:
         *,
         agent_id: Optional[str] = None,
         title: Optional[str] = None,
+        locale: Optional[str] = None,
         model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
@@ -345,6 +352,7 @@ class SessionsClient:
                 server defaults to the Generic harness if omitted.
             agent_id: Agent ID (optional).
             title: Human-readable title.
+            locale: Session locale (BCP 47, for example ``uk-UA``).
             model_id: LLM model ID override.
             tags: Tags for organizing sessions.
             capabilities: Session-level capabilities (additive to agent capabilities).
@@ -354,6 +362,7 @@ class SessionsClient:
             harness_id=harness_id,
             agent_id=agent_id,
             title=title,
+            locale=locale,
             model_id=model_id,
             tags=tags or [],
             capabilities=capabilities or [],

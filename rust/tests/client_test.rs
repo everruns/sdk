@@ -1,6 +1,6 @@
 //! Integration tests for Everruns SDK
 
-use everruns_sdk::{CreateSessionRequest, Everruns, InitialFile};
+use everruns_sdk::{CreateAgentRequest, CreateSessionRequest, Everruns, InitialFile};
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
     matchers::{body_json, method, path},
@@ -105,4 +105,98 @@ async fn test_create_session_with_initial_files() {
         .expect("session creation should succeed");
 
     assert_eq!(session.id, "session_123");
+}
+
+#[tokio::test]
+async fn test_create_agent_with_initial_files() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/agents"))
+        .and(body_json(serde_json::json!({
+            "name": "Starter Agent",
+            "system_prompt": "You keep files ready.",
+            "initial_files": [
+                {
+                    "path": "/workspace/README.md",
+                    "content": "# starter\n",
+                    "encoding": "text",
+                    "is_readonly": true
+                }
+            ]
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "agent_123",
+            "name": "Starter Agent",
+            "description": null,
+            "system_prompt": "You keep files ready.",
+            "default_model_id": null,
+            "tags": [],
+            "capabilities": [],
+            "initial_files": [{
+                "path": "/workspace/README.md",
+                "content": "# starter\n",
+                "encoding": "text",
+                "is_readonly": true
+            }],
+            "status": "active",
+            "created_at": "2026-03-13T00:00:00Z",
+            "updated_at": "2026-03-13T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let agent = client
+        .agents()
+        .create_with_options(
+            CreateAgentRequest::new("Starter Agent", "You keep files ready.").initial_files(vec![
+                InitialFile::new("/workspace/README.md", "# starter\n")
+                    .encoding("text")
+                    .is_readonly(true),
+            ]),
+        )
+        .await
+        .expect("agent creation should succeed");
+
+    assert_eq!(agent.id, "agent_123");
+    assert_eq!(agent.initial_files.len(), 1);
+}
+
+#[tokio::test]
+async fn test_create_session_with_locale() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions"))
+        .and(body_json(serde_json::json!({
+            "title": "Localized session",
+            "locale": "uk-UA"
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "session_456",
+            "organization_id": "org_123",
+            "harness_id": "harness_123",
+            "title": "Localized session",
+            "locale": "uk-UA",
+            "status": "started",
+            "created_at": "2026-03-13T00:00:00Z",
+            "updated_at": "2026-03-13T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let session = client
+        .sessions()
+        .create_with_options(
+            CreateSessionRequest::new()
+                .title("Localized session")
+                .locale("uk-UA"),
+        )
+        .await
+        .expect("session creation should succeed");
+
+    assert_eq!(session.id, "session_456");
+    assert_eq!(session.locale.as_deref(), Some("uk-UA"));
 }

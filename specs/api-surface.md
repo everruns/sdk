@@ -22,11 +22,12 @@ The `POST /v1/agents` endpoint accepts an optional `id` field in the request bod
 When `id` is provided (format: `agent_<32-hex>`), the endpoint has upsert semantics:
 if an agent with that ID exists it is updated, otherwise a new agent is created.
 When `id` is omitted, the server auto-generates one (plain create).
+Agent create/update payloads also support optional `initial_files` starter files that are copied into each new session for that agent.
 
 ### Sessions
 - `POST /v1/sessions` - Create session (harness_id optional, defaults to Generic harness)
 - `GET /v1/sessions` - List sessions (supports `search` query param)
-  Request supports optional `agent_id`, optional `title`, optional `model_id`, optional `tags`, optional `capabilities`, and optional `initial_files` starter files.
+  Request supports optional `agent_id` search filtering.
 - `GET /v1/sessions/{id}` - Get session
 - `PATCH /v1/sessions/{id}` - Update session
 - `DELETE /v1/sessions/{id}` - Delete session
@@ -38,6 +39,7 @@ When `id` is omitted, the server auto-generates one (plain create).
 
 Sessions accept an optional `harness_id` (format: `harness_<32-hex>`). If omitted, the server defaults to the Generic harness.
 Use `generate_harness_id()` to create one when needed. Agent is optional on session creation — sessions can run without an agent.
+Session create/update payloads support optional `title`, `locale`, `model_id`, `tags`, `capabilities`, and `initial_files` starter files.
 
 ### Capabilities
 - `GET /v1/capabilities` - List available capabilities

@@ -52,6 +52,7 @@ class Agent(BaseModel):
     default_model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
+    initial_files: list[InitialFile] = Field(default_factory=list)
     status: Literal["active", "archived"]
     created_at: str
     updated_at: str
@@ -70,6 +71,7 @@ class CreateAgentRequest(BaseModel):
     default_model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
+    initial_files: list[InitialFile] = Field(default_factory=list)
 
 
 class Session(BaseModel):
@@ -81,6 +83,7 @@ class Session(BaseModel):
     agent_id: Optional[str] = None
     title: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
+    locale: Optional[str] = None
     model_id: Optional[str] = None
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
     status: Literal["started", "active", "idle", "waitingfortoolresults"]
@@ -115,6 +118,7 @@ class CreateSessionRequest(BaseModel):
     harness_id: Optional[str] = None
     agent_id: Optional[str] = None
     title: Optional[str] = None
+    locale: Optional[str] = None
     model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
