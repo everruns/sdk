@@ -60,7 +60,10 @@ async fn main() -> Result<(), Error> {
         match event {
             Ok(e) => {
                 println!("Event: {} - {}", e.event_type, e.id);
-                if e.event_type == "turn.completed" {
+                if matches!(
+                    e.event_type.as_str(),
+                    "output.message.completed" | "turn.completed" | "turn.failed"
+                ) {
                     break;
                 }
             }

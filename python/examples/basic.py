@@ -47,7 +47,7 @@ async def main():
         # Stream events
         async for event in client.events.stream(session.id):
             print(f"Event: {event.type}")
-            if event.type == "turn.completed":
+            if event.type in {"output.message.completed", "turn.completed", "turn.failed"}:
                 break
 
         # Clean up

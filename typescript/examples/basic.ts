@@ -53,7 +53,11 @@ async function main() {
   for await (const event of stream) {
     console.log(`[${event.type}]`, JSON.stringify(event.data).slice(0, 100));
 
-    if (event.type === "turn.completed" || event.type === "turn.failed") {
+    if (
+      event.type === "output.message.completed" ||
+      event.type === "turn.completed" ||
+      event.type === "turn.failed"
+    ) {
       break;
     }
   }
