@@ -90,9 +90,9 @@ just generate           # Regenerate types from OpenAPI
 - Node 22+, npm
 - `prettier` and `oxlint`
 
-### Commands
+### Skills
 
-`.claude/commands/` contains agent commands.
+`.claude/skills/` contains agent skills (also symlinked at `.agents/skills/`).
 
 - `ship.md` - Full shipping workflow: test, verify artifacts, smoke test, push, PR, merge
 
@@ -100,7 +100,7 @@ just generate           # Regenerate types from OpenAPI
 
 "Ship" means: the change is **merged to main**. Not just "PR created" — merged. The full flow: implement with comprehensive test coverage (positive and negative paths), complete the Pre-PR Checklist, create PR, wait for CI green, squash-merge, confirm merge. Shipping is not done until the PR is merged.
 
-Use the [`/ship`](.claude/commands/ship.md) command to execute the full shipping workflow. When asked to "ship", "fix and ship", or "ship it" — run all 8 phases through to merge. Do not stop at PR creation.
+Use the [`/ship`](.claude/skills/ship.md) skill to execute the full shipping workflow. When asked to "ship", "fix and ship", or "ship it" — run all 10 phases through to merge. Do not stop at PR creation.
 
 ### Pre-PR Checklist
 
