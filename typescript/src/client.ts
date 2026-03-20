@@ -7,12 +7,17 @@ import {
   CapabilityInfo,
   ContentPart,
   CreateAgentRequest,
+  DeleteFileResponse,
   Session,
   CreateSessionRequest,
+  FileInfo,
+  FileStat,
+  GrepResult,
   Message,
   CreateMessageRequest,
   Event,
   ListEventsOptions,
+  SessionFile,
   StreamOptions,
 } from "./models.js";
 import {
@@ -37,6 +42,7 @@ export class Everruns {
   readonly messages: MessagesClient;
   readonly events: EventsClient;
   readonly capabilities: CapabilitiesClient;
+  readonly sessionFiles: SessionFilesClient;
 
   constructor(options: EverrunsOptions = {}) {
     if (options.apiKey instanceof ApiKey) {
@@ -58,6 +64,7 @@ export class Everruns {
     this.messages = new MessagesClient(this);
     this.events = new EventsClient(this);
     this.capabilities = new CapabilitiesClient(this);
+    this.sessionFiles = new SessionFilesClient(this);
   }
 
   /**
@@ -437,6 +444,136 @@ class CapabilitiesClient {
   /** Get a specific capability by ID. */
   async get(capabilityId: string): Promise<CapabilityInfo> {
     return this.client.fetch(`/capabilities/${capabilityId}`);
+  }
+}
+
+class SessionFilesClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** List files in a directory. */
+  async list(
+    sessionId: string,
+    options?: { path?: string; recursive?: boolean },
+  ): Promise<FileInfo[]> {
+    const fsPath = options?.path
+      ? `/sessions/${sessionId}/fs/${options.path.replace(/^\//, "")}`
+      : `/sessions/${sessionId}/fs`;
+    const params = new URLSearchParams();
+    if (options?.recursive) params.set("recursive", "true");
+    const query = params.toString() ? `?${params}` : "";
+    const response = await this.client.fetch<{ data: FileInfo[] }>(
+      `${fsPath}${query}`,
+    );
+    return response.data;
+  }
+
+  /** Read a file's content. */
+  async read(sessionId: string, path: string): Promise<SessionFile> {
+    return this.client.fetch(
+      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+    );
+  }
+
+  /** Create a file. */
+  async create(
+    sessionId: string,
+    path: string,
+    content: string,
+    options?: { encoding?: string; isReadonly?: boolean },
+  ): Promise<SessionFile> {
+    const body: Record<string, unknown> = { content };
+    if (options?.encoding) body.encoding = options.encoding;
+    if (options?.isReadonly != null) body.is_readonly = options.isReadonly;
+    return this.client.fetch(
+      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+      { method: "POST", body: JSON.stringify(body) },
+    );
+  }
+
+  /** Create a directory. */
+  async createDir(sessionId: string, path: string): Promise<SessionFile> {
+    return this.client.fetch(
+      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+      { method: "POST", body: JSON.stringify({ is_directory: true }) },
+    );
+  }
+
+  /** Update a file's content. */
+  async update(
+    sessionId: string,
+    path: string,
+    content: string,
+    options?: { encoding?: string; isReadonly?: boolean },
+  ): Promise<SessionFile> {
+    const body: Record<string, unknown> = { content };
+    if (options?.encoding) body.encoding = options.encoding;
+    if (options?.isReadonly != null) body.is_readonly = options.isReadonly;
+    return this.client.fetch(
+      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+      { method: "PUT", body: JSON.stringify(body) },
+    );
+  }
+
+  /** Delete a file or directory. */
+  async delete(
+    sessionId: string,
+    path: string,
+    options?: { recursive?: boolean },
+  ): Promise<DeleteFileResponse> {
+    const params = new URLSearchParams();
+    if (options?.recursive) params.set("recursive", "true");
+    const query = params.toString() ? `?${params}` : "";
+    return this.client.fetch(
+      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}${query}`,
+      { method: "DELETE" },
+    );
+  }
+
+  /** Move/rename a file. */
+  async moveFile(
+    sessionId: string,
+    srcPath: string,
+    dstPath: string,
+  ): Promise<SessionFile> {
+    return this.client.fetch(`/sessions/${sessionId}/fs/_/move`, {
+      method: "POST",
+      body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
+    });
+  }
+
+  /** Copy a file. */
+  async copyFile(
+    sessionId: string,
+    srcPath: string,
+    dstPath: string,
+  ): Promise<SessionFile> {
+    return this.client.fetch(`/sessions/${sessionId}/fs/_/copy`, {
+      method: "POST",
+      body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
+    });
+  }
+
+  /** Search files with regex. */
+  async grep(
+    sessionId: string,
+    pattern: string,
+    options?: { pathPattern?: string },
+  ): Promise<GrepResult[]> {
+    const body: Record<string, unknown> = { pattern };
+    if (options?.pathPattern) body.path_pattern = options.pathPattern;
+    const response = await this.client.fetch<{ data: GrepResult[] }>(
+      `/sessions/${sessionId}/fs/_/grep`,
+      { method: "POST", body: JSON.stringify(body) },
+    );
+    return response.data;
+  }
+
+  /** Get file or directory stat. */
+  async stat(sessionId: string, path: string): Promise<FileStat> {
+    return this.client.fetch(`/sessions/${sessionId}/fs/_/stat`, {
+      method: "POST",
+      body: JSON.stringify({ path }),
+    });
   }
 }
 

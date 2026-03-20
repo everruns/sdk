@@ -1,9 +1,12 @@
 //! Integration tests for Everruns SDK
 
-use everruns_sdk::{CreateAgentRequest, CreateSessionRequest, Everruns, InitialFile};
+use everruns_sdk::{
+    CreateAgentRequest, CreateFileRequest, CreateSessionRequest, Everruns, InitialFile,
+    UpdateFileRequest,
+};
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
-    matchers::{body_json, method, path},
+    matchers::{body_json, method, path, query_param},
 };
 
 #[test]
@@ -199,4 +202,348 @@ async fn test_create_session_with_locale() {
 
     assert_eq!(session.id, "session_456");
     assert_eq!(session.locale.as_deref(), Some("uk-UA"));
+}
+
+// --- Session Files Tests ---
+
+#[tokio::test]
+async fn test_session_files_list() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/sessions/sess_123/fs"))
+        .and(query_param("recursive", "true"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [{
+                "id": "file_001",
+                "session_id": "sess_123",
+                "path": "/workspace/hello.txt",
+                "name": "hello.txt",
+                "is_directory": false,
+                "is_readonly": false,
+                "size_bytes": 5,
+                "created_at": "2026-03-20T00:00:00Z",
+                "updated_at": "2026-03-20T00:00:00Z"
+            }],
+            "total": 1,
+            "offset": 0,
+            "limit": 100
+        })))
+        .mount(&server)
+        .await;
+
+    let files = client
+        .session_files()
+        .list("sess_123", None, Some(true))
+        .await
+        .expect("list should succeed");
+
+    assert_eq!(files.data.len(), 1);
+    assert_eq!(files.data[0].name, "hello.txt");
+    assert!(!files.data[0].is_directory);
+}
+
+#[tokio::test]
+async fn test_session_files_read() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/sessions/sess_123/fs/workspace/hello.txt"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "id": "file_001",
+            "session_id": "sess_123",
+            "path": "/workspace/hello.txt",
+            "name": "hello.txt",
+            "is_directory": false,
+            "is_readonly": false,
+            "size_bytes": 5,
+            "content": "hello",
+            "encoding": "text",
+            "created_at": "2026-03-20T00:00:00Z",
+            "updated_at": "2026-03-20T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let file = client
+        .session_files()
+        .read("sess_123", "/workspace/hello.txt")
+        .await
+        .expect("read should succeed");
+
+    assert_eq!(file.content.as_deref(), Some("hello"));
+    assert_eq!(file.encoding.as_deref(), Some("text"));
+}
+
+#[tokio::test]
+async fn test_session_files_create() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/sess_123/fs/workspace/new.txt"))
+        .and(body_json(serde_json::json!({
+            "content": "new content",
+            "encoding": "text"
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "file_002",
+            "session_id": "sess_123",
+            "path": "/workspace/new.txt",
+            "name": "new.txt",
+            "is_directory": false,
+            "is_readonly": false,
+            "size_bytes": 11,
+            "content": "new content",
+            "encoding": "text",
+            "created_at": "2026-03-20T00:00:00Z",
+            "updated_at": "2026-03-20T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let file = client
+        .session_files()
+        .create(
+            "sess_123",
+            "/workspace/new.txt",
+            "new content",
+            Some("text"),
+        )
+        .await
+        .expect("create should succeed");
+
+    assert_eq!(file.name, "new.txt");
+    assert_eq!(file.content.as_deref(), Some("new content"));
+}
+
+#[tokio::test]
+async fn test_session_files_create_dir() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/sess_123/fs/workspace/subdir"))
+        .and(body_json(serde_json::json!({
+            "is_directory": true
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "file_003",
+            "session_id": "sess_123",
+            "path": "/workspace/subdir",
+            "name": "subdir",
+            "is_directory": true,
+            "is_readonly": false,
+            "size_bytes": 0,
+            "created_at": "2026-03-20T00:00:00Z",
+            "updated_at": "2026-03-20T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let file = client
+        .session_files()
+        .create_dir("sess_123", "/workspace/subdir")
+        .await
+        .expect("create_dir should succeed");
+
+    assert!(file.is_directory);
+    assert_eq!(file.name, "subdir");
+}
+
+#[tokio::test]
+async fn test_session_files_update() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/sessions/sess_123/fs/workspace/hello.txt"))
+        .and(body_json(serde_json::json!({
+            "content": "updated"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "id": "file_001",
+            "session_id": "sess_123",
+            "path": "/workspace/hello.txt",
+            "name": "hello.txt",
+            "is_directory": false,
+            "is_readonly": false,
+            "size_bytes": 7,
+            "content": "updated",
+            "encoding": "text",
+            "created_at": "2026-03-20T00:00:00Z",
+            "updated_at": "2026-03-20T00:00:01Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let file = client
+        .session_files()
+        .update("sess_123", "/workspace/hello.txt", "updated", None)
+        .await
+        .expect("update should succeed");
+
+    assert_eq!(file.content.as_deref(), Some("updated"));
+}
+
+#[tokio::test]
+async fn test_session_files_delete() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("DELETE"))
+        .and(path("/v1/sessions/sess_123/fs/workspace/hello.txt"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!({"deleted": true})),
+        )
+        .mount(&server)
+        .await;
+
+    let resp = client
+        .session_files()
+        .delete("sess_123", "/workspace/hello.txt", None)
+        .await
+        .expect("delete should succeed");
+
+    assert!(resp.deleted);
+}
+
+#[tokio::test]
+async fn test_session_files_move() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/sess_123/fs/_/move"))
+        .and(body_json(serde_json::json!({
+            "src_path": "/workspace/old.txt",
+            "dst_path": "/workspace/new.txt"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "id": "file_001",
+            "session_id": "sess_123",
+            "path": "/workspace/new.txt",
+            "name": "new.txt",
+            "is_directory": false,
+            "is_readonly": false,
+            "size_bytes": 5,
+            "created_at": "2026-03-20T00:00:00Z",
+            "updated_at": "2026-03-20T00:00:01Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let file = client
+        .session_files()
+        .move_file("sess_123", "/workspace/old.txt", "/workspace/new.txt")
+        .await
+        .expect("move should succeed");
+
+    assert_eq!(file.path, "/workspace/new.txt");
+}
+
+#[tokio::test]
+async fn test_session_files_copy() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/sess_123/fs/_/copy"))
+        .and(body_json(serde_json::json!({
+            "src_path": "/workspace/original.txt",
+            "dst_path": "/workspace/copy.txt"
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "file_004",
+            "session_id": "sess_123",
+            "path": "/workspace/copy.txt",
+            "name": "copy.txt",
+            "is_directory": false,
+            "is_readonly": false,
+            "size_bytes": 5,
+            "created_at": "2026-03-20T00:00:00Z",
+            "updated_at": "2026-03-20T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let file = client
+        .session_files()
+        .copy_file("sess_123", "/workspace/original.txt", "/workspace/copy.txt")
+        .await
+        .expect("copy should succeed");
+
+    assert_eq!(file.path, "/workspace/copy.txt");
+}
+
+#[tokio::test]
+async fn test_session_files_grep() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/sess_123/fs/_/grep"))
+        .and(body_json(serde_json::json!({
+            "pattern": "TODO"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [{
+                "path": "/workspace/main.rs",
+                "matches": [{
+                    "path": "/workspace/main.rs",
+                    "line_number": 10,
+                    "line": "// TODO: fix this"
+                }]
+            }],
+            "total": 1,
+            "offset": 0,
+            "limit": 100
+        })))
+        .mount(&server)
+        .await;
+
+    let results = client
+        .session_files()
+        .grep("sess_123", "TODO", None)
+        .await
+        .expect("grep should succeed");
+
+    assert_eq!(results.data.len(), 1);
+    assert_eq!(results.data[0].matches.len(), 1);
+    assert_eq!(results.data[0].matches[0].line, "// TODO: fix this");
+}
+
+#[tokio::test]
+async fn test_session_files_stat() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/sess_123/fs/_/stat"))
+        .and(body_json(serde_json::json!({
+            "path": "/workspace/hello.txt"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "path": "/workspace/hello.txt",
+            "name": "hello.txt",
+            "is_directory": false,
+            "is_readonly": false,
+            "size_bytes": 5,
+            "created_at": "2026-03-20T00:00:00Z",
+            "updated_at": "2026-03-20T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let stat = client
+        .session_files()
+        .stat("sess_123", "/workspace/hello.txt")
+        .await
+        .expect("stat should succeed");
+
+    assert_eq!(stat.name, "hello.txt");
+    assert_eq!(stat.size_bytes, 5);
+    assert!(!stat.is_directory);
 }

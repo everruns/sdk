@@ -92,6 +92,11 @@ impl Everruns {
         CapabilitiesClient { client: self }
     }
 
+    /// Get the session files client
+    pub fn session_files(&self) -> SessionFilesClient<'_> {
+        SessionFilesClient { client: self }
+    }
+
     pub(crate) fn url(&self, path: &str) -> Url {
         // Use relative path (no leading slash) for correct joining with base URL.
         // The path parameter starts with "/" (e.g., "/agents"), so we strip it.
@@ -195,6 +200,22 @@ impl Everruns {
         }
     }
 
+    pub(crate) async fn put<T: serde::de::DeserializeOwned, B: serde::Serialize>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<T> {
+        let resp = self
+            .http
+            .put(self.url(path))
+            .headers(self.headers())
+            .json(body)
+            .send()
+            .await?;
+
+        self.handle_response(resp).await
+    }
+
     pub(crate) async fn put_empty(&self, path: &str) -> Result<()> {
         let resp = self
             .http
@@ -227,6 +248,12 @@ impl Everruns {
             let body = resp.text().await.unwrap_or_default();
             Err(Error::from_api_response(status, &body))
         }
+    }
+
+    pub(crate) async fn delete_url<T: serde::de::DeserializeOwned>(&self, url: Url) -> Result<T> {
+        let resp = self.http.delete(url).headers(self.headers()).send().await?;
+
+        self.handle_response(resp).await
     }
 
     async fn handle_response<T: serde::de::DeserializeOwned>(
@@ -537,6 +564,202 @@ impl<'a> CapabilitiesClient<'a> {
     /// Get a specific capability by ID
     pub async fn get(&self, id: &str) -> Result<CapabilityInfo> {
         self.client.get(&format!("/capabilities/{}", id)).await
+    }
+}
+
+/// Client for session filesystem operations
+pub struct SessionFilesClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> SessionFilesClient<'a> {
+    /// List files in a directory
+    pub async fn list(
+        &self,
+        session_id: &str,
+        path: Option<&str>,
+        recursive: Option<bool>,
+    ) -> Result<ListResponse<FileInfo>> {
+        let api_path = match path {
+            Some(p) => format!("/sessions/{}/fs/{}", session_id, p.trim_start_matches('/')),
+            None => format!("/sessions/{}/fs", session_id),
+        };
+        let mut url = self.client.url(&api_path);
+        if let Some(true) = recursive {
+            url.query_pairs_mut().append_pair("recursive", "true");
+        }
+        self.client.get_url(url).await
+    }
+
+    /// Read a file's content
+    pub async fn read(&self, session_id: &str, path: &str) -> Result<SessionFile> {
+        self.client
+            .get(&format!(
+                "/sessions/{}/fs/{}",
+                session_id,
+                path.trim_start_matches('/')
+            ))
+            .await
+    }
+
+    /// Create a file
+    pub async fn create(
+        &self,
+        session_id: &str,
+        path: &str,
+        content: &str,
+        encoding: Option<&str>,
+    ) -> Result<SessionFile> {
+        let mut req = CreateFileRequest::file(content);
+        if let Some(enc) = encoding {
+            req = req.encoding(enc);
+        }
+        self.client
+            .post(
+                &format!(
+                    "/sessions/{}/fs/{}",
+                    session_id,
+                    path.trim_start_matches('/')
+                ),
+                &req,
+            )
+            .await
+    }
+
+    /// Create a file with full options
+    pub async fn create_with_options(
+        &self,
+        session_id: &str,
+        path: &str,
+        req: CreateFileRequest,
+    ) -> Result<SessionFile> {
+        self.client
+            .post(
+                &format!(
+                    "/sessions/{}/fs/{}",
+                    session_id,
+                    path.trim_start_matches('/')
+                ),
+                &req,
+            )
+            .await
+    }
+
+    /// Create a directory
+    pub async fn create_dir(&self, session_id: &str, path: &str) -> Result<SessionFile> {
+        self.create_with_options(session_id, path, CreateFileRequest::directory())
+            .await
+    }
+
+    /// Update a file's content
+    pub async fn update(
+        &self,
+        session_id: &str,
+        path: &str,
+        content: &str,
+        encoding: Option<&str>,
+    ) -> Result<SessionFile> {
+        let mut req = UpdateFileRequest::content(content);
+        if let Some(enc) = encoding {
+            req = req.encoding(enc);
+        }
+        self.client
+            .put(
+                &format!(
+                    "/sessions/{}/fs/{}",
+                    session_id,
+                    path.trim_start_matches('/')
+                ),
+                &req,
+            )
+            .await
+    }
+
+    /// Update a file with full options
+    pub async fn update_with_options(
+        &self,
+        session_id: &str,
+        path: &str,
+        req: UpdateFileRequest,
+    ) -> Result<SessionFile> {
+        self.client
+            .put(
+                &format!(
+                    "/sessions/{}/fs/{}",
+                    session_id,
+                    path.trim_start_matches('/')
+                ),
+                &req,
+            )
+            .await
+    }
+
+    /// Delete a file or directory
+    pub async fn delete(
+        &self,
+        session_id: &str,
+        path: &str,
+        recursive: Option<bool>,
+    ) -> Result<DeleteResponse> {
+        let mut url = self.client.url(&format!(
+            "/sessions/{}/fs/{}",
+            session_id,
+            path.trim_start_matches('/')
+        ));
+        if let Some(true) = recursive {
+            url.query_pairs_mut().append_pair("recursive", "true");
+        }
+        self.client.delete_url(url).await
+    }
+
+    /// Move/rename a file
+    pub async fn move_file(
+        &self,
+        session_id: &str,
+        src_path: &str,
+        dst_path: &str,
+    ) -> Result<SessionFile> {
+        let req = MoveFileRequest::new(src_path, dst_path);
+        self.client
+            .post(&format!("/sessions/{}/fs/_/move", session_id), &req)
+            .await
+    }
+
+    /// Copy a file
+    pub async fn copy_file(
+        &self,
+        session_id: &str,
+        src_path: &str,
+        dst_path: &str,
+    ) -> Result<SessionFile> {
+        let req = CopyFileRequest::new(src_path, dst_path);
+        self.client
+            .post(&format!("/sessions/{}/fs/_/copy", session_id), &req)
+            .await
+    }
+
+    /// Search files with regex
+    pub async fn grep(
+        &self,
+        session_id: &str,
+        pattern: &str,
+        path_pattern: Option<&str>,
+    ) -> Result<ListResponse<GrepResult>> {
+        let mut req = GrepRequest::new(pattern);
+        if let Some(pp) = path_pattern {
+            req = req.path_pattern(pp);
+        }
+        self.client
+            .post(&format!("/sessions/{}/fs/_/grep", session_id), &req)
+            .await
+    }
+
+    /// Get file or directory stat
+    pub async fn stat(&self, session_id: &str, path: &str) -> Result<FileStat> {
+        let req = StatRequest::new(path);
+        self.client
+            .post(&format!("/sessions/{}/fs/_/stat", session_id), &req)
+            .await
     }
 }
 

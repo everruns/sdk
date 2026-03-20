@@ -61,9 +61,15 @@ Session create/update payloads support optional `title`, `locale`, `model_id`, `
 - `GET /v1/images/{id}/thumbnail` - Get image thumbnail
 
 ### Session Filesystem
-- `GET /v1/sessions/{id}/fs` - List files
-- `GET /v1/sessions/{id}/fs/{path}` - Read file
-- `PUT /v1/sessions/{id}/fs/{path}` - Write file
+- `GET /v1/sessions/{id}/fs` - List root directory (supports `recursive` query param)
+- `GET /v1/sessions/{id}/fs/{path}` - Read file content or list directory
+- `POST /v1/sessions/{id}/fs/{path}` - Create file or directory
+- `PUT /v1/sessions/{id}/fs/{path}` - Update file content
+- `DELETE /v1/sessions/{id}/fs/{path}` - Delete file or directory (supports `recursive` query param)
+- `POST /v1/sessions/{id}/fs/_/move` - Move/rename file
+- `POST /v1/sessions/{id}/fs/_/copy` - Copy file
+- `POST /v1/sessions/{id}/fs/_/grep` - Search files with regex
+- `POST /v1/sessions/{id}/fs/_/stat` - Get file/directory metadata
 
 ### Tool Results
 - `POST /v1/sessions/{id}/tool-results` - Submit tool results
