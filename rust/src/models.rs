@@ -702,3 +702,225 @@ pub struct EventContext {
     #[serde(default)]
     pub input_message_id: Option<String>,
 }
+
+// --- Session Filesystem Models ---
+
+/// File metadata without content
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct FileInfo {
+    pub id: String,
+    pub session_id: String,
+    pub path: String,
+    pub name: String,
+    pub is_directory: bool,
+    pub is_readonly: bool,
+    pub size_bytes: i64,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// Complete file with content
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SessionFile {
+    pub id: String,
+    pub session_id: String,
+    pub path: String,
+    pub name: String,
+    pub is_directory: bool,
+    pub is_readonly: bool,
+    pub size_bytes: i64,
+    pub created_at: String,
+    pub updated_at: String,
+    #[serde(default)]
+    pub content: Option<String>,
+    #[serde(default)]
+    pub encoding: Option<String>,
+}
+
+/// File stat information (without id/session_id)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct FileStat {
+    pub path: String,
+    pub name: String,
+    pub is_directory: bool,
+    pub is_readonly: bool,
+    pub size_bytes: i64,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// Request to create a file or directory
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct CreateFileRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub encoding: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_directory: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_readonly: Option<bool>,
+}
+
+impl CreateFileRequest {
+    /// Create a request for a new file
+    pub fn file(content: impl Into<String>) -> Self {
+        Self {
+            content: Some(content.into()),
+            encoding: None,
+            is_directory: None,
+            is_readonly: None,
+        }
+    }
+
+    /// Create a request for a new directory
+    pub fn directory() -> Self {
+        Self {
+            content: None,
+            encoding: None,
+            is_directory: Some(true),
+            is_readonly: None,
+        }
+    }
+
+    /// Set the content encoding ("text" or "base64")
+    pub fn encoding(mut self, encoding: impl Into<String>) -> Self {
+        self.encoding = Some(encoding.into());
+        self
+    }
+
+    /// Set the readonly flag
+    pub fn is_readonly(mut self, is_readonly: bool) -> Self {
+        self.is_readonly = Some(is_readonly);
+        self
+    }
+}
+
+/// Request to update a file
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct UpdateFileRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub encoding: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_readonly: Option<bool>,
+}
+
+impl UpdateFileRequest {
+    /// Create a request to update file content
+    pub fn content(content: impl Into<String>) -> Self {
+        Self {
+            content: Some(content.into()),
+            encoding: None,
+            is_readonly: None,
+        }
+    }
+
+    /// Set the content encoding ("text" or "base64")
+    pub fn encoding(mut self, encoding: impl Into<String>) -> Self {
+        self.encoding = Some(encoding.into());
+        self
+    }
+
+    /// Set the readonly flag
+    pub fn is_readonly(mut self, is_readonly: bool) -> Self {
+        self.is_readonly = Some(is_readonly);
+        self
+    }
+}
+
+/// Request to copy a file
+#[derive(Debug, Clone, Serialize)]
+pub struct CopyFileRequest {
+    pub src_path: String,
+    pub dst_path: String,
+}
+
+impl CopyFileRequest {
+    pub fn new(src_path: impl Into<String>, dst_path: impl Into<String>) -> Self {
+        Self {
+            src_path: src_path.into(),
+            dst_path: dst_path.into(),
+        }
+    }
+}
+
+/// Request to move/rename a file
+#[derive(Debug, Clone, Serialize)]
+pub struct MoveFileRequest {
+    pub src_path: String,
+    pub dst_path: String,
+}
+
+impl MoveFileRequest {
+    pub fn new(src_path: impl Into<String>, dst_path: impl Into<String>) -> Self {
+        Self {
+            src_path: src_path.into(),
+            dst_path: dst_path.into(),
+        }
+    }
+}
+
+/// Request to search files with regex
+#[derive(Debug, Clone, Serialize)]
+pub struct GrepRequest {
+    pub pattern: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub path_pattern: Option<String>,
+}
+
+impl GrepRequest {
+    pub fn new(pattern: impl Into<String>) -> Self {
+        Self {
+            pattern: pattern.into(),
+            path_pattern: None,
+        }
+    }
+
+    /// Set an optional path pattern to filter files
+    pub fn path_pattern(mut self, path_pattern: impl Into<String>) -> Self {
+        self.path_pattern = Some(path_pattern.into());
+        self
+    }
+}
+
+/// Request to get file stat
+#[derive(Debug, Clone, Serialize)]
+pub struct StatRequest {
+    pub path: String,
+}
+
+impl StatRequest {
+    pub fn new(path: impl Into<String>) -> Self {
+        Self { path: path.into() }
+    }
+}
+
+/// Single grep match
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct GrepMatch {
+    pub path: String,
+    pub line_number: u64,
+    pub line: String,
+}
+
+/// Grep result for a file
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct GrepResult {
+    pub path: String,
+    pub matches: Vec<GrepMatch>,
+}
+
+/// Response for delete operations
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeleteResponse {
+    pub deleted: bool,
+}

@@ -7,7 +7,12 @@ import httpx
 import pytest
 import respx
 
-from everruns_sdk import ApiError, ApiKey, Everruns, InitialFile
+from everruns_sdk import (
+    ApiError,
+    ApiKey,
+    Everruns,
+    InitialFile,
+)
 
 
 def test_api_key_creation():
@@ -649,3 +654,277 @@ async def test_create_session_with_locale():
     assert session.locale == "uk-UA"
     assert route.called
     assert json.loads(route.calls[0].request.content)["locale"] == "uk-UA"
+
+
+# --- Session Files Tests ---
+
+FILE_RESPONSE = {
+    "id": "file_001",
+    "session_id": "sess_123",
+    "path": "/workspace/hello.txt",
+    "name": "hello.txt",
+    "is_directory": False,
+    "is_readonly": False,
+    "size_bytes": 5,
+    "content": "hello",
+    "encoding": "text",
+    "created_at": "2026-03-20T00:00:00Z",
+    "updated_at": "2026-03-20T00:00:00Z",
+}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_list():
+    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/fs?recursive=true").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "data": [
+                    {
+                        "id": "file_001",
+                        "session_id": "sess_123",
+                        "path": "/workspace/hello.txt",
+                        "name": "hello.txt",
+                        "is_directory": False,
+                        "is_readonly": False,
+                        "size_bytes": 5,
+                        "created_at": "2026-03-20T00:00:00Z",
+                        "updated_at": "2026-03-20T00:00:00Z",
+                    }
+                ],
+                "total": 1,
+                "offset": 0,
+                "limit": 100,
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        files = await client.session_files.list("sess_123", recursive=True)
+    finally:
+        await client.close()
+
+    assert len(files) == 1
+    assert files[0].name == "hello.txt"
+    assert not files[0].is_directory
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_read():
+    route = respx.get(
+        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt"
+    ).mock(return_value=httpx.Response(200, json=FILE_RESPONSE))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        file = await client.session_files.read("sess_123", "/workspace/hello.txt")
+    finally:
+        await client.close()
+
+    assert file.content == "hello"
+    assert file.encoding == "text"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_create():
+    route = respx.post(
+        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/new.txt"
+    ).mock(return_value=httpx.Response(201, json=FILE_RESPONSE))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        file = await client.session_files.create(
+            "sess_123", "/workspace/new.txt", "hello", encoding="text"
+        )
+    finally:
+        await client.close()
+
+    assert file.name == "hello.txt"
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["content"] == "hello"
+    assert body["encoding"] == "text"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_create_dir():
+    route = respx.post(
+        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/subdir"
+    ).mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": "file_003",
+                "session_id": "sess_123",
+                "path": "/workspace/subdir",
+                "name": "subdir",
+                "is_directory": True,
+                "is_readonly": False,
+                "size_bytes": 0,
+                "created_at": "2026-03-20T00:00:00Z",
+                "updated_at": "2026-03-20T00:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        file = await client.session_files.create_dir("sess_123", "/workspace/subdir")
+    finally:
+        await client.close()
+
+    assert file.is_directory
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["is_directory"] is True
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_update():
+    route = respx.put(
+        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt"
+    ).mock(return_value=httpx.Response(200, json=FILE_RESPONSE))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        file = await client.session_files.update("sess_123", "/workspace/hello.txt", "hello")
+    finally:
+        await client.close()
+
+    assert file.content == "hello"
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["content"] == "hello"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_delete():
+    route = respx.delete(
+        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt"
+    ).mock(return_value=httpx.Response(200, json={"deleted": True}))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        resp = await client.session_files.delete("sess_123", "/workspace/hello.txt")
+    finally:
+        await client.close()
+
+    assert resp.deleted
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_move():
+    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/move").mock(
+        return_value=httpx.Response(200, json=FILE_RESPONSE)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.session_files.move_file("sess_123", "/workspace/old.txt", "/workspace/new.txt")
+    finally:
+        await client.close()
+
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["src_path"] == "/workspace/old.txt"
+    assert body["dst_path"] == "/workspace/new.txt"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_copy():
+    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/copy").mock(
+        return_value=httpx.Response(201, json=FILE_RESPONSE)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.session_files.copy_file(
+            "sess_123", "/workspace/original.txt", "/workspace/copy.txt"
+        )
+    finally:
+        await client.close()
+
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["src_path"] == "/workspace/original.txt"
+    assert body["dst_path"] == "/workspace/copy.txt"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_grep():
+    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/grep").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "data": [
+                    {
+                        "path": "/workspace/main.rs",
+                        "matches": [
+                            {
+                                "path": "/workspace/main.rs",
+                                "line_number": 10,
+                                "line": "// TODO: fix this",
+                            }
+                        ],
+                    }
+                ],
+                "total": 1,
+                "offset": 0,
+                "limit": 100,
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        results = await client.session_files.grep("sess_123", "TODO")
+    finally:
+        await client.close()
+
+    assert len(results) == 1
+    assert len(results[0].matches) == 1
+    assert results[0].matches[0].line == "// TODO: fix this"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_files_stat():
+    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/stat").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "path": "/workspace/hello.txt",
+                "name": "hello.txt",
+                "is_directory": False,
+                "is_readonly": False,
+                "size_bytes": 5,
+                "created_at": "2026-03-20T00:00:00Z",
+                "updated_at": "2026-03-20T00:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        stat = await client.session_files.stat("sess_123", "/workspace/hello.txt")
+    finally:
+        await client.close()
+
+    assert stat.name == "hello.txt"
+    assert stat.size_bytes == 5
+    assert not stat.is_directory
+    assert route.called

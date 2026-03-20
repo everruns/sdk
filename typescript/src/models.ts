@@ -228,6 +228,65 @@ export interface ListEventsOptions {
   beforeSequence?: number;
 }
 
+// --- Session Filesystem Models ---
+
+/** File metadata without content */
+export interface FileInfo {
+  id: string;
+  sessionId: string;
+  path: string;
+  name: string;
+  isDirectory: boolean;
+  isReadonly: boolean;
+  sizeBytes: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Complete file with content */
+export interface SessionFile {
+  id: string;
+  sessionId: string;
+  path: string;
+  name: string;
+  isDirectory: boolean;
+  isReadonly: boolean;
+  sizeBytes: number;
+  createdAt: string;
+  updatedAt: string;
+  content?: string | null;
+  encoding?: string | null;
+}
+
+/** File stat information */
+export interface FileStat {
+  path: string;
+  name: string;
+  isDirectory: boolean;
+  isReadonly: boolean;
+  sizeBytes: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Single grep match */
+export interface GrepMatch {
+  path: string;
+  lineNumber: number;
+  line: string;
+}
+
+/** Grep result for a file */
+export interface GrepResult {
+  path: string;
+  matches: GrepMatch[];
+}
+
+/** Response for delete operation */
+export interface DeleteFileResponse {
+  deleted: boolean;
+}
+
 export interface StreamOptions {
   /** Resume from this event ID */
   sinceId?: string;

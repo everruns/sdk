@@ -13,6 +13,10 @@ import {
   type CreateMessageRequest,
   type CreateSessionRequest,
   type ExternalActor,
+  type FileInfo,
+  type SessionFile,
+  type FileStat,
+  type GrepResult,
   type Message,
 } from "../src/models.js";
 
@@ -574,5 +578,324 @@ describe("toolResult and toolError helpers", () => {
     expect(part.type).toBe("tool_result");
     expect(part.tool_call_id).toBe("tc_1");
     expect(part.error).toBe("something failed");
+  });
+});
+
+// --- Session Files Tests ---
+
+const FILE_RESPONSE = {
+  id: "file_001",
+  session_id: "sess_123",
+  path: "/workspace/hello.txt",
+  name: "hello.txt",
+  is_directory: false,
+  is_readonly: false,
+  size_bytes: 5,
+  content: "hello",
+  encoding: "text",
+  created_at: "2026-03-20T00:00:00Z",
+  updated_at: "2026-03-20T00:00:00Z",
+};
+
+describe("SessionFilesClient", () => {
+  it("should have sessionFiles on client", () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    expect(client.sessionFiles).toBeDefined();
+  });
+
+  it("should list files", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [FILE_RESPONSE],
+        total: 1,
+        offset: 0,
+        limit: 100,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const files = await client.sessionFiles.list("sess_123", {
+      recursive: true,
+    });
+
+    expect(files).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs?recursive=true",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should list files with path", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: [], total: 0, offset: 0, limit: 100 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessionFiles.list("sess_123", { path: "/workspace" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should read a file", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => FILE_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const file = await client.sessionFiles.read(
+      "sess_123",
+      "/workspace/hello.txt",
+    );
+
+    expect(file.content).toBe("hello");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should create a file", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => FILE_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessionFiles.create(
+      "sess_123",
+      "/workspace/new.txt",
+      "hello",
+      { encoding: "text" },
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/new.txt",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ content: "hello", encoding: "text" }),
+      }),
+    );
+  });
+
+  it("should create a directory", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({ ...FILE_RESPONSE, is_directory: true }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessionFiles.createDir("sess_123", "/workspace/subdir");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/subdir",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ is_directory: true }),
+      }),
+    );
+  });
+
+  it("should update a file", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => FILE_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessionFiles.update(
+      "sess_123",
+      "/workspace/hello.txt",
+      "updated",
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ content: "updated" }),
+      }),
+    );
+  });
+
+  it("should delete a file", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ deleted: true }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const resp = await client.sessionFiles.delete(
+      "sess_123",
+      "/workspace/hello.txt",
+    );
+
+    expect(resp.deleted).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("should delete recursively", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ deleted: true }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessionFiles.delete("sess_123", "/workspace/dir", {
+      recursive: true,
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/dir?recursive=true",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("should move a file", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => FILE_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessionFiles.moveFile(
+      "sess_123",
+      "/workspace/old.txt",
+      "/workspace/new.txt",
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/move",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          src_path: "/workspace/old.txt",
+          dst_path: "/workspace/new.txt",
+        }),
+      }),
+    );
+  });
+
+  it("should copy a file", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => FILE_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessionFiles.copyFile(
+      "sess_123",
+      "/workspace/original.txt",
+      "/workspace/copy.txt",
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/copy",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          src_path: "/workspace/original.txt",
+          dst_path: "/workspace/copy.txt",
+        }),
+      }),
+    );
+  });
+
+  it("should grep files", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [
+          {
+            path: "/workspace/main.rs",
+            matches: [
+              {
+                path: "/workspace/main.rs",
+                line_number: 10,
+                line: "// TODO: fix this",
+              },
+            ],
+          },
+        ],
+        total: 1,
+        offset: 0,
+        limit: 100,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const results = await client.sessionFiles.grep("sess_123", "TODO");
+
+    expect(results).toHaveLength(1);
+    expect(results[0].matches).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/grep",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ pattern: "TODO" }),
+      }),
+    );
+  });
+
+  it("should stat a file", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        path: "/workspace/hello.txt",
+        name: "hello.txt",
+        is_directory: false,
+        is_readonly: false,
+        size_bytes: 5,
+        created_at: "2026-03-20T00:00:00Z",
+        updated_at: "2026-03-20T00:00:00Z",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const stat = await client.sessionFiles.stat(
+      "sess_123",
+      "/workspace/hello.txt",
+    );
+
+    expect(stat.name).toBe("hello.txt");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/stat",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ path: "/workspace/hello.txt" }),
+      }),
+    );
   });
 });

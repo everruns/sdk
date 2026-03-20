@@ -259,6 +259,72 @@ class ListResponse(BaseModel):
     limit: int
 
 
+# --- Session Filesystem Models ---
+
+
+class FileInfo(BaseModel):
+    """File metadata without content."""
+
+    id: str
+    session_id: str
+    path: str
+    name: str
+    is_directory: bool
+    is_readonly: bool
+    size_bytes: int
+    created_at: str
+    updated_at: str
+
+
+class SessionFile(BaseModel):
+    """Complete file with content."""
+
+    id: str
+    session_id: str
+    path: str
+    name: str
+    is_directory: bool
+    is_readonly: bool
+    size_bytes: int
+    created_at: str
+    updated_at: str
+    content: Optional[str] = None
+    encoding: Optional[str] = None
+
+
+class FileStat(BaseModel):
+    """File stat information."""
+
+    path: str
+    name: str
+    is_directory: bool
+    is_readonly: bool
+    size_bytes: int
+    created_at: str
+    updated_at: str
+
+
+class GrepMatch(BaseModel):
+    """Single grep match."""
+
+    path: str
+    line_number: int
+    line: str
+
+
+class GrepResult(BaseModel):
+    """Grep result for a file."""
+
+    path: str
+    matches: list[GrepMatch]
+
+
+class DeleteFileResponse(BaseModel):
+    """Response for delete operation."""
+
+    deleted: bool
+
+
 def extract_tool_calls(data: dict[str, Any]) -> list[ToolCallInfo]:
     """Extract tool call info from event data (``data.message.content``)."""
     message = data.get("message")

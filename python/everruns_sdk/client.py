@@ -18,11 +18,16 @@ from everruns_sdk.models import (
     CreateAgentRequest,
     CreateMessageRequest,
     CreateSessionRequest,
+    DeleteFileResponse,
     Event,
+    FileInfo,
+    FileStat,
+    GrepResult,
     InitialFile,
     Message,
     MessageInput,
     Session,
+    SessionFile,
 )
 from everruns_sdk.sse import EventStream, StreamOptions
 
@@ -110,6 +115,11 @@ class Everruns:
         """Get the capabilities client."""
         return CapabilitiesClient(self)
 
+    @property
+    def session_files(self) -> "SessionFilesClient":
+        """Get the session files client."""
+        return SessionFilesClient(self)
+
     def _url(self, path: str) -> str:
         # Use relative path (no leading slash) for correct joining with base URL.
         # The path parameter starts with "/" (e.g., "/agents"), so we strip it.
@@ -143,6 +153,10 @@ class Everruns:
         resp = await self._client.patch(self._url(path), json=data)
         return await self._handle_response(resp)
 
+    async def _put(self, path: str, data: Any) -> Any:
+        resp = await self._client.put(self._url(path), json=data)
+        return await self._handle_response(resp)
+
     async def _put_empty(self, path: str) -> None:
         resp = await self._client.put(self._url(path))
         if not resp.is_success:
@@ -152,6 +166,10 @@ class Everruns:
         resp = await self._client.delete(self._url(path))
         if not resp.is_success:
             await self._raise_error(resp)
+
+    async def _delete_json(self, path: str) -> Any:
+        resp = await self._client.delete(self._url(path))
+        return await self._handle_response(resp)
 
     async def _handle_response(self, resp: httpx.Response) -> Any:
         if resp.is_success:
@@ -508,3 +526,199 @@ class CapabilitiesClient:
         """Get a specific capability by ID."""
         resp = await self._client._get(f"/capabilities/{capability_id}")
         return CapabilityInfo(**resp)
+
+
+class SessionFilesClient:
+    """Client for session filesystem operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def list(
+        self,
+        session_id: str,
+        path: Optional[str] = None,
+        *,
+        recursive: Optional[bool] = None,
+    ) -> list[FileInfo]:
+        """List files in a directory.
+
+        Args:
+            session_id: Session ID.
+            path: Directory path (defaults to root).
+            recursive: List recursively.
+        """
+        if path:
+            api_path = f"/sessions/{session_id}/fs/{path.lstrip('/')}"
+        else:
+            api_path = f"/sessions/{session_id}/fs"
+        params: list[str] = []
+        if recursive:
+            params.append("recursive=true")
+        if params:
+            api_path += "?" + "&".join(params)
+        resp = await self._client._get(api_path)
+        return [FileInfo(**f) for f in resp.get("data", [])]
+
+    async def read(self, session_id: str, path: str) -> SessionFile:
+        """Read a file's content.
+
+        Args:
+            session_id: Session ID.
+            path: File path.
+        """
+        resp = await self._client._get(f"/sessions/{session_id}/fs/{path.lstrip('/')}")
+        return SessionFile(**resp)
+
+    async def create(
+        self,
+        session_id: str,
+        path: str,
+        content: str,
+        *,
+        encoding: Optional[str] = None,
+        is_readonly: Optional[bool] = None,
+    ) -> SessionFile:
+        """Create a file.
+
+        Args:
+            session_id: Session ID.
+            path: File path.
+            content: File content.
+            encoding: Content encoding ("text" or "base64").
+            is_readonly: Whether the file is read-only.
+        """
+        body: dict[str, Any] = {"content": content}
+        if encoding is not None:
+            body["encoding"] = encoding
+        if is_readonly is not None:
+            body["is_readonly"] = is_readonly
+        resp = await self._client._post(f"/sessions/{session_id}/fs/{path.lstrip('/')}", body)
+        return SessionFile(**resp)
+
+    async def create_dir(self, session_id: str, path: str) -> SessionFile:
+        """Create a directory.
+
+        Args:
+            session_id: Session ID.
+            path: Directory path.
+        """
+        resp = await self._client._post(
+            f"/sessions/{session_id}/fs/{path.lstrip('/')}",
+            {"is_directory": True},
+        )
+        return SessionFile(**resp)
+
+    async def update(
+        self,
+        session_id: str,
+        path: str,
+        content: str,
+        *,
+        encoding: Optional[str] = None,
+        is_readonly: Optional[bool] = None,
+    ) -> SessionFile:
+        """Update a file's content.
+
+        Args:
+            session_id: Session ID.
+            path: File path.
+            content: New file content.
+            encoding: Content encoding ("text" or "base64").
+            is_readonly: Whether the file is read-only.
+        """
+        body: dict[str, Any] = {"content": content}
+        if encoding is not None:
+            body["encoding"] = encoding
+        if is_readonly is not None:
+            body["is_readonly"] = is_readonly
+        resp = await self._client._put(f"/sessions/{session_id}/fs/{path.lstrip('/')}", body)
+        return SessionFile(**resp)
+
+    async def delete(
+        self,
+        session_id: str,
+        path: str,
+        *,
+        recursive: Optional[bool] = None,
+    ) -> DeleteFileResponse:
+        """Delete a file or directory.
+
+        Args:
+            session_id: Session ID.
+            path: File or directory path.
+            recursive: Delete recursively (for directories).
+        """
+        api_path = f"/sessions/{session_id}/fs/{path.lstrip('/')}"
+        if recursive:
+            api_path += "?recursive=true"
+        resp = await self._client._delete_json(api_path)
+        return DeleteFileResponse(**resp)
+
+    async def move_file(
+        self,
+        session_id: str,
+        src_path: str,
+        dst_path: str,
+    ) -> SessionFile:
+        """Move/rename a file.
+
+        Args:
+            session_id: Session ID.
+            src_path: Source path.
+            dst_path: Destination path.
+        """
+        resp = await self._client._post(
+            f"/sessions/{session_id}/fs/_/move",
+            {"src_path": src_path, "dst_path": dst_path},
+        )
+        return SessionFile(**resp)
+
+    async def copy_file(
+        self,
+        session_id: str,
+        src_path: str,
+        dst_path: str,
+    ) -> SessionFile:
+        """Copy a file.
+
+        Args:
+            session_id: Session ID.
+            src_path: Source path.
+            dst_path: Destination path.
+        """
+        resp = await self._client._post(
+            f"/sessions/{session_id}/fs/_/copy",
+            {"src_path": src_path, "dst_path": dst_path},
+        )
+        return SessionFile(**resp)
+
+    async def grep(
+        self,
+        session_id: str,
+        pattern: str,
+        *,
+        path_pattern: Optional[str] = None,
+    ) -> list[GrepResult]:
+        """Search files with regex.
+
+        Args:
+            session_id: Session ID.
+            pattern: Regex pattern to search for.
+            path_pattern: Optional path pattern to filter files.
+        """
+        body: dict[str, Any] = {"pattern": pattern}
+        if path_pattern is not None:
+            body["path_pattern"] = path_pattern
+        resp = await self._client._post(f"/sessions/{session_id}/fs/_/grep", body)
+        return [GrepResult(**r) for r in resp.get("data", [])]
+
+    async def stat(self, session_id: str, path: str) -> FileStat:
+        """Get file or directory stat.
+
+        Args:
+            session_id: Session ID.
+            path: File or directory path.
+        """
+        resp = await self._client._post(f"/sessions/{session_id}/fs/_/stat", {"path": path})
+        return FileStat(**resp)
