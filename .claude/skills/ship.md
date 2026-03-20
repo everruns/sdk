@@ -1,8 +1,14 @@
+---
+name: ship
+description: Ship
+user_invocable: true
+---
+
 # Ship
 
 Run the full ship flow through to **merge on main**. Shipping is not done until the PR is merged.
 
-This command implements the complete "Shipping" definition and Pre-PR Checklist from AGENTS.md. When the user says "ship", "fix and ship", or "ship it", execute ALL 10 phases below — do NOT stop at PR creation. The final deliverable is a merged PR.
+This skill implements the complete "Shipping" definition and Pre-PR Checklist from AGENTS.md. When the user says "ship", "fix and ship", or "ship it", execute ALL 10 phases below — do NOT stop at PR creation. The final deliverable is a merged PR.
 
 ## Arguments
 
