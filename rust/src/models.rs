@@ -641,8 +641,11 @@ impl Controls {
 #[non_exhaustive]
 pub struct ListResponse<T> {
     pub data: Vec<T>,
+    #[serde(default)]
     pub total: u64,
+    #[serde(default)]
     pub offset: u64,
+    #[serde(default)]
     pub limit: u64,
 }
 
@@ -923,4 +926,29 @@ pub struct GrepResult {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeleteResponse {
     pub deleted: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn list_response_deserializes_without_pagination_fields() {
+        let json = r#"{"data": [1, 2, 3]}"#;
+        let resp: ListResponse<i32> = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.data, vec![1, 2, 3]);
+        assert_eq!(resp.total, 0);
+        assert_eq!(resp.offset, 0);
+        assert_eq!(resp.limit, 0);
+    }
+
+    #[test]
+    fn list_response_deserializes_with_pagination_fields() {
+        let json = r#"{"data": ["a"], "total": 10, "offset": 5, "limit": 25}"#;
+        let resp: ListResponse<String> = serde_json::from_str(json).unwrap();
+        assert_eq!(resp.data, vec!["a"]);
+        assert_eq!(resp.total, 10);
+        assert_eq!(resp.offset, 5);
+        assert_eq!(resp.limit, 25);
+    }
 }
