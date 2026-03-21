@@ -287,6 +287,14 @@ export interface DeleteFileResponse {
   deleted: boolean;
 }
 
+/** Paginated list response */
+export interface ListResponse<T> {
+  data: T[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 export interface StreamOptions {
   /** Resume from this event ID */
   sinceId?: string;

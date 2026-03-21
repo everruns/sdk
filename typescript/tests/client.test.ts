@@ -617,11 +617,11 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const files = await client.sessionFiles.list("sess_123", {
+    const response = await client.sessionFiles.list("sess_123", {
       recursive: true,
     });
 
-    expect(files).toHaveLength(1);
+    expect(response.data).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/sessions/sess_123/fs?recursive=true",
       expect.objectContaining({ headers: expect.any(Object) }),
@@ -897,5 +897,44 @@ describe("SessionFilesClient", () => {
         body: JSON.stringify({ path: "/workspace/hello.txt" }),
       }),
     );
+  });
+
+  it("should handle list response without pagination fields", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: [FILE_RESPONSE] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.sessionFiles.list("sess_123");
+
+    expect(response.data).toHaveLength(1);
+    expect(response.total).toBe(0);
+    expect(response.offset).toBe(0);
+    expect(response.limit).toBe(0);
+  });
+
+  it("should handle list response with pagination fields", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [FILE_RESPONSE],
+        total: 42,
+        offset: 10,
+        limit: 20,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.sessionFiles.list("sess_123");
+
+    expect(response.data).toHaveLength(1);
+    expect(response.total).toBe(42);
+    expect(response.offset).toBe(10);
+    expect(response.limit).toBe(20);
   });
 });
