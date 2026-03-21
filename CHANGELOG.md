@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.5] - 2026-03-21
+
+### Highlights
+
+- Session filesystem client methods for file operations within sessions
+- ListResponse pagination fields are now optional across all SDKs
+- Git attribution helpers and pre-push checks for commit identity enforcement
+
+### What's Changed
+
+* fix(rust,python,typescript): make ListResponse pagination fields optional ([#64](https://github.com/everruns/sdk/pull/64)) by @mchalyi
+* feat: add session filesystem client methods ([#62](https://github.com/everruns/sdk/pull/62)) by @mchalyi
+* refactor: convert ship command to invocable skill ([#61](https://github.com/everruns/sdk/pull/61)) by @mchalyi
+* feat(ci): add git attribution helpers and pre-push checks ([#59](https://github.com/everruns/sdk/pull/59)) by @mchalyi
+* fix(ci): add --allow-dirty to cargo publish ([#58](https://github.com/everruns/sdk/pull/58)) by @mchalyi
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.4...v0.1.5
+
 ## [0.1.4] - 2026-03-14
 
 ### Highlights
