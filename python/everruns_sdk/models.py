@@ -254,9 +254,9 @@ class ListResponse(BaseModel):
     """Paginated list response."""
 
     data: list[Any]
-    total: int
-    offset: int
-    limit: int
+    total: int = 0
+    offset: int = 0
+    limit: int = 0
 
 
 # --- Session Filesystem Models ---

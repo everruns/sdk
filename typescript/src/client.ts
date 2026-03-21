@@ -17,6 +17,7 @@ import {
   CreateMessageRequest,
   Event,
   ListEventsOptions,
+  ListResponse,
   SessionFile,
   StreamOptions,
 } from "./models.js";
@@ -434,11 +435,11 @@ class CapabilitiesClient {
   constructor(private readonly client: Everruns) {}
 
   /** List all available capabilities. */
-  async list(): Promise<CapabilityInfo[]> {
-    const response = await this.client.fetch<{
-      data: CapabilityInfo[];
-    }>("/capabilities");
-    return response.data;
+  async list(): Promise<ListResponse<CapabilityInfo>> {
+    const response = await this.client.fetch<
+      ListResponse<CapabilityInfo>
+    >("/capabilities");
+    return { data: response.data, total: response.total ?? 0, offset: response.offset ?? 0, limit: response.limit ?? 0 };
   }
 
   /** Get a specific capability by ID. */
@@ -454,17 +455,17 @@ class SessionFilesClient {
   async list(
     sessionId: string,
     options?: { path?: string; recursive?: boolean },
-  ): Promise<FileInfo[]> {
+  ): Promise<ListResponse<FileInfo>> {
     const fsPath = options?.path
       ? `/sessions/${sessionId}/fs/${options.path.replace(/^\//, "")}`
       : `/sessions/${sessionId}/fs`;
     const params = new URLSearchParams();
     if (options?.recursive) params.set("recursive", "true");
     const query = params.toString() ? `?${params}` : "";
-    const response = await this.client.fetch<{ data: FileInfo[] }>(
+    const response = await this.client.fetch<ListResponse<FileInfo>>(
       `${fsPath}${query}`,
     );
-    return response.data;
+    return { data: response.data, total: response.total ?? 0, offset: response.offset ?? 0, limit: response.limit ?? 0 };
   }
 
   /** Read a file's content. */

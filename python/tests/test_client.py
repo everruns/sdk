@@ -928,3 +928,25 @@ async def test_session_files_stat():
     assert stat.size_bytes == 5
     assert not stat.is_directory
     assert route.called
+
+
+def test_list_response_without_pagination_fields():
+    """ListResponse deserializes when server omits total/offset/limit."""
+    from everruns_sdk.models import ListResponse
+
+    resp = ListResponse.model_validate({"data": [1, 2, 3]})
+    assert resp.data == [1, 2, 3]
+    assert resp.total == 0
+    assert resp.offset == 0
+    assert resp.limit == 0
+
+
+def test_list_response_with_pagination_fields():
+    """ListResponse deserializes when server includes total/offset/limit."""
+    from everruns_sdk.models import ListResponse
+
+    resp = ListResponse.model_validate({"data": ["a"], "total": 10, "offset": 5, "limit": 25})
+    assert resp.data == ["a"]
+    assert resp.total == 10
+    assert resp.offset == 5
+    assert resp.limit == 25
