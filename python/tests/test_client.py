@@ -1020,3 +1020,46 @@ async def test_connections_remove():
         await client.close()
 
     assert route.called
+
+
+# --- Session Secrets Tests ---
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_set_secrets():
+    route = respx.put("https://custom.example.com/api/v1/sessions/sess_123/storage/secrets").mock(
+        return_value=httpx.Response(200, json={})
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.sessions.set_secrets(
+            "sess_123",
+            {"OPENAI_API_KEY": "sk-abc123", "DB_PASSWORD": "hunter2"},
+        )
+    finally:
+        await client.close()
+
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["secrets"]["OPENAI_API_KEY"] == "sk-abc123"
+    assert body["secrets"]["DB_PASSWORD"] == "hunter2"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_set_secrets_empty():
+    route = respx.put("https://custom.example.com/api/v1/sessions/sess_123/storage/secrets").mock(
+        return_value=httpx.Response(200, json={})
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.sessions.set_secrets("sess_123", {})
+    finally:
+        await client.close()
+
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["secrets"] == {}

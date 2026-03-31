@@ -436,6 +436,19 @@ impl<'a> SessionsClient<'a> {
     pub async fn unpin(&self, id: &str) -> Result<()> {
         self.client.delete(&format!("/sessions/{}/pin", id)).await
     }
+
+    /// Batch-set encrypted secrets for a session
+    pub async fn set_secrets(
+        &self,
+        id: &str,
+        secrets: &std::collections::HashMap<String, String>,
+    ) -> Result<()> {
+        let req = SetSecretsRequest::new(secrets.clone());
+        self.client
+            .put::<serde_json::Value, _>(&format!("/sessions/{}/storage/secrets", id), &req)
+            .await?;
+        Ok(())
+    }
 }
 
 /// Client for message operations

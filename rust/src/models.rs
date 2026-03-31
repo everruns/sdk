@@ -953,6 +953,20 @@ impl SetConnectionRequest {
     }
 }
 
+// --- Session Secrets Models ---
+
+/// Request to batch-set session secrets
+#[derive(Debug, Clone, Serialize)]
+pub struct SetSecretsRequest {
+    pub secrets: std::collections::HashMap<String, String>,
+}
+
+impl SetSecretsRequest {
+    pub fn new(secrets: std::collections::HashMap<String, String>) -> Self {
+        Self { secrets }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

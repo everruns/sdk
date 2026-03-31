@@ -411,6 +411,18 @@ class SessionsClient:
         """Unpin a session for the current user."""
         await self._client._delete(f"/sessions/{session_id}/pin")
 
+    async def set_secrets(self, session_id: str, secrets: dict[str, str]) -> None:
+        """Batch-set encrypted secrets for a session.
+
+        Args:
+            session_id: Session ID.
+            secrets: Map of secret name to secret value.
+        """
+        await self._client._put(
+            f"/sessions/{session_id}/storage/secrets",
+            {"secrets": secrets},
+        )
+
 
 class MessagesClient:
     """Client for message operations."""
