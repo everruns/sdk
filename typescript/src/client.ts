@@ -319,6 +319,17 @@ class SessionsClient {
       method: "DELETE",
     });
   }
+
+  /** Batch-set encrypted secrets for a session. */
+  async setSecrets(
+    sessionId: string,
+    secrets: Record<string, string>,
+  ): Promise<void> {
+    await this.client.fetch(`/sessions/${sessionId}/storage/secrets`, {
+      method: "PUT",
+      body: JSON.stringify({ secrets }),
+    });
+  }
 }
 
 class MessagesClient {

@@ -624,3 +624,55 @@ async fn test_connections_remove() {
         .await
         .expect("remove connection should succeed");
 }
+
+// --- Session Secrets Tests ---
+
+#[tokio::test]
+async fn test_session_set_secrets() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/sessions/sess_123/storage/secrets"))
+        .and(body_json(serde_json::json!({
+            "secrets": {
+                "OPENAI_API_KEY": "sk-abc123",
+                "DB_PASSWORD": "hunter2"
+            }
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+        .mount(&server)
+        .await;
+
+    let mut secrets = std::collections::HashMap::new();
+    secrets.insert("OPENAI_API_KEY".to_string(), "sk-abc123".to_string());
+    secrets.insert("DB_PASSWORD".to_string(), "hunter2".to_string());
+
+    client
+        .sessions()
+        .set_secrets("sess_123", &secrets)
+        .await
+        .expect("set_secrets should succeed");
+}
+
+#[tokio::test]
+async fn test_session_set_secrets_empty() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/sessions/sess_123/storage/secrets"))
+        .and(body_json(serde_json::json!({
+            "secrets": {}
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({})))
+        .mount(&server)
+        .await;
+
+    let secrets = std::collections::HashMap::new();
+    client
+        .sessions()
+        .set_secrets("sess_123", &secrets)
+        .await
+        .expect("set_secrets with empty map should succeed");
+}

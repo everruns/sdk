@@ -1016,3 +1016,55 @@ describe("ConnectionsClient", () => {
     );
   });
 });
+
+// --- Session Secrets Tests ---
+
+describe("SessionsClient.setSecrets", () => {
+  it("should batch-set secrets", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessions.setSecrets("sess_123", {
+      OPENAI_API_KEY: "sk-abc123",
+      DB_PASSWORD: "hunter2",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/storage/secrets",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({
+          secrets: {
+            OPENAI_API_KEY: "sk-abc123",
+            DB_PASSWORD: "hunter2",
+          },
+        }),
+      }),
+    );
+  });
+
+  it("should handle empty secrets map", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.sessions.setSecrets("sess_123", {});
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/storage/secrets",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ secrets: {} }),
+      }),
+    );
+  });
+});
