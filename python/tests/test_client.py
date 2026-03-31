@@ -950,3 +950,73 @@ def test_list_response_with_pagination_fields():
     assert resp.total == 10
     assert resp.offset == 5
     assert resp.limit == 25
+
+
+# --- Connections Tests ---
+
+CONN_RESPONSE = {
+    "provider": "daytona",
+    "created_at": "2026-03-31T00:00:00Z",
+    "updated_at": "2026-03-31T00:00:00Z",
+}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_connections_set():
+    route = respx.post("https://custom.example.com/api/v1/user/connections/daytona").mock(
+        return_value=httpx.Response(200, json=CONN_RESPONSE)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        conn = await client.connections.set("daytona", "dtn_secret_key")
+    finally:
+        await client.close()
+
+    assert conn.provider == "daytona"
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["api_key"] == "dtn_secret_key"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_connections_list():
+    route = respx.get("https://custom.example.com/api/v1/user/connections").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "data": [CONN_RESPONSE],
+                "total": 1,
+                "offset": 0,
+                "limit": 100,
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        connections = await client.connections.list()
+    finally:
+        await client.close()
+
+    assert len(connections) == 1
+    assert connections[0].provider == "daytona"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_connections_remove():
+    route = respx.delete("https://custom.example.com/api/v1/user/connections/daytona").mock(
+        return_value=httpx.Response(204)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.connections.remove("daytona")
+    finally:
+        await client.close()
+
+    assert route.called

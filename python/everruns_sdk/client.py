@@ -13,6 +13,7 @@ from everruns_sdk.models import (
     Agent,
     AgentCapabilityConfig,
     CapabilityInfo,
+    Connection,
     ContentPart,
     Controls,
     CreateAgentRequest,
@@ -119,6 +120,11 @@ class Everruns:
     def session_files(self) -> "SessionFilesClient":
         """Get the session files client."""
         return SessionFilesClient(self)
+
+    @property
+    def connections(self) -> "ConnectionsClient":
+        """Get the connections client."""
+        return ConnectionsClient(self)
 
     def _url(self, path: str) -> str:
         # Use relative path (no leading slash) for correct joining with base URL.
@@ -722,3 +728,36 @@ class SessionFilesClient:
         """
         resp = await self._client._post(f"/sessions/{session_id}/fs/_/stat", {"path": path})
         return FileStat(**resp)
+
+
+class ConnectionsClient:
+    """Client for user connection operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def set(self, provider: str, api_key: str) -> Connection:
+        """Set an API key connection for a provider.
+
+        Args:
+            provider: Provider name (e.g. "daytona").
+            api_key: API key for the provider.
+        """
+        resp = await self._client._post(
+            f"/user/connections/{provider}",
+            {"api_key": api_key},
+        )
+        return Connection(**resp)
+
+    async def list(self) -> list[Connection]:
+        """List all connections."""
+        resp = await self._client._get("/user/connections")
+        return [Connection(**c) for c in resp.get("data", [])]
+
+    async def remove(self, provider: str) -> None:
+        """Remove a connection.
+
+        Args:
+            provider: Provider name (e.g. "daytona").
+        """
+        await self._client._delete(f"/user/connections/{provider}")

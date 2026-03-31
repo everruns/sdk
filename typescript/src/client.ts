@@ -5,6 +5,7 @@ import { ApiKey } from "./auth.js";
 import {
   Agent,
   CapabilityInfo,
+  Connection,
   ContentPart,
   CreateAgentRequest,
   DeleteFileResponse,
@@ -44,6 +45,7 @@ export class Everruns {
   readonly events: EventsClient;
   readonly capabilities: CapabilitiesClient;
   readonly sessionFiles: SessionFilesClient;
+  readonly connections: ConnectionsClient;
 
   constructor(options: EverrunsOptions = {}) {
     if (options.apiKey instanceof ApiKey) {
@@ -66,6 +68,7 @@ export class Everruns {
     this.events = new EventsClient(this);
     this.capabilities = new CapabilitiesClient(this);
     this.sessionFiles = new SessionFilesClient(this);
+    this.connections = new ConnectionsClient(this);
   }
 
   /**
@@ -574,6 +577,33 @@ class SessionFilesClient {
     return this.client.fetch(`/sessions/${sessionId}/fs/_/stat`, {
       method: "POST",
       body: JSON.stringify({ path }),
+    });
+  }
+}
+
+class ConnectionsClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** Set an API key connection for a provider. */
+  async set(provider: string, apiKey: string): Promise<Connection> {
+    return this.client.fetch(`/user/connections/${provider}`, {
+      method: "POST",
+      body: JSON.stringify({ api_key: apiKey }),
+    });
+  }
+
+  /** List all connections. */
+  async list(): Promise<Connection[]> {
+    const response = await this.client.fetch<{ data: Connection[] }>(
+      "/user/connections",
+    );
+    return response.data;
+  }
+
+  /** Remove a connection. */
+  async remove(provider: string): Promise<void> {
+    await this.client.fetch(`/user/connections/${provider}`, {
+      method: "DELETE",
     });
   }
 }

@@ -287,6 +287,15 @@ export interface DeleteFileResponse {
   deleted: boolean;
 }
 
+// --- Connections Models ---
+
+/** A user connection to an external provider */
+export interface Connection {
+  provider: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** Paginated list response */
 export interface ListResponse<T> {
   data: T[];

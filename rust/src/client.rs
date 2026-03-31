@@ -97,6 +97,11 @@ impl Everruns {
         SessionFilesClient { client: self }
     }
 
+    /// Get the connections client
+    pub fn connections(&self) -> ConnectionsClient<'_> {
+        ConnectionsClient { client: self }
+    }
+
     pub(crate) fn url(&self, path: &str) -> Url {
         // Use relative path (no leading slash) for correct joining with base URL.
         // The path parameter starts with "/" (e.g., "/agents"), so we strip it.
@@ -759,6 +764,33 @@ impl<'a> SessionFilesClient<'a> {
         let req = StatRequest::new(path);
         self.client
             .post(&format!("/sessions/{}/fs/_/stat", session_id), &req)
+            .await
+    }
+}
+
+/// Client for user connection operations
+pub struct ConnectionsClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> ConnectionsClient<'a> {
+    /// Set an API key connection for a provider
+    pub async fn set(&self, provider: &str, api_key: &str) -> Result<Connection> {
+        let req = SetConnectionRequest::new(api_key);
+        self.client
+            .post(&format!("/user/connections/{}", provider), &req)
+            .await
+    }
+
+    /// List all connections
+    pub async fn list(&self) -> Result<ListResponse<Connection>> {
+        self.client.get("/user/connections").await
+    }
+
+    /// Remove a connection
+    pub async fn remove(&self, provider: &str) -> Result<()> {
+        self.client
+            .delete(&format!("/user/connections/{}", provider))
             .await
     }
 }
