@@ -325,6 +325,17 @@ class DeleteFileResponse(BaseModel):
     deleted: bool
 
 
+# --- Connections Models ---
+
+
+class Connection(BaseModel):
+    """A user connection to an external provider."""
+
+    provider: str
+    created_at: str
+    updated_at: str
+
+
 def extract_tool_calls(data: dict[str, Any]) -> list[ToolCallInfo]:
     """Extract tool call info from event data (``data.message.content``)."""
     message = data.get("message")

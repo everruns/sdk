@@ -928,6 +928,31 @@ pub struct DeleteResponse {
     pub deleted: bool,
 }
 
+// --- Connections Models ---
+
+/// A user connection to an external provider
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct Connection {
+    pub provider: String,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// Request to set a connection API key
+#[derive(Debug, Clone, Serialize)]
+pub struct SetConnectionRequest {
+    pub api_key: String,
+}
+
+impl SetConnectionRequest {
+    pub fn new(api_key: impl Into<String>) -> Self {
+        Self {
+            api_key: api_key.into(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

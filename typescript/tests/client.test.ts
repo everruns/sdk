@@ -9,6 +9,7 @@ import {
   toolError,
   type AgentCapabilityConfig,
   type CapabilityInfo,
+  type Connection,
   type CreateAgentRequest,
   type CreateMessageRequest,
   type CreateSessionRequest,
@@ -936,5 +937,82 @@ describe("SessionFilesClient", () => {
     expect(response.total).toBe(42);
     expect(response.offset).toBe(10);
     expect(response.limit).toBe(20);
+  });
+});
+
+// --- Connections Tests ---
+
+const CONN_RESPONSE = {
+  provider: "daytona",
+  created_at: "2026-03-31T00:00:00Z",
+  updated_at: "2026-03-31T00:00:00Z",
+};
+
+describe("ConnectionsClient", () => {
+  it("should have connections on client", () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    expect(client.connections).toBeDefined();
+  });
+
+  it("should set a connection", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => CONN_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const conn = await client.connections.set("daytona", "dtn_secret_key");
+
+    expect(conn.provider).toBe("daytona");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/user/connections/daytona",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ api_key: "dtn_secret_key" }),
+      }),
+    );
+  });
+
+  it("should list connections", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [CONN_RESPONSE],
+        total: 1,
+        offset: 0,
+        limit: 100,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const connections = await client.connections.list();
+
+    expect(connections).toHaveLength(1);
+    expect(connections[0].provider).toBe("daytona");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/user/connections",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should remove a connection", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: async () => undefined,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.connections.remove("daytona");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/user/connections/daytona",
+      expect.objectContaining({ method: "DELETE" }),
+    );
   });
 });

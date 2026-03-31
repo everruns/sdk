@@ -2,7 +2,7 @@
 
 use everruns_sdk::{
     CreateAgentRequest, CreateFileRequest, CreateSessionRequest, Everruns, InitialFile,
-    UpdateFileRequest,
+    SetConnectionRequest, UpdateFileRequest,
 };
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -546,4 +546,81 @@ async fn test_session_files_stat() {
     assert_eq!(stat.name, "hello.txt");
     assert_eq!(stat.size_bytes, 5);
     assert!(!stat.is_directory);
+}
+
+// --- Connections Tests ---
+
+#[tokio::test]
+async fn test_connections_set() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/user/connections/daytona"))
+        .and(body_json(serde_json::json!({
+            "api_key": "dtn_secret_key"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "provider": "daytona",
+            "created_at": "2026-03-31T00:00:00Z",
+            "updated_at": "2026-03-31T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let conn = client
+        .connections()
+        .set("daytona", "dtn_secret_key")
+        .await
+        .expect("set connection should succeed");
+
+    assert_eq!(conn.provider, "daytona");
+}
+
+#[tokio::test]
+async fn test_connections_list() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/user/connections"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [{
+                "provider": "daytona",
+                "created_at": "2026-03-31T00:00:00Z",
+                "updated_at": "2026-03-31T00:00:00Z"
+            }],
+            "total": 1,
+            "offset": 0,
+            "limit": 100
+        })))
+        .mount(&server)
+        .await;
+
+    let connections = client
+        .connections()
+        .list()
+        .await
+        .expect("list connections should succeed");
+
+    assert_eq!(connections.data.len(), 1);
+    assert_eq!(connections.data[0].provider, "daytona");
+}
+
+#[tokio::test]
+async fn test_connections_remove() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("DELETE"))
+        .and(path("/v1/user/connections/daytona"))
+        .respond_with(ResponseTemplate::new(204))
+        .mount(&server)
+        .await;
+
+    client
+        .connections()
+        .remove("daytona")
+        .await
+        .expect("remove connection should succeed");
 }
