@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.6] - 2026-04-01
+
+### Highlights
+
+- Session secrets API for managing secrets within sessions
+- Connections API for managing external service connections
+- Dependency upgrades across all SDKs
+
+### What's Changed
+
+* feat(rust,python,typescript): add session secrets API ([#69](https://github.com/everruns/sdk/pull/69)) by @mchalyi
+* feat(rust,python,typescript): add connections API ([#68](https://github.com/everruns/sdk/pull/68)) by @mchalyi
+* chore(rust,python,typescript): upgrade dependencies across all SDKs ([#70](https://github.com/everruns/sdk/pull/70)) by @mchalyi
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.5...v0.1.6
+
 ## [0.1.5] - 2026-03-21
 
 ### Highlights
