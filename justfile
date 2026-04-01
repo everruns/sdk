@@ -38,7 +38,7 @@ check-examples-python:
 # Check TypeScript examples
 check-examples-typescript:
     cd typescript && npm run build
-    cd typescript && npx tsc --noEmit examples/basic.ts examples/initial-files.ts
+    cd typescript && npx tsc --noEmit --ignoreConfig --types node examples/basic.ts examples/initial-files.ts
 
 # Lint all SDKs
 lint: lint-rust lint-python lint-typescript

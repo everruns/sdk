@@ -69,7 +69,7 @@ jobs:
       - name: Install TypeScript SDK deps
         run: cd typescript && npm ci
       - name: Check TypeScript examples compile
-        run: cd typescript && npx tsc --noEmit examples/basic.ts examples/initial-files.ts
+        run: cd typescript && npx tsc --noEmit --ignoreConfig --types node examples/basic.ts examples/initial-files.ts
 
   check-cookbooks:
     runs-on: ubuntu-latest

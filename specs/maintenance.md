@@ -4,7 +4,7 @@ Periodic checklist to keep the SDK repo healthy. Run quarterly or when triggered
 
 ## 1. Update Dependencies
 
-Update all SDK dependencies to latest versions. Major version bumps are acceptable (pre-1.0 SDK, no backward compat needed).
+Update all SDK dependencies to their latest versions, **including breaking/major version bumps**. This is a pre-1.0 SDK with no backward compatibility guarantees, so always upgrade to the newest release even if it contains breaking API changes. Fix any resulting compilation or test failures after upgrading.
 
 ### Rust
 
