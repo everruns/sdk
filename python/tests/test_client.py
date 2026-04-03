@@ -1063,3 +1063,284 @@ async def test_session_set_secrets_empty():
     assert route.called
     body = json.loads(route.calls[0].request.content)
     assert body["secrets"] == {}
+
+
+# --- Budget Tests ---
+
+BUDGET_RESPONSE = {
+    "id": "bdgt_001",
+    "organization_id": "org_123",
+    "subject_type": "session",
+    "subject_id": "sess_123",
+    "currency": "usd",
+    "limit": 10.0,
+    "soft_limit": 8.0,
+    "balance": 10.0,
+    "status": "active",
+    "created_at": "2026-04-01T00:00:00Z",
+    "updated_at": "2026-04-01T00:00:00Z",
+}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_create():
+    route = respx.post("https://custom.example.com/api/v1/budgets").mock(
+        return_value=httpx.Response(201, json=BUDGET_RESPONSE)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        budget = await client.budgets.create("session", "sess_123", "usd", 10.0, soft_limit=8.0)
+    finally:
+        await client.close()
+
+    assert budget.id == "bdgt_001"
+    assert budget.balance == 10.0
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["subject_type"] == "session"
+    assert body["limit"] == 10.0
+    assert body["soft_limit"] == 8.0
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_get():
+    route = respx.get("https://custom.example.com/api/v1/budgets/bdgt_001").mock(
+        return_value=httpx.Response(200, json=BUDGET_RESPONSE)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        budget = await client.budgets.get("bdgt_001")
+    finally:
+        await client.close()
+
+    assert budget.id == "bdgt_001"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_list():
+    route = respx.get("https://custom.example.com/api/v1/budgets?subject_type=session").mock(
+        return_value=httpx.Response(200, json=[BUDGET_RESPONSE])
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        budgets = await client.budgets.list(subject_type="session")
+    finally:
+        await client.close()
+
+    assert len(budgets) == 1
+    assert budgets[0].id == "bdgt_001"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_update():
+    updated = {**BUDGET_RESPONSE, "limit": 20.0}
+    route = respx.patch("https://custom.example.com/api/v1/budgets/bdgt_001").mock(
+        return_value=httpx.Response(200, json=updated)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        budget = await client.budgets.update("bdgt_001", limit=20.0)
+    finally:
+        await client.close()
+
+    assert budget.limit == 20.0
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["limit"] == 20.0
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_delete():
+    route = respx.delete("https://custom.example.com/api/v1/budgets/bdgt_001").mock(
+        return_value=httpx.Response(204)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.budgets.delete("bdgt_001")
+    finally:
+        await client.close()
+
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_top_up():
+    topped_up = {**BUDGET_RESPONSE, "balance": 15.0}
+    route = respx.post("https://custom.example.com/api/v1/budgets/bdgt_001/top-up").mock(
+        return_value=httpx.Response(200, json=topped_up)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        budget = await client.budgets.top_up("bdgt_001", 5.0, description="manual")
+    finally:
+        await client.close()
+
+    assert budget.balance == 15.0
+    assert route.called
+    body = json.loads(route.calls[0].request.content)
+    assert body["amount"] == 5.0
+    assert body["description"] == "manual"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_ledger():
+    route = respx.get("https://custom.example.com/api/v1/budgets/bdgt_001/ledger?limit=10").mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {
+                    "id": "le_001",
+                    "budget_id": "bdgt_001",
+                    "amount": 2.5,
+                    "meter_source": "llm_tokens",
+                    "created_at": "2026-04-01T00:00:00Z",
+                }
+            ],
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        entries = await client.budgets.ledger("bdgt_001", limit=10)
+    finally:
+        await client.close()
+
+    assert len(entries) == 1
+    assert entries[0].amount == 2.5
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_budgets_check():
+    route = respx.get("https://custom.example.com/api/v1/budgets/bdgt_001/check").mock(
+        return_value=httpx.Response(200, json={"action": "continue"})
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        result = await client.budgets.check("bdgt_001")
+    finally:
+        await client.close()
+
+    assert result.action == "continue"
+    assert route.called
+
+
+# --- Session Budget Shortcuts Tests ---
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_budgets():
+    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/budgets").mock(
+        return_value=httpx.Response(200, json=[BUDGET_RESPONSE])
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        budgets = await client.sessions.budgets("sess_123")
+    finally:
+        await client.close()
+
+    assert len(budgets) == 1
+    assert budgets[0].id == "bdgt_001"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_budget_check():
+    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/budget-check").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "action": "warn",
+                "message": "Budget running low",
+                "budget_id": "bdgt_001",
+                "balance": 1.5,
+                "currency": "usd",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        result = await client.sessions.budget_check("sess_123")
+    finally:
+        await client.close()
+
+    assert result.action == "warn"
+    assert result.balance == 1.5
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_resume():
+    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/resume").mock(
+        return_value=httpx.Response(
+            200,
+            json={"resumed_budgets": 2, "session_id": "sess_123"},
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        result = await client.sessions.resume("sess_123")
+    finally:
+        await client.close()
+
+    assert result.resumed_budgets == 2
+    assert result.session_id == "sess_123"
+    assert route.called
+
+
+def test_budget_model():
+    """Test Budget model deserialization."""
+    from everruns_sdk import Budget
+
+    budget = Budget(**BUDGET_RESPONSE)
+    assert budget.id == "bdgt_001"
+    assert budget.subject_type == "session"
+    assert budget.currency == "usd"
+    assert budget.limit == 10.0
+    assert budget.soft_limit == 8.0
+    assert budget.balance == 10.0
+    assert budget.status == "active"
+
+
+def test_budget_model_without_optional_fields():
+    """Test Budget model without optional fields."""
+    from everruns_sdk import Budget
+
+    budget = Budget(
+        id="bdgt_001",
+        organization_id="org_123",
+        subject_type="session",
+        subject_id="sess_123",
+        currency="usd",
+        limit=10.0,
+        balance=10.0,
+        status="active",
+        created_at="2026-04-01T00:00:00Z",
+        updated_at="2026-04-01T00:00:00Z",
+    )
+    assert budget.soft_limit is None
+    assert budget.period is None
+    assert budget.metadata is None

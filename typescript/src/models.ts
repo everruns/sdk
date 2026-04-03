@@ -287,6 +287,87 @@ export interface DeleteFileResponse {
   deleted: boolean;
 }
 
+// --- Budget Models ---
+
+/** Budget period configuration for recurring budgets */
+export interface BudgetPeriod {
+  type: "rolling" | "calendar";
+  /** Window duration for rolling periods (e.g. "24h") */
+  window?: string;
+  /** Calendar unit for calendar periods (e.g. "month") */
+  unit?: string;
+}
+
+/** Budget — a spending cap for a subject in a currency */
+export interface Budget {
+  id: string;
+  organizationId: string;
+  subjectType: string;
+  subjectId: string;
+  currency: string;
+  limit: number;
+  softLimit?: number | null;
+  balance: number;
+  period?: BudgetPeriod | null;
+  metadata?: Record<string, unknown> | null;
+  status: "active" | "paused" | "exhausted" | "disabled";
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Request to create a budget */
+export interface CreateBudgetRequest {
+  subjectType: string;
+  subjectId: string;
+  currency: string;
+  limit: number;
+  softLimit?: number;
+  period?: BudgetPeriod;
+  metadata?: Record<string, unknown>;
+}
+
+/** Request to update a budget */
+export interface UpdateBudgetRequest {
+  limit?: number;
+  softLimit?: number | null;
+  status?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/** Request to top up a budget */
+export interface TopUpRequest {
+  amount: number;
+  description?: string;
+}
+
+/** Ledger entry recording resource consumption or credit */
+export interface LedgerEntry {
+  id: string;
+  budgetId: string;
+  amount: number;
+  meterSource: string;
+  refType?: string | null;
+  refId?: string | null;
+  sessionId?: string | null;
+  description?: string | null;
+  createdAt: string;
+}
+
+/** Result of checking all budgets for a session */
+export interface BudgetCheckResult {
+  action: string;
+  message?: string | null;
+  budgetId?: string | null;
+  balance?: number | null;
+  currency?: string | null;
+}
+
+/** Response from session resume endpoint */
+export interface ResumeSessionResponse {
+  resumedBudgets: number;
+  sessionId: string;
+}
+
 // --- Connections Models ---
 
 /** A user connection to an external provider */

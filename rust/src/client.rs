@@ -102,6 +102,11 @@ impl Everruns {
         ConnectionsClient { client: self }
     }
 
+    /// Get the budgets client
+    pub fn budgets(&self) -> BudgetsClient<'_> {
+        BudgetsClient { client: self }
+    }
+
     pub(crate) fn url(&self, path: &str) -> Url {
         // Use relative path (no leading slash) for correct joining with base URL.
         // The path parameter starts with "/" (e.g., "/agents"), so we strip it.
@@ -153,7 +158,6 @@ impl Everruns {
         self.handle_response(resp).await
     }
 
-    #[allow(dead_code)]
     pub(crate) async fn patch<T: serde::de::DeserializeOwned, B: serde::Serialize>(
         &self,
         path: &str,
@@ -435,6 +439,25 @@ impl<'a> SessionsClient<'a> {
     /// Unpin a session for the current user
     pub async fn unpin(&self, id: &str) -> Result<()> {
         self.client.delete(&format!("/sessions/{}/pin", id)).await
+    }
+
+    /// List budgets for a session
+    pub async fn budgets(&self, id: &str) -> Result<Vec<Budget>> {
+        self.client.get(&format!("/sessions/{}/budgets", id)).await
+    }
+
+    /// Check all budgets in hierarchy for a session
+    pub async fn budget_check(&self, id: &str) -> Result<BudgetCheckResult> {
+        self.client
+            .get(&format!("/sessions/{}/budget-check", id))
+            .await
+    }
+
+    /// Resume paused budgets for a session
+    pub async fn resume(&self, id: &str) -> Result<ResumeSessionResponse> {
+        self.client
+            .post::<ResumeSessionResponse, _>(&format!("/sessions/{}/resume", id), &())
+            .await
     }
 
     /// Batch-set encrypted secrets for a session
@@ -778,6 +801,78 @@ impl<'a> SessionFilesClient<'a> {
         self.client
             .post(&format!("/sessions/{}/fs/_/stat", session_id), &req)
             .await
+    }
+}
+
+/// Client for budget operations
+pub struct BudgetsClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> BudgetsClient<'a> {
+    /// Create a budget
+    pub async fn create(&self, req: CreateBudgetRequest) -> Result<Budget> {
+        self.client.post("/budgets", &req).await
+    }
+
+    /// List budgets, optionally filtered by subject
+    pub async fn list(
+        &self,
+        subject_type: Option<&str>,
+        subject_id: Option<&str>,
+    ) -> Result<Vec<Budget>> {
+        let mut url = self.client.url("/budgets");
+        if let Some(st) = subject_type {
+            url.query_pairs_mut().append_pair("subject_type", st);
+        }
+        if let Some(si) = subject_id {
+            url.query_pairs_mut().append_pair("subject_id", si);
+        }
+        self.client.get_url(url).await
+    }
+
+    /// Get a budget by ID
+    pub async fn get(&self, id: &str) -> Result<Budget> {
+        self.client.get(&format!("/budgets/{}", id)).await
+    }
+
+    /// Update a budget
+    pub async fn update(&self, id: &str, req: UpdateBudgetRequest) -> Result<Budget> {
+        self.client.patch(&format!("/budgets/{}", id), &req).await
+    }
+
+    /// Delete (soft-delete) a budget
+    pub async fn delete(&self, id: &str) -> Result<()> {
+        self.client.delete(&format!("/budgets/{}", id)).await
+    }
+
+    /// Add credits to a budget
+    pub async fn top_up(&self, id: &str, req: TopUpRequest) -> Result<Budget> {
+        self.client
+            .post(&format!("/budgets/{}/top-up", id), &req)
+            .await
+    }
+
+    /// Get paginated ledger entries for a budget
+    pub async fn ledger(
+        &self,
+        id: &str,
+        limit: Option<i64>,
+        offset: Option<i64>,
+    ) -> Result<Vec<LedgerEntry>> {
+        let mut url = self.client.url(&format!("/budgets/{}/ledger", id));
+        if let Some(l) = limit {
+            url.query_pairs_mut().append_pair("limit", &l.to_string());
+        }
+        if let Some(o) = offset {
+            url.query_pairs_mut().append_pair("offset", &o.to_string());
+        }
+        self.client.get_url(url).await
+    }
+
+    /// Check budget status
+    pub async fn check(&self, id: &str) -> Result<BudgetCheckResult> {
+        self.client.get(&format!("/budgets/{}/check", id)).await
     }
 }
 

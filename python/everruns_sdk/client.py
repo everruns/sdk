@@ -12,6 +12,8 @@ from everruns_sdk.errors import ApiError
 from everruns_sdk.models import (
     Agent,
     AgentCapabilityConfig,
+    Budget,
+    BudgetCheckResult,
     CapabilityInfo,
     Connection,
     ContentPart,
@@ -25,8 +27,10 @@ from everruns_sdk.models import (
     FileStat,
     GrepResult,
     InitialFile,
+    LedgerEntry,
     Message,
     MessageInput,
+    ResumeSessionResponse,
     Session,
     SessionFile,
 )
@@ -125,6 +129,11 @@ class Everruns:
     def connections(self) -> "ConnectionsClient":
         """Get the connections client."""
         return ConnectionsClient(self)
+
+    @property
+    def budgets(self) -> "BudgetsClient":
+        """Get the budgets client."""
+        return BudgetsClient(self)
 
     def _url(self, path: str) -> str:
         # Use relative path (no leading slash) for correct joining with base URL.
@@ -410,6 +419,33 @@ class SessionsClient:
     async def unpin(self, session_id: str) -> None:
         """Unpin a session for the current user."""
         await self._client._delete(f"/sessions/{session_id}/pin")
+
+    async def budgets(self, session_id: str) -> list[Budget]:
+        """List budgets for a session.
+
+        Args:
+            session_id: Session ID.
+        """
+        resp = await self._client._get(f"/sessions/{session_id}/budgets")
+        return [Budget(**b) for b in resp]
+
+    async def budget_check(self, session_id: str) -> BudgetCheckResult:
+        """Check all budgets in hierarchy for a session.
+
+        Args:
+            session_id: Session ID.
+        """
+        resp = await self._client._get(f"/sessions/{session_id}/budget-check")
+        return BudgetCheckResult(**resp)
+
+    async def resume(self, session_id: str) -> ResumeSessionResponse:
+        """Resume paused budgets for a session.
+
+        Args:
+            session_id: Session ID.
+        """
+        resp = await self._client._post(f"/sessions/{session_id}/resume", {})
+        return ResumeSessionResponse(**resp)
 
     async def set_secrets(self, session_id: str, secrets: dict[str, str]) -> None:
         """Batch-set encrypted secrets for a session.
@@ -740,6 +776,174 @@ class SessionFilesClient:
         """
         resp = await self._client._post(f"/sessions/{session_id}/fs/_/stat", {"path": path})
         return FileStat(**resp)
+
+
+class BudgetsClient:
+    """Client for budget operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def create(
+        self,
+        subject_type: str,
+        subject_id: str,
+        currency: str,
+        limit: float,
+        *,
+        soft_limit: Optional[float] = None,
+        period: Optional[dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> Budget:
+        """Create a budget.
+
+        Args:
+            subject_type: Subject type (session, agent, user, org).
+            subject_id: Subject entity ID.
+            currency: Currency (usd, tokens, credits, etc).
+            limit: Hard limit.
+            soft_limit: Soft limit (triggers pause/warn).
+            period: Period config for recurring budgets.
+            metadata: Arbitrary metadata.
+        """
+        body: dict[str, Any] = {
+            "subject_type": subject_type,
+            "subject_id": subject_id,
+            "currency": currency,
+            "limit": limit,
+        }
+        if soft_limit is not None:
+            body["soft_limit"] = soft_limit
+        if period is not None:
+            body["period"] = period
+        if metadata is not None:
+            body["metadata"] = metadata
+        resp = await self._client._post("/budgets", body)
+        return Budget(**resp)
+
+    async def list(
+        self,
+        *,
+        subject_type: Optional[str] = None,
+        subject_id: Optional[str] = None,
+    ) -> list[Budget]:
+        """List budgets, optionally filtered by subject.
+
+        Args:
+            subject_type: Filter by subject type.
+            subject_id: Filter by subject ID.
+        """
+        params: list[str] = []
+        if subject_type:
+            params.append(f"subject_type={subject_type}")
+        if subject_id:
+            params.append(f"subject_id={subject_id}")
+        path = "/budgets"
+        if params:
+            path += "?" + "&".join(params)
+        resp = await self._client._get(path)
+        return [Budget(**b) for b in resp]
+
+    async def get(self, budget_id: str) -> Budget:
+        """Get a budget by ID.
+
+        Args:
+            budget_id: Budget ID.
+        """
+        resp = await self._client._get(f"/budgets/{budget_id}")
+        return Budget(**resp)
+
+    async def update(
+        self,
+        budget_id: str,
+        *,
+        limit: Optional[float] = None,
+        soft_limit: Optional[Optional[float]] = None,
+        status: Optional[str] = None,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> Budget:
+        """Update a budget.
+
+        Args:
+            budget_id: Budget ID.
+            limit: New hard limit.
+            soft_limit: New soft limit (None to remove).
+            status: New status.
+            metadata: New metadata.
+        """
+        body: dict[str, Any] = {}
+        if limit is not None:
+            body["limit"] = limit
+        if soft_limit is not None:
+            body["soft_limit"] = soft_limit
+        if status is not None:
+            body["status"] = status
+        if metadata is not None:
+            body["metadata"] = metadata
+        resp = await self._client._patch(f"/budgets/{budget_id}", body)
+        return Budget(**resp)
+
+    async def delete(self, budget_id: str) -> None:
+        """Delete (soft-delete) a budget.
+
+        Args:
+            budget_id: Budget ID.
+        """
+        await self._client._delete(f"/budgets/{budget_id}")
+
+    async def top_up(
+        self,
+        budget_id: str,
+        amount: float,
+        *,
+        description: Optional[str] = None,
+    ) -> Budget:
+        """Add credits to a budget.
+
+        Args:
+            budget_id: Budget ID.
+            amount: Amount to add.
+            description: Optional description.
+        """
+        body: dict[str, Any] = {"amount": amount}
+        if description is not None:
+            body["description"] = description
+        resp = await self._client._post(f"/budgets/{budget_id}/top-up", body)
+        return Budget(**resp)
+
+    async def ledger(
+        self,
+        budget_id: str,
+        *,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> list[LedgerEntry]:
+        """Get paginated ledger entries for a budget.
+
+        Args:
+            budget_id: Budget ID.
+            limit: Max entries to return.
+            offset: Offset for pagination.
+        """
+        params: list[str] = []
+        if limit is not None:
+            params.append(f"limit={limit}")
+        if offset is not None:
+            params.append(f"offset={offset}")
+        path = f"/budgets/{budget_id}/ledger"
+        if params:
+            path += "?" + "&".join(params)
+        resp = await self._client._get(path)
+        return [LedgerEntry(**e) for e in resp]
+
+    async def check(self, budget_id: str) -> BudgetCheckResult:
+        """Check budget status.
+
+        Args:
+            budget_id: Budget ID.
+        """
+        resp = await self._client._get(f"/budgets/{budget_id}/check")
+        return BudgetCheckResult(**resp)
 
 
 class ConnectionsClient:

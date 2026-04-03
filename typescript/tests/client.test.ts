@@ -8,17 +8,22 @@ import {
   toolResult,
   toolError,
   type AgentCapabilityConfig,
+  type Budget,
+  type BudgetCheckResult,
   type CapabilityInfo,
   type Connection,
   type CreateAgentRequest,
+  type CreateBudgetRequest,
   type CreateMessageRequest,
   type CreateSessionRequest,
   type ExternalActor,
   type FileInfo,
+  type LedgerEntry,
   type SessionFile,
   type FileStat,
   type GrepResult,
   type Message,
+  type ResumeSessionResponse,
 } from "../src/models.js";
 
 afterEach(() => {
@@ -1065,6 +1070,272 @@ describe("SessionsClient.setSecrets", () => {
         method: "PUT",
         body: JSON.stringify({ secrets: {} }),
       }),
+    );
+  });
+});
+
+// --- Budget Tests ---
+
+const BUDGET_RESPONSE = {
+  id: "bdgt_001",
+  organization_id: "org_123",
+  subject_type: "session",
+  subject_id: "sess_123",
+  currency: "usd",
+  limit: 10.0,
+  soft_limit: 8.0,
+  balance: 10.0,
+  status: "active",
+  created_at: "2026-04-01T00:00:00Z",
+  updated_at: "2026-04-01T00:00:00Z",
+};
+
+describe("BudgetsClient", () => {
+  it("should have budgets on client", () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    expect(client.budgets).toBeDefined();
+  });
+
+  it("should create a budget", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => BUDGET_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const budget = await client.budgets.create({
+      subjectType: "session",
+      subjectId: "sess_123",
+      currency: "usd",
+      limit: 10.0,
+      softLimit: 8.0,
+    });
+
+    expect(budget.id).toBe("bdgt_001");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          subject_type: "session",
+          subject_id: "sess_123",
+          currency: "usd",
+          limit: 10.0,
+          soft_limit: 8.0,
+        }),
+      }),
+    );
+  });
+
+  it("should get a budget", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => BUDGET_RESPONSE,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const budget = await client.budgets.get("bdgt_001");
+
+    expect(budget.id).toBe("bdgt_001");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets/bdgt_001",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should list budgets with filter", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [BUDGET_RESPONSE],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const budgets = await client.budgets.list({ subjectType: "session" });
+
+    expect(budgets).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets?subject_type=session",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should update a budget", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ...BUDGET_RESPONSE, limit: 20.0 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const budget = await client.budgets.update("bdgt_001", { limit: 20.0 });
+
+    expect(budget.limit).toBe(20.0);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets/bdgt_001",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ limit: 20.0 }),
+      }),
+    );
+  });
+
+  it("should delete a budget", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: async () => undefined,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.budgets.delete("bdgt_001");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets/bdgt_001",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("should top up a budget", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ...BUDGET_RESPONSE, balance: 15.0 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const budget = await client.budgets.topUp("bdgt_001", {
+      amount: 5.0,
+      description: "manual",
+    });
+
+    expect(budget.balance).toBe(15.0);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets/bdgt_001/top-up",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ amount: 5.0, description: "manual" }),
+      }),
+    );
+  });
+
+  it("should get ledger entries", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [
+        {
+          id: "le_001",
+          budget_id: "bdgt_001",
+          amount: 2.5,
+          meter_source: "llm_tokens",
+          created_at: "2026-04-01T00:00:00Z",
+        },
+      ],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const entries = await client.budgets.ledger("bdgt_001", { limit: 10 });
+
+    expect(entries).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets/bdgt_001/ledger?limit=10",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should check a budget", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ action: "continue" }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const result = await client.budgets.check("bdgt_001");
+
+    expect(result.action).toBe("continue");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/budgets/bdgt_001/check",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+});
+
+// --- Session Budget Shortcuts Tests ---
+
+describe("Session budget shortcuts", () => {
+  it("should list session budgets", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [BUDGET_RESPONSE],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const budgets = await client.sessions.budgets("sess_123");
+
+    expect(budgets).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/budgets",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should check session budgets", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        action: "warn",
+        message: "Budget running low",
+        budget_id: "bdgt_001",
+        balance: 1.5,
+        currency: "usd",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const result = await client.sessions.budgetCheck("sess_123");
+
+    expect(result.action).toBe("warn");
+    expect(result.balance).toBe(1.5);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/budget-check",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should resume session", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        resumed_budgets: 2,
+        session_id: "sess_123",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const result = await client.sessions.resume("sess_123");
+
+    expect(result.resumed_budgets).toBe(2);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/resume",
+      expect.objectContaining({ method: "POST" }),
     );
   });
 });
