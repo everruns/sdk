@@ -325,6 +325,94 @@ class DeleteFileResponse(BaseModel):
     deleted: bool
 
 
+# --- Budget Models ---
+
+
+class BudgetPeriod(BaseModel):
+    """Budget period configuration for recurring budgets."""
+
+    type: Literal["rolling", "calendar"]
+    window: Optional[str] = None
+    unit: Optional[str] = None
+
+
+class Budget(BaseModel):
+    """Budget — a spending cap for a subject in a currency."""
+
+    id: str
+    organization_id: str
+    subject_type: str
+    subject_id: str
+    currency: str
+    limit: float
+    soft_limit: Optional[float] = None
+    balance: float
+    period: Optional[BudgetPeriod] = None
+    metadata: Optional[dict[str, Any]] = None
+    status: Literal["active", "paused", "exhausted", "disabled"]
+    created_at: str
+    updated_at: str
+
+
+class CreateBudgetRequest(BaseModel):
+    """Request to create a budget."""
+
+    subject_type: str
+    subject_id: str
+    currency: str
+    limit: float
+    soft_limit: Optional[float] = None
+    period: Optional[BudgetPeriod] = None
+    metadata: Optional[dict[str, Any]] = None
+
+
+class UpdateBudgetRequest(BaseModel):
+    """Request to update a budget."""
+
+    limit: Optional[float] = None
+    soft_limit: Optional[Optional[float]] = None
+    status: Optional[str] = None
+    metadata: Optional[dict[str, Any]] = None
+
+
+class TopUpRequest(BaseModel):
+    """Request to top up a budget."""
+
+    amount: float
+    description: Optional[str] = None
+
+
+class LedgerEntry(BaseModel):
+    """Ledger entry recording resource consumption or credit."""
+
+    id: str
+    budget_id: str
+    amount: float
+    meter_source: str
+    ref_type: Optional[str] = None
+    ref_id: Optional[str] = None
+    session_id: Optional[str] = None
+    description: Optional[str] = None
+    created_at: str
+
+
+class BudgetCheckResult(BaseModel):
+    """Result of checking all budgets for a session."""
+
+    action: str
+    message: Optional[str] = None
+    budget_id: Optional[str] = None
+    balance: Optional[float] = None
+    currency: Optional[str] = None
+
+
+class ResumeSessionResponse(BaseModel):
+    """Response from session resume endpoint."""
+
+    resumed_budgets: int
+    session_id: str
+
+
 # --- Connections Models ---
 
 

@@ -928,6 +928,225 @@ pub struct DeleteResponse {
     pub deleted: bool,
 }
 
+// --- Budget Models ---
+
+/// Budget status
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BudgetStatus {
+    Active,
+    Paused,
+    Exhausted,
+    Disabled,
+}
+
+/// Budget period configuration for recurring budgets
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum BudgetPeriod {
+    /// Rolling window (e.g. "last 24 hours")
+    Rolling { window: String },
+    /// Calendar-aligned (e.g. "per month")
+    Calendar { unit: String },
+}
+
+/// Budget — a spending cap for a subject in a currency
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct Budget {
+    pub id: String,
+    pub organization_id: String,
+    pub subject_type: String,
+    pub subject_id: String,
+    pub currency: String,
+    pub limit: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub soft_limit: Option<f64>,
+    pub balance: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub period: Option<BudgetPeriod>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
+    pub status: BudgetStatus,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// Request to create a budget
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct CreateBudgetRequest {
+    pub subject_type: String,
+    pub subject_id: String,
+    pub currency: String,
+    pub limit: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub soft_limit: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub period: Option<BudgetPeriod>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
+}
+
+impl CreateBudgetRequest {
+    /// Create a new budget request with required fields
+    pub fn new(
+        subject_type: impl Into<String>,
+        subject_id: impl Into<String>,
+        currency: impl Into<String>,
+        limit: f64,
+    ) -> Self {
+        Self {
+            subject_type: subject_type.into(),
+            subject_id: subject_id.into(),
+            currency: currency.into(),
+            limit,
+            soft_limit: None,
+            period: None,
+            metadata: None,
+        }
+    }
+
+    /// Set the soft limit
+    pub fn soft_limit(mut self, soft_limit: f64) -> Self {
+        self.soft_limit = Some(soft_limit);
+        self
+    }
+
+    /// Set the period
+    pub fn period(mut self, period: BudgetPeriod) -> Self {
+        self.period = Some(period);
+        self
+    }
+
+    /// Set metadata
+    pub fn metadata(mut self, metadata: serde_json::Value) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+}
+
+/// Request to update a budget
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct UpdateBudgetRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub limit: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub soft_limit: Option<Option<f64>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metadata: Option<serde_json::Value>,
+}
+
+impl UpdateBudgetRequest {
+    /// Create a new empty update request
+    pub fn new() -> Self {
+        Self {
+            limit: None,
+            soft_limit: None,
+            status: None,
+            metadata: None,
+        }
+    }
+
+    /// Set the limit
+    pub fn limit(mut self, limit: f64) -> Self {
+        self.limit = Some(limit);
+        self
+    }
+
+    /// Set the soft limit (None to remove)
+    pub fn soft_limit(mut self, soft_limit: Option<f64>) -> Self {
+        self.soft_limit = Some(soft_limit);
+        self
+    }
+
+    /// Set the status
+    pub fn status(mut self, status: impl Into<String>) -> Self {
+        self.status = Some(status.into());
+        self
+    }
+
+    /// Set metadata
+    pub fn metadata(mut self, metadata: serde_json::Value) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+}
+
+impl Default for UpdateBudgetRequest {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Request to top up a budget
+#[derive(Debug, Clone, Serialize)]
+pub struct TopUpRequest {
+    pub amount: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+impl TopUpRequest {
+    /// Create a new top-up request
+    pub fn new(amount: f64) -> Self {
+        Self {
+            amount,
+            description: None,
+        }
+    }
+
+    /// Set the description
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+}
+
+/// Ledger entry recording resource consumption or credit
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct LedgerEntry {
+    pub id: String,
+    pub budget_id: String,
+    pub amount: f64,
+    pub meter_source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ref_type: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ref_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub created_at: String,
+}
+
+/// Result of checking all budgets for a session
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct BudgetCheckResult {
+    pub action: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub budget_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub balance: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub currency: Option<String>,
+}
+
+/// Response from session resume endpoint
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResumeSessionResponse {
+    pub resumed_budgets: i32,
+    pub session_id: String,
+}
+
 // --- Connections Models ---
 
 /// A user connection to an external provider

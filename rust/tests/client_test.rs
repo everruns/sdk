@@ -1,8 +1,8 @@
 //! Integration tests for Everruns SDK
 
 use everruns_sdk::{
-    CreateAgentRequest, CreateFileRequest, CreateSessionRequest, Everruns, InitialFile,
-    SetConnectionRequest, UpdateFileRequest,
+    CreateAgentRequest, CreateBudgetRequest, CreateFileRequest, CreateSessionRequest, Everruns,
+    InitialFile, SetConnectionRequest, TopUpRequest, UpdateBudgetRequest, UpdateFileRequest,
 };
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -675,4 +675,342 @@ async fn test_session_set_secrets_empty() {
         .set_secrets("sess_123", &secrets)
         .await
         .expect("set_secrets with empty map should succeed");
+}
+
+// --- Budget Tests ---
+
+#[tokio::test]
+async fn test_budgets_create() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/budgets"))
+        .and(body_json(serde_json::json!({
+            "subject_type": "session",
+            "subject_id": "sess_123",
+            "currency": "usd",
+            "limit": 10.0,
+            "soft_limit": 8.0
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "bdgt_001",
+            "organization_id": "org_123",
+            "subject_type": "session",
+            "subject_id": "sess_123",
+            "currency": "usd",
+            "limit": 10.0,
+            "soft_limit": 8.0,
+            "balance": 10.0,
+            "status": "active",
+            "created_at": "2026-04-01T00:00:00Z",
+            "updated_at": "2026-04-01T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let budget = client
+        .budgets()
+        .create(CreateBudgetRequest::new("session", "sess_123", "usd", 10.0).soft_limit(8.0))
+        .await
+        .expect("create budget should succeed");
+
+    assert_eq!(budget.id, "bdgt_001");
+    assert_eq!(budget.balance, 10.0);
+}
+
+#[tokio::test]
+async fn test_budgets_get() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/budgets/bdgt_001"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "id": "bdgt_001",
+            "organization_id": "org_123",
+            "subject_type": "session",
+            "subject_id": "sess_123",
+            "currency": "usd",
+            "limit": 10.0,
+            "balance": 7.5,
+            "status": "active",
+            "created_at": "2026-04-01T00:00:00Z",
+            "updated_at": "2026-04-01T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let budget = client
+        .budgets()
+        .get("bdgt_001")
+        .await
+        .expect("get budget should succeed");
+
+    assert_eq!(budget.id, "bdgt_001");
+    assert_eq!(budget.balance, 7.5);
+}
+
+#[tokio::test]
+async fn test_budgets_list() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/budgets"))
+        .and(query_param("subject_type", "session"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!([{
+                "id": "bdgt_001",
+                "organization_id": "org_123",
+                "subject_type": "session",
+                "subject_id": "sess_123",
+                "currency": "usd",
+                "limit": 10.0,
+                "balance": 10.0,
+                "status": "active",
+                "created_at": "2026-04-01T00:00:00Z",
+                "updated_at": "2026-04-01T00:00:00Z"
+            }])),
+        )
+        .mount(&server)
+        .await;
+
+    let budgets = client
+        .budgets()
+        .list(Some("session"), None)
+        .await
+        .expect("list budgets should succeed");
+
+    assert_eq!(budgets.len(), 1);
+    assert_eq!(budgets[0].id, "bdgt_001");
+}
+
+#[tokio::test]
+async fn test_budgets_update() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("PATCH"))
+        .and(path("/v1/budgets/bdgt_001"))
+        .and(body_json(serde_json::json!({
+            "limit": 20.0
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "id": "bdgt_001",
+            "organization_id": "org_123",
+            "subject_type": "session",
+            "subject_id": "sess_123",
+            "currency": "usd",
+            "limit": 20.0,
+            "balance": 17.5,
+            "status": "active",
+            "created_at": "2026-04-01T00:00:00Z",
+            "updated_at": "2026-04-01T00:00:01Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let budget = client
+        .budgets()
+        .update("bdgt_001", UpdateBudgetRequest::new().limit(20.0))
+        .await
+        .expect("update budget should succeed");
+
+    assert_eq!(budget.limit, 20.0);
+}
+
+#[tokio::test]
+async fn test_budgets_delete() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("DELETE"))
+        .and(path("/v1/budgets/bdgt_001"))
+        .respond_with(ResponseTemplate::new(204))
+        .mount(&server)
+        .await;
+
+    client
+        .budgets()
+        .delete("bdgt_001")
+        .await
+        .expect("delete budget should succeed");
+}
+
+#[tokio::test]
+async fn test_budgets_top_up() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/budgets/bdgt_001/top-up"))
+        .and(body_json(serde_json::json!({
+            "amount": 5.0,
+            "description": "manual top-up"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "id": "bdgt_001",
+            "organization_id": "org_123",
+            "subject_type": "session",
+            "subject_id": "sess_123",
+            "currency": "usd",
+            "limit": 10.0,
+            "balance": 12.5,
+            "status": "active",
+            "created_at": "2026-04-01T00:00:00Z",
+            "updated_at": "2026-04-01T00:00:01Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let budget = client
+        .budgets()
+        .top_up(
+            "bdgt_001",
+            TopUpRequest::new(5.0).description("manual top-up"),
+        )
+        .await
+        .expect("top_up should succeed");
+
+    assert_eq!(budget.balance, 12.5);
+}
+
+#[tokio::test]
+async fn test_budgets_ledger() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/budgets/bdgt_001/ledger"))
+        .and(query_param("limit", "10"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!([{
+                "id": "le_001",
+                "budget_id": "bdgt_001",
+                "amount": 2.5,
+                "meter_source": "llm_tokens",
+                "created_at": "2026-04-01T00:00:00Z"
+            }])),
+        )
+        .mount(&server)
+        .await;
+
+    let entries = client
+        .budgets()
+        .ledger("bdgt_001", Some(10), None)
+        .await
+        .expect("ledger should succeed");
+
+    assert_eq!(entries.len(), 1);
+    assert_eq!(entries[0].amount, 2.5);
+}
+
+#[tokio::test]
+async fn test_budgets_check() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/budgets/bdgt_001/check"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "action": "continue"
+        })))
+        .mount(&server)
+        .await;
+
+    let result = client
+        .budgets()
+        .check("bdgt_001")
+        .await
+        .expect("check should succeed");
+
+    assert_eq!(result.action, "continue");
+}
+
+// --- Session Budget Shortcuts Tests ---
+
+#[tokio::test]
+async fn test_session_budgets() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/sessions/sess_123/budgets"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!([{
+                "id": "bdgt_001",
+                "organization_id": "org_123",
+                "subject_type": "session",
+                "subject_id": "sess_123",
+                "currency": "usd",
+                "limit": 10.0,
+                "balance": 7.5,
+                "status": "active",
+                "created_at": "2026-04-01T00:00:00Z",
+                "updated_at": "2026-04-01T00:00:00Z"
+            }])),
+        )
+        .mount(&server)
+        .await;
+
+    let budgets = client
+        .sessions()
+        .budgets("sess_123")
+        .await
+        .expect("session budgets should succeed");
+
+    assert_eq!(budgets.len(), 1);
+    assert_eq!(budgets[0].id, "bdgt_001");
+}
+
+#[tokio::test]
+async fn test_session_budget_check() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/sessions/sess_123/budget-check"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "action": "warn",
+            "message": "Budget running low",
+            "budget_id": "bdgt_001",
+            "balance": 1.5,
+            "currency": "usd"
+        })))
+        .mount(&server)
+        .await;
+
+    let result = client
+        .sessions()
+        .budget_check("sess_123")
+        .await
+        .expect("budget_check should succeed");
+
+    assert_eq!(result.action, "warn");
+    assert_eq!(result.balance, Some(1.5));
+}
+
+#[tokio::test]
+async fn test_session_resume() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/sess_123/resume"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "resumed_budgets": 2,
+            "session_id": "sess_123"
+        })))
+        .mount(&server)
+        .await;
+
+    let result = client
+        .sessions()
+        .resume("sess_123")
+        .await
+        .expect("resume should succeed");
+
+    assert_eq!(result.resumed_budgets, 2);
+    assert_eq!(result.session_id, "sess_123");
 }

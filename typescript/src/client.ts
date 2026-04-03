@@ -4,23 +4,30 @@
 import { ApiKey } from "./auth.js";
 import {
   Agent,
+  Budget,
+  BudgetCheckResult,
   CapabilityInfo,
   Connection,
   ContentPart,
   CreateAgentRequest,
+  CreateBudgetRequest,
   DeleteFileResponse,
   Session,
   CreateSessionRequest,
   FileInfo,
   FileStat,
   GrepResult,
+  LedgerEntry,
   Message,
   CreateMessageRequest,
   Event,
   ListEventsOptions,
   ListResponse,
+  ResumeSessionResponse,
   SessionFile,
   StreamOptions,
+  TopUpRequest,
+  UpdateBudgetRequest,
 } from "./models.js";
 import {
   ApiError,
@@ -46,6 +53,7 @@ export class Everruns {
   readonly capabilities: CapabilitiesClient;
   readonly sessionFiles: SessionFilesClient;
   readonly connections: ConnectionsClient;
+  readonly budgets: BudgetsClient;
 
   constructor(options: EverrunsOptions = {}) {
     if (options.apiKey instanceof ApiKey) {
@@ -69,6 +77,7 @@ export class Everruns {
     this.capabilities = new CapabilitiesClient(this);
     this.sessionFiles = new SessionFilesClient(this);
     this.connections = new ConnectionsClient(this);
+    this.budgets = new BudgetsClient(this);
   }
 
   /**
@@ -317,6 +326,23 @@ class SessionsClient {
   async unpin(sessionId: string): Promise<void> {
     await this.client.fetch(`/sessions/${sessionId}/pin`, {
       method: "DELETE",
+    });
+  }
+
+  /** List budgets for a session. */
+  async budgets(sessionId: string): Promise<Budget[]> {
+    return this.client.fetch(`/sessions/${sessionId}/budgets`);
+  }
+
+  /** Check all budgets in hierarchy for a session. */
+  async budgetCheck(sessionId: string): Promise<BudgetCheckResult> {
+    return this.client.fetch(`/sessions/${sessionId}/budget-check`);
+  }
+
+  /** Resume paused budgets for a session. */
+  async resume(sessionId: string): Promise<ResumeSessionResponse> {
+    return this.client.fetch(`/sessions/${sessionId}/resume`, {
+      method: "POST",
     });
   }
 
@@ -589,6 +615,89 @@ class SessionFilesClient {
       method: "POST",
       body: JSON.stringify({ path }),
     });
+  }
+}
+
+class BudgetsClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** Create a budget. */
+  async create(request: CreateBudgetRequest): Promise<Budget> {
+    return this.client.fetch("/budgets", {
+      method: "POST",
+      body: JSON.stringify({
+        subject_type: request.subjectType,
+        subject_id: request.subjectId,
+        currency: request.currency,
+        limit: request.limit,
+        soft_limit: request.softLimit,
+        period: request.period,
+        metadata: request.metadata,
+      }),
+    });
+  }
+
+  /** List budgets, optionally filtered by subject. */
+  async list(options?: {
+    subjectType?: string;
+    subjectId?: string;
+  }): Promise<Budget[]> {
+    const params = new URLSearchParams();
+    if (options?.subjectType) params.set("subject_type", options.subjectType);
+    if (options?.subjectId) params.set("subject_id", options.subjectId);
+    const query = params.toString() ? `?${params}` : "";
+    return this.client.fetch(`/budgets${query}`);
+  }
+
+  /** Get a budget by ID. */
+  async get(budgetId: string): Promise<Budget> {
+    return this.client.fetch(`/budgets/${budgetId}`);
+  }
+
+  /** Update a budget. */
+  async update(
+    budgetId: string,
+    request: UpdateBudgetRequest,
+  ): Promise<Budget> {
+    return this.client.fetch(`/budgets/${budgetId}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        limit: request.limit,
+        soft_limit: request.softLimit,
+        status: request.status,
+        metadata: request.metadata,
+      }),
+    });
+  }
+
+  /** Delete (soft-delete) a budget. */
+  async delete(budgetId: string): Promise<void> {
+    await this.client.fetch(`/budgets/${budgetId}`, { method: "DELETE" });
+  }
+
+  /** Add credits to a budget. */
+  async topUp(budgetId: string, request: TopUpRequest): Promise<Budget> {
+    return this.client.fetch(`/budgets/${budgetId}/top-up`, {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  }
+
+  /** Get paginated ledger entries for a budget. */
+  async ledger(
+    budgetId: string,
+    options?: { limit?: number; offset?: number },
+  ): Promise<LedgerEntry[]> {
+    const params = new URLSearchParams();
+    if (options?.limit != null) params.set("limit", String(options.limit));
+    if (options?.offset != null) params.set("offset", String(options.offset));
+    const query = params.toString() ? `?${params}` : "";
+    return this.client.fetch(`/budgets/${budgetId}/ledger${query}`);
+  }
+
+  /** Check budget status. */
+  async check(budgetId: string): Promise<BudgetCheckResult> {
+    return this.client.fetch(`/budgets/${budgetId}/check`);
   }
 }
 
