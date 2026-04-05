@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.7] - 2026-04-05
+
+### Highlights
+
+- Budgets API support for managing resource budgets across all SDKs
+
+### What's Changed
+
+* feat(rust,python,typescript): add budgets API support ([#73](https://github.com/everruns/sdk/pull/73)) by @mchalyi
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.6...v0.1.7
+
 ## [0.1.6] - 2026-04-01
 
 ### Highlights
