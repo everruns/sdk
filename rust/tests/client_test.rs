@@ -1014,3 +1014,26 @@ async fn test_session_resume() {
     assert_eq!(result.resumed_budgets, 2);
     assert_eq!(result.session_id, "sess_123");
 }
+
+#[tokio::test]
+async fn test_session_export() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    let jsonl = "{\"id\":\"msg_001\",\"session_id\":\"sess_123\",\"sequence\":1,\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hello\"}],\"created_at\":\"2024-01-15T10:30:00.000Z\"}\n{\"id\":\"msg_002\",\"session_id\":\"sess_123\",\"sequence\":2,\"role\":\"agent\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}],\"created_at\":\"2024-01-15T10:30:01.000Z\"}\n";
+
+    Mock::given(method("GET"))
+        .and(path("/v1/sessions/sess_123/export"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(jsonl))
+        .mount(&server)
+        .await;
+
+    let result = client
+        .sessions()
+        .export("sess_123")
+        .await
+        .expect("export should succeed");
+
+    assert!(result.contains("msg_001"));
+    assert!(result.contains("msg_002"));
+}

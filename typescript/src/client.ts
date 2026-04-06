@@ -356,6 +356,11 @@ class SessionsClient {
       body: JSON.stringify({ secrets }),
     });
   }
+
+  /** Export a session's messages as JSONL. */
+  async export(sessionId: string): Promise<string> {
+    return this.client.fetchText(`/sessions/${sessionId}/export`);
+  }
 }
 
 class MessagesClient {

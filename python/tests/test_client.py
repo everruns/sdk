@@ -1311,6 +1311,30 @@ async def test_session_resume():
     assert route.called
 
 
+@pytest.mark.asyncio
+@respx.mock
+async def test_session_export():
+    jsonl = (
+        '{"id":"msg_001","session_id":"sess_123","sequence":1,"role":"user",'
+        '"content":[{"type":"text","text":"hello"}],"created_at":"2024-01-15T10:30:00.000Z"}\n'
+        '{"id":"msg_002","session_id":"sess_123","sequence":2,"role":"agent",'
+        '"content":[{"type":"text","text":"hi"}],"created_at":"2024-01-15T10:30:01.000Z"}\n'
+    )
+    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/export").mock(
+        return_value=httpx.Response(200, text=jsonl)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        result = await client.sessions.export("sess_123")
+    finally:
+        await client.close()
+
+    assert "msg_001" in result
+    assert "msg_002" in result
+    assert route.called
+
+
 def test_budget_model():
     """Test Budget model deserialization."""
     from everruns_sdk import Budget

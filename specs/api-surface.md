@@ -34,6 +34,7 @@ Agent create/update payloads also support optional `initial_files` starter files
 - `POST /v1/sessions/{id}/cancel` - Cancel turn
 - `PUT /v1/sessions/{id}/pin` - Pin session for current user
 - `DELETE /v1/sessions/{id}/pin` - Unpin session for current user
+- `GET /v1/sessions/{id}/export` - Export session messages as JSONL
 
 #### Harness ID
 

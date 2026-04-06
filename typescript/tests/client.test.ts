@@ -1338,4 +1338,26 @@ describe("Session budget shortcuts", () => {
       expect.objectContaining({ method: "POST" }),
     );
   });
+
+  it("should export session as JSONL", async () => {
+    const jsonl =
+      '{"id":"msg_001","session_id":"sess_123","sequence":1,"role":"user","content":[{"type":"text","text":"hello"}],"created_at":"2024-01-15T10:30:00.000Z"}\n' +
+      '{"id":"msg_002","session_id":"sess_123","sequence":2,"role":"agent","content":[{"type":"text","text":"hi"}],"created_at":"2024-01-15T10:30:01.000Z"}\n';
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => jsonl,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const result = await client.sessions.export("sess_123");
+
+    expect(result).toContain("msg_001");
+    expect(result).toContain("msg_002");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/export",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
 });
