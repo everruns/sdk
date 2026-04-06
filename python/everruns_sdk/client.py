@@ -459,6 +459,14 @@ class SessionsClient:
             {"secrets": secrets},
         )
 
+    async def export(self, session_id: str) -> str:
+        """Export a session's messages as JSONL.
+
+        Args:
+            session_id: Session ID.
+        """
+        return await self._client._get_text(f"/sessions/{session_id}/export")
+
 
 class MessagesClient:
     """Client for message operations."""

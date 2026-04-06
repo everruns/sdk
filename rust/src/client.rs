@@ -472,6 +472,13 @@ impl<'a> SessionsClient<'a> {
             .await?;
         Ok(())
     }
+
+    /// Export a session's messages as JSONL
+    pub async fn export(&self, id: &str) -> Result<String> {
+        self.client
+            .get_text(&format!("/sessions/{}/export", id))
+            .await
+    }
 }
 
 /// Client for message operations
