@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import secrets
 from typing import Any, Literal, Optional
 
@@ -16,6 +17,28 @@ def generate_agent_id() -> str:
 def generate_harness_id() -> str:
     """Generate a random harness ID in the format ``harness_<32-hex>``."""
     return f"harness_{secrets.token_hex(16)}"
+
+
+# Harness name validation: lowercase alphanumeric segments separated by hyphens
+_HARNESS_NAME_PATTERN = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+_HARNESS_NAME_MAX_LENGTH = 64
+
+
+def validate_harness_name(name: str) -> str:
+    """Validate a harness name and return it if valid.
+
+    Harness names must match ``[a-z0-9]+(-[a-z0-9]+)*`` and be at most 64 characters.
+
+    Raises:
+        ValueError: If the name is invalid.
+    """
+    if len(name) > _HARNESS_NAME_MAX_LENGTH:
+        raise ValueError(
+            f"harness_name must be at most {_HARNESS_NAME_MAX_LENGTH} characters, got {len(name)}"
+        )
+    if not _HARNESS_NAME_PATTERN.match(name):
+        raise ValueError(f"harness_name must match pattern [a-z0-9]+(-[a-z0-9]+)*, got {name!r}")
+    return name
 
 
 class AgentCapabilityConfig(BaseModel):
@@ -116,6 +139,7 @@ class CreateSessionRequest(BaseModel):
     """Request to create a session."""
 
     harness_id: Optional[str] = None
+    harness_name: Optional[str] = None
     agent_id: Optional[str] = None
     title: Optional[str] = None
     locale: Optional[str] = None

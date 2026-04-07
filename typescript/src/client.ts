@@ -28,6 +28,7 @@ import {
   StreamOptions,
   TopUpRequest,
   UpdateBudgetRequest,
+  validateHarnessName,
 } from "./models.js";
 import {
   ApiError,
@@ -249,9 +250,18 @@ class SessionsClient {
   constructor(private readonly client: Everruns) {}
 
   async create(request: CreateSessionRequest = {}): Promise<Session> {
+    if (request.harnessId && request.harnessName) {
+      throw new Error("Cannot specify both harnessId and harnessName");
+    }
+    if (request.harnessName) {
+      validateHarnessName(request.harnessName);
+    }
     const body: Record<string, unknown> = {};
     if (request.harnessId) {
       body.harness_id = request.harnessId;
+    }
+    if (request.harnessName) {
+      body.harness_name = request.harnessName;
     }
     if (request.agentId) {
       body.agent_id = request.agentId;

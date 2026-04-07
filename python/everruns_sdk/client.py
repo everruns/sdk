@@ -33,6 +33,7 @@ from everruns_sdk.models import (
     ResumeSessionResponse,
     Session,
     SessionFile,
+    validate_harness_name,
 )
 from everruns_sdk.sse import EventStream, StreamOptions
 
@@ -370,6 +371,7 @@ class SessionsClient:
         self,
         harness_id: Optional[str] = None,
         *,
+        harness_name: Optional[str] = None,
         agent_id: Optional[str] = None,
         title: Optional[str] = None,
         locale: Optional[str] = None,
@@ -383,6 +385,10 @@ class SessionsClient:
         Args:
             harness_id: Harness ID (format: ``harness_<32-hex>``). Optional;
                 server defaults to the Generic harness if omitted.
+            harness_name: Human-readable harness name (e.g. ``generic``,
+                ``deep-research``). Preferred over ``harness_id``.
+                Must match ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 characters.
+                Cannot be used together with ``harness_id``.
             agent_id: Agent ID (optional).
             title: Human-readable title.
             locale: Session locale (BCP 47, for example ``uk-UA``).
@@ -390,9 +396,18 @@ class SessionsClient:
             tags: Tags for organizing sessions.
             capabilities: Session-level capabilities (additive to agent capabilities).
             initial_files: Starter files copied into the session workspace.
+
+        Raises:
+            ValueError: If both ``harness_id`` and ``harness_name`` are provided,
+                or if ``harness_name`` fails validation.
         """
+        if harness_id is not None and harness_name is not None:
+            raise ValueError("Cannot specify both harness_id and harness_name")
+        if harness_name is not None:
+            validate_harness_name(harness_name)
         req = CreateSessionRequest(
             harness_id=harness_id,
+            harness_name=harness_name,
             agent_id=agent_id,
             title=title,
             locale=locale,

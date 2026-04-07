@@ -102,6 +102,12 @@ export interface InitialFile {
 
 export interface CreateSessionRequest {
   harnessId?: string;
+  /**
+   * Human-readable harness name (e.g. "generic", "deep-research").
+   * Preferred over harnessId. Must match [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
+   * Cannot be used together with harnessId.
+   */
+  harnessName?: string;
   agentId?: string;
   title?: string;
   locale?: string;
@@ -109,6 +115,29 @@ export interface CreateSessionRequest {
   tags?: string[];
   capabilities?: AgentCapabilityConfig[];
   initialFiles?: InitialFile[];
+}
+
+/** Harness name validation pattern: lowercase alphanumeric segments separated by hyphens */
+const HARNESS_NAME_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const HARNESS_NAME_MAX_LENGTH = 64;
+
+/**
+ * Validate a harness name.
+ *
+ * @param name - The harness name to validate
+ * @throws Error if the name is invalid
+ */
+export function validateHarnessName(name: string): void {
+  if (name.length > HARNESS_NAME_MAX_LENGTH) {
+    throw new Error(
+      `harness_name must be at most ${HARNESS_NAME_MAX_LENGTH} characters, got ${name.length}`,
+    );
+  }
+  if (!HARNESS_NAME_PATTERN.test(name)) {
+    throw new Error(
+      `harness_name must match pattern [a-z0-9]+(-[a-z0-9]+)*, got "${name}"`,
+    );
+  }
 }
 
 /** External actor identity for messages from external channels (Slack, Discord, etc.) */

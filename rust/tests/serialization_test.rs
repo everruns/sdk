@@ -5,7 +5,7 @@
 use everruns_sdk::{
     Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateMessageRequest,
     CreateSessionRequest, Event, ExternalActor, InitialFile, ListResponse, Message, Session,
-    generate_agent_id, generate_harness_id,
+    generate_agent_id, generate_harness_id, validate_harness_name,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
@@ -520,6 +520,61 @@ fn test_generate_harness_id_unique() {
     let id1 = generate_harness_id();
     let id2 = generate_harness_id();
     assert_ne!(id1, id2, "generated IDs should be unique");
+}
+
+/// Test validate_harness_name accepts valid names
+#[test]
+fn test_validate_harness_name_valid() {
+    assert!(validate_harness_name("generic").is_ok());
+    assert!(validate_harness_name("deep-research").is_ok());
+    assert!(validate_harness_name("my-harness-v2").is_ok());
+    assert!(validate_harness_name("a1b2").is_ok());
+    assert!(validate_harness_name("x").is_ok());
+}
+
+/// Test validate_harness_name rejects names over 64 chars
+#[test]
+fn test_validate_harness_name_too_long() {
+    let long_name = "a".repeat(65);
+    let result = validate_harness_name(&long_name);
+    assert!(result.is_err());
+    assert!(
+        result
+            .unwrap_err()
+            .to_string()
+            .contains("at most 64 characters")
+    );
+}
+
+/// Test validate_harness_name rejects invalid patterns
+#[test]
+fn test_validate_harness_name_invalid_patterns() {
+    assert!(validate_harness_name("UPPER").is_err());
+    assert!(validate_harness_name("has_underscore").is_err());
+    assert!(validate_harness_name("-leading-dash").is_err());
+    assert!(validate_harness_name("trailing-dash-").is_err());
+    assert!(validate_harness_name("double--dash").is_err());
+    assert!(validate_harness_name("").is_err());
+}
+
+/// Test CreateSessionRequest serialization with harness_name
+#[test]
+fn test_create_session_request_with_harness_name() {
+    let req = CreateSessionRequest::new().harness_name("deep-research");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["harness_name"], "deep-research");
+    assert!(raw.get("harness_id").is_none());
+}
+
+/// Test CreateSessionRequest without harness_name omits it
+#[test]
+fn test_create_session_request_without_harness_name() {
+    let req = CreateSessionRequest::new().harness_id("harness_abc123");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["harness_id"], "harness_abc123");
+    assert!(raw.get("harness_name").is_none());
 }
 
 /// Test that Event serialization preserves the "type" field name (not "event_type")

@@ -413,6 +413,14 @@ impl<'a> SessionsClient<'a> {
 
     /// Create a session with full options
     pub async fn create_with_options(&self, req: CreateSessionRequest) -> Result<Session> {
+        if req.harness_id.is_some() && req.harness_name.is_some() {
+            return Err(Error::Validation(
+                "Cannot specify both harness_id and harness_name".to_string(),
+            ));
+        }
+        if let Some(ref name) = req.harness_name {
+            validate_harness_name(name)?;
+        }
         self.client.post("/sessions", &req).await
     }
 
