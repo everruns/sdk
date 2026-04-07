@@ -4,6 +4,7 @@ import { Everruns } from "../src/client.js";
 import {
   generateAgentId,
   generateHarnessId,
+  validateHarnessName,
   extractToolCalls,
   toolResult,
   toolError,
@@ -364,6 +365,57 @@ describe("generateHarnessId", () => {
     const id1 = generateHarnessId();
     const id2 = generateHarnessId();
     expect(id1).not.toBe(id2);
+  });
+});
+
+describe("validateHarnessName", () => {
+  it("should accept valid names", () => {
+    expect(() => validateHarnessName("generic")).not.toThrow();
+    expect(() => validateHarnessName("deep-research")).not.toThrow();
+    expect(() => validateHarnessName("my-harness-v2")).not.toThrow();
+    expect(() => validateHarnessName("a1b2")).not.toThrow();
+    expect(() => validateHarnessName("x")).not.toThrow();
+  });
+
+  it("should reject names over 64 characters", () => {
+    expect(() => validateHarnessName("a".repeat(65))).toThrow(
+      "at most 64 characters",
+    );
+  });
+
+  it("should reject invalid patterns", () => {
+    expect(() => validateHarnessName("UPPER")).toThrow("must match pattern");
+    expect(() => validateHarnessName("has_underscore")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateHarnessName("-leading-dash")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateHarnessName("trailing-dash-")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateHarnessName("double--dash")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateHarnessName("")).toThrow("must match pattern");
+  });
+});
+
+describe("CreateSessionRequest with harnessName", () => {
+  it("should include harnessName in request interface", () => {
+    const request: CreateSessionRequest = {
+      harnessName: "deep-research",
+    };
+    expect(request.harnessName).toBe("deep-research");
+    expect(request.harnessId).toBeUndefined();
+  });
+
+  it("should work with harnessId only (backward compat)", () => {
+    const request: CreateSessionRequest = {
+      harnessId: "harness_abc123",
+    };
+    expect(request.harnessId).toBe("harness_abc123");
+    expect(request.harnessName).toBeUndefined();
   });
 });
 

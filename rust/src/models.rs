@@ -274,12 +274,42 @@ impl InitialFile {
     }
 }
 
+/// Harness name validation pattern: lowercase alphanumeric segments separated by hyphens.
+/// Max 64 characters.
+pub fn validate_harness_name(name: &str) -> crate::error::Result<()> {
+    const MAX_LEN: usize = 64;
+    if name.len() > MAX_LEN {
+        return Err(crate::error::Error::Validation(format!(
+            "harness_name must be at most {} characters, got {}",
+            MAX_LEN,
+            name.len()
+        )));
+    }
+    // Pattern: [a-z0-9]+(-[a-z0-9]+)*
+    let valid = !name.is_empty()
+        && name.split('-').all(|seg| {
+            !seg.is_empty()
+                && seg
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+        });
+    if !valid {
+        return Err(crate::error::Error::Validation(format!(
+            "harness_name must match pattern [a-z0-9]+(-[a-z0-9]+)*, got {:?}",
+            name
+        )));
+    }
+    Ok(())
+}
+
 /// Request to create a session
 #[derive(Debug, Clone, Serialize)]
 #[non_exhaustive]
 pub struct CreateSessionRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub harness_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub harness_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -307,6 +337,7 @@ impl CreateSessionRequest {
     pub fn new() -> Self {
         Self {
             harness_id: None,
+            harness_name: None,
             agent_id: None,
             title: None,
             locale: None,
@@ -320,6 +351,14 @@ impl CreateSessionRequest {
     /// Set the harness ID
     pub fn harness_id(mut self, harness_id: impl Into<String>) -> Self {
         self.harness_id = Some(harness_id.into());
+        self
+    }
+
+    /// Set the harness name (preferred over harness_id).
+    /// Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 characters.
+    /// Cannot be used together with `harness_id`.
+    pub fn harness_name(mut self, harness_name: impl Into<String>) -> Self {
+        self.harness_name = Some(harness_name.into());
         self
     }
 

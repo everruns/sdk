@@ -37,6 +37,10 @@ pub enum Error {
     #[error("SSE error: {0}")]
     Sse(String),
 
+    /// Client-side validation error
+    #[error("Validation error: {0}")]
+    Validation(String),
+
     /// Server-initiated graceful disconnect with retry hint
     #[error("Graceful disconnect: reason={reason}, retry_ms={retry_ms}")]
     GracefulDisconnect { reason: String, retry_ms: u64 },

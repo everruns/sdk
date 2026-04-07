@@ -36,10 +36,17 @@ Agent create/update payloads also support optional `initial_files` starter files
 - `DELETE /v1/sessions/{id}/pin` - Unpin session for current user
 - `GET /v1/sessions/{id}/export` - Export session messages as JSONL
 
-#### Harness ID
+#### Harness Identification
 
-Sessions accept an optional `harness_id` (format: `harness_<32-hex>`). If omitted, the server defaults to the Generic harness.
-Use `generate_harness_id()` to create one when needed. Agent is optional on session creation — sessions can run without an agent.
+Sessions accept harness identification via one of two parameters (mutually exclusive):
+
+- **`harness_name`** (preferred): Human-readable name like `generic` or `deep-research`.
+  Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 characters. Client-side validated.
+- **`harness_id`**: Opaque ID (format: `harness_<32-hex>`). Use `generate_harness_id()` to create one.
+
+If neither is provided, the server defaults to the Generic harness.
+Providing both `harness_id` and `harness_name` raises a client-side validation error.
+Agent is optional on session creation — sessions can run without an agent.
 Session create/update payloads support optional `title`, `locale`, `model_id`, `tags`, `capabilities`, and `initial_files` starter files.
 
 ### Capabilities

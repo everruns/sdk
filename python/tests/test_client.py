@@ -372,6 +372,64 @@ def test_generate_harness_id_unique():
     assert id1 != id2
 
 
+def test_validate_harness_name_valid():
+    """Test validate_harness_name accepts valid names."""
+    from everruns_sdk import validate_harness_name
+
+    validate_harness_name("generic")
+    validate_harness_name("deep-research")
+    validate_harness_name("my-harness-v2")
+    validate_harness_name("a1b2")
+    validate_harness_name("x")
+
+
+def test_validate_harness_name_too_long():
+    """Test validate_harness_name rejects names over 64 chars."""
+    from everruns_sdk import validate_harness_name
+
+    with pytest.raises(ValueError, match="at most 64 characters"):
+        validate_harness_name("a" * 65)
+
+
+def test_validate_harness_name_invalid_pattern():
+    """Test validate_harness_name rejects invalid patterns."""
+    from everruns_sdk import validate_harness_name
+
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_harness_name("UPPER")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_harness_name("has_underscore")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_harness_name("-leading-dash")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_harness_name("trailing-dash-")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_harness_name("double--dash")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_harness_name("")
+
+
+def test_create_session_request_with_harness_name():
+    """Test CreateSessionRequest serialization with harness_name."""
+    from everruns_sdk.models import CreateSessionRequest
+
+    req = CreateSessionRequest(harness_name="deep-research")
+    data = req.model_dump(exclude_none=True)
+    assert data["harness_name"] == "deep-research"
+    assert "harness_id" not in data
+
+
+def test_create_session_request_harness_name_and_id_both():
+    """Test that both harness_id and harness_name can be set on the model."""
+    from everruns_sdk.models import CreateSessionRequest
+
+    # Both can be set on the model (validation is in the client)
+    req = CreateSessionRequest(harness_id="harness_abc", harness_name="generic")
+    data = req.model_dump(exclude_none=True)
+    assert "harness_id" in data
+    assert "harness_name" in data
+
+
 def test_create_agent_request_with_id():
     """Test CreateAgentRequest serialization with client-supplied ID."""
     from everruns_sdk.models import CreateAgentRequest, generate_agent_id
