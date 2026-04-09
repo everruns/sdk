@@ -13,7 +13,7 @@ async function main() {
 
   // Create an agent with current_time capability
   const agent = await client.agents.create({
-    name: "Assistant",
+    name: "assistant",
     systemPrompt: "You are a helpful assistant.",
     capabilities: [{ ref: "current_time" }],
   });

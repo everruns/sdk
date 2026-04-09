@@ -14,7 +14,7 @@ async def main():
 
     try:
         agent = await client.agents.create(
-            name="Initial Files Example",
+            name="initial-files-example",
             system_prompt=("You are a helpful assistant. Read the starter files before answering."),
         )
 
