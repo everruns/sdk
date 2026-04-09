@@ -65,8 +65,8 @@ async function main() {
   const client = devClient();
 
   // Create agent with tool-aware system prompt
-  const agent = await client.agents.applyByName({
-    name: "weather-assistant",
+  const agent = await client.agents.create({
+    name: "weather-assistant-ts",
     systemPrompt: SYSTEM_PROMPT,
   });
   console.log(`Created agent: ${agent.id}`);

@@ -19,8 +19,8 @@ async def main():
 
     try:
         # Create agent
-        agent = await client.agents.apply_by_name(
-            name="dad-jokes-bot",
+        agent = await client.agents.create(
+            name="dad-jokes-bot-py",
             system_prompt="You are a dad joke expert. Tell one short, cheesy dad joke.",
         )
         print(f"Created agent: {agent.id}")

@@ -11,8 +11,8 @@ async fn main() -> Result<(), Error> {
 
     let agent = client
         .agents()
-        .apply_by_name(
-            "initial-files-example",
+        .create(
+            "initial-files-example-rs",
             "You are a helpful assistant. Read the starter files before answering.",
         )
         .await?;
