@@ -10,8 +10,8 @@ async def main():
     client = Everruns()
 
     try:
-        # Create an agent with current_time capability
-        agent = await client.agents.create(
+        # Create or update an agent with current_time capability (upsert by name)
+        agent = await client.agents.apply_by_name(
             name="example-assistant",
             system_prompt="You are a helpful assistant for examples.",
             capabilities=[AgentCapabilityConfig(ref="current_time")],

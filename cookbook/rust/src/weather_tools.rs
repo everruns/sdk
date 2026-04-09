@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create agent with tool-aware system prompt
     let agent = client
         .agents()
-        .create("weather-assistant", SYSTEM_PROMPT)
+        .apply_by_name("weather-assistant", SYSTEM_PROMPT)
         .await?;
     println!("Created agent: {}", agent.id);
 

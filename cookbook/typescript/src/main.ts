@@ -13,7 +13,7 @@ async function main() {
   const client = devClient();
 
   // Create agent
-  const agent = await client.agents.create({
+  const agent = await client.agents.applyByName({
     name: "dad-jokes-bot",
     systemPrompt: "You are a dad joke expert. Tell one short, cheesy dad joke.",
   });

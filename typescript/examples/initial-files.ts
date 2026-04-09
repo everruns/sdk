@@ -10,7 +10,7 @@ import { Everruns } from "../src/index.js";
 async function main() {
   const client = Everruns.fromEnv();
 
-  const agent = await client.agents.create({
+  const agent = await client.agents.applyByName({
     name: "initial-files-example",
     systemPrompt:
       "You are a helpful assistant. Read the starter files before answering.",

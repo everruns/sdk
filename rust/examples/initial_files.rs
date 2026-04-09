@@ -11,7 +11,7 @@ async fn main() -> Result<(), Error> {
 
     let agent = client
         .agents()
-        .create(
+        .apply_by_name(
             "initial-files-example",
             "You are a helpful assistant. Read the starter files before answering.",
         )

@@ -11,8 +11,8 @@ async function main() {
   // Create client using EVERRUNS_API_KEY env var
   const client = Everruns.fromEnv();
 
-  // Create an agent with current_time capability
-  const agent = await client.agents.create({
+  // Create or update an agent with current_time capability (upsert by name)
+  const agent = await client.agents.applyByName({
     name: "assistant",
     systemPrompt: "You are a helpful assistant.",
     capabilities: [{ ref: "current_time" }],

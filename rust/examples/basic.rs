@@ -10,10 +10,10 @@ async fn main() -> Result<(), Error> {
     // Initialize client from environment
     let client = Everruns::from_env()?;
 
-    // Create an agent with current_time capability
+    // Create or update an agent with current_time capability (upsert by name)
     let agent = client
         .agents()
-        .create_with_options(
+        .apply_by_name_with_options(
             CreateAgentRequest::new(
                 "example-assistant",
                 "You are a helpful assistant for examples.",

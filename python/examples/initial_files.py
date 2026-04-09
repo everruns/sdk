@@ -13,7 +13,7 @@ async def main():
     client = Everruns()
 
     try:
-        agent = await client.agents.create(
+        agent = await client.agents.apply_by_name(
             name="initial-files-example",
             system_prompt=("You are a helpful assistant. Read the starter files before answering."),
         )

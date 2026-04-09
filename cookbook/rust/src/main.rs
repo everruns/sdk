@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create agent
     let agent = client
         .agents()
-        .create(
+        .apply_by_name(
             "dad-jokes-bot",
             "You are a dad joke expert. Tell one short, cheesy dad joke.",
         )
