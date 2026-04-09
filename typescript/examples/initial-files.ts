@@ -11,7 +11,7 @@ async function main() {
   const client = Everruns.fromEnv();
 
   const agent = await client.agents.create({
-    name: "Initial Files Example",
+    name: "initial-files-example-ts",
     systemPrompt:
       "You are a helpful assistant. Read the starter files before answering.",
   });

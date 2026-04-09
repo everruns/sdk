@@ -33,6 +33,7 @@ from everruns_sdk.models import (
     ResumeSessionResponse,
     Session,
     SessionFile,
+    validate_agent_name,
     validate_harness_name,
 )
 from everruns_sdk.sse import EventStream, StreamOptions
@@ -55,7 +56,7 @@ class Everruns:
 
     Example:
         >>> client = Everruns()
-        >>> agent = await client.agents.create("Assistant", "You are helpful.")
+        >>> agent = await client.agents.create("assistant", "You are helpful.")
     """
 
     def __init__(
@@ -244,6 +245,7 @@ class AgentsClient:
         name: str,
         system_prompt: str,
         *,
+        display_name: Optional[str] = None,
         description: Optional[str] = None,
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
@@ -253,16 +255,24 @@ class AgentsClient:
         """Create a new agent with a server-assigned ID.
 
         Args:
-            name: Display name of the agent.
+            name: Addressable name, unique per org
+                (format: ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 chars).
             system_prompt: System prompt defining agent behavior.
+            display_name: Human-readable display name shown in UI.
+                Falls back to ``name`` when absent.
             description: Human-readable description.
             default_model_id: Default LLM model ID.
             tags: Tags for organizing agents.
             capabilities: Capabilities to enable.
             initial_files: Starter files copied into each new session for this agent.
+
+        Raises:
+            ValueError: If ``name`` fails validation.
         """
+        validate_agent_name(name)
         req = CreateAgentRequest(
             name=name,
+            display_name=display_name,
             system_prompt=system_prompt,
             description=description,
             default_model_id=default_model_id,
@@ -279,6 +289,7 @@ class AgentsClient:
         name: str,
         system_prompt: str,
         *,
+        display_name: Optional[str] = None,
         description: Optional[str] = None,
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
@@ -293,17 +304,69 @@ class AgentsClient:
         Args:
             id: Agent ID (format: ``agent_<32-hex>``). Use
                 :func:`~everruns_sdk.generate_agent_id` to create one.
-            name: Display name of the agent.
+            name: Addressable name, unique per org
+                (format: ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 chars).
             system_prompt: System prompt defining agent behavior.
+            display_name: Human-readable display name shown in UI.
             description: Human-readable description.
             default_model_id: Default LLM model ID.
             tags: Tags for organizing agents.
             capabilities: Capabilities to enable.
             initial_files: Starter files copied into each new session for this agent.
+
+        Raises:
+            ValueError: If ``name`` fails validation.
         """
+        validate_agent_name(name)
         req = CreateAgentRequest(
             id=id,
             name=name,
+            display_name=display_name,
+            system_prompt=system_prompt,
+            description=description,
+            default_model_id=default_model_id,
+            tags=tags or [],
+            capabilities=capabilities or [],
+            initial_files=initial_files or [],
+        )
+        resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
+        return Agent(**resp)
+
+    async def apply_by_name(
+        self,
+        name: str,
+        system_prompt: str,
+        *,
+        display_name: Optional[str] = None,
+        description: Optional[str] = None,
+        default_model_id: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        initial_files: Optional[list[InitialFile]] = None,
+    ) -> Agent:
+        """Create or update an agent by name (upsert).
+
+        If an agent with the given ``name`` exists in the org, it is updated.
+        If not, a new agent is created.
+
+        Args:
+            name: Addressable name, unique per org
+                (format: ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 chars).
+            system_prompt: System prompt defining agent behavior.
+            display_name: Human-readable display name shown in UI.
+            description: Human-readable description.
+            default_model_id: Default LLM model ID.
+            tags: Tags for organizing agents.
+            capabilities: Capabilities to enable.
+            initial_files: Starter files copied into each new session for this agent.
+
+        Raises:
+            ValueError: If ``name`` fails validation.
+        """
+        validate_agent_name(name)
+        req = CreateAgentRequest(
+            name=name,
+            display_name=display_name,
             system_prompt=system_prompt,
             description=description,
             default_model_id=default_model_id,

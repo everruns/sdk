@@ -19,9 +19,27 @@ def generate_harness_id() -> str:
     return f"harness_{secrets.token_hex(16)}"
 
 
-# Harness name validation: lowercase alphanumeric segments separated by hyphens
-_HARNESS_NAME_PATTERN = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-_HARNESS_NAME_MAX_LENGTH = 64
+# Addressable name validation: lowercase alphanumeric segments separated by hyphens.
+# Shared by harness names and agent names.
+_ADDRESSABLE_NAME_PATTERN = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+_ADDRESSABLE_NAME_MAX_LENGTH = 64
+
+
+def _validate_addressable_name(name: str, *, label: str) -> str:
+    """Validate an addressable name and return it if valid.
+
+    Names must match ``[a-z0-9]+(-[a-z0-9]+)*`` and be at most 64 characters.
+
+    Raises:
+        ValueError: If the name is invalid.
+    """
+    if len(name) > _ADDRESSABLE_NAME_MAX_LENGTH:
+        raise ValueError(
+            f"{label} must be at most {_ADDRESSABLE_NAME_MAX_LENGTH} characters, got {len(name)}"
+        )
+    if not _ADDRESSABLE_NAME_PATTERN.match(name):
+        raise ValueError(f"{label} must match pattern [a-z0-9]+(-[a-z0-9]+)*, got {name!r}")
+    return name
 
 
 def validate_harness_name(name: str) -> str:
@@ -32,13 +50,18 @@ def validate_harness_name(name: str) -> str:
     Raises:
         ValueError: If the name is invalid.
     """
-    if len(name) > _HARNESS_NAME_MAX_LENGTH:
-        raise ValueError(
-            f"harness_name must be at most {_HARNESS_NAME_MAX_LENGTH} characters, got {len(name)}"
-        )
-    if not _HARNESS_NAME_PATTERN.match(name):
-        raise ValueError(f"harness_name must match pattern [a-z0-9]+(-[a-z0-9]+)*, got {name!r}")
-    return name
+    return _validate_addressable_name(name, label="harness_name")
+
+
+def validate_agent_name(name: str) -> str:
+    """Validate an agent name and return it if valid.
+
+    Agent names must match ``[a-z0-9]+(-[a-z0-9]+)*`` and be at most 64 characters.
+
+    Raises:
+        ValueError: If the name is invalid.
+    """
+    return _validate_addressable_name(name, label="agent_name")
 
 
 class AgentCapabilityConfig(BaseModel):
@@ -70,6 +93,7 @@ class Agent(BaseModel):
 
     id: str
     name: str
+    display_name: Optional[str] = None
     description: Optional[str] = None
     system_prompt: str
     default_model_id: Optional[str] = None
@@ -88,7 +112,15 @@ class CreateAgentRequest(BaseModel):
         default=None,
         description="Client-supplied agent ID (format: agent_{32-hex}). Auto-generated if omitted.",
     )
-    name: str
+    name: str = Field(
+        description=(
+            "Addressable name, unique per org. Format: [a-z0-9]+(-[a-z0-9]+)*, max 64 chars."
+        ),
+    )
+    display_name: Optional[str] = Field(
+        default=None,
+        description="Human-readable display name shown in UI. Falls back to name when absent.",
+    )
     system_prompt: str
     description: Optional[str] = None
     default_model_id: Optional[str] = None

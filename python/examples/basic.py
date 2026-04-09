@@ -12,7 +12,7 @@ async def main():
     try:
         # Create an agent with current_time capability
         agent = await client.agents.create(
-            name="Example Assistant",
+            name="example-assistant-py",
             system_prompt="You are a helpful assistant for examples.",
             capabilities=[AgentCapabilityConfig(ref="current_time")],
         )

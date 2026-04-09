@@ -10,7 +10,7 @@
  *
  * // Create an agent
  * const agent = await client.agents.create({
- *   name: "Assistant",
+ *   name: "assistant",
  *   systemPrompt: "You are a helpful assistant."
  * });
  *

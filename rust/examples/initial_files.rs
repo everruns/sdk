@@ -12,7 +12,7 @@ async fn main() -> Result<(), Error> {
     let agent = client
         .agents()
         .create(
-            "Initial Files Example",
+            "initial-files-example-rs",
             "You are a helpful assistant. Read the starter files before answering.",
         )
         .await?;

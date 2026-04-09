@@ -14,7 +14,7 @@
 //!
 //!     // Create an agent
 //!     let agent = client.agents().create(
-//!         "Assistant",
+//!         "assistant",
 //!         "You are a helpful assistant."
 //!     ).await?;
 //!

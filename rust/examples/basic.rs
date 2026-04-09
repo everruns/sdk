@@ -15,7 +15,7 @@ async fn main() -> Result<(), Error> {
         .agents()
         .create_with_options(
             CreateAgentRequest::new(
-                "Example Assistant",
+                "example-assistant-rs",
                 "You are a helpful assistant for examples.",
             )
             .capabilities(vec![AgentCapabilityConfig::new("current_time")]),

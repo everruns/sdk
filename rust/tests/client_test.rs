@@ -118,7 +118,7 @@ async fn test_create_agent_with_initial_files() {
     Mock::given(method("POST"))
         .and(path("/v1/agents"))
         .and(body_json(serde_json::json!({
-            "name": "Starter Agent",
+            "name": "starter-agent",
             "system_prompt": "You keep files ready.",
             "initial_files": [
                 {
@@ -131,7 +131,7 @@ async fn test_create_agent_with_initial_files() {
         })))
         .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
             "id": "agent_123",
-            "name": "Starter Agent",
+            "name": "starter-agent",
             "description": null,
             "system_prompt": "You keep files ready.",
             "default_model_id": null,
@@ -153,7 +153,7 @@ async fn test_create_agent_with_initial_files() {
     let agent = client
         .agents()
         .create_with_options(
-            CreateAgentRequest::new("Starter Agent", "You keep files ready.").initial_files(vec![
+            CreateAgentRequest::new("starter-agent", "You keep files ready.").initial_files(vec![
                 InitialFile::new("/workspace/README.md", "# starter\n")
                     .encoding("text")
                     .is_readonly(true),

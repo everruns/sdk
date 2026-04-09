@@ -28,6 +28,7 @@ import {
   StreamOptions,
   TopUpRequest,
   UpdateBudgetRequest,
+  validateAgentName,
   validateHarnessName,
 } from "./models.js";
 import {
@@ -187,6 +188,7 @@ class AgentsClient {
 
   /** Create a new agent with a server-assigned ID. */
   async create(request: CreateAgentRequest): Promise<Agent> {
+    validateAgentName(request.name);
     return this.client.fetch("/agents", {
       method: "POST",
       body: JSON.stringify(toAgentBody(request)),
@@ -202,9 +204,24 @@ class AgentsClient {
    * Use {@link generateAgentId} to create a properly formatted ID.
    */
   async apply(id: string, request: CreateAgentRequest): Promise<Agent> {
+    validateAgentName(request.name);
     return this.client.fetch("/agents", {
       method: "POST",
       body: JSON.stringify({ ...toAgentBody(request), id }),
+    });
+  }
+
+  /**
+   * Create or update an agent by name (upsert).
+   *
+   * If an agent with the given `name` exists in the org, it is updated.
+   * If not, a new agent is created with that name.
+   */
+  async applyByName(request: CreateAgentRequest): Promise<Agent> {
+    validateAgentName(request.name);
+    return this.client.fetch("/agents", {
+      method: "POST",
+      body: JSON.stringify(toAgentBody(request)),
     });
   }
 
@@ -752,6 +769,9 @@ function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
   };
   if (request.id) {
     body.id = request.id;
+  }
+  if (request.displayName) {
+    body.display_name = request.displayName;
   }
   if (request.capabilities?.length) {
     body.capabilities = request.capabilities;

@@ -14,7 +14,7 @@ async function main() {
 
   // Create agent
   const agent = await client.agents.create({
-    name: "Dad Jokes Bot",
+    name: "dad-jokes-bot-ts",
     systemPrompt: "You are a dad joke expert. Tell one short, cheesy dad joke.",
   });
   console.log(`Created agent: ${agent.id}`);

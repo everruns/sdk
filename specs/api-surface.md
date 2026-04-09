@@ -16,11 +16,24 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 - `GET /v1/agents/{id}/export` - Export agent as Markdown
 - `POST /v1/agents/{id}/copy` - Copy an agent
 
-#### Client-Supplied Agent IDs
+#### Agent Names
 
-The `POST /v1/agents` endpoint accepts an optional `id` field in the request body.
-When `id` is provided (format: `agent_<32-hex>`), the endpoint has upsert semantics:
-if an agent with that ID exists it is updated, otherwise a new agent is created.
+Agent `name` is a URL/CLI-friendly addressable slug, **unique per org**.
+Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 characters (same rules as harness names).
+Client-side validated via `validate_agent_name()`.
+
+The optional `display_name` field provides a human-readable label for UI rendering
+(e.g. `"Customer Support Agent"`). Falls back to `name` when absent.
+
+#### Upsert Semantics
+
+`POST /v1/agents` supports two upsert modes:
+
+- **By ID**: When `id` is provided (format: `agent_<32-hex>`), if an agent with that ID
+  exists it is updated, otherwise a new agent is created. All SDKs expose `apply()`.
+- **By name**: When `name` matches an existing agent in the org, that agent is updated.
+  All SDKs expose `apply_by_name()` / `applyByName()`.
+
 When `id` is omitted, the server auto-generates one (plain create).
 Agent create/update payloads also support optional `initial_files` starter files that are copied into each new session for that agent.
 

@@ -67,7 +67,7 @@ async def main():
     try:
         # Create agent with tool-aware system prompt
         agent = await client.agents.create(
-            name="Weather Assistant",
+            name="weather-assistant-py",
             system_prompt=SYSTEM_PROMPT,
         )
         print(f"Created agent: {agent.id}")

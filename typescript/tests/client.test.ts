@@ -4,6 +4,7 @@ import { Everruns } from "../src/client.js";
 import {
   generateAgentId,
   generateHarnessId,
+  validateAgentName,
   validateHarnessName,
   extractToolCalls,
   toolResult,
@@ -149,7 +150,7 @@ describe("Everruns", () => {
       status: 201,
       json: async () => ({
         id: "agent_123",
-        name: "Starter Agent",
+        name: "starter-agent",
         system_prompt: "You keep files ready.",
         initial_files: [
           {
@@ -171,7 +172,7 @@ describe("Everruns", () => {
     });
 
     await client.agents.create({
-      name: "Starter Agent",
+      name: "starter-agent",
       systemPrompt: "You keep files ready.",
       initialFiles: [
         {
@@ -188,7 +189,7 @@ describe("Everruns", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          name: "Starter Agent",
+          name: "starter-agent",
           system_prompt: "You keep files ready.",
           initial_files: [
             {
@@ -416,6 +417,58 @@ describe("CreateSessionRequest with harnessName", () => {
     };
     expect(request.harnessId).toBe("harness_abc123");
     expect(request.harnessName).toBeUndefined();
+  });
+});
+
+describe("validateAgentName", () => {
+  it("should accept valid names", () => {
+    expect(() => validateAgentName("customer-support")).not.toThrow();
+    expect(() => validateAgentName("my-agent-v2")).not.toThrow();
+    expect(() => validateAgentName("a1b2")).not.toThrow();
+    expect(() => validateAgentName("x")).not.toThrow();
+  });
+
+  it("should reject names over 64 characters", () => {
+    expect(() => validateAgentName("a".repeat(65))).toThrow(
+      "at most 64 characters",
+    );
+  });
+
+  it("should reject invalid patterns", () => {
+    expect(() => validateAgentName("UPPER")).toThrow("must match pattern");
+    expect(() => validateAgentName("has_underscore")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateAgentName("-leading-dash")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateAgentName("trailing-dash-")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateAgentName("double--dash")).toThrow(
+      "must match pattern",
+    );
+    expect(() => validateAgentName("")).toThrow("must match pattern");
+  });
+});
+
+describe("CreateAgentRequest with displayName", () => {
+  it("should include displayName in request interface", () => {
+    const request: CreateAgentRequest = {
+      name: "customer-support",
+      displayName: "Customer Support Agent",
+      systemPrompt: "You are helpful.",
+    };
+    expect(request.name).toBe("customer-support");
+    expect(request.displayName).toBe("Customer Support Agent");
+  });
+
+  it("should work without displayName", () => {
+    const request: CreateAgentRequest = {
+      name: "customer-support",
+      systemPrompt: "You are helpful.",
+    };
+    expect(request.displayName).toBeUndefined();
   });
 });
 

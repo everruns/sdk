@@ -5,7 +5,7 @@ A typed client for the Everruns API.
 Quick Start:
     >>> from everruns_sdk import Everruns
     >>> client = Everruns()  # uses EVERRUNS_API_KEY
-    >>> agent = await client.agents.create("Assistant", "You are helpful.")
+    >>> agent = await client.agents.create("assistant", "You are helpful.")
 """
 
 from everruns_sdk.auth import ApiKey
@@ -45,6 +45,7 @@ from everruns_sdk.models import (
     extract_tool_calls,
     generate_agent_id,
     generate_harness_id,
+    validate_agent_name,
     validate_harness_name,
 )
 
@@ -83,6 +84,7 @@ __all__ = [
     "extract_tool_calls",
     "generate_agent_id",
     "generate_harness_id",
+    "validate_agent_name",
     "validate_harness_name",
 ]
 
