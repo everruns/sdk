@@ -56,7 +56,7 @@ class Everruns:
 
     Example:
         >>> client = Everruns()
-        >>> agent = await client.agents.create("Assistant", "You are helpful.")
+        >>> agent = await client.agents.create("assistant", "You are helpful.")
     """
 
     def __init__(
