@@ -327,14 +327,19 @@ impl<'a> AgentsClient<'a> {
         self.client.get(&format!("/agents/{}", id)).await
     }
 
-    /// Create a new agent with a server-assigned ID
+    /// Create a new agent with a server-assigned ID.
+    ///
+    /// `name` is the addressable slug (e.g. `"customer-support"`), validated
+    /// against `[a-z0-9]+(-[a-z0-9]+)*`, max 64 chars.
     pub async fn create(&self, name: &str, system_prompt: &str) -> Result<Agent> {
+        validate_agent_name(name)?;
         let req = CreateAgentRequest::new(name, system_prompt);
         self.client.post("/agents", &req).await
     }
 
     /// Create an agent with full options
     pub async fn create_with_options(&self, req: CreateAgentRequest) -> Result<Agent> {
+        validate_agent_name(&req.name)?;
         self.client.post("/agents", &req).await
     }
 
@@ -345,15 +350,33 @@ impl<'a> AgentsClient<'a> {
     ///
     /// Use [`generate_agent_id`] to create a properly formatted ID.
     pub async fn apply(&self, id: &str, name: &str, system_prompt: &str) -> Result<Agent> {
+        validate_agent_name(name)?;
         let req = CreateAgentRequest::new(name, system_prompt).id(id);
         self.client.post("/agents", &req).await
     }
 
-    /// Create or update an agent with full options (upsert).
+    /// Create or update an agent with full options (upsert by ID).
     ///
     /// The `id` parameter is set on the request, overriding any existing value.
     pub async fn apply_with_options(&self, id: &str, req: CreateAgentRequest) -> Result<Agent> {
+        validate_agent_name(&req.name)?;
         let req = req.id(id);
+        self.client.post("/agents", &req).await
+    }
+
+    /// Create or update an agent by name (upsert).
+    ///
+    /// If an agent with the given `name` exists in the org, it is updated.
+    /// If not, a new agent is created with that name.
+    pub async fn apply_by_name(&self, name: &str, system_prompt: &str) -> Result<Agent> {
+        validate_agent_name(name)?;
+        let req = CreateAgentRequest::new(name, system_prompt);
+        self.client.post("/agents", &req).await
+    }
+
+    /// Create or update an agent by name with full options (upsert).
+    pub async fn apply_by_name_with_options(&self, req: CreateAgentRequest) -> Result<Agent> {
+        validate_agent_name(&req.name)?;
         self.client.post("/agents", &req).await
     }
 

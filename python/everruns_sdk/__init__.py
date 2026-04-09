@@ -45,6 +45,7 @@ from everruns_sdk.models import (
     extract_tool_calls,
     generate_agent_id,
     generate_harness_id,
+    validate_agent_name,
     validate_harness_name,
 )
 
@@ -83,6 +84,7 @@ __all__ = [
     "extract_tool_calls",
     "generate_agent_id",
     "generate_harness_id",
+    "validate_agent_name",
     "validate_harness_name",
 ]
 

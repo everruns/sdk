@@ -35,15 +35,58 @@
                 "null"
               ]
             }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "description": "Include archived agents. Deleted agents never appear in lists.",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Pagination offset (default 0).",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum items to return (default 20, max 100).",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of agents",
+            "description": "Paginated list of agents",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponse_Agent"
+                  "$ref": "#/components/schemas/PaginatedResponse_Agent"
                 }
               }
             }
@@ -109,7 +152,7 @@
           "agents"
         ],
         "summary": "POST /v1/agents/import - Import agent from Markdown, YAML, or JSON",
-        "description": "Accepts agent definition in multiple formats:\n- Markdown with YAML front matter (if starts with ---)\n- Pure YAML\n- Pure JSON\n- Plain text (treated as system prompt, name auto-generated)",
+        "description": "Accepts agent definition in multiple formats:\n- Markdown with YAML front matter (if starts with ---)\n- Pure YAML\n- Pure JSON\n- Plain text (treated as system prompt, name auto-generated)\n\nIf the file contains an `id` field and an agent with that ID already exists,\nthe agent is updated (upsert). Returns 201 on create, 200 on update.",
         "operationId": "import_agent",
         "requestBody": {
           "content": {
@@ -122,6 +165,16 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "Agent updated via import",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Agent"
+                }
+              }
+            }
+          },
           "201": {
             "description": "Agent imported successfully",
             "content": {
@@ -202,13 +255,14 @@
         "tags": [
           "agents"
         ],
-        "summary": "GET /v1/agents/{agent_id} - Get agent by ID",
+        "summary": "GET /v1/agents/{agent_id} - Get agent by ID or name",
+        "description": "Accepts either an agent ID (e.g. `agent_01933b5a...`) or a\nname (e.g. `customer-support`). Names are resolved within the caller's org.",
         "operationId": "get_agent",
         "parameters": [
           {
             "name": "agent_id",
             "in": "path",
-            "description": "Agent ID (prefixed, e.g., agt_...)",
+            "description": "Agent ID (prefixed) or name",
             "required": true,
             "schema": {
               "type": "string"
@@ -242,13 +296,13 @@
           "agents"
         ],
         "summary": "PUT /v1/agents/{agent_id} - Create or update agent (upsert)",
-        "description": "If agent with this ID exists, update it. If not, create it.\nReturns 201 on create, 200 on update.",
+        "description": "Accepts either an agent ID (e.g. `agent_01933b5a...`) or a\nname (e.g. `customer-support`). If the agent exists, update it; if not,\ncreate it. Returns 201 on create, 200 on update.",
         "operationId": "upsert_agent",
         "parameters": [
           {
             "name": "agent_id",
             "in": "path",
-            "description": "Agent ID (format: agent_{32-hex})",
+            "description": "Agent ID (prefixed) or name",
             "required": true,
             "schema": {
               "type": "string"
@@ -287,7 +341,7 @@
             }
           },
           "400": {
-            "description": "Invalid agent ID or input exceeds allowed limits",
+            "description": "Invalid input",
             "content": {
               "application/json": {
                 "schema": {
@@ -1249,6 +1303,411 @@
         }
       }
     },
+    "/v1/harnesses": {
+      "get": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "GET /v1/harnesses",
+        "operationId": "list_harnesses",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by name or description (case-insensitive substring match).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "description": "Include archived harnesses. Deleted harnesses never appear in lists.",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of harnesses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_Harness"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "POST /v1/harnesses",
+        "operationId": "create_harness",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHarnessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Harness created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Harness"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/harnesses/config": {
+      "get": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "GET /v1/harnesses/config",
+        "description": "Returns which harness policies the caller satisfies.\nUI uses this to show/hide controls (e.g. delete button).",
+        "operationId": "harness_config",
+        "responses": {
+          "200": {
+            "description": "Resource config for harnesses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/harnesses/preview": {
+      "post": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "POST /v1/harnesses/preview",
+        "operationId": "preview_harness",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewHarnessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Harness preview generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HarnessPreviewResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/harnesses/{harness_id}": {
+      "get": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "GET /v1/harnesses/{harness_id}",
+        "description": "Accepts either a harness ID (e.g. `harness_01933b5a...`) or a\nname (e.g. `generic`). The virtual name `default` resolves to the org's\nconfigured default harness. Names are resolved within the caller's org.",
+        "operationId": "get_harness",
+        "parameters": [
+          {
+            "name": "harness_id",
+            "in": "path",
+            "description": "Harness ID (prefixed) or name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Harness found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Harness"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Harness not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "DELETE /v1/harnesses/{harness_id}",
+        "operationId": "delete_harness",
+        "parameters": [
+          {
+            "name": "harness_id",
+            "in": "path",
+            "description": "Harness ID (prefixed)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Harness archived"
+          },
+          "400": {
+            "description": "Invalid harness ID"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Harness not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "PATCH /v1/harnesses/{harness_id}",
+        "operationId": "update_harness",
+        "parameters": [
+          {
+            "name": "harness_id",
+            "in": "path",
+            "description": "Harness ID (prefixed)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHarnessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Harness updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Harness"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Harness not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/harnesses/{harness_id}/copy": {
+      "post": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "POST /v1/harnesses/{harness_id}/copy - Copy a harness",
+        "description": "Creates a new harness with the same configuration as the source harness.\nThe new harness's name will be \"{original name} (copy)\".",
+        "operationId": "copy_harness",
+        "parameters": [
+          {
+            "name": "harness_id",
+            "in": "path",
+            "description": "Source harness ID to copy",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Harness copied successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Harness"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid harness ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source harness not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/images": {
       "get": {
         "tags": [
@@ -1310,8 +1769,7 @@
             "description": "Optional: session ID stored as metadata for tracking (not required for upload)",
             "required": false,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -1908,6 +2366,9 @@
           "400": {
             "description": "Invalid provider ID"
           },
+          "404": {
+            "description": "Provider not found"
+          },
           "500": {
             "description": "Internal error"
           }
@@ -1930,6 +2391,18 @@
             "schema": {
               "type": [
                 "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "description": "Include archived MCP servers. Deleted MCP servers never appear in lists.",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
                 "null"
               ]
             }
@@ -2445,6 +2918,50 @@
         }
       }
     },
+    "/v1/sessions/chat": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "POST /v1/sessions/chat - Get or create global chat session",
+        "description": "Returns the user's singleton global chat session. Creates one if it doesn't exist.\nUses the Platform Chat harness and tags for per-user singleton management.",
+        "operationId": "get_or_create_chat_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GetOrCreateChatSessionRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat session returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v1/sessions/{session_id}": {
       "get": {
         "tags": [
@@ -2936,6 +3453,47 @@
         }
       }
     },
+    "/v1/sessions/{session_id}/export": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Export session messages as a JSONL file",
+        "description": "Returns all materialized messages (user, agent) as newline-delimited JSON.\nDelta events are excluded. Each line is a complete JSON object representing one message.\nThe response includes `Content-Disposition: attachment` for browser download.",
+        "operationId": "export_session_jsonl",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID (prefixed, e.g., session_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSONL file with one message per line",
+            "content": {
+              "application/x-ndjson": {}
+            }
+          },
+          "400": {
+            "description": "Invalid ID format"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Session not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v1/sessions/{session_id}/fs": {
       "get": {
         "tags": [
@@ -3408,6 +3966,289 @@
         }
       }
     },
+    "/v1/sessions/{session_id}/git/branches": {
+      "post": {
+        "tags": [
+          "Session Git"
+        ],
+        "summary": "POST /v1/sessions/{session_id}/git/branches",
+        "operationId": "create_branch",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBranchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Branch created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        }
+      }
+    },
+    "/v1/sessions/{session_id}/git/branches/{name}": {
+      "delete": {
+        "tags": [
+          "Session Git"
+        ],
+        "summary": "DELETE /v1/sessions/{session_id}/git/branches/{name}",
+        "operationId": "delete_branch",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Branch name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Branch deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Branch not found"
+          }
+        }
+      }
+    },
+    "/v1/sessions/{session_id}/git/commit": {
+      "post": {
+        "tags": [
+          "Session Git"
+        ],
+        "summary": "POST /v1/sessions/{session_id}/git/commit",
+        "operationId": "commit",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Commit created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommitResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    },
+    "/v1/sessions/{session_id}/git/diff": {
+      "get": {
+        "tags": [
+          "Session Git"
+        ],
+        "summary": "GET /v1/sessions/{session_id}/git/diff",
+        "operationId": "diff",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "oid",
+            "in": "query",
+            "description": "Commit OID to diff",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "description": "Base commit OID (default: parent)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Diff result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitDiff"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid commit OID"
+          },
+          "404": {
+            "description": "Commit not found"
+          }
+        }
+      }
+    },
+    "/v1/sessions/{session_id}/git/log": {
+      "get": {
+        "tags": [
+          "Session Git"
+        ],
+        "summary": "GET /v1/sessions/{session_id}/git/log",
+        "operationId": "log",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ref",
+            "in": "query",
+            "description": "Ref to start from (default: HEAD)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max commits (default: 50)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commit log",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GitCommitInfo"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session or ref not found"
+          }
+        }
+      }
+    },
+    "/v1/sessions/{session_id}/git/refs": {
+      "get": {
+        "tags": [
+          "Session Git"
+        ],
+        "summary": "GET /v1/sessions/{session_id}/git/refs",
+        "operationId": "list_refs",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of refs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GitRefInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/sessions/{session_id}/messages": {
       "get": {
         "tags": [
@@ -3854,6 +4695,18 @@
             "schema": {
               "type": [
                 "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "description": "Include archived skills. Deleted skills never appear in lists.",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
                 "null"
               ]
             }
@@ -4323,6 +5176,14 @@
           "updated_at"
         ],
         "properties": {
+          "archived_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when the agent was archived."
+          },
           "capabilities": {
             "type": "array",
             "items": {
@@ -4343,12 +5204,27 @@
             "description": "Default LLM model ID for this agent.\nCan be overridden at the session level.",
             "example": "model_01933b5a00007000800000000000001"
           },
+          "deleted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when the agent was deleted."
+          },
           "description": {
             "type": [
               "string",
               "null"
             ],
             "description": "Human-readable description of what the agent does."
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name shown in UI (e.g. \"Customer Support Agent\").\nFalls back to `name` when absent."
           },
           "id": {
             "type": "string",
@@ -4362,9 +5238,28 @@
             },
             "description": "Starter files copied into each new session for this agent."
           },
+          "max_iterations": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Maximum number of LLM iterations per turn for this agent.",
+            "minimum": 0
+          },
           "name": {
             "type": "string",
-            "description": "Display name of the agent."
+            "description": "Name, unique per org (e.g. \"customer-support\")."
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
+              }
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/AgentStatus",
@@ -4445,11 +5340,57 @@
       },
       "AgentStatus": {
         "type": "string",
-        "description": "Agent lifecycle status.\n- `active`: Agent is available for use\n- `archived`: Agent is soft-deleted and hidden from listings",
+        "description": "Agent lifecycle status.\n- `active`: Agent is available for use\n- `archived`: Agent is hidden from listings and cannot be modified or assigned\n- `deleted`: Agent is a tombstone kept only for historical references",
         "enum": [
           "active",
-          "archived"
+          "archived",
+          "deleted"
         ]
+      },
+      "BudgetEventData": {
+        "type": "object",
+        "description": "Data for budget lifecycle events (warning, paused, exhausted, resumed).",
+        "required": [
+          "budget_id",
+          "balance",
+          "limit",
+          "currency"
+        ],
+        "properties": {
+          "balance": {
+            "type": "number",
+            "format": "double",
+            "description": "Current remaining balance."
+          },
+          "budget_id": {
+            "type": "string",
+            "description": "Budget that triggered this event."
+          },
+          "currency": {
+            "type": "string",
+            "description": "Budget currency (e.g. \"usd\", \"tokens\")."
+          },
+          "limit": {
+            "type": "number",
+            "format": "double",
+            "description": "Budget limit."
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable message."
+          },
+          "soft_limit": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "Soft limit threshold (present for warning/paused events)."
+          }
+        }
       },
       "BuiltinTool": {
         "type": "object",
@@ -4481,6 +5422,10 @@
               "null"
             ],
             "description": "Human-readable display name for UI rendering (e.g., \"Get Current Time\" for `get_current_time`)"
+          },
+          "hints": {
+            "$ref": "#/components/schemas/ToolHints",
+            "description": "Semantic hints describing the tool's behavioral properties"
           },
           "name": {
             "type": "string",
@@ -4635,6 +5580,10 @@
             ],
             "description": "Human-readable display name for UI rendering"
           },
+          "hints": {
+            "$ref": "#/components/schemas/ToolHints",
+            "description": "Semantic hints describing the tool's behavioral properties"
+          },
           "name": {
             "type": "string",
             "description": "Tool name (used by LLM and for correlation)"
@@ -4664,6 +5613,96 @@
           "tool_call_id": {
             "type": "string",
             "description": "Tool call ID (correlates with the tool call from tool.call_requested event)"
+          }
+        }
+      },
+      "CommitRequest": {
+        "type": "object",
+        "description": "Request to create a commit",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "author_email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Author email (defaults to \"agent@everruns.local\")"
+          },
+          "author_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Author name (defaults to \"Agent\")"
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Branch name (defaults to \"refs/heads/main\"); short names like \"main\" are normalized"
+          },
+          "message": {
+            "type": "string",
+            "description": "Commit message"
+          }
+        }
+      },
+      "CommitResult": {
+        "type": "object",
+        "description": "Result of a commit operation",
+        "required": [
+          "oid",
+          "tree_oid",
+          "objects_created"
+        ],
+        "properties": {
+          "objects_created": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "oid": {
+            "type": "string"
+          },
+          "tree_oid": {
+            "type": "string"
+          }
+        }
+      },
+      "CompactionReason": {
+        "type": "string",
+        "description": "Reason why compaction was triggered.",
+        "enum": [
+          "proactive_budget",
+          "request_too_large",
+          "manual"
+        ]
+      },
+      "CompactionStepData": {
+        "type": "object",
+        "description": "A single step in a compaction cascade.",
+        "required": [
+          "strategy",
+          "messages_after",
+          "duration_ms"
+        ],
+        "properties": {
+          "duration_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Duration of this step in milliseconds.",
+            "minimum": 0
+          },
+          "messages_after": {
+            "type": "integer",
+            "description": "Number of messages after this step.",
+            "minimum": 0
+          },
+          "strategy": {
+            "type": "string",
+            "description": "Strategy used in this step."
           }
         }
       },
@@ -4787,10 +5826,87 @@
         ],
         "description": "A part of message content - can be text, image, image_file, tool_call, or tool_result\n\nThis is the canonical content part type used across the system.\nAPI layer enables the \"openapi\" feature to add ToSchema derive."
       },
+      "ContextCompactedData": {
+        "type": "object",
+        "description": "Data for context.compacted event (compaction completed).",
+        "required": [
+          "strategy_used",
+          "messages_before",
+          "messages_after",
+          "duration_ms"
+        ],
+        "properties": {
+          "duration_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total duration of all compaction steps in milliseconds.",
+            "minimum": 0
+          },
+          "messages_after": {
+            "type": "integer",
+            "description": "Number of messages after compaction.",
+            "minimum": 0
+          },
+          "messages_before": {
+            "type": "integer",
+            "description": "Number of messages before compaction.",
+            "minimum": 0
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompactionStepData"
+            },
+            "description": "Individual steps in the cascade."
+          },
+          "strategy_used": {
+            "type": "string",
+            "description": "Combined strategy description (e.g., \"observation_masking+native\")."
+          }
+        }
+      },
+      "ContextCompactingData": {
+        "type": "object",
+        "description": "Data for context.compacting event (compaction starting).",
+        "required": [
+          "reason",
+          "strategy",
+          "messages_before"
+        ],
+        "properties": {
+          "messages_before": {
+            "type": "integer",
+            "description": "Number of messages before compaction.",
+            "minimum": 0
+          },
+          "reason": {
+            "$ref": "#/components/schemas/CompactionReason",
+            "description": "Why compaction was triggered."
+          },
+          "strategy": {
+            "type": "string",
+            "description": "Strategy requested (may differ from strategy_used in the completed event)."
+          }
+        }
+      },
       "Controls": {
         "type": "object",
         "description": "Runtime controls for message processing",
         "properties": {
+          "hints": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Generic client hints — arbitrary key-value pairs declared by the client.\nSession-level defaults are set at session creation; per-message values\noverride session hints key-by-key (shallow merge).\n\nExamples: `{\"setup_connection\": true, \"rich_media\": true}`"
+          },
+          "locale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Locale override for this message turn (BCP 47, e.g. `uk-UA`).\nOverrides the session locale for backend-authored strings and prompts."
+          },
           "model_id": {
             "type": [
               "string",
@@ -4827,6 +5943,40 @@
           "src_path": {
             "type": "string",
             "description": "Source path"
+          }
+        }
+      },
+      "CostTier": {
+        "type": "object",
+        "description": "A pricing tier that activates above a context token threshold.\nFor example, OpenAI charges higher rates for prompts exceeding 200K tokens.",
+        "required": [
+          "above_tokens",
+          "input",
+          "output"
+        ],
+        "properties": {
+          "above_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Context token threshold above which this tier applies"
+          },
+          "cache_read": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "Cached read cost per million tokens (USD) for this tier, if supported"
+          },
+          "input": {
+            "type": "number",
+            "format": "double",
+            "description": "Input cost per million tokens (USD) for this tier"
+          },
+          "output": {
+            "type": "number",
+            "format": "double",
+            "description": "Output cost per million tokens (USD) for this tier"
           }
         }
       },
@@ -4871,6 +6021,14 @@
             "description": "A human-readable description of what the agent does.",
             "example": "Handles customer inquiries and support tickets"
           },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name shown in UI.\nFalls back to `name` when absent.",
+            "example": "Customer Support Agent"
+          },
           "id": {
             "type": [
               "string",
@@ -4886,10 +6044,29 @@
             },
             "description": "Starter files copied into each new session for this agent."
           },
+          "max_iterations": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Maximum number of LLM iterations per turn for this agent.",
+            "minimum": 0
+          },
           "name": {
             "type": "string",
-            "description": "The name of the agent. Used for display purposes.",
-            "example": "Customer Support Agent"
+            "description": "Name, unique per org. Lowercase alphanumeric and hyphens.\nFormat: lowercase alphanumeric and hyphens (e.g. \"customer-support\").",
+            "example": "customer-support"
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list controlling which hosts/URLs this agent's sessions can reach.\nIf set, merged with harness and session layers (allowed: intersect, blocked: union)."
+              }
+            ]
           },
           "system_prompt": {
             "type": "string",
@@ -4913,6 +6090,24 @@
               "$ref": "#/components/schemas/ToolDefinition"
             },
             "description": "Client-side tools for this agent.\nThese tools are sent to the LLM but executed by the client, not the server."
+          }
+        }
+      },
+      "CreateBranchRequest": {
+        "type": "object",
+        "description": "Request to create a branch",
+        "required": [
+          "name",
+          "commit_oid"
+        ],
+        "properties": {
+          "commit_oid": {
+            "type": "string",
+            "description": "Commit OID (hex) to point to"
+          },
+          "name": {
+            "type": "string",
+            "description": "Branch name (e.g., \"feature-xyz\")"
           }
         }
       },
@@ -4960,6 +6155,104 @@
               "null"
             ],
             "description": "Whether file is read-only"
+          }
+        }
+      },
+      "CreateHarnessRequest": {
+        "type": "object",
+        "description": "Request to create a new harness",
+        "required": [
+          "name",
+          "system_prompt"
+        ],
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentCapabilityConfig"
+            },
+            "description": "Capabilities to enable with per-harness configuration.",
+            "example": [
+              {
+                "config": {},
+                "ref": "current_time"
+              },
+              {
+                "config": {},
+                "ref": "web_fetch"
+              }
+            ]
+          },
+          "default_model_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Default LLM model ID for this harness. Lowest priority in model chain.",
+            "example": "model_01933b5a00007000800000000000001"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Description of what the harness does.",
+            "example": "Research harness with planning and web capabilities"
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name shown in UI.",
+            "example": "Deep Research"
+          },
+          "initial_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Starter files copied into each new session for this harness."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name, unique per org. Lowercase alphanumeric and hyphens.",
+            "example": "deep-research"
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list controlling which hosts/URLs sessions can reach."
+              }
+            ]
+          },
+          "parent_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional parent harness to inherit from.",
+            "example": "harness_01933b5a000070008000000000000602"
+          },
+          "system_prompt": {
+            "type": "string",
+            "description": "The system prompt defining the harness's base behavior.",
+            "example": "You are a research assistant with deep analytical capabilities."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for organizing harnesses.",
+            "example": [
+              "research",
+              "planning"
+            ]
           }
         }
       },
@@ -5053,6 +6346,17 @@
               "null"
             ],
             "description": "API key for authentication (optional)."
+          },
+          "auth_mode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/McpServerAuthMode",
+                "description": "Authentication mode. Defaults to `api_key` when `api_key` is provided, otherwise `none`."
+              }
+            ]
           },
           "description": {
             "type": [
@@ -5236,6 +6540,14 @@
             "description": "ID of the agent to work in this session (optional, format: agent_{32-hex}).",
             "example": "agent_01933b5a00007000800000000000001"
           },
+          "agent_identity_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional resident agent identity used for unattended/background execution.",
+            "example": "identity_01933b5a00007000800000000000001"
+          },
           "capabilities": {
             "type": "array",
             "items": {
@@ -5244,9 +6556,34 @@
             "description": "Session-level capabilities (additive to agent capabilities).\nApplied after agent capabilities when building RuntimeAgent."
           },
           "harness_id": {
-            "type": "string",
-            "description": "ID of the harness for this session (format: harness_{32-hex}).\nDefaults to the Generic harness if omitted (backward compat with older SDKs).",
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ID of the harness for this session (format: harness_{32-hex}).\nIf omitted, the org default harness is used. New orgs default that to Generic.\nMutually exclusive with `harness_name`.",
             "example": "harness_01933b5a00007000800000000000001"
+          },
+          "harness_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Harness name (e.g. \"generic\", \"deep-research\").\nAlternative to `harness_id` — looked up by name within the org.\nMutually exclusive with `harness_id`.",
+            "example": "generic"
+          },
+          "hints": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Session-level client hints — arbitrary key-value pairs that tell the\nserver what the client can handle. These are defaults for every turn;\nper-message `controls.hints` override these key-by-key (shallow merge).\n\nExamples: `{\"setup_connection\": true, \"rich_media\": true}`"
+          },
+          "initial_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Session-level initial files (additive to agent initial_files).\nFiles with matching paths override agent/harness files; new paths are appended."
           },
           "locale": {
             "type": [
@@ -5256,6 +6593,14 @@
             "description": "Session locale (BCP 47, e.g. `uk-UA`).",
             "example": "uk-UA"
           },
+          "max_iterations": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Maximum number of LLM iterations per turn for this session.",
+            "minimum": 0
+          },
           "model_id": {
             "type": [
               "string",
@@ -5263,6 +6608,24 @@
             ],
             "description": "The ID of the LLM model to use for this session.\nOverrides the agent's default model if specified.",
             "example": "model_01933b5a00007000800000000000001"
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list controlling which hosts/URLs this session can reach.\nMerged with harness and agent layers (allowed: intersect, blocked: union)."
+              }
+            ]
+          },
+          "system_prompt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional session-level system prompt override.\nPrepended to the agent's system prompt when building RuntimeAgent."
           },
           "tags": {
             "type": "array",
@@ -5364,6 +6727,26 @@
         "properties": {
           "deleted": {
             "type": "boolean"
+          }
+        }
+      },
+      "DiffQuery": {
+        "type": "object",
+        "description": "Query for diff endpoint",
+        "required": [
+          "oid"
+        ],
+        "properties": {
+          "base": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Base commit OID (optional, defaults to parent)"
+          },
+          "oid": {
+            "type": "string",
+            "description": "Commit OID to diff (required)"
           }
         }
       },
@@ -5535,6 +6918,12 @@
             "$ref": "#/components/schemas/ToolCompletedData"
           },
           {
+            "$ref": "#/components/schemas/ToolProgressData"
+          },
+          {
+            "$ref": "#/components/schemas/ToolOutputDeltaData"
+          },
+          {
             "$ref": "#/components/schemas/ToolCallRequestedData"
           },
           {
@@ -5572,6 +6961,27 @@
           },
           {
             "$ref": "#/components/schemas/SubagentEventData"
+          },
+          {
+            "$ref": "#/components/schemas/ContextCompactingData"
+          },
+          {
+            "$ref": "#/components/schemas/ContextCompactedData"
+          },
+          {
+            "$ref": "#/components/schemas/FileWrittenData"
+          },
+          {
+            "$ref": "#/components/schemas/BudgetEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BudgetEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BudgetEventData"
+          },
+          {
+            "$ref": "#/components/schemas/BudgetEventData"
           }
         ],
         "title": "EventData",
@@ -5718,6 +7128,47 @@
           }
         }
       },
+      "FileWrittenData": {
+        "type": "object",
+        "description": "Data for file.written events emitted when files are written to the session filesystem.",
+        "required": [
+          "path",
+          "operation",
+          "size_bytes",
+          "created"
+        ],
+        "properties": {
+          "created": {
+            "type": "boolean",
+            "description": "Whether this is a new file (true) or an update to an existing file (false)."
+          },
+          "operation": {
+            "type": "string",
+            "description": "Operation type (see `FILE_OP_*` constants)."
+          },
+          "path": {
+            "type": "string",
+            "description": "File path within the session filesystem (normalized, e.g. \"/reports/summary.md\")."
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "File size in bytes after write."
+          }
+        }
+      },
+      "GetOrCreateChatSessionRequest": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Browser locale for seeding the global chat session (BCP 47, e.g. `uk-UA`)."
+          }
+        }
+      },
       "GetQuery": {
         "type": "object",
         "description": "Query parameters for GET requests",
@@ -5738,6 +7189,132 @@
           }
         ],
         "description": "Unified response for GET that can be file or directory listing"
+      },
+      "GitCommitInfo": {
+        "type": "object",
+        "description": "A commit entry in the log",
+        "required": [
+          "oid",
+          "message",
+          "author_name",
+          "author_email",
+          "timestamp",
+          "parent_oids"
+        ],
+        "properties": {
+          "author_email": {
+            "type": "string"
+          },
+          "author_name": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "oid": {
+            "type": "string"
+          },
+          "parent_oids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GitDiff": {
+        "type": "object",
+        "description": "A diff with full patch output",
+        "required": [
+          "entries",
+          "stats"
+        ],
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GitDiffEntry"
+            }
+          },
+          "patch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "stats": {
+            "$ref": "#/components/schemas/GitDiffStats"
+          }
+        }
+      },
+      "GitDiffEntry": {
+        "type": "object",
+        "description": "A diff entry between two commits",
+        "required": [
+          "path",
+          "status"
+        ],
+        "properties": {
+          "old_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "GitDiffStats": {
+        "type": "object",
+        "description": "Diff statistics",
+        "required": [
+          "files_changed",
+          "insertions",
+          "deletions"
+        ],
+        "properties": {
+          "deletions": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "files_changed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "insertions": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "GitRefInfo": {
+        "type": "object",
+        "description": "A git ref (branch pointer)",
+        "required": [
+          "name",
+          "target",
+          "is_symbolic"
+        ],
+        "properties": {
+          "is_symbolic": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        }
       },
       "GrepMatch": {
         "type": "object",
@@ -5798,6 +7375,157 @@
             "type": "string"
           }
         }
+      },
+      "Harness": {
+        "type": "object",
+        "description": "Harness configuration for sessions.\nA harness defines the base behavior and capabilities that apply to all sessions.",
+        "required": [
+          "id",
+          "name",
+          "system_prompt",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "archived_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when the harness was archived."
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentCapabilityConfig"
+            },
+            "description": "Capabilities enabled for this harness with per-harness configuration."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the harness was created."
+          },
+          "default_model_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Default LLM model ID for this harness.\nLowest priority in chain: controls > session > agent > harness.",
+            "example": "model_01933b5a00007000800000000000001"
+          },
+          "deleted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when the harness was deleted."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable description of what the harness does."
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name shown in UI."
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the harness (format: harness_{32-hex}).",
+            "example": "harness_01933b5a00007000800000000000001"
+          },
+          "initial_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Starter files copied into each new session for this harness."
+          },
+          "is_built_in": {
+            "type": "boolean",
+            "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name, unique per org (e.g. \"generic\")."
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list controlling which hosts/URLs sessions can reach.\nMerged with agent and session layers (allowed: intersect, blocked: union)."
+              }
+            ]
+          },
+          "parent_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional parent harness that this harness inherits from.",
+            "example": "harness_01933b5a000070008000000000000602"
+          },
+          "status": {
+            "$ref": "#/components/schemas/HarnessStatus",
+            "description": "Current lifecycle status of the harness."
+          },
+          "system_prompt": {
+            "type": "string",
+            "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for organizing and filtering harnesses."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the harness was last updated."
+          }
+        }
+      },
+      "HarnessPreviewResponse": {
+        "type": "object",
+        "description": "Preview response showing merged prompt and tools",
+        "required": [
+          "system_prompt",
+          "tools"
+        ],
+        "properties": {
+          "system_prompt": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "HarnessStatus": {
+        "type": "string",
+        "description": "Harness lifecycle status.\n- `active`: Harness is available for use\n- `archived`: Harness is hidden from listings and cannot be modified or assigned\n- `deleted`: Harness is a tombstone kept only for historical references",
+        "enum": [
+          "active",
+          "archived",
+          "deleted"
+        ]
       },
       "ImageContentPart": {
         "type": "object",
@@ -6249,6 +7977,14 @@
                 "updated_at"
               ],
               "properties": {
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the agent was archived."
+                },
                 "capabilities": {
                   "type": "array",
                   "items": {
@@ -6269,12 +8005,27 @@
                   "description": "Default LLM model ID for this agent.\nCan be overridden at the session level.",
                   "example": "model_01933b5a00007000800000000000001"
                 },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the agent was deleted."
+                },
                 "description": {
                   "type": [
                     "string",
                     "null"
                   ],
                   "description": "Human-readable description of what the agent does."
+                },
+                "display_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Human-readable display name shown in UI (e.g. \"Customer Support Agent\").\nFalls back to `name` when absent."
                 },
                 "id": {
                   "type": "string",
@@ -6288,9 +8039,28 @@
                   },
                   "description": "Starter files copied into each new session for this agent."
                 },
+                "max_iterations": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Maximum number of LLM iterations per turn for this agent.",
+                  "minimum": 0
+                },
                 "name": {
                   "type": "string",
-                  "description": "Display name of the agent."
+                  "description": "Name, unique per org (e.g. \"customer-support\")."
+                },
+                "network_access": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NetworkAccessList",
+                      "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
+                    }
+                  ]
                 },
                 "status": {
                   "$ref": "#/components/schemas/AgentStatus",
@@ -6643,6 +8413,142 @@
           }
         }
       },
+      "ListResponse_Harness": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Harness configuration for sessions.\nA harness defines the base behavior and capabilities that apply to all sessions.",
+              "required": [
+                "id",
+                "name",
+                "system_prompt",
+                "status",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the harness was archived."
+                },
+                "capabilities": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AgentCapabilityConfig"
+                  },
+                  "description": "Capabilities enabled for this harness with per-harness configuration."
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when the harness was created."
+                },
+                "default_model_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Default LLM model ID for this harness.\nLowest priority in chain: controls > session > agent > harness.",
+                  "example": "model_01933b5a00007000800000000000001"
+                },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the harness was deleted."
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Human-readable description of what the harness does."
+                },
+                "display_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Human-readable display name shown in UI."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for the harness (format: harness_{32-hex}).",
+                  "example": "harness_01933b5a00007000800000000000001"
+                },
+                "initial_files": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InitialFile"
+                  },
+                  "description": "Starter files copied into each new session for this harness."
+                },
+                "is_built_in": {
+                  "type": "boolean",
+                  "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name, unique per org (e.g. \"generic\")."
+                },
+                "network_access": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NetworkAccessList",
+                      "description": "Network access list controlling which hosts/URLs sessions can reach.\nMerged with agent and session layers (allowed: intersect, blocked: union)."
+                    }
+                  ]
+                },
+                "parent_harness_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Optional parent harness that this harness inherits from.",
+                  "example": "harness_01933b5a000070008000000000000602"
+                },
+                "status": {
+                  "$ref": "#/components/schemas/HarnessStatus",
+                  "description": "Current lifecycle status of the harness."
+                },
+                "system_prompt": {
+                  "type": "string",
+                  "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack."
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Tags for organizing and filtering harnesses."
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when the harness was last updated."
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
       "ListResponse_KeyValueInfo": {
         "type": "object",
         "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
@@ -6945,10 +8851,30 @@
                   "type": "boolean",
                   "description": "Whether an API key has been configured."
                 },
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the MCP server was archived."
+                },
+                "auth_mode": {
+                  "$ref": "#/components/schemas/McpServerAuthMode",
+                  "description": "Authentication mode for this MCP server."
+                },
                 "created_at": {
                   "type": "string",
                   "format": "date-time",
                   "description": "Timestamp when the MCP server was created."
+                },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the MCP server was deleted."
                 },
                 "description": {
                   "type": [
@@ -6977,6 +8903,13 @@
                   "type": "string",
                   "description": "Display name of the MCP server.",
                   "example": "atlassian-mcp-server"
+                },
+                "oauth_provider_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Stable provider id used for user-scoped OAuth connections."
                 },
                 "status": {
                   "$ref": "#/components/schemas/McpServerStatus",
@@ -7109,10 +9042,31 @@
                 "updated_at"
               ],
               "properties": {
+                "base_harness_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Base harness used when session creation omits harness_id."
+                },
                 "created_at": {
                   "type": "string",
                   "format": "date-time",
                   "description": "When the organization was created"
+                },
+                "default_harness_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Default harness to preselect in the UI."
+                },
+                "default_model_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Default LLM model for the organization."
                 },
                 "id": {
                   "type": "string",
@@ -7198,6 +9152,13 @@
                     "null"
                   ]
                 },
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
                 "compatibility": {
                   "type": [
                     "string",
@@ -7208,9 +9169,20 @@
                   "type": "string",
                   "format": "date-time"
                 },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
                 "description": {
                   "type": "string",
                   "example": "Extract text and tables from PDF files."
+                },
+                "disable_model_invocation": {
+                  "type": "boolean",
+                  "description": "Whether the model is prevented from auto-invoking this skill"
                 },
                 "id": {
                   "type": "string",
@@ -7633,6 +9605,13 @@
             "format": "double",
             "description": "Cached read cost per million tokens (USD), if supported"
           },
+          "cost_tiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostTier"
+            },
+            "description": "Tiered pricing that applies above certain context thresholds.\nWhen present, the base cost fields apply up to the tier threshold,\nand each tier's costs apply for tokens beyond that threshold."
+          },
           "input": {
             "type": "number",
             "format": "double",
@@ -7665,6 +9644,14 @@
             ],
             "format": "int32",
             "description": "Maximum input tokens (if different from context - output)"
+          },
+          "max_media": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Maximum images or PDF pages per request"
           },
           "output": {
             "type": "integer",
@@ -7725,6 +9712,13 @@
                 "description": "Cost per million tokens"
               }
             ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Short human-readable description of the model's strengths and intended use"
           },
           "family": {
             "type": "string",
@@ -8010,6 +10004,27 @@
           }
         }
       },
+      "LogQuery": {
+        "type": "object",
+        "description": "Query for log endpoint",
+        "properties": {
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Max commits to return (default: 50)",
+            "minimum": 0
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Ref to start from (default: HEAD)"
+          }
+        }
+      },
       "McpServer": {
         "type": "object",
         "description": "MCP Server configuration.\nRepresents a remote MCP server that can provide tools and resources.",
@@ -8028,10 +10043,30 @@
             "type": "boolean",
             "description": "Whether an API key has been configured."
           },
+          "archived_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when the MCP server was archived."
+          },
+          "auth_mode": {
+            "$ref": "#/components/schemas/McpServerAuthMode",
+            "description": "Authentication mode for this MCP server."
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
             "description": "Timestamp when the MCP server was created."
+          },
+          "deleted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when the MCP server was deleted."
           },
           "description": {
             "type": [
@@ -8061,6 +10096,13 @@
             "description": "Display name of the MCP server.",
             "example": "atlassian-mcp-server"
           },
+          "oauth_provider_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Stable provider id used for user-scoped OAuth connections."
+          },
           "status": {
             "$ref": "#/components/schemas/McpServerStatus",
             "description": "Current lifecycle status of the MCP server."
@@ -8081,12 +10123,23 @@
           }
         }
       },
+      "McpServerAuthMode": {
+        "type": "string",
+        "description": "MCP server authentication mode.",
+        "enum": [
+          "none",
+          "api_key",
+          "o_auth"
+        ]
+      },
       "McpServerStatus": {
         "type": "string",
-        "description": "MCP Server lifecycle status.\n- `active`: Server is available for use\n- `disabled`: Server is disabled and not used",
+        "description": "MCP Server lifecycle status.\n- `active`: Server is available for use\n- `disabled`: Server is disabled and not used\n- `archived`: Server is hidden from listings and cannot be modified or assigned\n- `deleted`: Server is a tombstone kept only for historical references",
         "enum": [
           "active",
-          "disabled"
+          "disabled",
+          "archived",
+          "deleted"
         ]
       },
       "McpServerTransportType": {
@@ -8095,6 +10148,36 @@
         "enum": [
           "http"
         ]
+      },
+      "McpToolAnnotations": {
+        "type": "object",
+        "description": "MCP tool annotations as defined by the MCP specification.\nAll fields are optional booleans following the MCP convention.",
+        "properties": {
+          "destructiveHint": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "idempotentHint": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "openWorldHint": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "readOnlyHint": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
       },
       "Message": {
         "type": "object",
@@ -8200,7 +10283,8 @@
           "text",
           "image",
           "audio",
-          "video"
+          "video",
+          "pdf"
         ]
       },
       "ModelMetadata": {
@@ -8250,6 +10334,26 @@
           }
         }
       },
+      "NetworkAccessList": {
+        "type": "object",
+        "description": "Network access list controlling which hosts/URLs an agent session can reach.\n\n- `allowed`: if non-empty, only URLs matching these patterns are permitted.\n- `blocked`: URLs matching these patterns are always denied (takes precedence over allowed).\n\nPattern format:\n- `example.com` — exact domain match (any port, any path)\n- `*.example.com` — domain and all subdomains\n- `https://example.com/api/` — exact URL prefix (scheme + host + path)",
+        "properties": {
+          "allowed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed host patterns. If non-empty, only matching URLs are permitted.\nAn empty list means \"no restriction from this layer\" (inherit parent)."
+          },
+          "blocked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Blocked host patterns. Always denied, even if matched by `allowed`."
+          }
+        }
+      },
       "OrganizationResponse": {
         "type": "object",
         "description": "Response for organization operations",
@@ -8260,10 +10364,31 @@
           "updated_at"
         ],
         "properties": {
+          "base_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Base harness used when session creation omits harness_id."
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
             "description": "When the organization was created"
+          },
+          "default_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Default harness to preselect in the UI."
+          },
+          "default_model_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Default LLM model for the organization."
           },
           "id": {
             "type": "string",
@@ -8369,6 +10494,177 @@
           }
         }
       },
+      "PaginatedResponse_Agent": {
+        "type": "object",
+        "description": "Response wrapper for paginated list endpoints.\nIncludes pagination metadata along with the data array.",
+        "required": [
+          "data",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Agent configuration for agentic loop.\nAn agent defines the behavior and capabilities of an AI assistant.",
+              "required": [
+                "id",
+                "name",
+                "system_prompt",
+                "status",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the agent was archived."
+                },
+                "capabilities": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AgentCapabilityConfig"
+                  },
+                  "description": "Capabilities enabled for this agent with per-agent configuration.\nCapabilities add tools and system prompt modifications."
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when the agent was created."
+                },
+                "default_model_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Default LLM model ID for this agent.\nCan be overridden at the session level.",
+                  "example": "model_01933b5a00007000800000000000001"
+                },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when the agent was deleted."
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Human-readable description of what the agent does."
+                },
+                "display_name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Human-readable display name shown in UI (e.g. \"Customer Support Agent\").\nFalls back to `name` when absent."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "External identifier (agent_<32-hex>). Shown as \"id\" in API.\nClient-supplied or auto-generated.",
+                  "example": "agent_01933b5a000070008000000000000001"
+                },
+                "initial_files": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InitialFile"
+                  },
+                  "description": "Starter files copied into each new session for this agent."
+                },
+                "max_iterations": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Maximum number of LLM iterations per turn for this agent.",
+                  "minimum": 0
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name, unique per org (e.g. \"customer-support\")."
+                },
+                "network_access": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NetworkAccessList",
+                      "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
+                    }
+                  ]
+                },
+                "status": {
+                  "$ref": "#/components/schemas/AgentStatus",
+                  "description": "Current lifecycle status of the agent."
+                },
+                "system_prompt": {
+                  "type": "string",
+                  "description": "System prompt that defines the agent's behavior.\nSent as the first message in every conversation."
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Tags for organizing and filtering agents."
+                },
+                "tools": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ToolDefinition"
+                  },
+                  "description": "Client-side tools registered for this agent.\nThese tools are executed by the client, not the server."
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when the agent was last updated."
+                },
+                "usage": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TokenUsage",
+                      "description": "Cumulative token usage across all sessions for this agent."
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Maximum number of items per page.",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Current offset (starting position).",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of items matching the query (across all pages).",
+            "minimum": 0
+          }
+        }
+      },
       "PaginatedResponse_Session": {
         "type": "object",
         "description": "Response wrapper for paginated list endpoints.\nIncludes pagination metadata along with the data array.",
@@ -8410,6 +10706,24 @@
                   "description": "ID of the agent working in this session (format: agent_{32-hex}). Optional.",
                   "example": "agent_01933b5a00007000800000000000001"
                 },
+                "agent_identity_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Optional resident agent identity for unattended/background execution.",
+                  "example": "identity_01933b5a00007000800000000000001"
+                },
+                "blueprint_config": {
+                  "description": "Validated config passed by host at blueprint spawn time."
+                },
+                "blueprint_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent\nfrom the blueprint definition instead of from harness_id/agent_id."
+                },
                 "capabilities": {
                   "type": "array",
                   "items": {
@@ -8442,10 +10756,28 @@
                   "description": "ID of the harness for this session (format: harness_{32-hex}).",
                   "example": "harness_01933b5a00007000800000000000001"
                 },
+                "hints": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "description": "Session-level client hints — arbitrary key-value pairs declared by the\nclient at session creation time. These are defaults for every turn;\nper-message `controls.hints` override these key-by-key (shallow merge).\n\nExamples: `{\"setup_connection\": true, \"rich_media\": true}`",
+                  "additionalProperties": {},
+                  "propertyNames": {
+                    "type": "string"
+                  }
+                },
                 "id": {
                   "type": "string",
                   "description": "Unique identifier for the session (format: session_{32-hex}).",
                   "example": "session_01933b5a00007000800000000000001"
+                },
+                "initial_files": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InitialFile"
+                  },
+                  "description": "Session-level initial files (additive to agent initial_files).\nFiles with matching paths override agent/harness files; new paths are appended."
                 },
                 "is_pinned": {
                   "type": [
@@ -8461,6 +10793,14 @@
                   ],
                   "description": "Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`)."
                 },
+                "max_iterations": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Maximum number of LLM iterations per turn for this session.",
+                  "minimum": 0
+                },
                 "model_id": {
                   "type": [
                     "string",
@@ -8468,6 +10808,17 @@
                   ],
                   "description": "LLM model ID to use for this session (format: model_{32-hex}).\nOverrides the agent's default model if set.",
                   "example": "model_01933b5a00007000800000000000001"
+                },
+                "network_access": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NetworkAccessList",
+                      "description": "Network access list controlling which hosts/URLs this session can reach.\nMerged with harness and agent layers (allowed: intersect, blocked: union)."
+                    }
+                  ]
                 },
                 "organization_id": {
                   "type": "string",
@@ -8531,6 +10882,13 @@
                     "null"
                   ],
                   "description": "Original task description given to this subagent."
+                },
+                "system_prompt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Session-level system prompt override.\nPrepended to the agent's system prompt when building RuntimeAgent."
                 },
                 "tags": {
                   "type": "array",
@@ -8621,6 +10979,39 @@
             "type": "string",
             "description": "The base system prompt (before capability additions)",
             "example": "You are a helpful customer support agent."
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Client-side tools to include in the preview."
+          }
+        }
+      },
+      "PreviewHarnessRequest": {
+        "type": "object",
+        "description": "Request to preview harness shape with capabilities applied",
+        "required": [
+          "system_prompt"
+        ],
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentCapabilityConfig"
+            }
+          },
+          "parent_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "harness_01933b5a000070008000000000000602"
+          },
+          "system_prompt": {
+            "type": "string",
+            "example": "You are a research assistant."
           }
         }
       },
@@ -8843,6 +11234,25 @@
           "value": {
             "$ref": "#/components/schemas/ReasoningEffort",
             "description": "The API value (e.g., \"low\", \"medium\")"
+          }
+        }
+      },
+      "ResourceConfigResponse": {
+        "type": "object",
+        "description": "Response type for per-resource config endpoints.\n\nEvery resource exposes `GET /v1/{resource}/config` returning this type.\nUI uses it to gate controls (create/edit/delete buttons, admin panels).",
+        "required": [
+          "policies"
+        ],
+        "properties": {
+          "policies": {
+            "type": "object",
+            "description": "Map of policy ID → whether the caller satisfies it.",
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
           }
         }
       },
@@ -9205,6 +11615,24 @@
             "description": "ID of the agent working in this session (format: agent_{32-hex}). Optional.",
             "example": "agent_01933b5a00007000800000000000001"
           },
+          "agent_identity_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional resident agent identity for unattended/background execution.",
+            "example": "identity_01933b5a00007000800000000000001"
+          },
+          "blueprint_config": {
+            "description": "Validated config passed by host at blueprint spawn time."
+          },
+          "blueprint_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent\nfrom the blueprint definition instead of from harness_id/agent_id."
+          },
           "capabilities": {
             "type": "array",
             "items": {
@@ -9237,10 +11665,28 @@
             "description": "ID of the harness for this session (format: harness_{32-hex}).",
             "example": "harness_01933b5a00007000800000000000001"
           },
+          "hints": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Session-level client hints — arbitrary key-value pairs declared by the\nclient at session creation time. These are defaults for every turn;\nper-message `controls.hints` override these key-by-key (shallow merge).\n\nExamples: `{\"setup_connection\": true, \"rich_media\": true}`",
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            }
+          },
           "id": {
             "type": "string",
             "description": "Unique identifier for the session (format: session_{32-hex}).",
             "example": "session_01933b5a00007000800000000000001"
+          },
+          "initial_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            },
+            "description": "Session-level initial files (additive to agent initial_files).\nFiles with matching paths override agent/harness files; new paths are appended."
           },
           "is_pinned": {
             "type": [
@@ -9256,6 +11702,14 @@
             ],
             "description": "Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`)."
           },
+          "max_iterations": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Maximum number of LLM iterations per turn for this session.",
+            "minimum": 0
+          },
           "model_id": {
             "type": [
               "string",
@@ -9263,6 +11717,17 @@
             ],
             "description": "LLM model ID to use for this session (format: model_{32-hex}).\nOverrides the agent's default model if set.",
             "example": "model_01933b5a00007000800000000000001"
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list controlling which hosts/URLs this session can reach.\nMerged with harness and agent layers (allowed: intersect, blocked: union)."
+              }
+            ]
           },
           "organization_id": {
             "type": "string",
@@ -9326,6 +11791,13 @@
               "null"
             ],
             "description": "Original task description given to this subagent."
+          },
+          "system_prompt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Session-level system prompt override.\nPrepended to the agent's system prompt when building RuntimeAgent."
           },
           "tags": {
             "type": "array",
@@ -9512,12 +11984,13 @@
       },
       "SessionStatus": {
         "type": "string",
-        "description": "Session execution status.\n- `started`: Session just created, no turn executed yet\n- `active`: A turn is currently running\n- `idle`: Turn completed, session waiting for next input",
+        "description": "Session execution status.\n- `started`: Session just created, no turn executed yet\n- `active`: A turn is currently running\n- `idle`: Turn completed, session waiting for next input\n- `paused`: Budget limit reached, waiting for user to increase limit or resume",
         "enum": [
           "started",
           "active",
           "idle",
-          "waitingfortoolresults"
+          "waitingfortoolresults",
+          "paused"
         ]
       },
       "Skill": {
@@ -9540,6 +12013,13 @@
               "null"
             ]
           },
+          "archived_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
           "compatibility": {
             "type": [
               "string",
@@ -9550,9 +12030,20 @@
             "type": "string",
             "format": "date-time"
           },
+          "deleted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
           "description": {
             "type": "string",
             "example": "Extract text and tables from PDF files."
+          },
+          "disable_model_invocation": {
+            "type": "boolean",
+            "description": "Whether the model is prevented from auto-invoking this skill"
           },
           "id": {
             "type": "string",
@@ -9642,7 +12133,9 @@
         "description": "Skill lifecycle status",
         "enum": [
           "active",
-          "disabled"
+          "disabled",
+          "archived",
+          "deleted"
         ]
       },
       "SkillValidationResult": {
@@ -9780,6 +12273,18 @@
           "status": {
             "type": "string",
             "description": "Session status after submission"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "description": "Generic success response",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
           }
         }
       },
@@ -10165,6 +12670,96 @@
           }
         }
       },
+      "ToolHints": {
+        "type": "object",
+        "description": "Semantic hints describing a tool's behavioral properties.\n\nFollows the MCP tool annotations convention (readOnlyHint, destructiveHint,\nidempotentHint, openWorldHint) plus everruns-specific hints. All fields are\noptional booleans — `None` means \"unknown/unspecified\". Consumers should\ntreat `None` as the conservative default (e.g., assume not readonly, assume\nnot idempotent).\n\nThese hints are informational — they do not enforce policy. Use `ToolPolicy`\nfor execution gating (auto vs requires_approval).",
+        "properties": {
+          "destructive": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Tool may irreversibly destroy or delete data.\nSubset of non-readonly — a tool can be non-readonly (writes) without\nbeing destructive (e.g., create/update operations)."
+          },
+          "idempotent": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Calling the tool repeatedly with the same arguments produces the same\neffect. Safe to retry on transient failures."
+          },
+          "long_running": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Tool may take significant time to complete (> ~5s typical).\nUseful for clients to show progress indicators and set timeouts."
+          },
+          "narration_noun": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Entity noun for operation-based narration (e.g. \"agent\", \"harness\").\nWhen set, the narration system reads the `operation` argument and\nproduces verb-based narration like \"Created agent: Neon Cartographer\"\ninstead of the generic \"Ran Manage Agents\"."
+          },
+          "open_world": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Tool interacts with external entities beyond the local system\n(network calls, third-party APIs, cloud services)."
+          },
+          "persist_output": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Tool output should be persisted to session VFS before truncation.\nWhen set, the `tool_output_persistence` capability (EVE-222, EVE-245) writes\nstdout to `/.outputs/{tool_call_id}.stdout` and stderr to\n`/.outputs/{tool_call_id}.stderr`, injecting `full_output`, `total_lines`,\nand `output_files` into the result."
+          },
+          "readonly": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Tool does not modify any state (read-only queries, lookups).\nWhen true: safe to call speculatively, result can be cached."
+          },
+          "requires_secrets": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Tool requires API keys, credentials, or other secrets to function.\nUseful for UI to show connection prompts and for LLMs to anticipate\nauthentication failures."
+          }
+        }
+      },
+      "ToolOutputDeltaData": {
+        "type": "object",
+        "description": "Data for tool.output.delta event.\n\nEmitted by tools during execution to stream incremental output chunks.\nThis enables live output rendering (e.g., bash stdout/stderr, command output)\nbetween tool.started and tool.completed. Generic — usable by any tool that\nproduces streamed output (bashkit, Daytona exec, subagent speech, etc.).\n\nThe consumer accumulates deltas by tool_call_id for display. The final\ntool.completed result is authoritative — deltas are informational only.",
+        "required": [
+          "tool_call_id",
+          "tool_name",
+          "delta",
+          "stream"
+        ],
+        "properties": {
+          "delta": {
+            "type": "string",
+            "description": "Incremental output chunk"
+          },
+          "stream": {
+            "type": "string",
+            "description": "Output stream identifier (e.g., \"stdout\", \"stderr\")"
+          },
+          "tool_call_id": {
+            "type": "string",
+            "description": "Tool call ID this output belongs to"
+          },
+          "tool_name": {
+            "type": "string",
+            "description": "Tool name"
+          }
+        }
+      },
       "ToolPolicy": {
         "type": "string",
         "description": "Tool policy determines how tool calls are handled",
@@ -10173,6 +12768,36 @@
           "requires_approval",
           "client_side"
         ]
+      },
+      "ToolProgressData": {
+        "type": "object",
+        "description": "Data for tool.progress event.\n\nEmitted by tools during execution to report interim status updates.\nThis allows long-running tools (e.g., browser operations, sandbox setup)\nto stream progress feedback between tool.started and tool.completed.",
+        "required": [
+          "tool_call_id",
+          "tool_name",
+          "message"
+        ],
+        "properties": {
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name for UI rendering"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable status message (e.g., \"Connecting to browser…\")"
+          },
+          "tool_call_id": {
+            "type": "string",
+            "description": "Tool call ID this progress belongs to"
+          },
+          "tool_name": {
+            "type": "string",
+            "description": "Tool name"
+          }
+        }
       },
       "ToolResultContentPart": {
         "type": "object",
@@ -10413,6 +13038,14 @@
             "description": "A human-readable description of what the agent does.",
             "example": "Updated description for the agent"
           },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name shown in UI.",
+            "example": "Updated Support Agent"
+          },
           "initial_files": {
             "type": [
               "array",
@@ -10423,13 +13056,32 @@
             },
             "description": "Starter files copied into each new session for this agent."
           },
+          "max_iterations": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Maximum number of LLM iterations per turn for this agent.",
+            "minimum": 0
+          },
           "name": {
             "type": [
               "string",
               "null"
             ],
-            "description": "The name of the agent. Used for display purposes.",
-            "example": "Updated Support Agent"
+            "description": "Name, unique per org. Lowercase alphanumeric and hyphens.",
+            "example": "updated-support"
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list controlling which hosts/URLs this agent's sessions can reach.\nSend `{}` (empty object) to clear restrictions. Omit to leave unchanged."
+              }
+            ]
           },
           "status": {
             "oneOf": [
@@ -10499,6 +13151,100 @@
               "null"
             ],
             "description": "Whether file is read-only"
+          }
+        }
+      },
+      "UpdateHarnessRequest": {
+        "type": "object",
+        "description": "Request to update a harness. Only provided fields will be updated.",
+        "properties": {
+          "capabilities": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/AgentCapabilityConfig"
+            }
+          },
+          "default_model_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable display name.",
+            "example": "Updated Research Harness"
+          },
+          "initial_files": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/InitialFile"
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Name, unique per org.",
+            "example": "updated-research"
+          },
+          "network_access": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NetworkAccessList",
+                "description": "Network access list. Send `{}` (empty object) to clear. Omit to leave unchanged."
+              }
+            ]
+          },
+          "parent_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/HarnessStatus"
+              }
+            ]
+          },
+          "system_prompt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tags": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -10627,6 +13373,17 @@
             ],
             "description": "API key for authentication. Set to update."
           },
+          "auth_mode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/McpServerAuthMode",
+                "description": "Authentication mode."
+              }
+            ]
+          },
           "description": {
             "type": [
               "string",
@@ -10692,6 +13449,38 @@
         "type": "object",
         "description": "Request to update an organization",
         "properties": {
+          "base_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Base harness to use when a session is started without an explicit harness_id.",
+            "example": "harness_01933b5a000070008000000000000601"
+          },
+          "default_harness_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Default harness to preselect in the UI for new sessions.\nMutually exclusive with `default_harness_name`.",
+            "example": "harness_01933b5a000070008000000000000602"
+          },
+          "default_harness_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Alternative to `default_harness_id` — looked up by stable name within the org.\nMutually exclusive with `default_harness_id`.",
+            "example": "generic"
+          },
+          "default_model_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Default LLM model for this organization. Must be an installed model.",
+            "example": "model_01933b5a00007000800000000000001"
+          },
           "name": {
             "type": [
               "string",
@@ -10779,6 +13568,14 @@
         "type": "object",
         "description": "Request to update a session. Only provided fields will be updated.",
         "properties": {
+          "agent_identity_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional resident agent identity used for unattended/background execution.",
+            "example": "identity_01933b5a00007000800000000000001"
+          },
           "locale": {
             "type": [
               "string",
@@ -10957,6 +13754,10 @@
     {
       "name": "session-storage",
       "description": "Session key-value storage endpoints"
+    },
+    {
+      "name": "harnesses",
+      "description": "Harness management endpoints"
     },
     {
       "name": "skills",

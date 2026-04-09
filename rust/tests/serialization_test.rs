@@ -5,7 +5,7 @@
 use everruns_sdk::{
     Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateMessageRequest,
     CreateSessionRequest, Event, ExternalActor, InitialFile, ListResponse, Message, Session,
-    generate_agent_id, generate_harness_id, validate_harness_name,
+    generate_agent_id, generate_harness_id, validate_agent_name, validate_harness_name,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
@@ -575,6 +575,61 @@ fn test_create_session_request_without_harness_name() {
     let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
     assert_eq!(raw["harness_id"], "harness_abc123");
     assert!(raw.get("harness_name").is_none());
+}
+
+/// Test validate_agent_name accepts valid names
+#[test]
+fn test_validate_agent_name_valid() {
+    assert!(validate_agent_name("customer-support").is_ok());
+    assert!(validate_agent_name("my-agent-v2").is_ok());
+    assert!(validate_agent_name("a1b2").is_ok());
+    assert!(validate_agent_name("x").is_ok());
+}
+
+/// Test validate_agent_name rejects names over 64 chars
+#[test]
+fn test_validate_agent_name_too_long() {
+    let long_name = "a".repeat(65);
+    let result = validate_agent_name(&long_name);
+    assert!(result.is_err());
+    assert!(
+        result
+            .unwrap_err()
+            .to_string()
+            .contains("at most 64 characters")
+    );
+}
+
+/// Test validate_agent_name rejects invalid patterns
+#[test]
+fn test_validate_agent_name_invalid_patterns() {
+    assert!(validate_agent_name("UPPER").is_err());
+    assert!(validate_agent_name("has_underscore").is_err());
+    assert!(validate_agent_name("-leading-dash").is_err());
+    assert!(validate_agent_name("trailing-dash-").is_err());
+    assert!(validate_agent_name("double--dash").is_err());
+    assert!(validate_agent_name("").is_err());
+}
+
+/// Test CreateAgentRequest serialization with display_name
+#[test]
+fn test_create_agent_request_with_display_name() {
+    let req = CreateAgentRequest::new("customer-support", "You are helpful.")
+        .display_name("Customer Support Agent");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["name"], "customer-support");
+    assert_eq!(raw["display_name"], "Customer Support Agent");
+}
+
+/// Test CreateAgentRequest without display_name omits it
+#[test]
+fn test_create_agent_request_without_display_name() {
+    let req = CreateAgentRequest::new("customer-support", "You are helpful.");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["name"], "customer-support");
+    assert!(raw.get("display_name").is_none());
 }
 
 /// Test that Event serialization preserves the "type" field name (not "event_type")

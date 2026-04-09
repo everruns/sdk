@@ -171,7 +171,7 @@ def test_create_agent_request_with_initial_files():
     from everruns_sdk.models import CreateAgentRequest
 
     req = CreateAgentRequest(
-        name="Starter Agent",
+        name="starter-agent",
         system_prompt="You keep files ready.",
         initial_files=[
             InitialFile(
@@ -430,6 +430,68 @@ def test_create_session_request_harness_name_and_id_both():
     assert "harness_name" in data
 
 
+def test_validate_agent_name_valid():
+    """Test validate_agent_name accepts valid names."""
+    from everruns_sdk import validate_agent_name
+
+    validate_agent_name("customer-support")
+    validate_agent_name("my-agent-v2")
+    validate_agent_name("a1b2")
+    validate_agent_name("x")
+
+
+def test_validate_agent_name_too_long():
+    """Test validate_agent_name rejects names over 64 chars."""
+    from everruns_sdk import validate_agent_name
+
+    with pytest.raises(ValueError, match="at most 64 characters"):
+        validate_agent_name("a" * 65)
+
+
+def test_validate_agent_name_invalid_pattern():
+    """Test validate_agent_name rejects invalid patterns."""
+    from everruns_sdk import validate_agent_name
+
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_agent_name("UPPER")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_agent_name("has_underscore")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_agent_name("-leading-dash")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_agent_name("trailing-dash-")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_agent_name("double--dash")
+    with pytest.raises(ValueError, match="must match pattern"):
+        validate_agent_name("")
+
+
+def test_create_agent_request_with_display_name():
+    """Test CreateAgentRequest serialization with display_name."""
+    from everruns_sdk.models import CreateAgentRequest
+
+    req = CreateAgentRequest(
+        name="customer-support",
+        display_name="Customer Support Agent",
+        system_prompt="You are helpful.",
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["name"] == "customer-support"
+    assert data["display_name"] == "Customer Support Agent"
+
+
+def test_create_agent_request_without_display_name():
+    """Test CreateAgentRequest omits display_name when not set."""
+    from everruns_sdk.models import CreateAgentRequest
+
+    req = CreateAgentRequest(
+        name="customer-support",
+        system_prompt="You are helpful.",
+    )
+    data = req.model_dump(exclude_none=True)
+    assert "display_name" not in data
+
+
 def test_create_agent_request_with_id():
     """Test CreateAgentRequest serialization with client-supplied ID."""
     from everruns_sdk.models import CreateAgentRequest, generate_agent_id
@@ -437,12 +499,12 @@ def test_create_agent_request_with_id():
     agent_id = generate_agent_id()
     req = CreateAgentRequest(
         id=agent_id,
-        name="Test Agent",
+        name="test-agent",
         system_prompt="You are helpful.",
     )
     data = req.model_dump(exclude_none=True)
     assert data["id"] == agent_id
-    assert data["name"] == "Test Agent"
+    assert data["name"] == "test-agent"
 
 
 def test_create_agent_request_without_id():
@@ -450,7 +512,7 @@ def test_create_agent_request_without_id():
     from everruns_sdk.models import CreateAgentRequest
 
     req = CreateAgentRequest(
-        name="Test Agent",
+        name="test-agent",
         system_prompt="You are helpful.",
     )
     data = req.model_dump(exclude_none=True)
@@ -637,7 +699,7 @@ async def test_create_agent_with_initial_files():
             201,
             json={
                 "id": "agent_123",
-                "name": "Starter Agent",
+                "name": "starter-agent",
                 "system_prompt": "You keep files ready.",
                 "initial_files": [
                     {
@@ -657,7 +719,7 @@ async def test_create_agent_with_initial_files():
     client = Everruns(api_key="evr_test_key")
     try:
         agent = await client.agents.create(
-            "Starter Agent",
+            "starter-agent",
             "You keep files ready.",
             initial_files=[
                 InitialFile(

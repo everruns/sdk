@@ -30,7 +30,10 @@ export interface CapabilityInfo {
 
 export interface Agent {
   id: string;
+  /** Addressable name, unique per org (e.g. "customer-support"). */
   name: string;
+  /** Human-readable display name shown in UI. Falls back to name when absent. */
+  displayName?: string | null;
   systemPrompt: string;
   model?: string;
   capabilities?: AgentCapabilityConfig[];
@@ -42,7 +45,14 @@ export interface Agent {
 export interface CreateAgentRequest {
   /** Client-supplied agent ID (format: agent_{32-hex}). Auto-generated if omitted. */
   id?: string;
+  /**
+   * Addressable name, unique per org.
+   * Format: [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
+   * When a name matches an existing agent, the endpoint has upsert semantics.
+   */
   name: string;
+  /** Human-readable display name shown in UI. Falls back to name when absent. */
+  displayName?: string;
   systemPrompt: string;
   model?: string;
   capabilities?: AgentCapabilityConfig[];
@@ -117,9 +127,22 @@ export interface CreateSessionRequest {
   initialFiles?: InitialFile[];
 }
 
-/** Harness name validation pattern: lowercase alphanumeric segments separated by hyphens */
-const HARNESS_NAME_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const HARNESS_NAME_MAX_LENGTH = 64;
+/** Addressable name validation pattern: lowercase alphanumeric segments separated by hyphens */
+const ADDRESSABLE_NAME_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const ADDRESSABLE_NAME_MAX_LENGTH = 64;
+
+function validateAddressableName(name: string, label: string): void {
+  if (name.length > ADDRESSABLE_NAME_MAX_LENGTH) {
+    throw new Error(
+      `${label} must be at most ${ADDRESSABLE_NAME_MAX_LENGTH} characters, got ${name.length}`,
+    );
+  }
+  if (!ADDRESSABLE_NAME_PATTERN.test(name)) {
+    throw new Error(
+      `${label} must match pattern [a-z0-9]+(-[a-z0-9]+)*, got "${name}"`,
+    );
+  }
+}
 
 /**
  * Validate a harness name.
@@ -128,16 +151,17 @@ const HARNESS_NAME_MAX_LENGTH = 64;
  * @throws Error if the name is invalid
  */
 export function validateHarnessName(name: string): void {
-  if (name.length > HARNESS_NAME_MAX_LENGTH) {
-    throw new Error(
-      `harness_name must be at most ${HARNESS_NAME_MAX_LENGTH} characters, got ${name.length}`,
-    );
-  }
-  if (!HARNESS_NAME_PATTERN.test(name)) {
-    throw new Error(
-      `harness_name must match pattern [a-z0-9]+(-[a-z0-9]+)*, got "${name}"`,
-    );
-  }
+  validateAddressableName(name, "harness_name");
+}
+
+/**
+ * Validate an agent name.
+ *
+ * @param name - The agent name to validate
+ * @throws Error if the name is invalid
+ */
+export function validateAgentName(name: string): void {
+  validateAddressableName(name, "agent_name");
 }
 
 /** External actor identity for messages from external channels (Slack, Discord, etc.) */
