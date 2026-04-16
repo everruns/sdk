@@ -169,13 +169,13 @@ jobs:
         run: cd cookbook/rust && cargo run --bin dad-jokes
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
       - name: Run Rust cookbook (weather-tools)
         timeout-minutes: 3
         run: cd cookbook/rust && cargo run --bin weather-tools
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
 
       # Run Python cookbook
       - name: Install Python cookbook deps
@@ -185,13 +185,13 @@ jobs:
         run: cd cookbook/python && uv run python src/main.py
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
       - name: Run Python cookbook (weather-tools)
         timeout-minutes: 3
         run: cd cookbook/python && uv run python src/weather_tools.py
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
 
       # Run TypeScript cookbook
       - name: Build TypeScript SDK
@@ -203,13 +203,13 @@ jobs:
         run: cd cookbook/typescript && npx tsx src/main.ts
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
       - name: Run TypeScript cookbook (weather-tools)
         timeout-minutes: 3
         run: cd cookbook/typescript && npx tsx src/weather_tools.ts
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
 
   run-examples:
     runs-on: ubuntu-latest
@@ -258,13 +258,13 @@ jobs:
         run: cd rust && cargo run --example basic
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
       - name: Run Rust initial_files example
         timeout-minutes: 3
         run: cd rust && cargo run --example initial_files
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
 
       - name: Install Python SDK deps
         run: cd python && uv sync --all-extras
@@ -273,13 +273,13 @@ jobs:
         run: cd python && uv run python examples/basic.py
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
       - name: Run Python initial_files example
         timeout-minutes: 3
         run: cd python && uv run python examples/initial_files.py
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
 
       - name: Install TypeScript SDK deps
         run: cd typescript && npm ci
@@ -288,10 +288,10 @@ jobs:
         run: cd typescript && npx tsx examples/basic.ts
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
       - name: Run TypeScript initial-files example
         timeout-minutes: 3
         run: cd typescript && npx tsx examples/initial-files.ts
         env:
           EVERRUNS_API_KEY: fake-key
-          EVERRUNS_API_URL: http://localhost:9000
+          EVERRUNS_API_URL: http://localhost:9000/api
