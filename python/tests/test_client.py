@@ -776,6 +776,79 @@ async def test_create_session_with_locale():
     assert json.loads(route.calls[0].request.content)["locale"] == "uk-UA"
 
 
+@pytest.mark.asyncio
+@respx.mock
+async def test_import_agent_from_example():
+    route = respx.post(
+        "https://custom.example.com/api/v1/agents/import?from-example=dad-jokes-agent"
+    ).mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": "agent_123",
+                "name": "dad-jokes-agent",
+                "description": "Cracks jokes",
+                "system_prompt": "Tell dad jokes.",
+                "default_model_id": None,
+                "tags": [],
+                "capabilities": [],
+                "initial_files": [],
+                "status": "active",
+                "created_at": "2026-04-15T00:00:00Z",
+                "updated_at": "2026-04-15T00:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        agent = await client.agents.import_example("dad-jokes-agent")
+    finally:
+        await client.close()
+
+    assert agent.name == "dad-jokes-agent"
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_capabilities_list_with_options():
+    route = respx.get(
+        "https://custom.example.com/api/v1/capabilities?search=web&offset=20&limit=10"
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "data": [
+                    {
+                        "id": "web_search",
+                        "name": "web_search",
+                        "description": "Search the web",
+                        "status": "active",
+                    }
+                ],
+                "total": 21,
+                "offset": 20,
+                "limit": 10,
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        page = await client.capabilities.list_page(search="web", offset=20, limit=10)
+        items = await client.capabilities.list(search="web", offset=20, limit=10)
+    finally:
+        await client.close()
+
+    assert page.total == 21
+    assert page.offset == 20
+    assert page.limit == 10
+    assert len(items) == 1
+    assert items[0].id == "web_search"
+    assert route.called
+
+
 # --- Session Files Tests ---
 
 FILE_RESPONSE = {

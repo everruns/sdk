@@ -12,7 +12,7 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 - `GET /v1/agents/{id}` - Get agent
 - `PATCH /v1/agents/{id}` - Update agent
 - `DELETE /v1/agents/{id}` - Archive agent
-- `POST /v1/agents/import` - Import agent from Markdown/YAML/JSON/text
+- `POST /v1/agents/import` - Import agent from Markdown/YAML/JSON/text or built-in example via `from-example`
 - `GET /v1/agents/{id}/export` - Export agent as Markdown
 - `POST /v1/agents/{id}/copy` - Copy an agent
 
@@ -63,7 +63,7 @@ Agent is optional on session creation — sessions can run without an agent.
 Session create/update payloads support optional `title`, `locale`, `model_id`, `tags`, `capabilities`, and `initial_files` starter files.
 
 ### Capabilities
-- `GET /v1/capabilities` - List available capabilities
+- `GET /v1/capabilities` - List available capabilities (supports `search`, `offset`, `limit`)
 - `GET /v1/capabilities/{id}` - Get capability details
 
 ### Messages

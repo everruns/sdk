@@ -240,6 +240,74 @@ describe("Everruns", () => {
       }),
     );
   });
+
+  it("should import an agent from an example", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: "agent_123",
+        name: "dad-jokes-agent",
+        system_prompt: "Tell dad jokes.",
+        status: "active",
+        created_at: "2026-04-15T00:00:00Z",
+        updated_at: "2026-04-15T00:00:00Z",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.agents.importExample("dad-jokes-agent");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/agents/import?from-example=dad-jokes-agent",
+      expect.objectContaining({
+        method: "POST",
+        body: "",
+        headers: expect.objectContaining({
+          Authorization: "evr_test_key",
+          "Content-Type": "text/plain",
+        }),
+      }),
+    );
+  });
+
+  it("should list capabilities with search and pagination", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [
+          {
+            id: "web_search",
+            name: "web_search",
+            description: "Search the web",
+            status: "active",
+          },
+        ],
+        total: 21,
+        offset: 20,
+        limit: 10,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.capabilities.list({
+      search: "web",
+      offset: 20,
+      limit: 10,
+    });
+
+    expect(response.data).toHaveLength(1);
+    expect(response.total).toBe(21);
+    expect(response.offset).toBe(20);
+    expect(response.limit).toBe(10);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/capabilities?search=web&offset=20&limit=10",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
 });
 
 describe("AgentCapabilityConfig", () => {

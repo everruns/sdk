@@ -257,6 +257,17 @@ class AgentsClient {
     });
   }
 
+  /** Import an agent from a built-in example. */
+  async importExample(exampleName: string): Promise<Agent> {
+    const params = new URLSearchParams();
+    params.set("from-example", exampleName);
+    return this.client.fetch(`/agents/import?${params.toString()}`, {
+      method: "POST",
+      body: "",
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   /** Export an agent as Markdown with YAML front matter. */
   async export(agentId: string): Promise<string> {
     return this.client.fetchText(`/agents/${agentId}/export`);
@@ -506,11 +517,20 @@ class EventsClient {
 class CapabilitiesClient {
   constructor(private readonly client: Everruns) {}
 
-  /** List all available capabilities. */
-  async list(): Promise<ListResponse<CapabilityInfo>> {
+  /** List available capabilities. */
+  async list(options?: {
+    search?: string;
+    offset?: number;
+    limit?: number;
+  }): Promise<ListResponse<CapabilityInfo>> {
+    const params = new URLSearchParams();
+    if (options?.search) params.set("search", options.search);
+    if (options?.offset != null) params.set("offset", String(options.offset));
+    if (options?.limit != null) params.set("limit", String(options.limit));
+    const query = params.toString() ? `?${params.toString()}` : "";
     const response = await this.client.fetch<
       ListResponse<CapabilityInfo>
-    >("/capabilities");
+    >(`/capabilities${query}`);
     return { data: response.data, total: response.total ?? 0, offset: response.offset ?? 0, limit: response.limit ?? 0 };
   }
 
