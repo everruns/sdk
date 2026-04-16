@@ -66,7 +66,9 @@ fmt:
 # Generate types from OpenAPI spec
 generate:
     cd rust && cargo build
-    cd python && datamodel-codegen --input ../openapi/openapi.json --output everruns_sdk/_generated/models.py
+    mkdir -p python/everruns_sdk/_generated
+    cd python && uvx --from datamodel-code-generator datamodel-codegen --input ../openapi/openapi.json --output everruns_sdk/_generated/models.py
+    mkdir -p typescript/src/generated
     cd typescript && npx openapi-typescript ../openapi/openapi.json -o src/generated/schema.d.ts
 
 # Run coverage for all SDKs

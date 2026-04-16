@@ -192,6 +192,24 @@ impl Everruns {
         self.handle_response(resp).await
     }
 
+    pub(crate) async fn post_text_url<T: serde::de::DeserializeOwned>(
+        &self,
+        url: Url,
+        body: &str,
+    ) -> Result<T> {
+        let mut headers = self.headers();
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/plain"));
+        let resp = self
+            .http
+            .post(url)
+            .headers(headers)
+            .body(body.to_string())
+            .send()
+            .await?;
+
+        self.handle_response(resp).await
+    }
+
     pub(crate) async fn get_text(&self, path: &str) -> Result<String> {
         let resp = self
             .http
@@ -395,6 +413,14 @@ impl<'a> AgentsClient<'a> {
     /// Import an agent from Markdown, YAML, JSON, or plain text
     pub async fn import(&self, content: &str) -> Result<Agent> {
         self.client.post_text("/agents/import", content).await
+    }
+
+    /// Import an agent from a built-in example.
+    pub async fn import_example(&self, example_name: &str) -> Result<Agent> {
+        let mut url = self.client.url("/agents/import");
+        url.query_pairs_mut()
+            .append_pair("from-example", example_name);
+        self.client.post_text_url(url, "").await
     }
 
     /// Export an agent as Markdown with YAML front matter
@@ -634,10 +660,41 @@ pub struct CapabilitiesClient<'a> {
     client: &'a Everruns,
 }
 
+/// Options for listing capabilities with pagination and search.
+#[derive(Debug, Clone, Default)]
+pub struct ListCapabilitiesOptions {
+    /// Search by capability name or description.
+    pub search: Option<String>,
+    /// Pagination offset.
+    pub offset: Option<u32>,
+    /// Page size.
+    pub limit: Option<u32>,
+}
+
 impl<'a> CapabilitiesClient<'a> {
     /// List all available capabilities
     pub async fn list(&self) -> Result<ListResponse<CapabilityInfo>> {
         self.client.get("/capabilities").await
+    }
+
+    /// List capabilities with pagination and search options.
+    pub async fn list_with_options(
+        &self,
+        options: &ListCapabilitiesOptions,
+    ) -> Result<ListResponse<CapabilityInfo>> {
+        let mut url = self.client.url("/capabilities");
+        if let Some(ref search) = options.search {
+            url.query_pairs_mut().append_pair("search", search);
+        }
+        if let Some(offset) = options.offset {
+            url.query_pairs_mut()
+                .append_pair("offset", &offset.to_string());
+        }
+        if let Some(limit) = options.limit {
+            url.query_pairs_mut()
+                .append_pair("limit", &limit.to_string());
+        }
+        self.client.get_url(url).await
     }
 
     /// Get a specific capability by ID

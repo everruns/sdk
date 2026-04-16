@@ -1,8 +1,8 @@
 //! Integration tests for Everruns SDK
 
 use everruns_sdk::{
-    CreateAgentRequest, CreateBudgetRequest, CreateFileRequest, CreateSessionRequest, Everruns,
-    InitialFile, SetConnectionRequest, TopUpRequest, UpdateBudgetRequest, UpdateFileRequest,
+    CreateAgentRequest, CreateBudgetRequest, CreateSessionRequest, Everruns, InitialFile,
+    TopUpRequest, UpdateBudgetRequest,
 };
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -202,6 +202,79 @@ async fn test_create_session_with_locale() {
 
     assert_eq!(session.id, "session_456");
     assert_eq!(session.locale.as_deref(), Some("uk-UA"));
+}
+
+#[tokio::test]
+async fn test_import_agent_from_example() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/agents/import"))
+        .and(query_param("from-example", "dad-jokes-agent"))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "agent_123",
+            "name": "dad-jokes-agent",
+            "description": "Cracks jokes",
+            "system_prompt": "Tell dad jokes.",
+            "default_model_id": null,
+            "tags": [],
+            "capabilities": [],
+            "initial_files": [],
+            "status": "active",
+            "created_at": "2026-04-15T00:00:00Z",
+            "updated_at": "2026-04-15T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let agent = client
+        .agents()
+        .import_example("dad-jokes-agent")
+        .await
+        .expect("import example should succeed");
+
+    assert_eq!(agent.name, "dad-jokes-agent");
+}
+
+#[tokio::test]
+async fn test_capabilities_list_with_options() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/capabilities"))
+        .and(query_param("search", "web"))
+        .and(query_param("offset", "20"))
+        .and(query_param("limit", "10"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [{
+                "id": "web_search",
+                "name": "web_search",
+                "description": "Search the web",
+                "status": "active"
+            }],
+            "total": 21,
+            "offset": 20,
+            "limit": 10
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client
+        .capabilities()
+        .list_with_options(&everruns_sdk::client::ListCapabilitiesOptions {
+            search: Some("web".to_string()),
+            offset: Some(20),
+            limit: Some(10),
+        })
+        .await
+        .expect("list capabilities should succeed");
+
+    assert_eq!(response.data.len(), 1);
+    assert_eq!(response.total, 21);
+    assert_eq!(response.offset, 20);
+    assert_eq!(response.limit, 10);
 }
 
 // --- Session Files Tests ---

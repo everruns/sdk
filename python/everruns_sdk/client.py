@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from typing import Any, Optional
+from urllib.parse import urlencode
 
 import httpx
 
@@ -28,6 +29,7 @@ from everruns_sdk.models import (
     GrepResult,
     InitialFile,
     LedgerEntry,
+    ListResponse,
     Message,
     MessageInput,
     ResumeSessionResponse,
@@ -45,6 +47,17 @@ def _is_html_response(body: str) -> bool:
     """Check if the body looks like an HTML response."""
     trimmed = body.lstrip()
     return trimmed.startswith("<!DOCTYPE") or trimmed.lower().startswith("<html")
+
+
+def _with_query(path: str, params: dict[str, Any]) -> str:
+    """Append URL-encoded query params to a path."""
+    query = urlencode(
+        [(key, value) for key, value in params.items() if value is not None],
+        doseq=True,
+    )
+    if not query:
+        return path
+    return f"{path}?{query}"
 
 
 class Everruns:
@@ -391,6 +404,12 @@ class AgentsClient:
         resp = await self._client._post_text("/agents/import", content)
         return Agent(**resp)
 
+    async def import_example(self, example_name: str) -> Agent:
+        """Import an agent from a built-in example."""
+        path = _with_query("/agents/import", {"from-example": example_name})
+        resp = await self._client._post_text(path, "")
+        return Agent(**resp)
+
     async def export(self, agent_id: str) -> str:
         """Export an agent as Markdown with YAML front matter."""
         return await self._client._get_text(f"/agents/{agent_id}/export")
@@ -657,10 +676,35 @@ class CapabilitiesClient:
     def __init__(self, client: Everruns):
         self._client = client
 
-    async def list(self) -> list[CapabilityInfo]:
-        """List all available capabilities."""
-        resp = await self._client._get("/capabilities")
-        return [CapabilityInfo(**c) for c in resp.get("data", [])]
+    async def list_page(
+        self,
+        *,
+        search: Optional[str] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+    ) -> ListResponse:
+        """List capabilities with pagination metadata."""
+        path = _with_query(
+            "/capabilities",
+            {
+                "search": search,
+                "offset": offset,
+                "limit": limit,
+            },
+        )
+        resp = await self._client._get(path)
+        return ListResponse.model_validate(resp)
+
+    async def list(
+        self,
+        *,
+        search: Optional[str] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+    ) -> list[CapabilityInfo]:
+        """List available capabilities."""
+        page = await self.list_page(search=search, offset=offset, limit=limit)
+        return [CapabilityInfo(**c) for c in page.data]
 
     async def get(self, capability_id: str) -> CapabilityInfo:
         """Get a specific capability by ID."""
