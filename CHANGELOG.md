@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.8] - 2026-04-15
+
+### Highlights
+
+- Session export JSONL support across Rust, Python, and TypeScript SDKs
+- `harness_name`, unique agent names, and upsert-by-name support across all SDKs
+- Refreshed generated schemas, capability listing/import support, and maintenance updates
+
+### What's Changed
+
+* chore: periodic maintenance ([#80](https://github.com/everruns/sdk/pull/80)) by @chaliy
+* feat(rust,python,typescript): unique agent names with upsert-by-name ([#79](https://github.com/everruns/sdk/pull/79)) by @chaliy
+* feat(rust,python,typescript): support harness_name in session creation ([#78](https://github.com/everruns/sdk/pull/78)) by @chaliy
+* feat(rust,python,typescript): add session export JSONL support ([#76](https://github.com/everruns/sdk/pull/76)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.7...v0.1.8
+
 ## [0.1.7] - 2026-04-05
 
 ### Highlights
