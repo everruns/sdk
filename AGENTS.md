@@ -28,6 +28,7 @@ Fix root cause. Unsure: read more code; if stuck, ask w/ short options. Unrecogn
 - `specs/error-handling.md` - Error types per language, retry patterns
 - `specs/release-process.md` - Versioning, changelog, publishing to registries
 - `specs/shipping.md` - Ship workflow phases, quality core, test coverage requirements
+- `specs/upstream-adoption.md` - Requirements for adopting changes from everruns/everruns
 
 ### OpenAPI
 
@@ -95,6 +96,7 @@ just generate           # Regenerate types from OpenAPI
 `.agents/skills/` contains agent skills (also symlinked at `.claude/skills/`).
 
 - `ship.md` - Full shipping workflow: test, verify artifacts, smoke test, push, PR, merge
+- `adopt-upstream.md` - Adopt upstream Everruns API/docs changes into all SDK targets
 
 ### Shipping
 
