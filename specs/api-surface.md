@@ -15,6 +15,7 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 - `POST /v1/agents/import` - Import agent from Markdown/YAML/JSON/text or built-in example via `from-example`
 - `GET /v1/agents/{id}/export` - Export agent as Markdown
 - `POST /v1/agents/{id}/copy` - Copy an agent
+- `GET /v1/agents/{id}/stats` - Get aggregate usage stats for an agent
 
 #### Agent Names
 
@@ -60,7 +61,7 @@ Sessions accept harness identification via one of two parameters (mutually exclu
 If neither is provided, the server defaults to the Generic harness.
 Providing both `harness_id` and `harness_name` raises a client-side validation error.
 Agent is optional on session creation — sessions can run without an agent.
-Session create/update payloads support optional `title`, `locale`, `model_id`, `tags`, `capabilities`, and `initial_files` starter files.
+Session create/update payloads support optional `title`, `locale`, `model_id`, `tags`, `capabilities`, `tools`, and `initial_files` starter files.
 
 ### Capabilities
 - `GET /v1/capabilities` - List available capabilities (supports `search`, `offset`, `limit`)

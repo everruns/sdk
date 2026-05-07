@@ -1,8 +1,8 @@
 //! Integration tests for Everruns SDK
 
 use everruns_sdk::{
-    CreateAgentRequest, CreateBudgetRequest, CreateSessionRequest, Everruns, InitialFile,
-    TopUpRequest, UpdateBudgetRequest,
+    ContentPart, CreateAgentRequest, CreateBudgetRequest, CreateSessionRequest, Everruns,
+    InitialFile, TopUpRequest, UpdateBudgetRequest,
 };
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -238,6 +238,45 @@ async fn test_import_agent_from_example() {
 }
 
 #[tokio::test]
+async fn test_agent_stats() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/agents/agent_123/stats"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "session_count": 4,
+            "active_session_count": 1,
+            "idle_session_count": 2,
+            "started_session_count": 1,
+            "waiting_for_tool_results_session_count": 0,
+            "execution_count": 7,
+            "total_session_duration_ms": 12345,
+            "avg_session_duration_ms": 3086,
+            "total_input_tokens": 100,
+            "total_output_tokens": 50,
+            "total_cache_read_tokens": 25,
+            "total_cache_creation_tokens": 10,
+            "first_session_at": "2026-05-01T00:00:00Z",
+            "last_session_at": "2026-05-02T00:00:00Z",
+            "last_execution_at": "2026-05-02T01:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let stats = client
+        .agents()
+        .stats("agent_123")
+        .await
+        .expect("agent stats should succeed");
+
+    assert_eq!(stats.session_count, 4);
+    assert_eq!(stats.execution_count, 7);
+    assert_eq!(stats.avg_session_duration_ms, Some(3086));
+    assert_eq!(stats.total_input_tokens, 100);
+}
+
+#[tokio::test]
 async fn test_capabilities_list_with_options() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
@@ -275,6 +314,42 @@ async fn test_capabilities_list_with_options() {
     assert_eq!(response.total, 21);
     assert_eq!(response.offset, 20);
     assert_eq!(response.limit, 10);
+}
+
+#[tokio::test]
+async fn test_create_tool_results_uses_tool_results_endpoint() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/session_123/tool-results"))
+        .and(body_json(serde_json::json!({
+            "tool_results": [{
+                "tool_call_id": "call_123",
+                "result": {"weather": "sunny"}
+            }]
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "accepted": 1,
+            "status": "active"
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client
+        .messages()
+        .create_tool_results(
+            "session_123",
+            vec![ContentPart::tool_result(
+                "call_123",
+                serde_json::json!({"weather": "sunny"}),
+            )],
+        )
+        .await
+        .expect("tool results should submit");
+
+    assert_eq!(response.accepted, 1);
+    assert_eq!(response.status, "active");
 }
 
 // --- Session Files Tests ---

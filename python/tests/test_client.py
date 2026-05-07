@@ -10,6 +10,7 @@ import respx
 from everruns_sdk import (
     ApiError,
     ApiKey,
+    ContentPart,
     Everruns,
     InitialFile,
 )
@@ -166,6 +167,26 @@ def test_create_agent_request_with_capabilities():
     assert data["capabilities"][1]["config"] == {"timeout": 30}
 
 
+def test_create_agent_request_with_tools():
+    """Test CreateAgentRequest serialization with client-side tools."""
+    from everruns_sdk.models import CreateAgentRequest, ToolDefinition
+
+    req = CreateAgentRequest(
+        name="test-agent",
+        system_prompt="You are helpful.",
+        tools=[
+            ToolDefinition(
+                name="get_weather",
+                description="Get weather",
+                parameters={"type": "object"},
+            )
+        ],
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["tools"][0]["type"] == "client_side"
+    assert data["tools"][0]["name"] == "get_weather"
+
+
 def test_create_agent_request_with_initial_files():
     """Test CreateAgentRequest serialization with initial_files."""
     from everruns_sdk.models import CreateAgentRequest
@@ -191,6 +212,27 @@ def test_create_agent_request_with_initial_files():
             "is_readonly": True,
         }
     ]
+
+
+def test_extract_tool_calls_from_requested_event():
+    """Test extracting tool calls from tool.call_requested data."""
+    from everruns_sdk import extract_tool_calls
+
+    calls = extract_tool_calls(
+        {
+            "tool_calls": [
+                {
+                    "id": "call_123",
+                    "name": "get_weather",
+                    "arguments": {"city": "Paris"},
+                }
+            ]
+        }
+    )
+    assert len(calls) == 1
+    assert calls[0].id == "call_123"
+    assert calls[0].name == "get_weather"
+    assert calls[0].arguments == {"city": "Paris"}
 
 
 def test_create_session_request_with_capabilities():
@@ -680,6 +722,7 @@ async def test_create_session_with_initial_files():
         "model_id": "model_123",
         "tags": [],
         "capabilities": [],
+        "tools": [],
         "initial_files": [
             {
                 "path": "/workspace/README.md",
@@ -812,6 +855,45 @@ async def test_import_agent_from_example():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_agent_stats():
+    route = respx.get("https://custom.example.com/api/v1/agents/agent_123/stats").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "session_count": 4,
+                "active_session_count": 1,
+                "idle_session_count": 2,
+                "started_session_count": 1,
+                "waiting_for_tool_results_session_count": 0,
+                "execution_count": 7,
+                "total_session_duration_ms": 12345,
+                "avg_session_duration_ms": 3086,
+                "total_input_tokens": 100,
+                "total_output_tokens": 50,
+                "total_cache_read_tokens": 25,
+                "total_cache_creation_tokens": 10,
+                "first_session_at": "2026-05-01T00:00:00Z",
+                "last_session_at": "2026-05-02T00:00:00Z",
+                "last_execution_at": "2026-05-02T01:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        stats = await client.agents.stats("agent_123")
+    finally:
+        await client.close()
+
+    assert stats.session_count == 4
+    assert stats.execution_count == 7
+    assert stats.avg_session_duration_ms == 3086
+    assert stats.total_input_tokens == 100
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_capabilities_list_with_options():
     route = respx.get(
         "https://custom.example.com/api/v1/capabilities?search=web&offset=20&limit=10"
@@ -847,6 +929,41 @@ async def test_capabilities_list_with_options():
     assert len(items) == 1
     assert items[0].id == "web_search"
     assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_tool_results_uses_tool_results_endpoint():
+    route = respx.post("https://custom.example.com/api/v1/sessions/session_123/tool-results").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "accepted": 1,
+                "status": "active",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        response = await client.messages.create_tool_results(
+            session_id="session_123",
+            results=[ContentPart.make_tool_result("call_123", {"weather": "sunny"})],
+        )
+    finally:
+        await client.close()
+
+    assert response.accepted == 1
+    assert response.status == "active"
+    assert route.called
+    assert json.loads(route.calls[0].request.content) == {
+        "tool_results": [
+            {
+                "tool_call_id": "call_123",
+                "result": {"weather": "sunny"},
+            }
+        ]
+    }
 
 
 # --- Session Files Tests ---

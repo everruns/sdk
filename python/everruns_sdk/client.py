@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 from typing import Any, Optional
 from urllib.parse import urlencode
@@ -16,6 +17,7 @@ from everruns_sdk.models import (
     Budget,
     BudgetCheckResult,
     CapabilityInfo,
+    ClientToolResult,
     Connection,
     ContentPart,
     Controls,
@@ -32,9 +34,13 @@ from everruns_sdk.models import (
     ListResponse,
     Message,
     MessageInput,
+    ResourceStats,
     ResumeSessionResponse,
     Session,
     SessionFile,
+    SubmitToolResultsRequest,
+    SubmitToolResultsResponse,
+    ToolDefinition,
     validate_agent_name,
     validate_harness_name,
 )
@@ -253,6 +259,11 @@ class AgentsClient:
         resp = await self._client._get(f"/agents/{agent_id}")
         return Agent(**resp)
 
+    async def stats(self, agent_id: str) -> ResourceStats:
+        """Get aggregate usage stats for an agent."""
+        resp = await self._client._get(f"/agents/{agent_id}/stats")
+        return ResourceStats(**resp)
+
     async def create(
         self,
         name: str,
@@ -263,6 +274,7 @@ class AgentsClient:
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        tools: Optional[list[ToolDefinition]] = None,
         initial_files: Optional[list[InitialFile]] = None,
     ) -> Agent:
         """Create a new agent with a server-assigned ID.
@@ -277,6 +289,7 @@ class AgentsClient:
             default_model_id: Default LLM model ID.
             tags: Tags for organizing agents.
             capabilities: Capabilities to enable.
+            tools: Client-side tools to expose to the agent.
             initial_files: Starter files copied into each new session for this agent.
 
         Raises:
@@ -291,6 +304,7 @@ class AgentsClient:
             default_model_id=default_model_id,
             tags=tags or [],
             capabilities=capabilities or [],
+            tools=tools or [],
             initial_files=initial_files or [],
         )
         resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
@@ -307,6 +321,7 @@ class AgentsClient:
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        tools: Optional[list[ToolDefinition]] = None,
         initial_files: Optional[list[InitialFile]] = None,
     ) -> Agent:
         """Create or update an agent with a client-supplied ID (upsert).
@@ -325,6 +340,7 @@ class AgentsClient:
             default_model_id: Default LLM model ID.
             tags: Tags for organizing agents.
             capabilities: Capabilities to enable.
+            tools: Client-side tools to expose to the agent.
             initial_files: Starter files copied into each new session for this agent.
 
         Raises:
@@ -340,6 +356,7 @@ class AgentsClient:
             default_model_id=default_model_id,
             tags=tags or [],
             capabilities=capabilities or [],
+            tools=tools or [],
             initial_files=initial_files or [],
         )
         resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
@@ -355,6 +372,7 @@ class AgentsClient:
         default_model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        tools: Optional[list[ToolDefinition]] = None,
         initial_files: Optional[list[InitialFile]] = None,
     ) -> Agent:
         """Create or update an agent by name (upsert).
@@ -371,6 +389,7 @@ class AgentsClient:
             default_model_id: Default LLM model ID.
             tags: Tags for organizing agents.
             capabilities: Capabilities to enable.
+            tools: Client-side tools to expose to the agent.
             initial_files: Starter files copied into each new session for this agent.
 
         Raises:
@@ -385,6 +404,7 @@ class AgentsClient:
             default_model_id=default_model_id,
             tags=tags or [],
             capabilities=capabilities or [],
+            tools=tools or [],
             initial_files=initial_files or [],
         )
         resp = await self._client._post("/agents", req.model_dump(exclude_none=True))
@@ -460,6 +480,7 @@ class SessionsClient:
         model_id: Optional[str] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        tools: Optional[list[ToolDefinition]] = None,
         initial_files: Optional[list[InitialFile]] = None,
     ) -> Session:
         """Create a new session.
@@ -477,6 +498,7 @@ class SessionsClient:
             model_id: LLM model ID override.
             tags: Tags for organizing sessions.
             capabilities: Session-level capabilities (additive to agent capabilities).
+            tools: Session-level client-side tools.
             initial_files: Starter files copied into the session workspace.
 
         Raises:
@@ -496,6 +518,7 @@ class SessionsClient:
             model_id=model_id,
             tags=tags or [],
             capabilities=capabilities or [],
+            tools=tools or [],
             initial_files=initial_files,
         )
         resp = await self._client._post("/sessions", req.model_dump(exclude_none=True))
@@ -600,20 +623,38 @@ class MessagesClient:
         self,
         session_id: str,
         results: list[ContentPart],
-    ) -> Message:
+    ) -> SubmitToolResultsResponse:
         """Send tool results back to the session.
 
-        Use after receiving tool calls from an ``output.message.completed``
+        Use after receiving tool calls from a ``tool.call_requested``
         event to provide results from locally-executed tools.
         """
-        req = CreateMessageRequest(
-            message=MessageInput.tool_results(results),
-        )
-        resp = await self._client._post(
-            f"/sessions/{session_id}/messages",
-            req.model_dump(exclude_none=True),
-        )
-        return Message(**resp)
+        tool_results = []
+        for part in results:
+            if part.type != "tool_result" or part.tool_call_id is None:
+                raise ValueError("create_tool_results accepts only tool_result content parts")
+            tool_results.append(
+                ClientToolResult(
+                    tool_call_id=part.tool_call_id,
+                    result=part.result,
+                    error=part.error,
+                )
+            )
+        req = SubmitToolResultsRequest(tool_results=tool_results)
+        delay = 0.1
+        for attempt in range(6):
+            try:
+                resp = await self._client._post(
+                    f"/sessions/{session_id}/tool-results",
+                    req.model_dump(exclude_none=True),
+                )
+                return SubmitToolResultsResponse(**resp)
+            except ApiError as exc:
+                if attempt >= 5 or not _is_tool_results_pending_conflict(exc):
+                    raise
+                await asyncio.sleep(delay)
+                delay *= 2
+        raise RuntimeError("unreachable")
 
 
 class EventsClient:
@@ -668,6 +709,10 @@ class EventsClient:
         """Stream events from a session via SSE."""
         options = StreamOptions(types=types or [], exclude=exclude or [], since_id=since_id)
         return EventStream(self._client, session_id, options)
+
+
+def _is_tool_results_pending_conflict(error: ApiError) -> bool:
+    return error.status_code == 409 and "not waiting for tool results" in error.message
 
 
 class CapabilitiesClient:

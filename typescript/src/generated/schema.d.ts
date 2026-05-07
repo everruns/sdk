@@ -4,10631 +4,13138 @@
  */
 
 export interface paths {
-    "/v1/agents": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/agents - List all active agents */
-        get: operations["list_agents"];
-        put?: never;
-        /** POST /v1/agents - Create a new agent */
-        post: operations["create_agent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/agents/import": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/agents/import - Import agent from file or built-in example
-         * @description Two modes:
-         *     1. **From example** — `POST /v1/agents/import?from-example={name}` (body ignored)
-         *     2. **From file** — `POST /v1/agents/import` with a text body in Markdown/YAML/JSON
-         *
-         *     File mode accepts:
-         *     - Markdown with YAML front matter (if starts with ---)
-         *     - Pure YAML
-         *     - Pure JSON
-         *     - Plain text (treated as system prompt, name auto-generated)
-         *
-         *     If the file contains an `id` field and an agent with that ID already exists,
-         *     the agent is updated (upsert). Returns 201 on create, 200 on update.
-         */
-        post: operations["import_agent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/agents/preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/agents/preview - Preview the final agent shape with capabilities applied
-         * @description Returns the merged system prompt and all tools that would be available to the agent.
-         *     This is useful for previewing what the agent will look like before saving.
-         */
-        post: operations["preview_agent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/agents/{agent_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /v1/agents/{agent_id} - Get agent by ID or name
-         * @description Accepts either an agent ID (e.g. `agent_01933b5a...`) or a
-         *     name (e.g. `customer-support`). Names are resolved within the caller's org.
-         */
-        get: operations["get_agent"];
-        /**
-         * PUT /v1/agents/{agent_id} - Create or update agent (upsert)
-         * @description Accepts either an agent ID (e.g. `agent_01933b5a...`) or a
-         *     name (e.g. `customer-support`). If the agent exists, update it; if not,
-         *     create it. Returns 201 on create, 200 on update.
-         */
-        put: operations["upsert_agent"];
-        post?: never;
-        /** DELETE /v1/agents/{agent_id} - Archive agent */
-        delete: operations["delete_agent"];
-        options?: never;
-        head?: never;
-        /** PATCH /v1/agents/{agent_id} - Update agent */
-        patch: operations["update_agent"];
-        trace?: never;
-    };
-    "/v1/agents/{agent_id}/copy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/agents/{agent_id}/copy - Copy an agent
-         * @description Creates a new agent with the same configuration as the source agent.
-         *     The new agent's name will be "{original name} (copy)".
-         */
-        post: operations["copy_agent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/agents/{agent_id}/export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/agents/{agent_id}/export - Export agent in Markdown format with YAML front matter */
-        get: operations["export_agent"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/capabilities": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/capabilities - List available capabilities with pagination */
-        get: operations["list_capabilities"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/capabilities/{capability_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/capabilities/{capability_id} - Get a specific capability */
-        get: operations["get_capability"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/durable/executions/{execution_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/durable/executions/:execution_id - Get execution details */
-        get: operations["get_execution"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/durable/schedules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/durable/schedules - List schedules */
-        get: operations["list_schedules"];
-        put?: never;
-        /** POST /v1/durable/schedules - Create a new schedule */
-        post: operations["create_schedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/durable/schedules/{schedule_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/durable/schedules/:schedule_id - Get schedule details */
-        get: operations["get_schedule"];
-        put?: never;
-        post?: never;
-        /** DELETE /v1/durable/schedules/:schedule_id - Delete schedule */
-        delete: operations["delete_schedule"];
-        options?: never;
-        head?: never;
-        /** PATCH /v1/durable/schedules/:schedule_id - Update schedule */
-        patch: operations["update_schedule"];
-        trace?: never;
-    };
-    "/v1/durable/schedules/{schedule_id}/executions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/durable/schedules/:schedule_id/executions - List schedule executions */
-        get: operations["list_schedule_executions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/durable/schedules/{schedule_id}/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/durable/schedules/:schedule_id/pause - Pause schedule */
-        post: operations["pause_schedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/durable/schedules/{schedule_id}/resume": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/durable/schedules/:schedule_id/resume - Resume schedule */
-        post: operations["resume_schedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/durable/schedules/{schedule_id}/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/durable/schedules/:schedule_id/stats - Get schedule statistics */
-        get: operations["get_schedule_stats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/durable/schedules/{schedule_id}/trigger": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/durable/schedules/:schedule_id/trigger - Manually trigger schedule */
-        post: operations["trigger_schedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/harnesses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/harnesses */
-        get: operations["list_harnesses"];
-        put?: never;
-        /** POST /v1/harnesses */
-        post: operations["create_harness"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/harnesses/config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /v1/harnesses/config
-         * @description Returns which harness policies the caller satisfies.
-         *     UI uses this to show/hide controls (e.g. delete button).
-         */
-        get: operations["harness_config"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/harnesses/preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/harnesses/preview */
-        post: operations["preview_harness"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/harnesses/{harness_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /v1/harnesses/{harness_id}
-         * @description Accepts either a harness ID (e.g. `harness_01933b5a...`) or a
-         *     name (e.g. `generic`). The virtual name `default` resolves to the org's
-         *     configured default harness. Names are resolved within the caller's org.
-         */
-        get: operations["get_harness"];
-        put?: never;
-        post?: never;
-        /** DELETE /v1/harnesses/{harness_id} */
-        delete: operations["delete_harness"];
-        options?: never;
-        head?: never;
-        /** PATCH /v1/harnesses/{harness_id} */
-        patch: operations["update_harness"];
-        trace?: never;
-    };
-    "/v1/harnesses/{harness_id}/copy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/harnesses/{harness_id}/copy - Copy a harness
-         * @description Creates a new harness with the same configuration as the source harness.
-         *     The new harness's name will be "{original name} (copy)".
-         */
-        post: operations["copy_harness"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/images": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/images - List images */
-        get: operations["list_images"];
-        put?: never;
-        /** POST /v1/images - Upload an image */
-        post: operations["upload_image"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/images/{image_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/images/{image_id} - Get image (returns binary data) */
-        get: operations["get_image"];
-        put?: never;
-        post?: never;
-        /** DELETE /v1/images/{image_id} - Delete an image */
-        delete: operations["delete_image"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/images/{image_id}/thumbnail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/images/{image_id}/thumbnail - Get image thumbnail */
-        get: operations["get_thumbnail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/llm-models": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all models across all providers */
-        get: operations["list_all_models"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/llm-models/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a specific model with provider info and profile */
-        get: operations["get_model"];
-        put?: never;
-        post?: never;
-        /** Delete a model */
-        delete: operations["delete_model"];
-        options?: never;
-        head?: never;
-        /** Update a model */
-        patch: operations["update_model"];
-        trace?: never;
-    };
-    "/v1/llm-providers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all LLM providers */
-        get: operations["list_providers"];
-        put?: never;
-        /** Create a new LLM provider */
-        post: operations["create_provider"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/llm-providers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a specific LLM provider */
-        get: operations["get_provider"];
-        put?: never;
-        post?: never;
-        /** Delete an LLM provider */
-        delete: operations["delete_provider"];
-        options?: never;
-        head?: never;
-        /** Update an LLM provider */
-        patch: operations["update_provider"];
-        trace?: never;
-    };
-    "/v1/llm-providers/{id}/sync-models": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Sync models from an LLM provider
-         * @description Fetches the list of available models from the provider's API and updates
-         *     the database. Only works for providers with standard base URLs (not custom).
-         */
-        post: operations["sync_models"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/llm-providers/{provider_id}/models": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List models for a specific provider */
-        get: operations["list_provider_models"];
-        put?: never;
-        /** Create a new model for a provider */
-        post: operations["create_model"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/mcp-servers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/mcp-servers - List all MCP servers */
-        get: operations["list_mcp_servers"];
-        put?: never;
-        /** POST /v1/mcp-servers - Create a new MCP server */
-        post: operations["create_mcp_server"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/mcp-servers/{server_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/mcp-servers/{server_id} - Get MCP server by ID */
-        get: operations["get_mcp_server"];
-        put?: never;
-        post?: never;
-        /** DELETE /v1/mcp-servers/{server_id} - Delete MCP server */
-        delete: operations["delete_mcp_server"];
-        options?: never;
-        head?: never;
-        /** PATCH /v1/mcp-servers/{server_id} - Update MCP server */
-        patch: operations["update_mcp_server"];
-        trace?: never;
-    };
-    "/v1/orgs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/orgs - List organizations the current user belongs to */
-        get: operations["list_organizations"];
-        put?: never;
-        /** POST /v1/orgs - Create a new organization */
-        post: operations["create_organization"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/orgs/{org}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/orgs/:org - Get organization details */
-        get: operations["get_organization"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** PATCH /v1/orgs/:org - Update organization */
-        patch: operations["update_organization"];
-        trace?: never;
-    };
-    "/v1/sessions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions - List sessions in organization */
-        get: operations["list_sessions"];
-        put?: never;
-        /** POST /v1/sessions - Create a new session */
-        post: operations["create_session"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/chat": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/sessions/chat - Get or create global chat session
-         * @description Returns the user's singleton global chat session. Creates one if it doesn't exist.
-         *     Uses the Platform Chat harness and tags for per-user singleton management.
-         */
-        post: operations["get_or_create_chat_session"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id} - Get session */
-        get: operations["get_session"];
-        put?: never;
-        post?: never;
-        /** DELETE /v1/sessions/{session_id} - Delete session */
-        delete: operations["delete_session"];
-        options?: never;
-        head?: never;
-        /** PATCH /v1/sessions/{session_id} - Update session */
-        patch: operations["update_session"];
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/sessions/{session_id}/cancel - Cancel current turn
-         * @description Cancels the currently running turn in the session. If no turn is running,
-         *     this is a no-op and returns success (idempotent). When a turn is active:
-         *     1. Cancel the underlying workflow execution
-         *     2. Emit a turn.cancelled event
-         *     3. Insert an agent message indicating the turn was cancelled
-         *     4. Set the session status back to idle
-         */
-        post: operations["cancel_turn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/databases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/databases */
-        get: operations["list_databases"];
-        put?: never;
-        /** POST /v1/sessions/{session_id}/databases */
-        post: operations["create_database"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/databases/{name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/databases/{name} */
-        get: operations["get_database"];
-        put?: never;
-        post?: never;
-        /** DELETE /v1/sessions/{session_id}/databases/{name} */
-        delete: operations["delete_database"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/databases/{name}/schema": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/databases/{name}/schema */
-        get: operations["get_schema"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /v1/sessions/{session_id}/events - List events (JSON)
-         * @description Returns events for a session as a JSON array. Supports filtering by event type
-         *     via `types` (positive: only these types) and `exclude` (negative: remove these types).
-         *     When both are provided, `types` narrows first, then `exclude` removes from that set.
-         *     Both accept only known event types (max 25 per parameter). Unknown types return 400.
-         *
-         *     ## Pagination
-         *
-         *     Supports backward pagination via `limit` and `before_sequence`:
-         *     - `limit=200` returns the last 200 events (oldest→newest)
-         *     - `limit=200&before_sequence=4500` returns 200 events before sequence 4500
-         *     - When `limit` is provided, the response includes an `X-Total-Count` header
-         *       with the count of non-delta events for the session
-         *     - Turn boundary snapping: when fetching older pages, the batch boundary
-         *       snaps to the nearest `turn.started` event to avoid splitting turns
-         *     - Without `limit`, all events are returned (backward compatible)
-         */
-        get: operations["list_events"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Export session messages as a JSONL file
-         * @description Returns all materialized messages (user, agent) as newline-delimited JSON.
-         *     Delta events are excluded. Each line is a complete JSON object representing one message.
-         *     The response includes `Content-Disposition: attachment` for browser download.
-         */
-        get: operations["export_session_jsonl"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/fs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /fs - Get root directory listing */
-        get: operations["get_root"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/fs/_/copy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /fs/_/copy - Copy file */
-        post: operations["copy_file"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/fs/_/grep": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /fs/_/grep - Search files */
-        post: operations["grep_files"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/fs/_/move": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /fs/_/move - Move/rename file */
-        post: operations["move_file"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/fs/_/stat": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /fs/_/stat - Get file or directory stat */
-        post: operations["stat_file"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/fs/{path}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /fs/*path - Get file content or directory listing */
-        get: operations["get_path"];
-        /** PUT /fs/*path - Update file content */
-        put: operations["update_path"];
-        /** POST /fs/*path - Create file or directory */
-        post: operations["create_path"];
-        /** DELETE /fs/*path - Delete file or directory */
-        delete: operations["delete_path"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/git/branches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/sessions/{session_id}/git/branches */
-        post: operations["create_branch"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/git/branches/{name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** DELETE /v1/sessions/{session_id}/git/branches/{name} */
-        delete: operations["delete_branch"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/git/commit": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/sessions/{session_id}/git/commit */
-        post: operations["commit"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/git/diff": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/git/diff */
-        get: operations["diff"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/git/log": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/git/log */
-        get: operations["log"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/git/refs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/git/refs */
-        get: operations["list_refs"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/messages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/messages - List messages (PRIMARY data) */
-        get: operations["list_messages"];
-        put?: never;
-        /** POST /v1/sessions/{session_id}/messages - Create message (user message triggers workflow) */
-        post: operations["create_message"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/pin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /v1/sessions/{session_id}/pin - Pin session for current user */
-        put: operations["pin_session"];
-        post?: never;
-        /** DELETE /v1/sessions/{session_id}/pin - Unpin session for current user */
-        delete: operations["unpin_session"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/resources": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all resources registered in the session resource registry. */
-        get: operations["list_resources"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/sse": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /v1/sessions/{session_id}/sse - Stream events (SSE notifications)
-         * @description Establishes a Server-Sent Events (SSE) connection for real-time event streaming.
-         *
-         *     ## Connection Lifecycle Events
-         *
-         *     - **connected**: Sent immediately when the stream is established.
-         *       Data: `{"status":"connected"}`
-         *
-         *     - **disconnecting**: Sent before the server closes the connection for graceful cycling.
-         *       Data: `{"reason":"connection_cycle","retry_ms":100}`
-         *       Clients should reconnect immediately using the `since_id` of the last received event.
-         *
-         *     ## Connection Cycling
-         *
-         *     Connections are automatically cycled every 5 minutes to prevent stale connections
-         *     through proxies and load balancers. Before closing, the server sends a `disconnecting`
-         *     event so clients can reconnect seamlessly without missing events.
-         *
-         *     ## Retry Hints
-         *
-         *     Each SSE event includes a `retry:` field (in milliseconds) that hints how long
-         *     clients should wait before reconnecting if the connection is lost:
-         *     - During active streaming: 100ms (fast reconnect)
-         *     - During idle periods: increases with backoff up to 500ms
-         *     - After `disconnecting` event: 100ms (immediate reconnect)
-         *
-         *     ## Resuming Streams
-         *
-         *     Use the `since_id` query parameter to resume from a specific event. The server
-         *     resolves the event ID to its sequence number and returns all subsequent events
-         *     ordered by sequence, ensuring reliable ordering even under concurrent writes.
-         *
-         *     ## Event Type Filtering
-         *
-         *     Use `types` for positive filtering (only return these types) and `exclude` for
-         *     negative filtering (remove these types). When both are provided, `types` narrows
-         *     first, then `exclude` removes from that set. Both accept only known event types
-         *     (max 25 per parameter). Unknown types return 400.
-         */
-        get: operations["stream_sse"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/storage/keys": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/storage/keys - List all key-value pairs */
-        get: operations["list_keys"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/storage/secrets": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/sessions/{session_id}/storage/secrets - List all secrets (names only) */
-        get: operations["list_secrets"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/sessions/{session_id}/tool-results": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/sessions/{session_id}/tool-results - Submit client-side tool results
-         * @description Accepts tool results executed by the client and resumes the agent workflow.
-         *     Session must be in `waiting_for_tool_results` status.
-         */
-        post: operations["submit_tool_results"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/skills": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/skills - List all skills */
-        get: operations["list_skills"];
-        put?: never;
-        /** POST /v1/skills - Create skill from SKILL.md */
-        post: operations["create_skill"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/skills/upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/skills/upload - Create skill from ZIP archive */
-        post: operations["upload_skill"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/skills/validate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /v1/skills/validate - Validate SKILL.md content */
-        post: operations["validate_skill"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/skills/{skill_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/skills/{skill_id} - Get skill by ID */
-        get: operations["get_skill"];
-        put?: never;
-        post?: never;
-        /** DELETE /v1/skills/{skill_id} - Delete skill */
-        delete: operations["delete_skill"];
-        options?: never;
-        head?: never;
-        /** PATCH /v1/skills/{skill_id} - Update skill */
-        patch: operations["update_skill"];
-        trace?: never;
-    };
-    "/v1/skills/{skill_id}/content": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /v1/skills/{skill_id}/content - Get full skill content */
-        get: operations["get_skill_content"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /v1/users - List users in current organization
-         * @description Lists users that belong to the current organization with optional search filtering.
-         *     TM-TENANT-008: Enforces org isolation to prevent cross-tenant user enumeration.
-         */
-        get: operations["list_users"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/users/me/switch-org": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /v1/users/me/switch-org - Switch current organization
-         * @description Sets a cookie with the selected organization. This org will be used for all
-         *     subsequent requests (including SSE connections via EventSource).
-         *     The user must be a member of the requested organization.
-         */
-        post: operations["switch_org"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+  "/v1/agents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/agents - List all active agents */
+    get: operations["list_agents"];
+    put?: never;
+    /** POST /v1/agents - Create a new agent */
+    post: operations["create_agent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/import": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/agents/import - Import agent from file or built-in example
+     * @description Two modes:
+     *     1. **From example** — `POST /v1/agents/import?from-example={name}` (body ignored)
+     *     2. **From file** — `POST /v1/agents/import` with a text body in Markdown/YAML/JSON
+     *
+     *     File mode accepts:
+     *     - Markdown with YAML front matter (if starts with ---)
+     *     - Pure YAML
+     *     - Pure JSON
+     *     - Plain text (treated as system prompt, name auto-generated)
+     *
+     *     If the file contains an `id` field and an agent with that ID already exists,
+     *     the agent is updated (upsert). Returns 201 on create, 200 on update.
+     */
+    post: operations["import_agent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/agents/preview - Preview the final agent shape with capabilities applied
+     * @description Returns the merged system prompt and all tools that would be available to the agent.
+     *     This is useful for previewing what the agent will look like before saving.
+     */
+    post: operations["preview_agent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/agents/{agent_id} - Get agent by ID or name
+     * @description Accepts either an agent ID (e.g. `agent_01933b5a...`) or a
+     *     name (e.g. `customer-support`). Names are resolved within the caller's org.
+     */
+    get: operations["get_agent"];
+    /**
+     * PUT /v1/agents/{agent_id} - Create or update agent (upsert)
+     * @description Accepts either an agent ID (e.g. `agent_01933b5a...`) or a
+     *     name (e.g. `customer-support`). If the agent exists, update it; if not,
+     *     create it. Returns 201 on create, 200 on update.
+     */
+    put: operations["upsert_agent"];
+    post?: never;
+    /** DELETE /v1/agents/{agent_id} - Archive agent */
+    delete: operations["delete_agent"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/agents/{agent_id} - Update agent */
+    patch: operations["update_agent"];
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/copy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/agents/{agent_id}/copy - Copy an agent
+     * @description Creates a new agent with the same configuration as the source agent.
+     *     The new agent's name will be "{original name} (copy)".
+     */
+    post: operations["copy_agent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/agents/{agent_id}/export - Export agent in Markdown format with YAML front matter */
+    get: operations["export_agent"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/agents/{agent_id}/stats - Get aggregate usage stats for an agent */
+    get: operations["get_agent_stats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/a2a/{channel_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/apps/{app_id}/a2a/{channel_id} */
+    post: operations["invoke_a2a"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/a2a/{channel_id}/.well-known/agent-card.json": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/apps/{app_id}/a2a/{channel_id}/.well-known/agent-card.json */
+    get: operations["agent_card"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/webhooks/{channel_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["invoke_webhook"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/capabilities": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/capabilities - List available capabilities with pagination */
+    get: operations["list_capabilities"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/capabilities/{capability_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/capabilities/{capability_id} - Get a specific capability */
+    get: operations["get_capability"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/config - Durable policy results for UI gating. */
+    get: operations["durable_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/executions/{execution_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/executions/:execution_id - Get execution details */
+    get: operations["get_execution"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/schedules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/schedules - List schedules */
+    get: operations["list_schedules"];
+    put?: never;
+    /** POST /v1/durable/schedules - Create a new schedule */
+    post: operations["create_schedule"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/schedules/{schedule_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/schedules/:schedule_id - Get schedule details */
+    get: operations["get_schedule"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/durable/schedules/:schedule_id - Delete schedule */
+    delete: operations["delete_schedule"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/durable/schedules/:schedule_id - Update schedule */
+    patch: operations["update_schedule"];
+    trace?: never;
+  };
+  "/v1/durable/schedules/{schedule_id}/executions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/schedules/:schedule_id/executions - List schedule executions */
+    get: operations["list_schedule_executions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/schedules/{schedule_id}/pause": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/schedules/:schedule_id/pause - Pause schedule */
+    post: operations["pause_schedule"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/schedules/{schedule_id}/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/schedules/:schedule_id/resume - Resume schedule */
+    post: operations["resume_schedule"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/schedules/{schedule_id}/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/schedules/:schedule_id/stats - Get schedule statistics */
+    get: operations["get_schedule_stats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/schedules/{schedule_id}/trigger": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/schedules/:schedule_id/trigger - Manually trigger schedule */
+    post: operations["trigger_schedule"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harness-examples": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/harness-examples — list all available harness examples. */
+    get: operations["list_examples"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harnesses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/harnesses */
+    get: operations["list_harnesses"];
+    put?: never;
+    /** POST /v1/harnesses */
+    post: operations["create_harness"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harnesses/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/harnesses/config
+     * @description Returns which harness policies the caller satisfies.
+     *     UI uses this to show/hide controls (e.g. delete button).
+     */
+    get: operations["harness_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harnesses/import": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/harnesses/import - Adopt a harness example as a regular org-owned harness.
+     * @description Creates a normal harness (`is_built_in = false`) from a code-defined
+     *     example. The new harness inherits from the org's `generic` harness by
+     *     name — no UUIDs are hardcoded. Capabilities and other config flow through
+     *     the same validation paths as `POST /v1/harnesses`.
+     *
+     *     Returns 201 on creation. If the example name collides with an existing
+     *     harness in the org, a random alphanumeric suffix is appended (parity with
+     *     agent example import).
+     */
+    post: operations["import_harness"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harnesses/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/harnesses/preview */
+    post: operations["preview_harness"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harnesses/{harness_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/harnesses/{harness_id}
+     * @description Accepts either a harness ID (e.g. `harness_01933b5a...`) or a
+     *     name (e.g. `generic`). The virtual name `default` resolves to the org's
+     *     configured default harness. Names are resolved within the caller's org.
+     */
+    get: operations["get_harness"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/harnesses/{harness_id} */
+    delete: operations["delete_harness"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/harnesses/{harness_id} */
+    patch: operations["update_harness"];
+    trace?: never;
+  };
+  "/v1/harnesses/{harness_id}/copy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/harnesses/{harness_id}/copy - Copy a harness
+     * @description Creates a new harness with the same configuration as the source harness.
+     *     The new harness's name will be "{original name} (copy)".
+     */
+    post: operations["copy_harness"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harnesses/{harness_id}/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/harnesses/{harness_id}/stats - Get aggregate usage stats for a harness */
+    get: operations["get_harness_stats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/images": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/images - List images */
+    get: operations["list_images"];
+    put?: never;
+    /** POST /v1/images - Upload an image */
+    post: operations["upload_image"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/images/{image_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/images/{image_id} - Get image (returns binary data) */
+    get: operations["get_image"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/images/{image_id} - Delete an image */
+    delete: operations["delete_image"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/images/{image_id}/thumbnail": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/images/{image_id}/thumbnail - Get image thumbnail */
+    get: operations["get_thumbnail"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/knowledge-bases": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_kbs"];
+    put?: never;
+    post: operations["create_kb"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/knowledge-bases/{kb_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_kb"];
+    put?: never;
+    post?: never;
+    delete: operations["delete_kb"];
+    options?: never;
+    head?: never;
+    patch: operations["update_kb"];
+    trace?: never;
+  };
+  "/v1/knowledge-bases/{kb_id}/entries": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_entries"];
+    put?: never;
+    post: operations["create_entry"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/knowledge-bases/{kb_id}/entries/{entry_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_entry"];
+    put?: never;
+    post?: never;
+    delete: operations["delete_entry"];
+    options?: never;
+    head?: never;
+    patch: operations["update_entry"];
+    trace?: never;
+  };
+  "/v1/llm-models": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all models across all providers */
+    get: operations["list_all_models"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/llm-models/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a specific model with provider info and profile */
+    get: operations["get_model"];
+    put?: never;
+    post?: never;
+    /** Delete a model */
+    delete: operations["delete_model"];
+    options?: never;
+    head?: never;
+    /** Update a model */
+    patch: operations["update_model"];
+    trace?: never;
+  };
+  "/v1/llm-providers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all LLM providers */
+    get: operations["list_providers"];
+    put?: never;
+    /** Create a new LLM provider */
+    post: operations["create_provider"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/llm-providers/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a specific LLM provider */
+    get: operations["get_provider"];
+    put?: never;
+    post?: never;
+    /** Delete an LLM provider */
+    delete: operations["delete_provider"];
+    options?: never;
+    head?: never;
+    /** Update an LLM provider */
+    patch: operations["update_provider"];
+    trace?: never;
+  };
+  "/v1/llm-providers/{id}/sync-models": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sync models from an LLM provider
+     * @description Fetches the list of available models from the provider's API and updates
+     *     the database. Only works for providers with standard base URLs (not custom).
+     */
+    post: operations["sync_models"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/llm-providers/{provider_id}/models": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List models for a specific provider */
+    get: operations["list_provider_models"];
+    put?: never;
+    /** Create a new model for a provider */
+    post: operations["create_model"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/mcp-servers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/mcp-servers - List all MCP servers */
+    get: operations["list_mcp_servers"];
+    put?: never;
+    /** POST /v1/mcp-servers - Create a new MCP server */
+    post: operations["create_mcp_server"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/mcp-servers/{server_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/mcp-servers/{server_id} - Get MCP server by ID */
+    get: operations["get_mcp_server"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/mcp-servers/{server_id} - Delete MCP server */
+    delete: operations["delete_mcp_server"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/mcp-servers/{server_id} - Update MCP server */
+    patch: operations["update_mcp_server"];
+    trace?: never;
+  };
+  "/v1/memory-stores": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_memory_stores"];
+    put?: never;
+    post: operations["create_memory_store"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/memory-stores/{store_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_memory_store"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/memory-stores/{store_id}/memories": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_memories"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/memory-stores/{store_id}/memories/{memory_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["forget_memory"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/orgs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/orgs - List organizations the current user belongs to */
+    get: operations["list_organizations"];
+    put?: never;
+    /** POST /v1/orgs - Create a new organization */
+    post: operations["create_organization"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/orgs/{org}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/orgs/:org - Get organization details */
+    get: operations["get_organization"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** PATCH /v1/orgs/:org - Update organization */
+    patch: operations["update_organization"];
+    trace?: never;
+  };
+  "/v1/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions - List sessions in organization */
+    get: operations["list_sessions"];
+    put?: never;
+    /** POST /v1/sessions - Create a new session */
+    post: operations["create_session"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/chat": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/sessions/chat - Get or create global chat session
+     * @description Returns the user's singleton global chat session. Creates one if it doesn't exist.
+     *     Uses the Platform Chat harness and tags for per-user singleton management.
+     */
+    post: operations["get_or_create_chat_session"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id} - Get session */
+    get: operations["get_session"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/sessions/{session_id} - Delete session */
+    delete: operations["delete_session"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/sessions/{session_id} - Update session */
+    patch: operations["update_session"];
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/sessions/{session_id}/cancel - Cancel current turn
+     * @description Cancels the currently running turn in the session. If no turn is running,
+     *     this is a no-op and returns success (idempotent). When a turn is active:
+     *     1. Cancel the underlying workflow execution
+     *     2. Emit a turn.cancelled event
+     *     3. Insert an agent message indicating the turn was cancelled
+     *     4. Set the session status back to idle
+     */
+    post: operations["cancel_turn"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/context-report": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/context-report - Latest context breakdown */
+    get: operations["get_session_context_report"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/databases": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/databases */
+    get: operations["list_databases"];
+    put?: never;
+    /** POST /v1/sessions/{session_id}/databases */
+    post: operations["create_database"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/databases/{name}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/databases/{name} */
+    get: operations["get_database"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/sessions/{session_id}/databases/{name} */
+    delete: operations["delete_database"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/databases/{name}/schema": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/databases/{name}/schema */
+    get: operations["get_schema"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/sessions/{session_id}/events - List events (JSON)
+     * @description Returns events for a session as a JSON array. Supports filtering by event type
+     *     via `types` (positive: only these types) and `exclude` (negative: remove these types).
+     *     When both are provided, `types` narrows first, then `exclude` removes from that set.
+     *     Both accept only known event types (max 25 per parameter). Unknown types return 400.
+     *
+     *     ## Pagination
+     *
+     *     Supports backward pagination via `limit` and `before_sequence`:
+     *     - `limit=200` returns the last 200 events (oldest→newest)
+     *     - `limit=200&before_sequence=4500` returns 200 events before sequence 4500
+     *     - When `limit` is provided, the response includes an `X-Total-Count` header
+     *       with the count of non-delta events for the session
+     *     - Turn boundary snapping: when fetching older pages, the batch boundary
+     *       snaps to the nearest `turn.started` event to avoid splitting turns
+     *     - Without `limit`, all events are returned (backward compatible)
+     */
+    get: operations["list_events"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Export session messages as a JSONL file
+     * @description Returns all materialized messages (user, agent) as newline-delimited JSON.
+     *     Delta events are excluded. Each line is a complete JSON object representing one message.
+     *     The response includes `Content-Disposition: attachment` for browser download.
+     */
+    get: operations["export_session_jsonl"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/fs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /fs - Get root directory listing */
+    get: operations["get_root"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/fs/_/copy": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /fs/_/copy - Copy file */
+    post: operations["copy_file"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/fs/_/download/{path}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /fs/_/download/*path - Download raw file bytes */
+    get: operations["download_path"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/fs/_/grep": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /fs/_/grep - Search files */
+    post: operations["grep_files"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/fs/_/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /fs/_/move - Move/rename file */
+    post: operations["move_file"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/fs/_/stat": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /fs/_/stat - Get file or directory stat */
+    post: operations["stat_file"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/fs/{path}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /fs/*path - Get file content or directory listing */
+    get: operations["get_path"];
+    /** PUT /fs/*path - Update file content */
+    put: operations["update_path"];
+    /** POST /fs/*path - Create file or directory */
+    post: operations["create_path"];
+    /** DELETE /fs/*path - Delete file or directory */
+    delete: operations["delete_path"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/git/branches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/sessions/{session_id}/git/branches */
+    post: operations["create_branch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/git/branches/{name}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** DELETE /v1/sessions/{session_id}/git/branches/{name} */
+    delete: operations["delete_branch"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/git/commit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/sessions/{session_id}/git/commit */
+    post: operations["commit"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/git/diff": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/git/diff */
+    get: operations["diff"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/git/log": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/git/log */
+    get: operations["log"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/git/refs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/git/refs */
+    get: operations["list_refs"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/messages - List messages (PRIMARY data) */
+    get: operations["list_messages"];
+    put?: never;
+    /** POST /v1/sessions/{session_id}/messages - Create message (user message triggers workflow) */
+    post: operations["create_message"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/pin": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** PUT /v1/sessions/{session_id}/pin - Pin session for current user */
+    put: operations["pin_session"];
+    post?: never;
+    /** DELETE /v1/sessions/{session_id}/pin - Unpin session for current user */
+    delete: operations["unpin_session"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/resources": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all resources registered in the session resource registry. */
+    get: operations["list_resources"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/sandbox": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_sandbox"];
+    put?: never;
+    post: operations["manage_sandbox"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/sse": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/sessions/{session_id}/sse - Stream events (SSE notifications)
+     * @description Establishes a Server-Sent Events (SSE) connection for real-time event streaming.
+     *
+     *     ## Connection Lifecycle Events
+     *
+     *     - **connected**: Sent immediately when the stream is established.
+     *       Data: `{"status":"connected"}`
+     *
+     *     - **disconnecting**: Sent before the server closes the connection for graceful cycling.
+     *       Data: `{"reason":"connection_cycle","retry_ms":100}`
+     *       Clients should reconnect immediately using the `since_id` of the last received event.
+     *
+     *     ## Connection Cycling
+     *
+     *     Connections are automatically cycled every 5 minutes to prevent stale connections
+     *     through proxies and load balancers. Before closing, the server sends a `disconnecting`
+     *     event so clients can reconnect seamlessly without missing events.
+     *
+     *     ## Retry Hints
+     *
+     *     Each SSE event includes a `retry:` field (in milliseconds) that hints how long
+     *     clients should wait before reconnecting if the connection is lost:
+     *     - During active streaming: 100ms (fast reconnect)
+     *     - During idle periods: increases with backoff up to 500ms
+     *     - After `disconnecting` event: 100ms (immediate reconnect)
+     *
+     *     ## Resuming Streams
+     *
+     *     Use the `since_id` query parameter to resume from a specific event. The server
+     *     resolves the event ID to its sequence number and returns all subsequent events
+     *     ordered by sequence, ensuring reliable ordering even under concurrent writes.
+     *
+     *     ## Event Type Filtering
+     *
+     *     Use `types` for positive filtering (only return these types) and `exclude` for
+     *     negative filtering (remove these types). When both are provided, `types` narrows
+     *     first, then `exclude` removes from that set. Both accept only known event types
+     *     (max 25 per parameter). Unknown types return 400.
+     */
+    get: operations["stream_sse"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/storage/keys": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/storage/keys - List all key-value pairs */
+    get: operations["list_keys"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/storage/secrets": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/storage/secrets - List all secrets (names only) */
+    get: operations["list_secrets"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/tool-results": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/sessions/{session_id}/tool-results - Submit client-side tool results
+     * @description Accepts tool results executed by the client and resumes the agent workflow.
+     *     Session must be in `waiting_for_tool_results` status.
+     */
+    post: operations["submit_tool_results"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/skills": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/skills - List all skills */
+    get: operations["list_skills"];
+    put?: never;
+    /** POST /v1/skills - Create skill from SKILL.md */
+    post: operations["create_skill"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/skills/upload": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/skills/upload - Create skill from ZIP archive */
+    post: operations["upload_skill"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/skills/validate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/skills/validate - Validate SKILL.md content */
+    post: operations["validate_skill"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/skills/{skill_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/skills/{skill_id} - Get skill by ID */
+    get: operations["get_skill"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/skills/{skill_id} - Delete skill */
+    delete: operations["delete_skill"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/skills/{skill_id} - Update skill */
+    patch: operations["update_skill"];
+    trace?: never;
+  };
+  "/v1/skills/{skill_id}/content": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/skills/{skill_id}/content - Get full skill content */
+    get: operations["get_skill_content"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/users": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/users - List users in current organization
+     * @description Lists users that belong to the current organization with optional search filtering.
+     *     TM-TENANT-008: Enforces org isolation to prevent cross-tenant user enumeration.
+     */
+    get: operations["list_users"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/users/me/switch-org": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/users/me/switch-org - Switch current organization
+     * @description Sets a cookie with the selected organization. This org will be used for all
+     *     subsequent requests (including SSE connections via EventSource).
+     *     The user must be a member of the requested organization.
+     */
+    post: operations["switch_org"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/volumes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_volumes"];
+    put?: never;
+    post: operations["create_volume"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/volumes/{volume_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_volume"];
+    put?: never;
+    post?: never;
+    delete: operations["delete_volume"];
+    options?: never;
+    head?: never;
+    patch: operations["update_volume"];
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @description Data for act.completed event */
-        ActCompletedData: {
-            /** @description Whether all tool calls completed */
-            completed: boolean;
-            /**
-             * Format: int64
-             * @description Duration of the act phase in milliseconds
-             */
-            duration_ms?: number | null;
-            /**
-             * Format: int32
-             * @description Number of failed tool calls
-             */
-            error_count: number;
-            /** @description Human-readable headline for the completed batch */
-            headline?: string | null;
-            /**
-             * Format: int32
-             * @description Number of successful tool calls
-             */
-            success_count: number;
+  schemas: {
+    /** @description Data for act.completed event */
+    ActCompletedData: {
+      /** @description Whether all tool calls completed */
+      completed: boolean;
+      /**
+       * Format: int64
+       * @description Duration of the act phase in milliseconds
+       */
+      duration_ms?: number | null;
+      /**
+       * Format: int32
+       * @description Number of failed tool calls
+       */
+      error_count: number;
+      /** @description Human-readable headline for the completed batch */
+      headline?: string | null;
+      /**
+       * Format: int32
+       * @description Number of successful tool calls
+       */
+      success_count: number;
+    };
+    /** @description Data for act.started event */
+    ActStartedData: {
+      /** @description Human-readable headline for the batch */
+      headline?: string | null;
+      /** @description Tool calls to be executed */
+      tool_calls: components["schemas"]["ToolCallSummary"][];
+    };
+    /**
+     * @description Agent configuration for agentic loop.
+     *     An agent defines the behavior and capabilities of an AI assistant.
+     */
+    Agent: {
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was archived.
+       */
+      archived_at?: string | null;
+      /**
+       * @description Capabilities enabled for this agent with per-agent configuration.
+       *     Capabilities add tools and system prompt modifications.
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was created.
+       */
+      created_at: string;
+      /**
+       * @description Default LLM model ID for this agent.
+       *     Can be overridden at the session level.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the agent does. */
+      description?: string | null;
+      /**
+       * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
+       *     Falls back to `name` when absent.
+       */
+      display_name?: string | null;
+      /**
+       * @description External identifier (agent_<32-hex>). Shown as "id" in API.
+       *     Client-supplied or auto-generated.
+       * @example agent_01933b5a000070008000000000000001
+       */
+      id: string;
+      /** @description Starter files copied into each new session for this agent. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /** @description Maximum number of LLM iterations per turn for this agent. */
+      max_iterations?: number | null;
+      /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /** @description Name, unique per org (e.g. "customer-support"). */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /** @description Current lifecycle status of the agent. */
+      status: components["schemas"]["AgentStatus"];
+      /**
+       * @description System prompt that defines the agent's behavior.
+       *     Sent as the first message in every conversation.
+       */
+      system_prompt: string;
+      /** @description Tags for organizing and filtering agents. */
+      tags?: string[];
+      /**
+       * @description Client-side tools registered for this agent.
+       *     These tools are executed by the client, not the server.
+       */
+      tools?: components["schemas"]["ToolDefinition"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was last updated.
+       */
+      updated_at: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /**
+     * @description Per-agent capability configuration
+     *
+     *     Associates a capability with an agent, including optional per-agent configuration.
+     *     The config field allows the same capability to behave differently per-agent.
+     */
+    AgentCapabilityConfig: {
+      /** @description Per-agent configuration for this capability (capability-specific) */
+      config?: unknown;
+      /** @description Reference to the capability ID */
+      ref: string;
+    };
+    /** @description Response showing the final agent shape after applying capabilities */
+    AgentPreviewResponse: {
+      /** @description The full system prompt with capability additions prepended */
+      system_prompt: string;
+      /** @description All tool definitions from capabilities */
+      tools: Record<string, never>[];
+    };
+    /**
+     * @description Agent lifecycle status.
+     *     - `active`: Agent is available for use
+     *     - `archived`: Agent is hidden from listings and cannot be modified or assigned
+     *     - `deleted`: Agent is a tombstone kept only for historical references
+     * @enum {string}
+     */
+    AgentStatus: "active" | "archived" | "deleted";
+    BTreeMap: {
+      [key: string]: {
+        /** @description Authentication mode used when executing tools from this scoped server. */
+        auth_mode?: components["schemas"]["McpServerAuthMode"];
+        /** @description Additional HTTP headers sent on MCP requests. */
+        headers?: {
+          [key: string]: string;
         };
-        /** @description Data for act.started event */
-        ActStartedData: {
-            /** @description Human-readable headline for the batch */
-            headline?: string | null;
-            /** @description Tool calls to be executed */
-            tool_calls: components["schemas"]["ToolCallSummary"][];
-        };
-        /**
-         * @description Agent configuration for agentic loop.
-         *     An agent defines the behavior and capabilities of an AI assistant.
-         */
-        Agent: {
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was archived.
-             */
-            archived_at?: string | null;
-            /**
-             * @description Capabilities enabled for this agent with per-agent configuration.
-             *     Capabilities add tools and system prompt modifications.
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was created.
-             */
-            created_at: string;
-            /**
-             * @description Default LLM model ID for this agent.
-             *     Can be overridden at the session level.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was deleted.
-             */
-            deleted_at?: string | null;
-            /** @description Human-readable description of what the agent does. */
-            description?: string | null;
-            /**
-             * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
-             *     Falls back to `name` when absent.
-             */
-            display_name?: string | null;
-            /**
-             * @description External identifier (agent_<32-hex>). Shown as "id" in API.
-             *     Client-supplied or auto-generated.
-             * @example agent_01933b5a000070008000000000000001
-             */
-            id: string;
-            /** @description Starter files copied into each new session for this agent. */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /** @description Maximum number of LLM iterations per turn for this agent. */
-            max_iterations?: number | null;
-            /** @description Name, unique per org (e.g. "customer-support"). */
-            name: string;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /** @description Current lifecycle status of the agent. */
-            status: components["schemas"]["AgentStatus"];
-            /**
-             * @description System prompt that defines the agent's behavior.
-             *     Sent as the first message in every conversation.
-             */
-            system_prompt: string;
-            /** @description Tags for organizing and filtering agents. */
-            tags?: string[];
-            /**
-             * @description Client-side tools registered for this agent.
-             *     These tools are executed by the client, not the server.
-             */
-            tools?: components["schemas"]["ToolDefinition"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was last updated.
-             */
-            updated_at: string;
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
-        /**
-         * @description Per-agent capability configuration
-         *
-         *     Associates a capability with an agent, including optional per-agent configuration.
-         *     The config field allows the same capability to behave differently per-agent.
-         */
-        AgentCapabilityConfig: {
-            /** @description Per-agent configuration for this capability (capability-specific) */
-            config?: unknown;
-            /** @description Reference to the capability ID */
-            ref: string;
-        };
-        /** @description Response showing the final agent shape after applying capabilities */
-        AgentPreviewResponse: {
-            /** @description The full system prompt with capability additions prepended */
-            system_prompt: string;
-            /** @description All tool definitions from capabilities */
-            tools: Record<string, never>[];
-        };
-        /**
-         * @description Agent lifecycle status.
-         *     - `active`: Agent is available for use
-         *     - `archived`: Agent is hidden from listings and cannot be modified or assigned
-         *     - `deleted`: Agent is a tombstone kept only for historical references
-         * @enum {string}
-         */
-        AgentStatus: "active" | "archived" | "deleted";
-        /** @description Data for budget lifecycle events (warning, paused, exhausted, resumed). */
-        BudgetEventData: {
-            /**
-             * Format: double
-             * @description Current remaining balance.
-             */
-            balance: number;
-            /** @description Budget that triggered this event. */
-            budget_id: string;
-            /** @description Budget currency (e.g. "usd", "tokens"). */
-            currency: string;
-            /**
-             * Format: double
-             * @description Budget limit.
-             */
-            limit: number;
-            /** @description Human-readable message. */
-            message?: string | null;
-            /**
-             * Format: double
-             * @description Soft limit threshold (present for warning/paused events).
-             */
-            soft_limit?: number | null;
-        };
-        /**
-         * @description Built-in tool configuration
-         *
-         *     Note: The `kind` field has been removed. Tools are now identified
-         *     solely by their `name` field, and execution happens via the ToolRegistry
-         *     which looks up tools by name.
-         */
-        BuiltinTool: {
-            /** @description Category for tool_search namespace grouping (from parent capability) */
-            category?: string | null;
-            /** @description Whether this tool's schema can be deferred via tool_search */
-            deferrable?: components["schemas"]["DeferrablePolicy"];
-            /** @description Tool description for LLM */
-            description: string;
-            /** @description Human-readable display name for UI rendering (e.g., "Get Current Time" for `get_current_time`) */
-            display_name?: string | null;
-            /** @description Semantic hints describing the tool's behavioral properties */
-            hints?: components["schemas"]["ToolHints"];
-            /** @description Tool name (used by LLM and for registry lookup) */
-            name: string;
-            /** @description JSON schema for tool parameters */
-            parameters: unknown;
-            /** @description Tool policy (auto or requires_approval) */
-            policy?: components["schemas"]["ToolPolicy"];
-        };
-        /**
-         * @description Status of the cancel operation
-         * @enum {string}
-         */
-        CancelStatus: "cancelled" | "no_op";
-        /** @description Response from cancel turn endpoint */
-        CancelTurnResponse: {
-            /**
-             * @description Human-readable message
-             * @example Turn cancelled successfully
-             */
-            message: string;
-            /** @description Whether the cancellation was performed or was a no-op */
-            status: components["schemas"]["CancelStatus"];
-        };
-        /**
-         * @description Public capability information (without internal details)
-         *     This is what gets returned from the API
-         *     Named CapabilityInfo to distinguish from the Capability trait
-         */
-        CapabilityInfo: {
-            /** @description Category for grouping in UI */
-            category?: string | null;
-            /**
-             * @description IDs of capabilities that this capability depends on.
-             *     When this capability is selected, its dependencies are automatically included.
-             */
-            dependencies?: string[];
-            /** @description Description of what this capability provides */
-            description: string;
-            /**
-             * @description UI feature strings this capability contributes to.
-             *     Multiple capabilities can contribute the same feature.
-             */
-            features?: string[];
-            /** @description Icon name (for UI rendering) */
-            icon?: string | null;
-            /** @description Unique capability identifier */
-            id: string;
-            /** @description Whether this is an MCP server capability (for UI badge) */
-            is_mcp?: boolean;
-            /** @description Whether this is an Agent Skill capability (for UI badge) */
-            is_skill?: boolean;
-            /** @description Display name */
-            name: string;
-            /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
-            risk_level?: components["schemas"]["RiskLevel"];
-            /** @description Current status */
-            status: string;
-            /** @description System prompt addition contributed by this capability */
-            system_prompt?: string | null;
-            /** @description Tool definitions provided by this capability */
-            tool_definitions?: Record<string, never>[];
-        };
-        /**
-         * @description Client-side tool - executed by the client, not the server
-         *     The server pauses execution and waits for the client to submit results.
-         */
-        ClientSideTool: {
-            /** @description Category for tool_search namespace grouping (from parent capability) */
-            category?: string | null;
-            /** @description Whether this tool's schema can be deferred via tool_search */
-            deferrable?: components["schemas"]["DeferrablePolicy"];
-            /** @description Tool description for LLM */
-            description: string;
-            /** @description Human-readable display name for UI rendering */
-            display_name?: string | null;
-            /** @description Semantic hints describing the tool's behavioral properties */
-            hints?: components["schemas"]["ToolHints"];
-            /** @description Tool name (used by LLM and for correlation) */
-            name: string;
-            /** @description JSON schema for tool parameters */
-            parameters: unknown;
-        };
-        /** @description A single tool result from the client */
-        ClientToolResult: {
-            /** @description Error message if the tool failed */
-            error?: string | null;
-            /** @description Result value (JSON). Null if the tool failed. */
-            result?: unknown;
-            /** @description Tool call ID (correlates with the tool call from tool.call_requested event) */
-            tool_call_id: string;
-        };
-        /** @description Request to create a commit */
-        CommitRequest: {
-            /** @description Author email (defaults to "agent@everruns.local") */
-            author_email?: string | null;
-            /** @description Author name (defaults to "Agent") */
-            author_name?: string | null;
-            /** @description Branch name (defaults to "refs/heads/main"); short names like "main" are normalized */
-            branch?: string | null;
-            /** @description Commit message */
-            message: string;
-        };
-        /** @description Result of a commit operation */
-        CommitResult: {
-            objects_created: number;
-            oid: string;
-            tree_oid: string;
-        };
-        /**
-         * @description Reason why compaction was triggered.
-         * @enum {string}
-         */
-        CompactionReason: "proactive_budget" | "request_too_large" | "manual";
-        /** @description A single step in a compaction cascade. */
-        CompactionStepData: {
-            /**
-             * Format: int64
-             * @description Duration of this step in milliseconds.
-             */
-            duration_ms: number;
-            /** @description Number of messages after this step. */
-            messages_after: number;
-            /** @description Strategy used in this step. */
-            strategy: string;
-        };
-        /**
-         * @description A part of message content - can be text, image, image_file, tool_call, or tool_result
-         *
-         *     This is the canonical content part type used across the system.
-         *     API layer enables the "openapi" feature to add ToSchema derive.
-         */
-        ContentPart: (components["schemas"]["TextContentPart"] & {
-            /** @enum {string} */
-            type: "text";
-        }) | (components["schemas"]["ImageContentPart"] & {
-            /** @enum {string} */
-            type: "image";
-        }) | (components["schemas"]["ImageFileContentPart"] & {
-            /** @enum {string} */
-            type: "image_file";
-        }) | (components["schemas"]["ToolCallContentPart"] & {
-            /** @enum {string} */
-            type: "tool_call";
-        }) | (components["schemas"]["ToolResultContentPart"] & {
-            /** @enum {string} */
-            type: "tool_result";
+        /** @description Provider id used to resolve a user-scoped bearer token. */
+        oauth_provider_id?: string | null;
+        /** @description Whether to discover tool definitions live from this server. */
+        tool_discovery?: boolean;
+        /** @description MCP transport type. Only remote HTTP is supported today. */
+        type?: components["schemas"]["McpServerTransportType"];
+        /** @description URL of the remote MCP server endpoint. */
+        url: string;
+      };
+    };
+    /** @description Data for budget lifecycle events (warning, paused, exhausted, resumed). */
+    BudgetEventData: {
+      /**
+       * Format: double
+       * @description Current remaining balance.
+       */
+      balance: number;
+      /** @description Budget that triggered this event. */
+      budget_id: string;
+      /** @description Budget currency (e.g. "usd", "tokens"). */
+      currency: string;
+      /**
+       * Format: double
+       * @description Budget limit.
+       */
+      limit: number;
+      /** @description Human-readable message. */
+      message?: string | null;
+      /**
+       * Format: double
+       * @description Soft limit threshold (present for warning/paused events).
+       */
+      soft_limit?: number | null;
+    };
+    /**
+     * @description Built-in tool configuration
+     *
+     *     Note: The `kind` field has been removed. Tools are now identified
+     *     solely by their `name` field, and execution happens via the ToolRegistry
+     *     which looks up tools by name.
+     */
+    BuiltinTool: {
+      /** @description Category for tool_search namespace grouping (from parent capability) */
+      category?: string | null;
+      /** @description Whether this tool's schema can be deferred via tool_search */
+      deferrable?: components["schemas"]["DeferrablePolicy"];
+      /** @description Tool description for LLM */
+      description: string;
+      /** @description Human-readable display name for UI rendering (e.g., "Get Current Time" for `get_current_time`) */
+      display_name?: string | null;
+      /** @description Semantic hints describing the tool's behavioral properties */
+      hints?: components["schemas"]["ToolHints"];
+      /** @description Tool name (used by LLM and for registry lookup) */
+      name: string;
+      /** @description JSON schema for tool parameters */
+      parameters: unknown;
+      /** @description Tool policy (auto or requires_approval) */
+      policy?: components["schemas"]["ToolPolicy"];
+    };
+    /**
+     * @description Status of the cancel operation
+     * @enum {string}
+     */
+    CancelStatus: "cancelled" | "no_op";
+    /** @description Response from cancel turn endpoint */
+    CancelTurnResponse: {
+      /**
+       * @description Human-readable message
+       * @example Turn cancelled successfully
+       */
+      message: string;
+      /** @description Whether the cancellation was performed or was a no-op */
+      status: components["schemas"]["CancelStatus"];
+    };
+    /**
+     * @description Public capability information (without internal details)
+     *     This is what gets returned from the API
+     *     Named CapabilityInfo to distinguish from the Capability trait
+     */
+    CapabilityInfo: {
+      /**
+       * Format: int64
+       * @description Number of active agents referencing this capability in the org.
+       */
+      agent_count?: number;
+      /** @description Category for grouping in UI */
+      category?: string | null;
+      /** @description JSON Schema for capability-specific per-agent config. */
+      config_schema?: Record<string, never>;
+      /** @description react-jsonschema-form uiSchema hints for rendering config_schema. */
+      config_ui_schema?: Record<string, never>;
+      /**
+       * @description IDs of capabilities that this capability depends on.
+       *     When this capability is selected, its dependencies are automatically included.
+       */
+      dependencies?: string[];
+      /** @description Description of what this capability provides */
+      description: string;
+      /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+      docs_slug?: string | null;
+      /**
+       * @description UI feature strings this capability contributes to.
+       *     Multiple capabilities can contribute the same feature.
+       */
+      features?: string[];
+      /**
+       * Format: int64
+       * @description Number of active harnesses referencing this capability in the org.
+       */
+      harness_count?: number;
+      /** @description Icon name (for UI rendering) */
+      icon?: string | null;
+      /** @description Unique capability identifier */
+      id: string;
+      /** @description Whether this is an MCP server capability (for UI badge) */
+      is_mcp?: boolean;
+      /** @description Whether this is an Agent Skill capability (for UI badge) */
+      is_skill?: boolean;
+      /** @description Display name */
+      name: string;
+      /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
+      risk_level?: components["schemas"]["RiskLevel"];
+      /** @description Current status */
+      status: string;
+      /** @description System prompt addition contributed by this capability */
+      system_prompt?: string | null;
+      /** @description Tool definitions provided by this capability */
+      tool_definitions?: Record<string, never>[];
+    };
+    /**
+     * @description Client-side tool - executed by the client, not the server
+     *     The server pauses execution and waits for the client to submit results.
+     */
+    ClientSideTool: {
+      /** @description Category for tool_search namespace grouping (from parent capability) */
+      category?: string | null;
+      /** @description Whether this tool's schema can be deferred via tool_search */
+      deferrable?: components["schemas"]["DeferrablePolicy"];
+      /** @description Tool description for LLM */
+      description: string;
+      /** @description Human-readable display name for UI rendering */
+      display_name?: string | null;
+      /** @description Semantic hints describing the tool's behavioral properties */
+      hints?: components["schemas"]["ToolHints"];
+      /** @description Tool name (used by LLM and for correlation) */
+      name: string;
+      /** @description JSON schema for tool parameters */
+      parameters: unknown;
+    };
+    /** @description A single tool result from the client */
+    ClientToolResult: {
+      /** @description Error message if the tool failed */
+      error?: string | null;
+      /** @description Result value (JSON). Null if the tool failed. */
+      result?: unknown;
+      /** @description Tool call ID (correlates with the tool call from tool.call_requested event) */
+      tool_call_id: string;
+    };
+    /** @description Request to create a commit */
+    CommitRequest: {
+      /** @description Author email (defaults to "agent@everruns.local") */
+      author_email?: string | null;
+      /** @description Author name (defaults to "Agent") */
+      author_name?: string | null;
+      /** @description Branch name (defaults to "refs/heads/main"); short names like "main" are normalized */
+      branch?: string | null;
+      /** @description Commit message */
+      message: string;
+    };
+    /** @description Result of a commit operation */
+    CommitResult: {
+      objects_created: number;
+      oid: string;
+      tree_oid: string;
+    };
+    /**
+     * @description Reason why compaction was triggered.
+     * @enum {string}
+     */
+    CompactionReason: "proactive_budget" | "request_too_large" | "manual";
+    /** @description A single step in a compaction cascade. */
+    CompactionStepData: {
+      /**
+       * Format: int64
+       * @description Duration of this step in milliseconds.
+       */
+      duration_ms: number;
+      /** @description Number of messages after this step. */
+      messages_after: number;
+      /** @description Strategy used in this step. */
+      strategy: string;
+    };
+    /**
+     * @description A part of message content - can be text, image, image_file, tool_call, or tool_result
+     *
+     *     This is the canonical content part type used across the system.
+     *     API layer enables the "openapi" feature to add ToSchema derive.
+     */
+    ContentPart:
+      | (components["schemas"]["TextContentPart"] & {
+          /** @enum {string} */
+          type: "text";
+        })
+      | (components["schemas"]["ImageContentPart"] & {
+          /** @enum {string} */
+          type: "image";
+        })
+      | (components["schemas"]["ImageFileContentPart"] & {
+          /** @enum {string} */
+          type: "image_file";
+        })
+      | (components["schemas"]["ToolCallContentPart"] & {
+          /** @enum {string} */
+          type: "tool_call";
+        })
+      | (components["schemas"]["ToolResultContentPart"] & {
+          /** @enum {string} */
+          type: "tool_result";
         });
-        /** @description Data for context.compacted event (compaction completed). */
-        ContextCompactedData: {
-            /**
-             * Format: int64
-             * @description Total duration of all compaction steps in milliseconds.
-             */
-            duration_ms: number;
-            /** @description Number of messages after compaction. */
-            messages_after: number;
-            /** @description Number of messages before compaction. */
-            messages_before: number;
-            /** @description Individual steps in the cascade. */
-            steps?: components["schemas"]["CompactionStepData"][];
-            /** @description Combined strategy description (e.g., "observation_masking+native"). */
-            strategy_used: string;
-        };
-        /** @description Data for context.compacting event (compaction starting). */
-        ContextCompactingData: {
-            /** @description Number of messages before compaction. */
-            messages_before: number;
-            /** @description Why compaction was triggered. */
-            reason: components["schemas"]["CompactionReason"];
-            /** @description Strategy requested (may differ from strategy_used in the completed event). */
-            strategy: string;
-        };
-        /** @description Runtime controls for message processing */
-        Controls: {
-            /**
-             * @description Generic client hints — arbitrary key-value pairs declared by the client.
-             *     Session-level defaults are set at session creation; per-message values
-             *     override session hints key-by-key (shallow merge).
-             *
-             *     Examples: `{"setup_connection": true, "rich_media": true}`
-             */
-            hints?: Record<string, never> | null;
-            /**
-             * @description Locale override for this message turn (BCP 47, e.g. `uk-UA`).
-             *     Overrides the session locale for backend-authored strings and prompts.
-             */
-            locale?: string | null;
-            /**
-             * @description Model ID to use for this message (format: model_{32-hex}).
-             *     Overrides session and agent model settings.
-             * @example model_01933b5a00007000800000000000001
-             */
-            model_id?: string | null;
-            reasoning?: null | components["schemas"]["ReasoningConfig"];
-        };
-        /** @description Request to copy a file */
-        CopyFileRequest: {
-            /** @description Destination path */
-            dst_path: string;
-            /** @description Source path */
-            src_path: string;
-        };
-        /**
-         * @description A pricing tier that activates above a context token threshold.
-         *     For example, OpenAI charges higher rates for prompts exceeding 200K tokens.
-         */
-        CostTier: {
-            /**
-             * Format: int32
-             * @description Context token threshold above which this tier applies
-             */
-            above_tokens: number;
-            /**
-             * Format: double
-             * @description Cached read cost per million tokens (USD) for this tier, if supported
-             */
-            cache_read?: number | null;
-            /**
-             * Format: double
-             * @description Input cost per million tokens (USD) for this tier
-             */
-            input: number;
-            /**
-             * Format: double
-             * @description Output cost per million tokens (USD) for this tier
-             */
-            output: number;
-        };
-        /** @description Request to create a new agent */
-        CreateAgentRequest: {
-            /**
-             * @description Capabilities to enable for this agent with per-agent configuration.
-             *     Each capability has a `ref` (capability ID) and optional `config`.
-             * @example [
-             *       {
-             *         "config": {},
-             *         "ref": "current_time"
-             *       },
-             *       {
-             *         "config": {},
-             *         "ref": "web_fetch"
-             *       }
-             *     ]
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * @description The ID of the default LLM model to use for this agent.
-             *     If not specified, the system default model will be used.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * @description A human-readable description of what the agent does.
-             * @example Handles customer inquiries and support tickets
-             */
-            description?: string | null;
-            /**
-             * @description Human-readable display name shown in UI.
-             *     Falls back to `name` when absent.
-             * @example Customer Support Agent
-             */
-            display_name?: string | null;
-            /**
-             * @description Client-supplied agent ID (format: agent_{32-hex}).
-             *     If not provided, one is auto-generated.
-             * @example agent_01933b5a00007000800000000000001
-             */
-            id?: string | null;
-            /** @description Starter files copied into each new session for this agent. */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /** @description Maximum number of LLM iterations per turn for this agent. */
-            max_iterations?: number | null;
-            /**
-             * @description Name, unique per org. Lowercase alphanumeric and hyphens.
-             *     Format: lowercase alphanumeric and hyphens (e.g. "customer-support").
-             * @example customer-support
-             */
-            name: string;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /**
-             * @description The system prompt that defines the agent's behavior and capabilities.
-             *     This is sent as the first message in every conversation.
-             * @example You are a helpful customer support agent. Be polite and professional.
-             */
-            system_prompt: string;
-            /**
-             * @description Tags for organizing and filtering agents.
-             * @example [
-             *       "support",
-             *       "customer-facing"
-             *     ]
-             */
-            tags?: string[];
-            /**
-             * @description Client-side tools for this agent.
-             *     These tools are sent to the LLM but executed by the client, not the server.
-             */
-            tools?: components["schemas"]["ToolDefinition"][];
-        };
-        /** @description Request to create a branch */
-        CreateBranchRequest: {
-            /** @description Commit OID (hex) to point to */
-            commit_oid: string;
-            /** @description Branch name (e.g., "feature-xyz") */
-            name: string;
-        };
-        /** @description Request body for creating a database. */
-        CreateDatabaseRequest: {
-            /** @description Database name (alphanumeric + underscores, max 64 chars) */
-            name: string;
-        };
-        /** @description Request to create a file */
-        CreateFileRequest: {
-            /** @description File content (text or base64-encoded) */
-            content?: string | null;
-            /** @description Content encoding: "text" or "base64" */
-            encoding?: string | null;
-            /** @description Whether to create a directory instead of a file */
-            is_directory?: boolean | null;
-            /** @description Whether file is read-only */
-            is_readonly?: boolean | null;
-        };
-        /** @description Request to create a new harness */
-        CreateHarnessRequest: {
-            /**
-             * @description Capabilities to enable with per-harness configuration.
-             * @example [
-             *       {
-             *         "config": {},
-             *         "ref": "current_time"
-             *       },
-             *       {
-             *         "config": {},
-             *         "ref": "web_fetch"
-             *       }
-             *     ]
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * @description Default LLM model ID for this harness. Lowest priority in model chain.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * @description Description of what the harness does.
-             * @example Research harness with planning and web capabilities
-             */
-            description?: string | null;
-            /**
-             * @description Human-readable display name shown in UI.
-             * @example Deep Research
-             */
-            display_name?: string | null;
-            /** @description Starter files copied into each new session for this harness. */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /**
-             * @description Name, unique per org. Lowercase alphanumeric and hyphens.
-             * @example deep-research
-             */
-            name: string;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /**
-             * @description Optional parent harness to inherit from.
-             * @example harness_01933b5a000070008000000000000602
-             */
-            parent_harness_id?: string | null;
-            /**
-             * @description The system prompt defining the harness's base behavior.
-             * @example You are a research assistant with deep analytical capabilities.
-             */
-            system_prompt: string;
-            /**
-             * @description Tags for organizing harnesses.
-             * @example [
-             *       "research",
-             *       "planning"
-             *     ]
-             */
-            tags?: string[];
-        };
-        /** @description Request to create a new LLM model for a provider */
-        CreateLlmModelRequest: {
-            /**
-             * @description List of capabilities this model supports (e.g., "chat", "vision", "tools").
-             * @example [
-             *       "chat",
-             *       "vision",
-             *       "tools"
-             *     ]
-             */
-            capabilities?: string[];
-            /**
-             * @description Human-readable display name for the model.
-             * @example GPT-4o
-             */
-            display_name: string;
-            /**
-             * @description Whether this model should be enabled (visible in UI model pickers).
-             * @example false
-             */
-            enabled?: boolean;
-            /**
-             * @description Whether this model should be marked as a favorite for quick access.
-             * @example false
-             */
-            is_favorite?: boolean;
-            /**
-             * @description The model identifier used by the provider's API (e.g., "gpt-4", "claude-3-opus").
-             * @example gpt-4o
-             */
-            model_id: string;
-        };
-        /** @description Request to create a new LLM provider */
-        CreateLlmProviderRequest: {
-            /**
-             * @description API key for authenticating with the provider.
-             *     Will be encrypted at rest if encryption is configured.
-             */
-            api_key?: string | null;
-            /**
-             * @description Base URL for the provider's API. Required for custom endpoints.
-             *     For standard providers, this can be omitted to use the default URL.
-             * @example https://api.openai.com/v1
-             */
-            base_url?: string | null;
-            /**
-             * @description Display name for the provider.
-             * @example OpenAI Production
-             */
-            name: string;
-            /** @description The type of LLM provider (e.g., openai, anthropic). */
-            provider_type: components["schemas"]["LlmProviderType"];
-        };
-        /** @description Request to create a new MCP server */
-        CreateMcpServerRequest: {
-            /** @description API key for authentication (optional). */
-            api_key?: string | null;
-            auth_mode?: null | components["schemas"]["McpServerAuthMode"];
-            /**
-             * @description A human-readable description of what the MCP server provides.
-             * @example Atlassian MCP Server for Jira and Confluence
-             */
-            description?: string | null;
-            /** @description Additional HTTP headers for authentication. */
-            headers?: {
-                [key: string]: string;
-            } | null;
-            /**
-             * @description The name of the MCP server. Must be unique.
-             * @example atlassian-mcp-server
-             */
-            name: string;
-            /** @description Transport type. Currently only "http" is supported. */
-            transport_type?: components["schemas"]["McpServerTransportType"];
-            /**
-             * @description The URL of the MCP server endpoint.
-             * @example https://mcp.atlassian.com/v1/mcp
-             */
-            url: string;
-        };
-        /** @description Request to create a message */
-        CreateMessageRequest: {
-            controls?: null | components["schemas"]["Controls"];
-            external_actor?: null | components["schemas"]["ExternalActor"];
-            /** @description The message to create */
-            message: components["schemas"]["InputMessage"];
-            /** @description Request-level metadata */
-            metadata?: {
-                [key: string]: unknown;
-            } | null;
-            /** @description Tags for the message */
-            tags?: string[] | null;
-        };
-        /** @description Request to create a new organization */
-        CreateOrganizationRequest: {
-            /**
-             * @description The display name of the organization.
-             * @example Acme Corp
-             */
-            name: string;
-        };
-        /** @description Create schedule request */
-        CreateScheduleRequest: {
-            /** @description Whether to catch up missed triggers (default: false) */
-            catch_up_missed?: boolean;
-            /** @description Cron expression (5-field or 7-field) */
-            cron_expression: string;
-            /** @description Optional description */
-            description?: string | null;
-            /** @description Whether schedule is enabled (default: true) */
-            enabled?: boolean;
-            /**
-             * Format: int32
-             * @description Max catch-up executions
-             */
-            max_catch_up?: number | null;
-            /**
-             * Format: int32
-             * @description Max concurrent executions
-             */
-            max_concurrent?: number | null;
-            /** @description Unique name for the schedule */
-            name: string;
-            /** @description Retry policy for failed executions */
-            retry_policy?: unknown;
-            /** @description Target to trigger */
-            target: components["schemas"]["ScheduleTarget"];
-            /** @description Timezone (default: UTC) */
-            timezone?: string;
-        };
-        /** @description Request to create a session */
-        CreateSessionRequest: {
-            /**
-             * @description ID of the agent to work in this session (optional, format: agent_{32-hex}).
-             * @example agent_01933b5a00007000800000000000001
-             */
-            agent_id?: string | null;
-            /**
-             * @description Optional resident agent identity used for unattended/background execution.
-             * @example identity_01933b5a00007000800000000000001
-             */
-            agent_identity_id?: string | null;
-            /**
-             * @description Session-level capabilities (additive to agent capabilities).
-             *     Applied after agent capabilities when building RuntimeAgent.
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * @description ID of the harness for this session (format: harness_{32-hex}).
-             *     If omitted, the org default harness is used. New orgs default that to Generic.
-             *     Mutually exclusive with `harness_name`.
-             * @example harness_01933b5a00007000800000000000001
-             */
-            harness_id?: string | null;
-            /**
-             * @description Harness name (e.g. "generic", "deep-research").
-             *     Alternative to `harness_id` — looked up by name within the org.
-             *     Mutually exclusive with `harness_id`.
-             * @example generic
-             */
-            harness_name?: string | null;
-            /**
-             * @description Session-level client hints — arbitrary key-value pairs that tell the
-             *     server what the client can handle. These are defaults for every turn;
-             *     per-message `controls.hints` override these key-by-key (shallow merge).
-             *
-             *     Examples: `{"setup_connection": true, "rich_media": true}`
-             */
-            hints?: Record<string, never> | null;
-            /**
-             * @description Session-level initial files (additive to agent initial_files).
-             *     Files with matching paths override agent/harness files; new paths are appended.
-             */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /**
-             * @description Session locale (BCP 47, e.g. `uk-UA`).
-             * @example uk-UA
-             */
-            locale?: string | null;
-            /** @description Maximum number of LLM iterations per turn for this session. */
-            max_iterations?: number | null;
-            /**
-             * @description The ID of the LLM model to use for this session.
-             *     Overrides the agent's default model if specified.
-             * @example model_01933b5a00007000800000000000001
-             */
-            model_id?: string | null;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /**
-             * @description Optional session-level system prompt override.
-             *     Prepended to the agent's system prompt when building RuntimeAgent.
-             */
-            system_prompt?: string | null;
-            /**
-             * @description Tags for organizing and filtering sessions.
-             * @example [
-             *       "debugging",
-             *       "urgent"
-             *     ]
-             */
-            tags?: string[];
-            /**
-             * @description Human-readable title for the session.
-             * @example Debug login issue
-             */
-            title?: string | null;
-            /**
-             * @description Client-side tools for this session (additive to agent tools).
-             *     These tools are sent to the LLM but executed by the client.
-             */
-            tools?: components["schemas"]["ToolDefinition"][];
-        };
-        /** @description Request to create a skill from SKILL.md content */
-        CreateSkillRequest: {
-            /**
-             * @description Full SKILL.md content (YAML frontmatter + markdown body)
-             * @example ---
-             *     name: pdf-processing
-             *     description: Extract text from PDFs.
-             *     ---
-             *
-             *     # PDF Processing
-             *
-             *     Use pdfplumber...
-             */
-            skill_md: string;
-        };
-        /** @description Database info response. */
-        DatabaseInfoResponse: {
-            created_at: string;
-            name: string;
-            /** Format: int32 */
-            page_count: number;
-            /** Format: int64 */
-            size_bytes: number;
-            updated_at: string;
-        };
-        /**
-         * @description Controls whether a tool's full schema can be deferred (tool_search).
-         *
-         *     When tool_search is active and a model supports it, tools marked as
-         *     `Automatic` or `Always` will have `defer_loading: true` set, meaning
-         *     only the name+description are sent upfront and full parameter schemas
-         *     are loaded on-demand by the model.
-         * @enum {string}
-         */
-        DeferrablePolicy: "never" | "automatic" | "always";
-        /** @description Query parameters for DELETE requests */
-        DeleteQuery: {
-            /** @description Whether to delete recursively */
-            recursive?: boolean;
-        };
-        /** @description Response for delete operation */
-        DeleteResponse: {
-            deleted: boolean;
-        };
-        /** @description Query for diff endpoint */
-        DiffQuery: {
-            /** @description Base commit OID (optional, defaults to parent) */
-            base?: string | null;
-            /** @description Commit OID to diff (required) */
-            oid: string;
-        };
-        /** @description Standard error response for API endpoints. */
-        ErrorResponse: {
-            /** @description Error message describing what went wrong. */
-            error: string;
-        };
-        /**
-         * @description Standard event following the Everruns event protocol.
-         *
-         *     All events have a consistent structure:
-         *     - `id`: Unique event identifier (format: event_{32-hex})
-         *     - `type`: Event type in dot notation (e.g., "input.message", "reason.started")
-         *     - `ts`: ISO 8601 timestamp with millisecond precision
-         *     - `session_id`: Session this event belongs to (format: session_{32-hex})
-         *     - `context`: Correlation context for tracing
-         *     - `data`: Event-specific payload (typed via EventData enum)
-         *     - `metadata`: Optional arbitrary metadata
-         *     - `tags`: Optional list of tags for filtering
-         */
-        Event: {
-            /** @description Correlation context */
-            context: components["schemas"]["EventContext"];
-            /**
-             * @description Event-specific payload. The schema depends on the event type.
-             *     See EventData documentation for the mapping of type to data schema.
-             */
-            data: components["schemas"]["EventData"];
-            /**
-             * @description Unique event identifier (format: event_{32-hex})
-             * @example event_01933b5a00007000800000000000001
-             */
-            id: string;
-            /** @description Arbitrary metadata for the event */
-            metadata?: unknown;
-            /**
-             * Format: int32
-             * @description Sequence number within session (for ordering)
-             */
-            sequence?: number | null;
-            /**
-             * @description Session this event belongs to (format: session_{32-hex})
-             * @example session_01933b5a00007000800000000000001
-             */
-            session_id: string;
-            /** @description Tags for filtering and categorization */
-            tags?: string[] | null;
-            /**
-             * Format: date-time
-             * @description Event timestamp
-             */
-            ts: string;
-            /** @description Event type in dot notation */
-            type: string;
-        };
-        /**
-         * @description Context for event correlation and tracing
-         *
-         *     Uses OpenTelemetry-style trace/span IDs for observability correlation:
-         *     - `trace_id`: Root of the trace (typically the turn_id string)
-         *     - `span_id`: This event's unique span identifier
-         *     - `parent_span_id`: The parent span's identifier for hierarchical linking
-         */
-        EventContext: {
-            /**
-             * @description Atom execution identifier
-             * @example exec_01933b5a00007000800000000000001
-             */
-            exec_id?: string | null;
-            /**
-             * @description User message that triggered this turn
-             * @example message_01933b5a00007000800000000000001
-             */
-            input_message_id?: string | null;
-            /**
-             * @description Parent span ID for hierarchical linking (OTel-style).
-             *     Links this span to its parent in the trace hierarchy.
-             */
-            parent_span_id?: string | null;
-            /**
-             * @description This event's span ID for observability (OTel-style).
-             *     Uniquely identifies this span within the trace.
-             */
-            span_id?: string | null;
-            /**
-             * @description Trace ID for observability (OTel-style). Groups related spans into a single trace.
-             *     For agent turns, this is typically the turn_id string.
-             */
-            trace_id?: string | null;
-            /**
-             * @description Turn identifier (for turn-scoped events)
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id?: string | null;
-        };
-        /**
-         * EventData
-         * @description Event-specific payload. The schema depends on the event type field.
-         * @example {
-         *       "message": {
-         *         "content": [],
-         *         "id": "...",
-         *         "role": "user"
-         *       }
-         *     }
-         */
-        EventData: components["schemas"]["InputMessageData"] | components["schemas"]["OutputMessageDeltaData"] | components["schemas"]["OutputMessageStartedData"] | components["schemas"]["OutputMessageCompletedData"] | components["schemas"]["TurnStartedData"] | components["schemas"]["TurnCompletedData"] | components["schemas"]["TurnFailedData"] | components["schemas"]["ReasonStartedData"] | components["schemas"]["ReasonCompletedData"] | components["schemas"]["ActStartedData"] | components["schemas"]["ActCompletedData"] | components["schemas"]["ToolStartedData"] | components["schemas"]["ToolCompletedData"] | components["schemas"]["ToolProgressData"] | components["schemas"]["ToolOutputDeltaData"] | components["schemas"]["ToolCallRequestedData"] | components["schemas"]["LlmGenerationData"] | components["schemas"]["ReasonThinkingDeltaData"] | components["schemas"]["ReasonThinkingStartedData"] | components["schemas"]["ReasonThinkingCompletedData"] | components["schemas"]["TurnCancelledData"] | components["schemas"]["SessionStartedData"] | components["schemas"]["SessionActivatedData"] | components["schemas"]["SessionIdledData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["ContextCompactingData"] | components["schemas"]["ContextCompactedData"] | components["schemas"]["FileWrittenData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"];
-        /**
-         * @description Execution phase for assistant messages in multi-step tool-calling flows.
-         *
-         *     Providers that natively support phases (OpenAI GPT-5.x) send the phase value
-         *     directly in the API request. For providers without native support (Anthropic,
-         *     Gemini), the phase is still tracked internally and derived from state in the
-         *     ReasonAtom, but is not sent to the provider API.
-         *
-         *     Serialized as lowercase strings for backward compatibility with existing
-         *     persisted messages: `"commentary"` and `"final_answer"`.
-         *
-         *     Legacy values `"in_progress"` and `"completed"` are accepted during
-         *     deserialization for backward compatibility.
-         * @enum {string}
-         */
-        ExecutionPhase: "Commentary" | "FinalAnswer";
-        /**
-         * @description External actor identity for messages originating from external channels
-         *     (Slack, Discord, Teams, etc.).
-         *
-         *     Channel adapters populate this to identify the sender without coupling
-         *     core logic to any specific channel. The ReasonAtom uses this to prefix
-         *     user messages so the LLM knows who is speaking.
-         */
-        ExternalActor: {
-            /** @description Opaque actor identifier from the source channel (e.g. Slack user ID "U0123456789") */
-            actor_id: string;
-            /** @description Resolved display name (e.g. "Alice"). Falls back to actor_id if absent. */
-            actor_name?: string | null;
-            /** @description Channel-specific metadata (e.g. team_id, channel_id) */
-            metadata?: {
-                [key: string]: string;
-            } | null;
-            /** @description Source channel identifier (e.g. "slack", "discord") */
-            source: string;
-        };
-        /** @description File metadata without content */
-        FileInfo: {
-            /** Format: date-time */
-            created_at: string;
-            /** Format: uuid */
-            id: string;
-            is_directory: boolean;
-            is_readonly: boolean;
-            name: string;
-            path: string;
-            /** Format: uuid */
-            session_id: string;
-            /** Format: int64 */
-            size_bytes: number;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        /** @description File stat information */
-        FileStat: {
-            /** Format: date-time */
-            created_at: string;
-            is_directory: boolean;
-            is_readonly: boolean;
-            name: string;
-            path: string;
-            /** Format: int64 */
-            size_bytes: number;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        /** @description Data for file.written events emitted when files are written to the session filesystem. */
-        FileWrittenData: {
-            /** @description Whether this is a new file (true) or an update to an existing file (false). */
-            created: boolean;
-            /** @description Operation type (see `FILE_OP_*` constants). */
-            operation: string;
-            /** @description File path within the session filesystem (normalized, e.g. "/reports/summary.md"). */
-            path: string;
-            /**
-             * Format: int64
-             * @description File size in bytes after write.
-             */
-            size_bytes: number;
-        };
-        GetOrCreateChatSessionRequest: {
-            /** @description Browser locale for seeding the global chat session (BCP 47, e.g. `uk-UA`). */
-            locale?: string | null;
-        };
-        /** @description Query parameters for GET requests */
-        GetQuery: {
-            /** @description For directories: whether to list recursively */
-            recursive?: boolean;
-        };
-        /** @description Unified response for GET that can be file or directory listing */
-        GetResponse: components["schemas"]["SessionFile"] | components["schemas"]["ListResponse_FileInfo"];
-        /** @description A commit entry in the log */
-        GitCommitInfo: {
-            author_email: string;
-            author_name: string;
-            message: string;
-            oid: string;
-            parent_oids: string[];
-            /** Format: date-time */
-            timestamp: string;
-        };
-        /** @description A diff with full patch output */
-        GitDiff: {
-            entries: components["schemas"]["GitDiffEntry"][];
-            patch?: string | null;
-            stats: components["schemas"]["GitDiffStats"];
-        };
-        /** @description A diff entry between two commits */
-        GitDiffEntry: {
-            old_path?: string | null;
-            path: string;
-            status: string;
-        };
-        /** @description Diff statistics */
-        GitDiffStats: {
-            deletions: number;
-            files_changed: number;
-            insertions: number;
-        };
-        /** @description A git ref (branch pointer) */
-        GitRefInfo: {
-            is_symbolic: boolean;
-            name: string;
-            target: string;
-        };
-        /** @description Grep match result */
-        GrepMatch: {
-            line: string;
-            line_number: number;
-            path: string;
-        };
-        /** @description Request to search files */
-        GrepRequest: {
-            /** @description Optional path pattern to filter files */
-            path_pattern?: string | null;
-            /** @description Regex pattern to search for */
-            pattern: string;
-        };
-        /** @description Grep result for a file */
-        GrepResult: {
-            matches: components["schemas"]["GrepMatch"][];
-            path: string;
-        };
-        /**
-         * @description Harness configuration for sessions.
-         *     A harness defines the base behavior and capabilities that apply to all sessions.
-         */
-        Harness: {
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was archived.
-             */
-            archived_at?: string | null;
-            /** @description Capabilities enabled for this harness with per-harness configuration. */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was created.
-             */
-            created_at: string;
-            /**
-             * @description Default LLM model ID for this harness.
-             *     Lowest priority in chain: controls > session > agent > harness.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was deleted.
-             */
-            deleted_at?: string | null;
-            /** @description Human-readable description of what the harness does. */
-            description?: string | null;
-            /** @description Human-readable display name shown in UI. */
-            display_name?: string | null;
-            /**
-             * @description Unique identifier for the harness (format: harness_{32-hex}).
-             * @example harness_01933b5a00007000800000000000001
-             */
-            id: string;
-            /** @description Starter files copied into each new session for this harness. */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /**
-             * @description Whether this harness is built-in (system-managed, readonly).
-             *     Built-in harnesses are provisioned during org initialization and
-             *     cannot be modified or deleted via the API. Users can copy them.
-             */
-            is_built_in?: boolean;
-            /** @description Name, unique per org (e.g. "generic"). */
-            name: string;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /**
-             * @description Optional parent harness that this harness inherits from.
-             * @example harness_01933b5a000070008000000000000602
-             */
-            parent_harness_id?: string | null;
-            /** @description Current lifecycle status of the harness. */
-            status: components["schemas"]["HarnessStatus"];
-            /**
-             * @description System prompt that defines the harness's base behavior.
-             *     Forms the foundation of the prompt stack.
-             */
-            system_prompt: string;
-            /** @description Tags for organizing and filtering harnesses. */
-            tags?: string[];
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was last updated.
-             */
-            updated_at: string;
-        };
-        /** @description Preview response showing merged prompt and tools */
-        HarnessPreviewResponse: {
-            system_prompt: string;
-            tools: Record<string, never>[];
-        };
-        /**
-         * @description Harness lifecycle status.
-         *     - `active`: Harness is available for use
-         *     - `archived`: Harness is hidden from listings and cannot be modified or assigned
-         *     - `deleted`: Harness is a tombstone kept only for historical references
-         * @enum {string}
-         */
-        HarnessStatus: "active" | "archived" | "deleted";
-        /** @description Image content part (base64 or URL) */
-        ImageContentPart: {
-            base64?: string | null;
-            media_type?: string | null;
-            url?: string | null;
-        };
-        /**
-         * @description Image file content part (reference to uploaded image)
-         *
-         *     This is used for images uploaded via the /images API.
-         *     The image data is stored separately and referenced by ID.
-         *     Note: Currently filtered out before sending to LLM.
-         */
-        ImageFileContentPart: {
-            /** @description Original filename (for display) */
-            filename?: string | null;
-            /**
-             * @description ID of the uploaded image (format: img_{32-hex})
-             * @example img_01933b5a00007000800000000000001
-             */
-            image_id: string;
-        };
-        /** @description Image metadata (without binary data) */
-        ImageInfo: {
-            content_type: string;
-            /** Format: date-time */
-            created_at: string;
-            filename: string;
-            /** Format: uuid */
-            id: string;
-            metadata: unknown;
-            /** Format: int64 */
-            size_bytes: number;
-        };
-        /** @description Image upload response */
-        ImageUploadResponse: {
-            content_type: string;
-            /** Format: date-time */
-            created_at: string;
-            filename: string;
-            /** Format: uuid */
-            id: string;
-            /** Format: int64 */
-            size_bytes: number;
-        };
-        /** @description Starter file copied into a new session from an agent or harness. */
-        InitialFile: {
-            /** @description File content: plain text or base64-encoded binary. */
-            content: string;
-            /** @description Content encoding: `text` or `base64`. */
-            encoding?: string;
-            /** @description Prevent session-side edits or deletes when true. */
-            is_readonly?: boolean;
-            /** @description Absolute path within the session workspace. `/workspace` prefix is accepted. */
-            path: string;
-        };
-        /**
-         * @description Input content part - text, image, and image_file (for user input)
-         *
-         *     This is a subset of ContentPart that users can send.
-         *     Tool calls and results are system-generated.
-         */
-        InputContentPart: (components["schemas"]["TextContentPart"] & {
-            /** @enum {string} */
-            type: "text";
-        }) | (components["schemas"]["ImageContentPart"] & {
-            /** @enum {string} */
-            type: "image";
-        }) | (components["schemas"]["ImageFileContentPart"] & {
-            /** @enum {string} */
-            type: "image_file";
+    /** @description Data for context.compacted event (compaction completed). */
+    ContextCompactedData: {
+      /**
+       * Format: int64
+       * @description Total duration of all compaction steps in milliseconds.
+       */
+      duration_ms: number;
+      /** @description Number of messages after compaction. */
+      messages_after: number;
+      /** @description Number of messages before compaction. */
+      messages_before: number;
+      /** @description Individual steps in the cascade. */
+      steps?: components["schemas"]["CompactionStepData"][];
+      /** @description Combined strategy description (e.g., "observation_masking+native"). */
+      strategy_used: string;
+    };
+    /** @description Data for context.compacting event (compaction starting). */
+    ContextCompactingData: {
+      /** @description Number of messages before compaction. */
+      messages_before: number;
+      /** @description Why compaction was triggered. */
+      reason: components["schemas"]["CompactionReason"];
+      /** @description Strategy requested (may differ from strategy_used in the completed event). */
+      strategy: string;
+    };
+    ContextReportContribution: {
+      label: string;
+      section_key: string;
+      source_id: string;
+      /** Format: int32 */
+      tokens: number;
+    };
+    ContextReportSection: {
+      /** Format: int32 */
+      items: number;
+      key: string;
+      label: string;
+      /** Format: int32 */
+      tokens: number;
+    };
+    /** @description Runtime controls for message processing */
+    Controls: {
+      /**
+       * @description Generic client hints — arbitrary key-value pairs declared by the client.
+       *     Session-level defaults are set at session creation; per-message values
+       *     override session hints key-by-key (shallow merge).
+       *
+       *     Examples: `{"setup_connection": true, "rich_media": true}`
+       */
+      hints?: Record<string, never> | null;
+      /**
+       * @description Locale override for this message turn (BCP 47, e.g. `uk-UA`).
+       *     Overrides the session locale for backend-authored strings and prompts.
+       */
+      locale?: string | null;
+      /**
+       * @description Model ID to use for this message (format: model_{32-hex}).
+       *     Overrides session and agent model settings.
+       * @example model_01933b5a00007000800000000000001
+       */
+      model_id?: string | null;
+      reasoning?: null | components["schemas"]["ReasoningConfig"];
+    };
+    /** @description Request to copy a file */
+    CopyFileRequest: {
+      /** @description Destination path */
+      dst_path: string;
+      /** @description Source path */
+      src_path: string;
+    };
+    /**
+     * @description A pricing tier that activates above a context token threshold.
+     *     For example, OpenAI charges higher rates for prompts exceeding 200K tokens.
+     */
+    CostTier: {
+      /**
+       * Format: int32
+       * @description Context token threshold above which this tier applies
+       */
+      above_tokens: number;
+      /**
+       * Format: double
+       * @description Cached read cost per million tokens (USD) for this tier, if supported
+       */
+      cache_read?: number | null;
+      /**
+       * Format: double
+       * @description Input cost per million tokens (USD) for this tier
+       */
+      input: number;
+      /**
+       * Format: double
+       * @description Output cost per million tokens (USD) for this tier
+       */
+      output: number;
+    };
+    /** @description Request to create a new agent */
+    CreateAgentRequest: {
+      /**
+       * @description Capabilities to enable for this agent with per-agent configuration.
+       *     Each capability has a `ref` (capability ID) and optional `config`.
+       * @example [
+       *       {
+       *         "config": {},
+       *         "ref": "current_time"
+       *       },
+       *       {
+       *         "config": {},
+       *         "ref": "web_fetch"
+       *       }
+       *     ]
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * @description The ID of the default LLM model to use for this agent.
+       *     If not specified, the system default model will be used.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * @description A human-readable description of what the agent does.
+       * @example Handles customer inquiries and support tickets
+       */
+      description?: string | null;
+      /**
+       * @description Human-readable display name shown in UI.
+       *     Falls back to `name` when absent.
+       * @example Customer Support Agent
+       */
+      display_name?: string | null;
+      /**
+       * @description Client-supplied agent ID (format: agent_{32-hex}).
+       *     If not provided, one is auto-generated.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      id?: string | null;
+      /** @description Starter files copied into each new session for this agent. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /** @description Maximum number of LLM iterations per turn for this agent. */
+      max_iterations?: number | null;
+      /** @description Remote MCP servers scoped to this agent. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /**
+       * @description Name, unique per org. Lowercase alphanumeric and hyphens.
+       *     Format: lowercase alphanumeric and hyphens (e.g. "customer-support").
+       * @example customer-support
+       */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description The system prompt that defines the agent's behavior and capabilities.
+       *     This is sent as the first message in every conversation.
+       * @example You are a helpful customer support agent. Be polite and professional.
+       */
+      system_prompt: string;
+      /**
+       * @description Tags for organizing and filtering agents.
+       * @example [
+       *       "support",
+       *       "customer-facing"
+       *     ]
+       */
+      tags?: string[];
+      /**
+       * @description Client-side tools for this agent.
+       *     These tools are sent to the LLM but executed by the client, not the server.
+       */
+      tools?: components["schemas"]["ToolDefinition"][];
+    };
+    /** @description Request to create a branch */
+    CreateBranchRequest: {
+      /** @description Commit OID (hex) to point to */
+      commit_oid: string;
+      /** @description Branch name (e.g., "feature-xyz") */
+      name: string;
+    };
+    /** @description Request body for creating a database. */
+    CreateDatabaseRequest: {
+      /** @description Database name (alphanumeric + underscores, max 64 chars) */
+      name: string;
+    };
+    /** @description Request to create a file */
+    CreateFileRequest: {
+      /** @description File content (text or base64-encoded) */
+      content?: string | null;
+      /** @description Content encoding: "text" or "base64" */
+      encoding?: string | null;
+      /** @description Whether to create a directory instead of a file */
+      is_directory?: boolean | null;
+      /** @description Whether file is read-only */
+      is_readonly?: boolean | null;
+    };
+    /** @description Request to create a new harness */
+    CreateHarnessRequest: {
+      /**
+       * @description Capabilities to enable with per-harness configuration.
+       * @example [
+       *       {
+       *         "config": {},
+       *         "ref": "current_time"
+       *       },
+       *       {
+       *         "config": {},
+       *         "ref": "web_fetch"
+       *       }
+       *     ]
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * @description Default LLM model ID for this harness. Lowest priority in model chain.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * @description Description of what the harness does.
+       * @example Research harness with planning and web capabilities
+       */
+      description?: string | null;
+      /**
+       * @description Human-readable display name shown in UI.
+       * @example Deep Research
+       */
+      display_name?: string | null;
+      /** @description Starter files copied into each new session for this harness. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /** @description Remote MCP servers scoped to this harness. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /**
+       * @description Name, unique per org. Lowercase alphanumeric and hyphens.
+       * @example deep-research
+       */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Optional parent harness to inherit from.
+       * @example harness_01933b5a000070008000000000000602
+       */
+      parent_harness_id?: string | null;
+      /**
+       * @description The system prompt defining the harness's base behavior.
+       * @example You are a research assistant with deep analytical capabilities.
+       */
+      system_prompt: string;
+      /**
+       * @description Tags for organizing harnesses.
+       * @example [
+       *       "research",
+       *       "planning"
+       *     ]
+       */
+      tags?: string[];
+    };
+    CreateKnowledgeBaseRequest: {
+      description?: string | null;
+      name: string;
+    };
+    CreateKnowledgeEntryRequest: {
+      body: string;
+      kind?: string | null;
+      tags?: string[] | null;
+      title: string;
+    };
+    /** @description Request to create a new LLM model for a provider */
+    CreateLlmModelRequest: {
+      /**
+       * @description List of capabilities this model supports (e.g., "chat", "vision", "tools").
+       * @example [
+       *       "chat",
+       *       "vision",
+       *       "tools"
+       *     ]
+       */
+      capabilities?: string[];
+      /**
+       * @description Human-readable display name for the model.
+       * @example GPT-4o
+       */
+      display_name: string;
+      /**
+       * @description Whether this model should be enabled (visible in UI model pickers).
+       * @example false
+       */
+      enabled?: boolean;
+      /**
+       * @description Whether this model should be marked as a favorite for quick access.
+       * @example false
+       */
+      is_favorite?: boolean;
+      /**
+       * @description The model identifier used by the provider's API (e.g., "gpt-4", "claude-3-opus").
+       * @example gpt-4o
+       */
+      model_id: string;
+    };
+    /** @description Request to create a new LLM provider */
+    CreateLlmProviderRequest: {
+      /**
+       * @description API key for authenticating with the provider.
+       *     Will be encrypted at rest if encryption is configured.
+       */
+      api_key?: string | null;
+      /**
+       * @description Base URL for the provider's API. Required for custom endpoints.
+       *     For standard providers, this can be omitted to use the default URL.
+       * @example https://api.openai.com/v1
+       */
+      base_url?: string | null;
+      /**
+       * @description Display name for the provider.
+       * @example OpenAI Production
+       */
+      name: string;
+      /** @description The type of LLM provider (e.g., openai, anthropic). */
+      provider_type: components["schemas"]["LlmProviderType"];
+    };
+    /** @description Request to create a new MCP server */
+    CreateMcpServerRequest: {
+      /** @description API key for authentication (optional). */
+      api_key?: string | null;
+      auth_mode?: null | components["schemas"]["McpServerAuthMode"];
+      /**
+       * @description A human-readable description of what the MCP server provides.
+       * @example Atlassian MCP Server for Jira and Confluence
+       */
+      description?: string | null;
+      /** @description Additional HTTP headers for authentication. */
+      headers?: {
+        [key: string]: string;
+      } | null;
+      /**
+       * @description The name of the MCP server. Must be unique.
+       * @example atlassian-mcp-server
+       */
+      name: string;
+      /** @description Transport type. Currently only "http" is supported. */
+      transport_type?: components["schemas"]["McpServerTransportType"];
+      /**
+       * @description The URL of the MCP server endpoint.
+       * @example https://mcp.atlassian.com/v1/mcp
+       */
+      url: string;
+    };
+    CreateMemoryStoreRequest: {
+      is_default?: boolean;
+      name: string;
+    };
+    /** @description Request to create a message */
+    CreateMessageRequest: {
+      controls?: null | components["schemas"]["Controls"];
+      external_actor?: null | components["schemas"]["ExternalActor"];
+      /** @description The message to create */
+      message: components["schemas"]["InputMessage"];
+      /** @description Request-level metadata */
+      metadata?: {
+        [key: string]: unknown;
+      } | null;
+      /** @description Tags for the message */
+      tags?: string[] | null;
+    };
+    /** @description Request to create a new organization */
+    CreateOrganizationRequest: {
+      /**
+       * @description The display name of the organization.
+       * @example Acme Corp
+       */
+      name: string;
+    };
+    /** @description Create schedule request */
+    CreateScheduleRequest: {
+      /** @description Whether to catch up missed triggers (default: false) */
+      catch_up_missed?: boolean;
+      /** @description Cron expression (5-field or 7-field) */
+      cron_expression: string;
+      /** @description Optional description */
+      description?: string | null;
+      /** @description Whether schedule is enabled (default: true) */
+      enabled?: boolean;
+      /**
+       * Format: int32
+       * @description Max catch-up executions
+       */
+      max_catch_up?: number | null;
+      /**
+       * Format: int32
+       * @description Max concurrent executions
+       */
+      max_concurrent?: number | null;
+      /** @description Unique name for the schedule */
+      name: string;
+      /** @description Retry policy for failed executions */
+      retry_policy?: unknown;
+      /** @description Target to trigger */
+      target: components["schemas"]["ScheduleTarget"];
+      /** @description Timezone (default: UTC) */
+      timezone?: string;
+    };
+    /** @description Request to create a session */
+    CreateSessionRequest: {
+      /**
+       * @description ID of the agent to work in this session (optional, format: agent_{32-hex}).
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /**
+       * @description Optional resident agent identity used for unattended/background execution.
+       * @example identity_01933b5a00007000800000000000001
+       */
+      agent_identity_id?: string | null;
+      /**
+       * @description Session-level capabilities (additive to agent capabilities).
+       *     Applied after agent capabilities when building RuntimeAgent.
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * @description ID of the harness for this session (format: harness_{32-hex}).
+       *     If omitted, the org default harness is used. New orgs default that to Generic.
+       *     Mutually exclusive with `harness_name`.
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id?: string | null;
+      /**
+       * @description Harness name (e.g. "generic", "deep-research").
+       *     Alternative to `harness_id` — looked up by name within the org.
+       *     Mutually exclusive with `harness_id`.
+       * @example generic
+       */
+      harness_name?: string | null;
+      /**
+       * @description Session-level client hints — arbitrary key-value pairs that tell the
+       *     server what the client can handle. These are defaults for every turn;
+       *     per-message `controls.hints` override these key-by-key (shallow merge).
+       *
+       *     Examples: `{"setup_connection": true, "rich_media": true}`
+       */
+      hints?: Record<string, never> | null;
+      /**
+       * @description Session-level initial files (additive to agent initial_files).
+       *     Files with matching paths override agent/harness files; new paths are appended.
+       */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /**
+       * @description Session locale (BCP 47, e.g. `uk-UA`).
+       * @example uk-UA
+       */
+      locale?: string | null;
+      /** @description Maximum number of LLM iterations per turn for this session. */
+      max_iterations?: number | null;
+      /** @description Remote MCP servers scoped to this session only. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /**
+       * @description The ID of the LLM model to use for this session.
+       *     Overrides the agent's default model if specified.
+       * @example model_01933b5a00007000800000000000001
+       */
+      model_id?: string | null;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Optional session-level system prompt override.
+       *     Prepended to the agent's system prompt when building RuntimeAgent.
+       */
+      system_prompt?: string | null;
+      /**
+       * @description Tags for organizing and filtering sessions.
+       * @example [
+       *       "debugging",
+       *       "urgent"
+       *     ]
+       */
+      tags?: string[];
+      /**
+       * @description Human-readable title for the session.
+       * @example Debug login issue
+       */
+      title?: string | null;
+      /**
+       * @description Client-side tools for this session (additive to agent tools).
+       *     These tools are sent to the LLM but executed by the client.
+       */
+      tools?: components["schemas"]["ToolDefinition"][];
+    };
+    /** @description Request to create a skill from SKILL.md content */
+    CreateSkillRequest: {
+      /**
+       * @description Full SKILL.md content (YAML frontmatter + markdown body)
+       * @example ---
+       *     name: pdf-processing
+       *     description: Extract text from PDFs.
+       *     ---
+       *
+       *     # PDF Processing
+       *
+       *     Use pdfplumber...
+       */
+      skill_md: string;
+    };
+    CreateVolumeRequest: {
+      description?: string | null;
+      name: string;
+    };
+    /** @description Database info response. */
+    DatabaseInfoResponse: {
+      created_at: string;
+      name: string;
+      /** Format: int32 */
+      page_count: number;
+      /** Format: int64 */
+      size_bytes: number;
+      updated_at: string;
+    };
+    /**
+     * @description Controls whether a tool's full schema can be deferred (tool_search).
+     *
+     *     When tool_search is active and a model supports it, tools marked as
+     *     `Automatic` or `Always` will have `defer_loading: true` set, meaning
+     *     only the name+description are sent upfront and full parameter schemas
+     *     are loaded on-demand by the model.
+     * @enum {string}
+     */
+    DeferrablePolicy: "never" | "automatic" | "always";
+    /** @description Query parameters for DELETE requests */
+    DeleteQuery: {
+      /** @description Whether to delete recursively */
+      recursive?: boolean;
+    };
+    /** @description Response for delete operation */
+    DeleteResponse: {
+      deleted: boolean;
+    };
+    /** @description Query for diff endpoint */
+    DiffQuery: {
+      /** @description Base commit OID (optional, defaults to parent) */
+      base?: string | null;
+      /** @description Commit OID to diff (required) */
+      oid: string;
+    };
+    /** @description Standard error response for API endpoints. */
+    ErrorResponse: {
+      /** @description Error message describing what went wrong. */
+      error: string;
+    };
+    /**
+     * @description Standard event following the Everruns event protocol.
+     *
+     *     All events have a consistent structure:
+     *     - `id`: Unique event identifier (format: event_{32-hex})
+     *     - `type`: Event type in dot notation (e.g., "input.message", "reason.started")
+     *     - `ts`: ISO 8601 timestamp with millisecond precision
+     *     - `session_id`: Session this event belongs to (format: session_{32-hex})
+     *     - `context`: Correlation context for tracing
+     *     - `data`: Event-specific payload (typed via EventData enum)
+     *     - `metadata`: Optional arbitrary metadata
+     *     - `tags`: Optional list of tags for filtering
+     */
+    Event: {
+      /** @description Correlation context */
+      context: components["schemas"]["EventContext"];
+      /**
+       * @description Event-specific payload. The schema depends on the event type.
+       *     See EventData documentation for the mapping of type to data schema.
+       */
+      data: components["schemas"]["EventData"];
+      /**
+       * @description Unique event identifier (format: event_{32-hex})
+       * @example event_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Arbitrary metadata for the event */
+      metadata?: unknown;
+      /**
+       * Format: int32
+       * @description Sequence number within session (for ordering)
+       */
+      sequence?: number | null;
+      /**
+       * @description Session this event belongs to (format: session_{32-hex})
+       * @example session_01933b5a00007000800000000000001
+       */
+      session_id: string;
+      /** @description Tags for filtering and categorization */
+      tags?: string[] | null;
+      /**
+       * Format: date-time
+       * @description Event timestamp
+       */
+      ts: string;
+      /** @description Event type in dot notation */
+      type: string;
+    };
+    /**
+     * @description Context for event correlation and tracing
+     *
+     *     Uses OpenTelemetry-style trace/span IDs for observability correlation:
+     *     - `trace_id`: Root of the trace (typically the turn_id string)
+     *     - `span_id`: This event's unique span identifier
+     *     - `parent_span_id`: The parent span's identifier for hierarchical linking
+     */
+    EventContext: {
+      /**
+       * @description Atom execution identifier
+       * @example exec_01933b5a00007000800000000000001
+       */
+      exec_id?: string | null;
+      /**
+       * @description User message that triggered this turn
+       * @example message_01933b5a00007000800000000000001
+       */
+      input_message_id?: string | null;
+      /**
+       * @description Parent span ID for hierarchical linking (OTel-style).
+       *     Links this span to its parent in the trace hierarchy.
+       */
+      parent_span_id?: string | null;
+      /**
+       * @description This event's span ID for observability (OTel-style).
+       *     Uniquely identifies this span within the trace.
+       */
+      span_id?: string | null;
+      /**
+       * @description Trace ID for observability (OTel-style). Groups related spans into a single trace.
+       *     For agent turns, this is typically the turn_id string.
+       */
+      trace_id?: string | null;
+      /**
+       * @description Turn identifier (for turn-scoped events)
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id?: string | null;
+    };
+    /**
+     * EventData
+     * @description Event-specific payload. The schema depends on the event type field.
+     * @example {
+     *       "message": {
+     *         "content": [],
+     *         "id": "...",
+     *         "role": "user"
+     *       }
+     *     }
+     */
+    EventData:
+      | components["schemas"]["InputMessageData"]
+      | components["schemas"]["OutputMessageDeltaData"]
+      | components["schemas"]["OutputMessageStartedData"]
+      | components["schemas"]["OutputMessageReplacedData"]
+      | components["schemas"]["OutputMessageCompletedData"]
+      | components["schemas"]["TurnStartedData"]
+      | components["schemas"]["TurnCompletedData"]
+      | components["schemas"]["TurnFailedData"]
+      | components["schemas"]["ReasonStartedData"]
+      | components["schemas"]["ReasonCompletedData"]
+      | components["schemas"]["ActStartedData"]
+      | components["schemas"]["ActCompletedData"]
+      | components["schemas"]["ToolStartedData"]
+      | components["schemas"]["ToolCompletedData"]
+      | components["schemas"]["ToolProgressData"]
+      | components["schemas"]["ToolOutputDeltaData"]
+      | components["schemas"]["ToolCallRequestedData"]
+      | components["schemas"]["LlmGenerationData"]
+      | components["schemas"]["ReasonThinkingDeltaData"]
+      | components["schemas"]["ReasonThinkingStartedData"]
+      | components["schemas"]["ReasonThinkingCompletedData"]
+      | components["schemas"]["TurnCancelledData"]
+      | components["schemas"]["SessionStartedData"]
+      | components["schemas"]["SessionActivatedData"]
+      | components["schemas"]["SessionIdledData"]
+      | components["schemas"]["SubagentEventData"]
+      | components["schemas"]["SubagentEventData"]
+      | components["schemas"]["SubagentEventData"]
+      | components["schemas"]["SubagentEventData"]
+      | components["schemas"]["ContextCompactingData"]
+      | components["schemas"]["ContextCompactedData"]
+      | components["schemas"]["FileWrittenData"]
+      | components["schemas"]["BudgetEventData"]
+      | components["schemas"]["BudgetEventData"]
+      | components["schemas"]["BudgetEventData"]
+      | components["schemas"]["BudgetEventData"];
+    /**
+     * @description Execution phase for assistant messages in multi-step tool-calling flows.
+     *
+     *     Providers that natively support phases (OpenAI GPT-5.x) send the phase value
+     *     directly in the API request. For providers without native support (Anthropic,
+     *     Gemini), the phase is still tracked internally and derived from state in the
+     *     ReasonAtom, but is not sent to the provider API.
+     *
+     *     Serialized as lowercase strings for backward compatibility with existing
+     *     persisted messages: `"commentary"` and `"final_answer"`.
+     *
+     *     Legacy values `"in_progress"` and `"completed"` are accepted during
+     *     deserialization for backward compatibility.
+     * @enum {string}
+     */
+    ExecutionPhase: "Commentary" | "FinalAnswer";
+    /**
+     * @description External actor identity for messages originating from external channels
+     *     (Slack, Discord, Teams, etc.).
+     *
+     *     Channel adapters populate this to identify the sender without coupling
+     *     core logic to any specific channel. The ReasonAtom uses this to prefix
+     *     user messages so the LLM knows who is speaking.
+     */
+    ExternalActor: {
+      /** @description Opaque actor identifier from the source channel (e.g. Slack user ID "U0123456789") */
+      actor_id: string;
+      /** @description Resolved display name (e.g. "Alice"). Falls back to actor_id if absent. */
+      actor_name?: string | null;
+      /** @description Channel-specific metadata (e.g. team_id, channel_id) */
+      metadata?: {
+        [key: string]: string;
+      } | null;
+      /** @description Source channel identifier (e.g. "slack", "discord") */
+      source: string;
+    };
+    /** @description File metadata without content */
+    FileInfo: {
+      /** Format: date-time */
+      created_at: string;
+      /** Format: uuid */
+      id: string;
+      is_directory: boolean;
+      is_readonly: boolean;
+      name: string;
+      path: string;
+      /** Format: uuid */
+      session_id: string;
+      /** Format: int64 */
+      size_bytes: number;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description File stat information */
+    FileStat: {
+      /** Format: date-time */
+      created_at: string;
+      is_directory: boolean;
+      is_readonly: boolean;
+      name: string;
+      path: string;
+      /** Format: int64 */
+      size_bytes: number;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description Data for file.written events emitted when files are written to the session filesystem. */
+    FileWrittenData: {
+      /** @description Whether this is a new file (true) or an update to an existing file (false). */
+      created: boolean;
+      /** @description Operation type (see `FILE_OP_*` constants). */
+      operation: string;
+      /** @description File path within the session filesystem (normalized, e.g. "/reports/summary.md"). */
+      path: string;
+      /**
+       * Format: int64
+       * @description File size in bytes after write.
+       */
+      size_bytes: number;
+    };
+    GetOrCreateChatSessionRequest: {
+      /** @description Browser locale for seeding the global chat session (BCP 47, e.g. `uk-UA`). */
+      locale?: string | null;
+    };
+    /** @description Query parameters for GET requests */
+    GetQuery: {
+      /** @description For directories: whether to list recursively */
+      recursive?: boolean;
+    };
+    /** @description Unified response for GET that can be file or directory listing */
+    GetResponse:
+      | components["schemas"]["SessionFile"]
+      | components["schemas"]["ListResponse_FileInfo"];
+    GetSessionSandboxResponse: {
+      configured: boolean;
+      created_at?: string | null;
+      display_name?: string | null;
+      exists: boolean;
+      external_id?: string | null;
+      init_completed_at?: string | null;
+      last_init_error?: string | null;
+      metadata?: Record<string, never>;
+      provider?: string | null;
+      session_status?:
+        | null
+        | components["schemas"]["SessionSandboxStatusValue"];
+      updated_at?: string | null;
+      workspace_path?: string | null;
+    };
+    /** @description A commit entry in the log */
+    GitCommitInfo: {
+      author_email: string;
+      author_name: string;
+      message: string;
+      oid: string;
+      parent_oids: string[];
+      /** Format: date-time */
+      timestamp: string;
+    };
+    /** @description A diff with full patch output */
+    GitDiff: {
+      entries: components["schemas"]["GitDiffEntry"][];
+      patch?: string | null;
+      stats: components["schemas"]["GitDiffStats"];
+    };
+    /** @description A diff entry between two commits */
+    GitDiffEntry: {
+      old_path?: string | null;
+      path: string;
+      status: string;
+    };
+    /** @description Diff statistics */
+    GitDiffStats: {
+      deletions: number;
+      files_changed: number;
+      insertions: number;
+    };
+    /** @description A git ref (branch pointer) */
+    GitRefInfo: {
+      is_symbolic: boolean;
+      name: string;
+      target: string;
+    };
+    /** @description Grep match result */
+    GrepMatch: {
+      line: string;
+      line_number: number;
+      path: string;
+    };
+    /** @description Request to search files */
+    GrepRequest: {
+      /** @description Optional path pattern to filter files */
+      path_pattern?: string | null;
+      /** @description Regex pattern to search for */
+      pattern: string;
+    };
+    /** @description Grep result for a file */
+    GrepResult: {
+      matches: components["schemas"]["GrepMatch"][];
+      path: string;
+    };
+    /**
+     * @description Harness configuration for sessions.
+     *     A harness defines the base behavior and capabilities that apply to all sessions.
+     */
+    Harness: {
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was archived.
+       */
+      archived_at?: string | null;
+      /** @description Capabilities enabled for this harness with per-harness configuration. */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was created.
+       */
+      created_at: string;
+      /**
+       * @description Default LLM model ID for this harness.
+       *     Lowest priority in chain: controls > session > agent > harness.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the harness does. */
+      description?: string | null;
+      /** @description Human-readable display name shown in UI. */
+      display_name?: string | null;
+      /**
+       * @description Unique identifier for the harness (format: harness_{32-hex}).
+       * @example harness_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Starter files copied into each new session for this harness. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /**
+       * @description Whether this harness is built-in (system-managed, readonly).
+       *     Built-in harnesses are provisioned during org initialization and
+       *     cannot be modified or deleted via the API. Users can copy them.
+       */
+      is_built_in?: boolean;
+      /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /** @description Name, unique per org (e.g. "generic"). */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Optional parent harness that this harness inherits from.
+       * @example harness_01933b5a000070008000000000000602
+       */
+      parent_harness_id?: string | null;
+      /** @description Current lifecycle status of the harness. */
+      status: components["schemas"]["HarnessStatus"];
+      /**
+       * @description System prompt that defines the harness's base behavior.
+       *     Forms the foundation of the prompt stack.
+       */
+      system_prompt: string;
+      /** @description Tags for organizing and filtering harnesses. */
+      tags?: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was last updated.
+       */
+      updated_at: string;
+    };
+    /** @description A read-only harness example defined in code. */
+    HarnessExample: {
+      /** @description Capabilities the example will assign with their per-harness config. */
+      capabilities: components["schemas"]["AgentCapabilityConfig"][];
+      /** @description Short description. */
+      description: string;
+      /** @description Whether this example is only available when experimental features are on. */
+      dev_only: boolean;
+      /** @description Human-readable display name (e.g. `Data Analyst`). */
+      display_name: string;
+      /** @description Unique slug (e.g. `data-analyst`). */
+      name: string;
+      /**
+       * @description Name of the parent harness this example inherits from when adopted
+       *     (e.g. `generic`). Resolved per-org at import time — no UUIDs are
+       *     hardcoded.
+       */
+      parent_name?: string | null;
+      /** @description Tags for categorization. */
+      tags: string[];
+    };
+    /** @description Preview response showing merged prompt and tools */
+    HarnessPreviewResponse: {
+      system_prompt: string;
+      tools: Record<string, never>[];
+    };
+    /**
+     * @description Harness lifecycle status.
+     *     - `active`: Harness is available for use
+     *     - `archived`: Harness is hidden from listings and cannot be modified or assigned
+     *     - `deleted`: Harness is a tombstone kept only for historical references
+     * @enum {string}
+     */
+    HarnessStatus: "active" | "archived" | "deleted";
+    /** @description Image content part (base64 or URL) */
+    ImageContentPart: {
+      base64?: string | null;
+      media_type?: string | null;
+      url?: string | null;
+    };
+    /**
+     * @description Image file content part (reference to uploaded image)
+     *
+     *     This is used for images uploaded via the /images API.
+     *     The image data is stored separately and referenced by ID.
+     *     Note: Currently filtered out before sending to LLM.
+     */
+    ImageFileContentPart: {
+      /** @description Original filename (for display) */
+      filename?: string | null;
+      /**
+       * @description ID of the uploaded image (format: img_{32-hex})
+       * @example img_01933b5a00007000800000000000001
+       */
+      image_id: string;
+    };
+    /** @description Image metadata (without binary data) */
+    ImageInfo: {
+      content_type: string;
+      /** Format: date-time */
+      created_at: string;
+      filename: string;
+      /** @example img_01933b5a00007000800000000000001 */
+      id: string;
+      metadata: unknown;
+      /** Format: int64 */
+      size_bytes: number;
+    };
+    /** @description Image upload response */
+    ImageUploadResponse: {
+      content_type: string;
+      /** Format: date-time */
+      created_at: string;
+      filename: string;
+      /** @example img_01933b5a00007000800000000000001 */
+      id: string;
+      /** Format: int64 */
+      size_bytes: number;
+    };
+    /** @description Starter file copied into a new session from an agent or harness. */
+    InitialFile: {
+      /** @description File content: plain text or base64-encoded binary. */
+      content: string;
+      /** @description Content encoding: `text` or `base64`. */
+      encoding?: string;
+      /** @description Prevent session-side edits or deletes when true. */
+      is_readonly?: boolean;
+      /** @description Absolute path within the session workspace. `/workspace` prefix is accepted. */
+      path: string;
+    };
+    /**
+     * @description Input content part - text, image, and image_file (for user input)
+     *
+     *     This is a subset of ContentPart that users can send.
+     *     Tool calls and results are system-generated.
+     */
+    InputContentPart:
+      | (components["schemas"]["TextContentPart"] & {
+          /** @enum {string} */
+          type: "text";
+        })
+      | (components["schemas"]["ImageContentPart"] & {
+          /** @enum {string} */
+          type: "image";
+        })
+      | (components["schemas"]["ImageFileContentPart"] & {
+          /** @enum {string} */
+          type: "image_file";
         });
+    /**
+     * @description Input message for creating a user message
+     *
+     *     Only user messages can be created via the API.
+     *     Agent messages are created internally by the workflow.
+     */
+    InputMessage: {
+      /** @description Array of content parts (text and image only) */
+      content: components["schemas"]["InputContentPart"][];
+      /** @description Message role (always "user" for API-created messages) */
+      role?: components["schemas"]["MessageRole"];
+    };
+    /** @description Data for input.message event */
+    InputMessageData: {
+      /** @description The user message */
+      message: components["schemas"]["Message"];
+    };
+    /** @description Key-value entry info (key and timestamps, no value) */
+    KeyValueInfo: {
+      /** @description When the key was created */
+      created_at: string;
+      /** @description The key name */
+      key: string;
+      /** @description When the key was last updated */
+      updated_at: string;
+      /** @description The stored value */
+      value: string;
+    };
+    KnowledgeBaseResponse: {
+      /** Format: date-time */
+      archived_at?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      deleted_at?: string | null;
+      description?: string | null;
+      /** @example kb_01933b5a000070008000000000000001 */
+      id: string;
+      name: string;
+      status: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    KnowledgeEntryResponse: {
+      body: string;
+      /** Format: date-time */
+      created_at: string;
+      /** @example kbe_01933b5a000070008000000000000001 */
+      id: string;
+      /** @example kb_01933b5a000070008000000000000001 */
+      kb_id: string;
+      kind: string;
+      tags: string[];
+      title: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description A lifecycle-managed external resource owned by a session-capable workflow. */
+    LeasedResource: {
+      /**
+       * Format: int32
+       * @description Number of cleanup attempts so far.
+       */
+      cleanup_attempts: number;
+      /**
+       * Format: date-time
+       * @description Cleanup completion time for released resources.
+       */
+      cleanup_completed_at?: string | null;
+      /**
+       * Format: date-time
+       * @description Cleanup attempt start time when the resource is currently claimed.
+       */
+      cleanup_started_at?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** @description Optional user-facing label. */
+      display_name?: string | null;
+      /** @description Stable provider identifier for cleanup calls. */
+      external_id: string;
+      /**
+       * @description Unique identifier (format: resource_{32-hex}).
+       * @example resource_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Last cleanup error message, if any. */
+      last_cleanup_error?: string | null;
+      /**
+       * Format: date-time
+       * @description Last successful touch from tool activity.
+       */
+      last_touched_at: string;
+      /**
+       * Format: int32
+       * @description Lease duration used when refreshing the lease.
+       */
+      lease_duration_seconds: number;
+      /**
+       * Format: date-time
+       * @description Absolute deadline after which cleanup becomes due.
+       */
+      lease_expires_at: string;
+      /**
+       * @description Provider-specific non-secret metadata for UI/debugging.
+       *     THREAT[TM-API-015]: This field is returned by the session resources API
+       *     and rendered in the UI, so providers must never persist bearer tokens or
+       *     other secrets here.
+       */
+      metadata?: unknown;
+      /**
+       * Format: uuid
+       * @description User connection owner used for provider cleanup, if known.
+       */
+      owner_user_id?: string | null;
+      /** @description External provider responsible for the resource (e.g. "daytona"). */
+      provider: string;
+      /** @description Provider-specific resource type (e.g. "sandbox", "browser_session"). */
+      resource_type: string;
+      /**
+       * @description Session that currently owns the resource, if still attached.
+       * @example session_01933b5a00007000800000000000001
+       */
+      session_id?: string | null;
+      /** @description Current lifecycle status. */
+      status: components["schemas"]["LeasedResourceStatus"];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /**
+     * @description Runtime status for a leased resource.
+     * @enum {string}
+     */
+    LeasedResourceStatus: "active" | "cleaning" | "released" | "cleanup_failed";
+    ListExecutionsQuery: {
+      /**
+       * Format: int32
+       * @description Pagination limit (default: 20, max: 100)
+       */
+      limit?: number | null;
+      /**
+       * Format: int32
+       * @description Pagination offset
+       */
+      offset?: number | null;
+      /** @description Filter by execution status */
+      status?: string | null;
+    };
+    ListKnowledgeBasesQuery: {
+      include_archived?: boolean | null;
+      search?: string | null;
+    };
+    ListKnowledgeEntriesQuery: {
+      kind?: string | null;
+      search?: string | null;
+    };
+    ListMemoriesQuery: {
+      include_inactive?: boolean | null;
+      kind?: string | null;
+      limit?: number | null;
+      query?: string | null;
+      tag?: string[] | null;
+    };
+    ListMemoriesResponse: {
+      data: components["schemas"]["MemoryResponse"][];
+      /** Format: int64 */
+      total: number;
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_Agent: {
+      /** @description Array of items returned by the list operation. */
+      data: {
         /**
-         * @description Input message for creating a user message
-         *
-         *     Only user messages can be created via the API.
-         *     Agent messages are created internally by the workflow.
+         * Format: date-time
+         * @description Timestamp when the agent was archived.
          */
-        InputMessage: {
-            /** @description Array of content parts (text and image only) */
-            content: components["schemas"]["InputContentPart"][];
-            /** @description Message role (always "user" for API-created messages) */
-            role?: components["schemas"]["MessageRole"];
-        };
-        /** @description Data for input.message event */
-        InputMessageData: {
-            /** @description The user message */
-            message: components["schemas"]["Message"];
-        };
-        /** @description Key-value entry info (key and timestamps, no value) */
-        KeyValueInfo: {
-            /** @description When the key was created */
-            created_at: string;
-            /** @description The key name */
-            key: string;
-            /** @description When the key was last updated */
-            updated_at: string;
-            /** @description The stored value */
-            value: string;
-        };
-        /** @description A lifecycle-managed external resource owned by a session-capable workflow. */
-        LeasedResource: {
-            /**
-             * Format: int32
-             * @description Number of cleanup attempts so far.
-             */
-            cleanup_attempts: number;
-            /**
-             * Format: date-time
-             * @description Cleanup completion time for released resources.
-             */
-            cleanup_completed_at?: string | null;
-            /**
-             * Format: date-time
-             * @description Cleanup attempt start time when the resource is currently claimed.
-             */
-            cleanup_started_at?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** @description Optional user-facing label. */
-            display_name?: string | null;
-            /** @description Stable provider identifier for cleanup calls. */
-            external_id: string;
-            /**
-             * @description Unique identifier (format: resource_{32-hex}).
-             * @example resource_01933b5a00007000800000000000001
-             */
-            id: string;
-            /** @description Last cleanup error message, if any. */
-            last_cleanup_error?: string | null;
-            /**
-             * Format: date-time
-             * @description Last successful touch from tool activity.
-             */
-            last_touched_at: string;
-            /**
-             * Format: int32
-             * @description Lease duration used when refreshing the lease.
-             */
-            lease_duration_seconds: number;
-            /**
-             * Format: date-time
-             * @description Absolute deadline after which cleanup becomes due.
-             */
-            lease_expires_at: string;
-            /**
-             * @description Provider-specific non-secret metadata for UI/debugging.
-             *     THREAT[TM-API-015]: This field is returned by the session resources API
-             *     and rendered in the UI, so providers must never persist bearer tokens or
-             *     other secrets here.
-             */
-            metadata?: unknown;
-            /**
-             * Format: uuid
-             * @description User connection owner used for provider cleanup, if known.
-             */
-            owner_user_id?: string | null;
-            /** @description External provider responsible for the resource (e.g. "daytona"). */
-            provider: string;
-            /** @description Provider-specific resource type (e.g. "sandbox", "browser_session"). */
-            resource_type: string;
-            /**
-             * @description Session that currently owns the resource, if still attached.
-             * @example session_01933b5a00007000800000000000001
-             */
-            session_id?: string | null;
-            /** @description Current lifecycle status. */
-            status: components["schemas"]["LeasedResourceStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        };
+        archived_at?: string | null;
         /**
-         * @description Runtime status for a leased resource.
-         * @enum {string}
+         * @description Capabilities enabled for this agent with per-agent configuration.
+         *     Capabilities add tools and system prompt modifications.
          */
-        LeasedResourceStatus: "active" | "cleaning" | "released" | "cleanup_failed";
-        ListExecutionsQuery: {
-            /**
-             * Format: int32
-             * @description Pagination limit (default: 20, max: 100)
-             */
-            limit?: number | null;
-            /**
-             * Format: int32
-             * @description Pagination offset
-             */
-            offset?: number | null;
-            /** @description Filter by execution status */
-            status?: string | null;
-        };
+        capabilities?: components["schemas"]["AgentCapabilityConfig"][];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: date-time
+         * @description Timestamp when the agent was created.
          */
-        ListResponse_Agent: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was archived.
-                 */
-                archived_at?: string | null;
-                /**
-                 * @description Capabilities enabled for this agent with per-agent configuration.
-                 *     Capabilities add tools and system prompt modifications.
-                 */
-                capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was created.
-                 */
-                created_at: string;
-                /**
-                 * @description Default LLM model ID for this agent.
-                 *     Can be overridden at the session level.
-                 * @example model_01933b5a00007000800000000000001
-                 */
-                default_model_id?: string | null;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was deleted.
-                 */
-                deleted_at?: string | null;
-                /** @description Human-readable description of what the agent does. */
-                description?: string | null;
-                /**
-                 * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
-                 *     Falls back to `name` when absent.
-                 */
-                display_name?: string | null;
-                /**
-                 * @description External identifier (agent_<32-hex>). Shown as "id" in API.
-                 *     Client-supplied or auto-generated.
-                 * @example agent_01933b5a000070008000000000000001
-                 */
-                id: string;
-                /** @description Starter files copied into each new session for this agent. */
-                initial_files?: components["schemas"]["InitialFile"][];
-                /** @description Maximum number of LLM iterations per turn for this agent. */
-                max_iterations?: number | null;
-                /** @description Name, unique per org (e.g. "customer-support"). */
-                name: string;
-                network_access?: null | components["schemas"]["NetworkAccessList"];
-                /** @description Current lifecycle status of the agent. */
-                status: components["schemas"]["AgentStatus"];
-                /**
-                 * @description System prompt that defines the agent's behavior.
-                 *     Sent as the first message in every conversation.
-                 */
-                system_prompt: string;
-                /** @description Tags for organizing and filtering agents. */
-                tags?: string[];
-                /**
-                 * @description Client-side tools registered for this agent.
-                 *     These tools are executed by the client, not the server.
-                 */
-                tools?: components["schemas"]["ToolDefinition"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was last updated.
-                 */
-                updated_at: string;
-                usage?: null | components["schemas"]["TokenUsage"];
-            }[];
-        };
+        created_at: string;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description Default LLM model ID for this agent.
+         *     Can be overridden at the session level.
+         * @example model_01933b5a00007000800000000000001
          */
-        ListResponse_CapabilityInfo: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** @description Category for grouping in UI */
-                category?: string | null;
-                /**
-                 * @description IDs of capabilities that this capability depends on.
-                 *     When this capability is selected, its dependencies are automatically included.
-                 */
-                dependencies?: string[];
-                /** @description Description of what this capability provides */
-                description: string;
-                /**
-                 * @description UI feature strings this capability contributes to.
-                 *     Multiple capabilities can contribute the same feature.
-                 */
-                features?: string[];
-                /** @description Icon name (for UI rendering) */
-                icon?: string | null;
-                /** @description Unique capability identifier */
-                id: string;
-                /** @description Whether this is an MCP server capability (for UI badge) */
-                is_mcp?: boolean;
-                /** @description Whether this is an Agent Skill capability (for UI badge) */
-                is_skill?: boolean;
-                /** @description Display name */
-                name: string;
-                /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
-                risk_level?: components["schemas"]["RiskLevel"];
-                /** @description Current status */
-                status: string;
-                /** @description System prompt addition contributed by this capability */
-                system_prompt?: string | null;
-                /** @description Tool definitions provided by this capability */
-                tool_definitions?: Record<string, never>[];
-            }[];
-        };
+        default_model_id?: string | null;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: date-time
+         * @description Timestamp when the agent was deleted.
          */
-        ListResponse_DatabaseInfoResponse: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                created_at: string;
-                name: string;
-                /** Format: int32 */
-                page_count: number;
-                /** Format: int64 */
-                size_bytes: number;
-                updated_at: string;
-            }[];
-        };
+        deleted_at?: string | null;
+        /** @description Human-readable description of what the agent does. */
+        description?: string | null;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
+         *     Falls back to `name` when absent.
          */
-        ListResponse_Event: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** @description Correlation context */
-                context: components["schemas"]["EventContext"];
-                /**
-                 * @description Event-specific payload. The schema depends on the event type.
-                 *     See EventData documentation for the mapping of type to data schema.
-                 */
-                data: components["schemas"]["EventData"];
-                /**
-                 * @description Unique event identifier (format: event_{32-hex})
-                 * @example event_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /** @description Arbitrary metadata for the event */
-                metadata?: unknown;
-                /**
-                 * Format: int32
-                 * @description Sequence number within session (for ordering)
-                 */
-                sequence?: number | null;
-                /**
-                 * @description Session this event belongs to (format: session_{32-hex})
-                 * @example session_01933b5a00007000800000000000001
-                 */
-                session_id: string;
-                /** @description Tags for filtering and categorization */
-                tags?: string[] | null;
-                /**
-                 * Format: date-time
-                 * @description Event timestamp
-                 */
-                ts: string;
-                /** @description Event type in dot notation */
-                type: string;
-            }[];
-        };
+        display_name?: string | null;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description External identifier (agent_<32-hex>). Shown as "id" in API.
+         *     Client-supplied or auto-generated.
+         * @example agent_01933b5a000070008000000000000001
          */
-        ListResponse_FileInfo: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** Format: date-time */
-                created_at: string;
-                /** Format: uuid */
-                id: string;
-                is_directory: boolean;
-                is_readonly: boolean;
-                name: string;
-                path: string;
-                /** Format: uuid */
-                session_id: string;
-                /** Format: int64 */
-                size_bytes: number;
-                /** Format: date-time */
-                updated_at: string;
-            }[];
-        };
+        id: string;
+        /** @description Starter files copied into each new session for this agent. */
+        initial_files?: components["schemas"]["InitialFile"][];
+        /** @description Maximum number of LLM iterations per turn for this agent. */
+        max_iterations?: number | null;
+        /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
+        mcpServers?: components["schemas"]["BTreeMap"];
+        /** @description Name, unique per org (e.g. "customer-support"). */
+        name: string;
+        network_access?: null | components["schemas"]["NetworkAccessList"];
+        /** @description Current lifecycle status of the agent. */
+        status: components["schemas"]["AgentStatus"];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description System prompt that defines the agent's behavior.
+         *     Sent as the first message in every conversation.
          */
-        ListResponse_GrepResult: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                matches: components["schemas"]["GrepMatch"][];
-                path: string;
-            }[];
-        };
+        system_prompt: string;
+        /** @description Tags for organizing and filtering agents. */
+        tags?: string[];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description Client-side tools registered for this agent.
+         *     These tools are executed by the client, not the server.
          */
-        ListResponse_Harness: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was archived.
-                 */
-                archived_at?: string | null;
-                /** @description Capabilities enabled for this harness with per-harness configuration. */
-                capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was created.
-                 */
-                created_at: string;
-                /**
-                 * @description Default LLM model ID for this harness.
-                 *     Lowest priority in chain: controls > session > agent > harness.
-                 * @example model_01933b5a00007000800000000000001
-                 */
-                default_model_id?: string | null;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was deleted.
-                 */
-                deleted_at?: string | null;
-                /** @description Human-readable description of what the harness does. */
-                description?: string | null;
-                /** @description Human-readable display name shown in UI. */
-                display_name?: string | null;
-                /**
-                 * @description Unique identifier for the harness (format: harness_{32-hex}).
-                 * @example harness_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /** @description Starter files copied into each new session for this harness. */
-                initial_files?: components["schemas"]["InitialFile"][];
-                /**
-                 * @description Whether this harness is built-in (system-managed, readonly).
-                 *     Built-in harnesses are provisioned during org initialization and
-                 *     cannot be modified or deleted via the API. Users can copy them.
-                 */
-                is_built_in?: boolean;
-                /** @description Name, unique per org (e.g. "generic"). */
-                name: string;
-                network_access?: null | components["schemas"]["NetworkAccessList"];
-                /**
-                 * @description Optional parent harness that this harness inherits from.
-                 * @example harness_01933b5a000070008000000000000602
-                 */
-                parent_harness_id?: string | null;
-                /** @description Current lifecycle status of the harness. */
-                status: components["schemas"]["HarnessStatus"];
-                /**
-                 * @description System prompt that defines the harness's base behavior.
-                 *     Forms the foundation of the prompt stack.
-                 */
-                system_prompt: string;
-                /** @description Tags for organizing and filtering harnesses. */
-                tags?: string[];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was last updated.
-                 */
-                updated_at: string;
-            }[];
-        };
+        tools?: components["schemas"]["ToolDefinition"][];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: date-time
+         * @description Timestamp when the agent was last updated.
          */
-        ListResponse_KeyValueInfo: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** @description When the key was created */
-                created_at: string;
-                /** @description The key name */
-                key: string;
-                /** @description When the key was last updated */
-                updated_at: string;
-                /** @description The stored value */
-                value: string;
-            }[];
-        };
+        updated_at: string;
+        usage?: null | components["schemas"]["TokenUsage"];
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_CapabilityInfo: {
+      /** @description Array of items returned by the list operation. */
+      data: {
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: int64
+         * @description Number of active agents referencing this capability in the org.
          */
-        ListResponse_McpServer: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** @description Whether an API key has been configured. */
-                api_key_set: boolean;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was archived.
-                 */
-                archived_at?: string | null;
-                /** @description Authentication mode for this MCP server. */
-                auth_mode?: components["schemas"]["McpServerAuthMode"];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was created.
-                 */
-                created_at: string;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was deleted.
-                 */
-                deleted_at?: string | null;
-                /**
-                 * @description Human-readable description of the MCP server.
-                 * @example Atlassian MCP Server for Jira and Confluence
-                 */
-                description?: string | null;
-                /**
-                 * @description Additional HTTP headers for authentication.
-                 *     Keys are header names, values are header values.
-                 */
-                headers?: {
-                    [key: string]: string;
-                };
-                /**
-                 * @description Unique identifier for the MCP server.
-                 * @example mcp_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /**
-                 * @description Display name of the MCP server.
-                 * @example atlassian-mcp-server
-                 */
-                name: string;
-                /** @description Stable provider id used for user-scoped OAuth connections. */
-                oauth_provider_id?: string | null;
-                /** @description Current lifecycle status of the MCP server. */
-                status: components["schemas"]["McpServerStatus"];
-                /** @description Transport type (currently only HTTP supported). */
-                transport_type: components["schemas"]["McpServerTransportType"];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was last updated.
-                 */
-                updated_at: string;
-                /**
-                 * @description URL of the MCP server endpoint.
-                 * @example https://mcp.atlassian.com/v1/mcp
-                 */
-                url: string;
-            }[];
-        };
+        agent_count?: number;
+        /** @description Category for grouping in UI */
+        category?: string | null;
+        /** @description JSON Schema for capability-specific per-agent config. */
+        config_schema?: Record<string, never>;
+        /** @description react-jsonschema-form uiSchema hints for rendering config_schema. */
+        config_ui_schema?: Record<string, never>;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description IDs of capabilities that this capability depends on.
+         *     When this capability is selected, its dependencies are automatically included.
          */
-        ListResponse_Message: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** @description Array of content parts */
-                content: components["schemas"]["ContentPart"][];
-                controls?: null | components["schemas"]["Controls"];
-                /** Format: date-time */
-                created_at: string;
-                external_actor?: null | components["schemas"]["ExternalActor"];
-                /**
-                 * @description Unique message ID (format: message_{32-hex})
-                 * @example message_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /** @description Message-level metadata (locale, etc.) */
-                metadata?: {
-                    [key: string]: unknown;
-                } | null;
-                role: components["schemas"]["MessageRole"];
-                /** Format: int32 */
-                sequence: number;
-                /**
-                 * @description Session ID this message belongs to (format: session_{32-hex})
-                 * @example session_01933b5a00007000800000000000001
-                 */
-                session_id: string;
-            }[];
-        };
+        dependencies?: string[];
+        /** @description Description of what this capability provides */
+        description: string;
+        /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+        docs_slug?: string | null;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description UI feature strings this capability contributes to.
+         *     Multiple capabilities can contribute the same feature.
          */
-        ListResponse_OrganizationResponse: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** @description Base harness used when session creation omits harness_id. */
-                base_harness_id?: string | null;
-                /**
-                 * Format: date-time
-                 * @description When the organization was created
-                 */
-                created_at: string;
-                /** @description Default harness to preselect in the UI. */
-                default_harness_id?: string | null;
-                /** @description Default LLM model for the organization. */
-                default_model_id?: string | null;
-                /** @description External identifier (org_<32-hex-chars>) */
-                id: string;
-                /** @description Display name */
-                name: string;
-                /**
-                 * Format: date-time
-                 * @description When the organization was last updated
-                 */
-                updated_at: string;
-            }[];
-        };
+        features?: string[];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: int64
+         * @description Number of active harnesses referencing this capability in the org.
          */
-        ListResponse_SecretInfo: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /** @description When the secret was created */
-                created_at: string;
-                /** @description The secret name */
-                name: string;
-                /** @description When the secret was last updated */
-                updated_at: string;
-            }[];
-        };
+        harness_count?: number;
+        /** @description Icon name (for UI rendering) */
+        icon?: string | null;
+        /** @description Unique capability identifier */
+        id: string;
+        /** @description Whether this is an MCP server capability (for UI badge) */
+        is_mcp?: boolean;
+        /** @description Whether this is an Agent Skill capability (for UI badge) */
+        is_skill?: boolean;
+        /** @description Display name */
+        name: string;
+        /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
+        risk_level?: components["schemas"]["RiskLevel"];
+        /** @description Current status */
+        status: string;
+        /** @description System prompt addition contributed by this capability */
+        system_prompt?: string | null;
+        /** @description Tool definitions provided by this capability */
+        tool_definitions?: Record<string, never>[];
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_DatabaseInfoResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        created_at: string;
+        name: string;
+        /** Format: int32 */
+        page_count: number;
+        /** Format: int64 */
+        size_bytes: number;
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_Event: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** @description Correlation context */
+        context: components["schemas"]["EventContext"];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description Event-specific payload. The schema depends on the event type.
+         *     See EventData documentation for the mapping of type to data schema.
          */
-        ListResponse_Skill: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                allowed_tools?: string | null;
-                /** Format: date-time */
-                archived_at?: string | null;
-                compatibility?: string | null;
-                /** Format: date-time */
-                created_at: string;
-                /** Format: date-time */
-                deleted_at?: string | null;
-                /** @example Extract text and tables from PDF files. */
-                description: string;
-                /** @description Whether the model is prevented from auto-invoking this skill */
-                disable_model_invocation?: boolean;
-                /** @example skill_01933b5a00007000800000000000001 */
-                id: string;
-                license?: string | null;
-                metadata?: {
-                    [key: string]: unknown;
-                };
-                /** @example pdf-processing */
-                name: string;
-                source_type: components["schemas"]["SkillSourceType"];
-                status: components["schemas"]["SkillStatus"];
-                /** Format: date-time */
-                updated_at: string;
-                /** @description Whether this skill appears as a /slash command for users */
-                user_invocable?: boolean;
-                version: string;
-            }[];
-        };
+        data: components["schemas"]["EventData"];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description Unique event identifier (format: event_{32-hex})
+         * @example event_01933b5a00007000800000000000001
          */
-        ListResponse_User: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                auth_provider?: string | null;
-                avatar_url?: string | null;
-                /** Format: date-time */
-                created_at: string;
-                email: string;
-                id: string;
-                name: string;
-                roles: string[];
-            }[];
-        };
+        id: string;
+        /** @description Arbitrary metadata for the event */
+        metadata?: unknown;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: int32
+         * @description Sequence number within session (for ordering)
          */
-        ListResponse_WithUrls_Harness: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was archived.
-                 */
-                archived_at?: string | null;
-                /** @description Capabilities enabled for this harness with per-harness configuration. */
-                capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was created.
-                 */
-                created_at: string;
-                /**
-                 * @description Default LLM model ID for this harness.
-                 *     Lowest priority in chain: controls > session > agent > harness.
-                 * @example model_01933b5a00007000800000000000001
-                 */
-                default_model_id?: string | null;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was deleted.
-                 */
-                deleted_at?: string | null;
-                /** @description Human-readable description of what the harness does. */
-                description?: string | null;
-                /** @description Human-readable display name shown in UI. */
-                display_name?: string | null;
-                /**
-                 * @description Unique identifier for the harness (format: harness_{32-hex}).
-                 * @example harness_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /** @description Starter files copied into each new session for this harness. */
-                initial_files?: components["schemas"]["InitialFile"][];
-                /**
-                 * @description Whether this harness is built-in (system-managed, readonly).
-                 *     Built-in harnesses are provisioned during org initialization and
-                 *     cannot be modified or deleted via the API. Users can copy them.
-                 */
-                is_built_in?: boolean;
-                /** @description Name, unique per org (e.g. "generic"). */
-                name: string;
-                network_access?: null | components["schemas"]["NetworkAccessList"];
-                /**
-                 * @description Optional parent harness that this harness inherits from.
-                 * @example harness_01933b5a000070008000000000000602
-                 */
-                parent_harness_id?: string | null;
-                /** @description Current lifecycle status of the harness. */
-                status: components["schemas"]["HarnessStatus"];
-                /**
-                 * @description System prompt that defines the harness's base behavior.
-                 *     Forms the foundation of the prompt stack.
-                 */
-                system_prompt: string;
-                /** @description Tags for organizing and filtering harnesses. */
-                tags?: string[];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the harness was last updated.
-                 */
-                updated_at: string;
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-        };
+        sequence?: number | null;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description Session this event belongs to (format: session_{32-hex})
+         * @example session_01933b5a00007000800000000000001
          */
-        ListResponse_WithUrls_LlmModel: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                capabilities: string[];
-                /** Format: date-time */
-                created_at: string;
-                display_name: string;
-                /**
-                 * @description Whether this model is enabled (visible in UI model pickers).
-                 *     All models are available via API regardless of this flag.
-                 */
-                enabled: boolean;
-                /** @example model_01933b5a00007000800000000000001 */
-                id: string;
-                is_favorite: boolean;
-                model_id: string;
-                /** @example provider_01933b5a00007000800000000000001 */
-                provider_id: string;
-                /** @description How the model was added to the system */
-                source: components["schemas"]["LlmModelSource"];
-                status: components["schemas"]["LlmModelStatus"];
-                /** Format: date-time */
-                updated_at: string;
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-        };
+        session_id: string;
+        /** @description Tags for filtering and categorization */
+        tags?: string[] | null;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: date-time
+         * @description Event timestamp
          */
-        ListResponse_WithUrls_LlmModelWithProvider: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                capabilities: string[];
-                /** Format: date-time */
-                created_at: string;
-                display_name: string;
-                /** @description Whether this model is enabled (visible in UI model pickers) */
-                enabled: boolean;
-                /** @example model_01933b5a00007000800000000000001 */
-                id: string;
-                is_favorite: boolean;
-                model_id: string;
-                profile?: null | components["schemas"]["LlmModelProfile"];
-                /** @example provider_01933b5a00007000800000000000001 */
-                provider_id: string;
-                provider_name: string;
-                provider_type: components["schemas"]["LlmProviderType"];
-                /** @description How the model was added to the system */
-                source: components["schemas"]["LlmModelSource"];
-                status: components["schemas"]["LlmModelStatus"];
-                /** Format: date-time */
-                updated_at: string;
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-        };
+        ts: string;
+        /** @description Event type in dot notation */
+        type: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_FileInfo: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** Format: date-time */
+        created_at: string;
+        /** Format: uuid */
+        id: string;
+        is_directory: boolean;
+        is_readonly: boolean;
+        name: string;
+        path: string;
+        /** Format: uuid */
+        session_id: string;
+        /** Format: int64 */
+        size_bytes: number;
+        /** Format: date-time */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_GrepResult: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        matches: components["schemas"]["GrepMatch"][];
+        path: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_Harness: {
+      /** @description Array of items returned by the list operation. */
+      data: {
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: date-time
+         * @description Timestamp when the harness was archived.
          */
-        ListResponse_WithUrls_LlmProvider: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                /** @description Whether an API key is configured (key is never returned) */
-                api_key_set: boolean;
-                base_url?: string | null;
-                /** Format: date-time */
-                created_at: string;
-                /** @example provider_01933b5a00007000800000000000001 */
-                id: string;
-                /**
-                 * Format: date-time
-                 * @description When models were last synced from provider API
-                 */
-                last_synced_at?: string | null;
-                name: string;
-                provider_type: components["schemas"]["LlmProviderType"];
-                status: components["schemas"]["LlmProviderStatus"];
-                /** Format: date-time */
-                updated_at: string;
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-        };
+        archived_at?: string | null;
+        /** @description Capabilities enabled for this harness with per-harness configuration. */
+        capabilities?: components["schemas"]["AgentCapabilityConfig"][];
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * Format: date-time
+         * @description Timestamp when the harness was created.
          */
-        ListResponse_WithUrls_McpServer: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                /** @description Whether an API key has been configured. */
-                api_key_set: boolean;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was archived.
-                 */
-                archived_at?: string | null;
-                /** @description Authentication mode for this MCP server. */
-                auth_mode?: components["schemas"]["McpServerAuthMode"];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was created.
-                 */
-                created_at: string;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was deleted.
-                 */
-                deleted_at?: string | null;
-                /**
-                 * @description Human-readable description of the MCP server.
-                 * @example Atlassian MCP Server for Jira and Confluence
-                 */
-                description?: string | null;
-                /**
-                 * @description Additional HTTP headers for authentication.
-                 *     Keys are header names, values are header values.
-                 */
-                headers?: {
-                    [key: string]: string;
-                };
-                /**
-                 * @description Unique identifier for the MCP server.
-                 * @example mcp_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /**
-                 * @description Display name of the MCP server.
-                 * @example atlassian-mcp-server
-                 */
-                name: string;
-                /** @description Stable provider id used for user-scoped OAuth connections. */
-                oauth_provider_id?: string | null;
-                /** @description Current lifecycle status of the MCP server. */
-                status: components["schemas"]["McpServerStatus"];
-                /** @description Transport type (currently only HTTP supported). */
-                transport_type: components["schemas"]["McpServerTransportType"];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the MCP server was last updated.
-                 */
-                updated_at: string;
-                /**
-                 * @description URL of the MCP server endpoint.
-                 * @example https://mcp.atlassian.com/v1/mcp
-                 */
-                url: string;
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-        };
+        created_at: string;
         /**
-         * @description Response wrapper for list endpoints.
-         *     All list endpoints return responses wrapped in a `data` field.
+         * @description Default LLM model ID for this harness.
+         *     Lowest priority in chain: controls > session > agent > harness.
+         * @example model_01933b5a00007000800000000000001
          */
-        ListResponse_WithUrls_Skill: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                allowed_tools?: string | null;
-                /** Format: date-time */
-                archived_at?: string | null;
-                compatibility?: string | null;
-                /** Format: date-time */
-                created_at: string;
-                /** Format: date-time */
-                deleted_at?: string | null;
-                /** @example Extract text and tables from PDF files. */
-                description: string;
-                /** @description Whether the model is prevented from auto-invoking this skill */
-                disable_model_invocation?: boolean;
-                /** @example skill_01933b5a00007000800000000000001 */
-                id: string;
-                license?: string | null;
-                metadata?: {
-                    [key: string]: unknown;
-                };
-                /** @example pdf-processing */
-                name: string;
-                source_type: components["schemas"]["SkillSourceType"];
-                status: components["schemas"]["SkillStatus"];
-                /** Format: date-time */
-                updated_at: string;
-                /** @description Whether this skill appears as a /slash command for users */
-                user_invocable?: boolean;
-                version: string;
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-        };
-        ListSchedulesQuery: {
-            /** @description Filter by enabled status */
-            enabled?: boolean | null;
-            /**
-             * Format: int32
-             * @description Pagination limit (default: 20, max: 100)
-             */
-            limit?: number | null;
-            /**
-             * Format: int32
-             * @description Pagination offset
-             */
-            offset?: number | null;
-            /** @description Filter by target type ("workflow" or "activity") */
-            target_type?: string | null;
-        };
-        /** @description Query parameters for listing users */
-        ListUsersQuery: {
-            /** @description Search query to filter by name or email */
-            search?: string | null;
-        };
+        default_model_id?: string | null;
         /**
-         * @description Information about context compaction performed before LLM generation
-         *
-         *     When the conversation context exceeds the model's limit, compaction is
-         *     automatically triggered to compress the context before retrying.
+         * Format: date-time
+         * @description Timestamp when the harness was deleted.
          */
-        LlmCompactionInfo: {
-            /** @description Whether compaction was performed */
-            compacted: boolean;
-            /**
-             * Format: int64
-             * @description Duration of the compaction operation in milliseconds
-             */
-            duration_ms?: number | null;
-            /**
-             * Format: int32
-             * @description Number of input tokens after compaction
-             */
-            input_tokens_after?: number | null;
-            /**
-             * Format: int32
-             * @description Number of input tokens before compaction
-             */
-            input_tokens_before?: number | null;
-        };
+        deleted_at?: string | null;
+        /** @description Human-readable description of what the harness does. */
+        description?: string | null;
+        /** @description Human-readable display name shown in UI. */
+        display_name?: string | null;
         /**
-         * @description Data for llm.generation event
-         *
-         *     Emitted after each LLM API call to provide full visibility into
-         *     the messages sent to the model and the response received.
+         * @description Unique identifier for the harness (format: harness_{32-hex}).
+         * @example harness_01933b5a00007000800000000000001
          */
-        LlmGenerationData: {
-            /** @description Messages sent to the LLM (including system prompt) */
-            messages: components["schemas"]["Message"][];
-            /** @description Metadata about the generation */
-            metadata: components["schemas"]["LlmGenerationMetadata"];
-            /** @description Output from the LLM */
-            output: components["schemas"]["LlmGenerationOutput"];
-            /** @description Tools available to the LLM for this generation */
-            tools?: components["schemas"]["ToolDefinitionSummary"][];
-        };
-        /** @description Metadata about an LLM generation */
-        LlmGenerationMetadata: {
-            compaction?: null | components["schemas"]["LlmCompactionInfo"];
-            /**
-             * Format: int64
-             * @description Duration of the generation in milliseconds
-             */
-            duration_ms?: number | null;
-            /** @description Error message if generation failed */
-            error?: string | null;
-            /**
-             * @description Finish reasons from the LLM (e.g., ["stop"], ["tool_calls"])
-             *     Required for gen-ai semantic conventions
-             */
-            finish_reasons?: string[] | null;
-            /** @description Model identifier used for generation */
-            model: string;
-            /** @description Provider type (openai, anthropic, etc.) */
-            provider?: string | null;
-            /**
-             * @description Unique response identifier from the LLM provider
-             *     Required for gen-ai semantic conventions
-             */
-            response_id?: string | null;
-            retry?: null | components["schemas"]["LlmRetryInfo"];
-            /** @description Whether the generation was successful */
-            success: boolean;
-            /**
-             * Format: int64
-             * @description Time to first token in milliseconds (streaming latency)
-             */
-            time_to_first_token_ms?: number | null;
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
-        /** @description LLM generation output */
-        LlmGenerationOutput: {
-            /** @description Text response from the model */
-            text?: string | null;
-            /** @description Tool calls requested by the model */
-            tool_calls?: components["schemas"]["ToolCall"][];
-        };
-        /** @description LLM Model entity */
-        LlmModel: {
-            capabilities: string[];
-            /** Format: date-time */
-            created_at: string;
-            display_name: string;
-            /**
-             * @description Whether this model is enabled (visible in UI model pickers).
-             *     All models are available via API regardless of this flag.
-             */
-            enabled: boolean;
-            /** @example model_01933b5a00007000800000000000001 */
-            id: string;
-            is_favorite: boolean;
-            model_id: string;
-            /** @example provider_01933b5a00007000800000000000001 */
-            provider_id: string;
-            /** @description How the model was added to the system */
-            source: components["schemas"]["LlmModelSource"];
-            status: components["schemas"]["LlmModelStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        };
-        /** @description Cost information for the model (per million tokens) */
-        LlmModelCost: {
-            /**
-             * Format: double
-             * @description Cached read cost per million tokens (USD), if supported
-             */
-            cache_read?: number | null;
-            /**
-             * @description Tiered pricing that applies above certain context thresholds.
-             *     When present, the base cost fields apply up to the tier threshold,
-             *     and each tier's costs apply for tokens beyond that threshold.
-             */
-            cost_tiers?: components["schemas"]["CostTier"][];
-            /**
-             * Format: double
-             * @description Input cost per million tokens (USD)
-             */
-            input: number;
-            /**
-             * Format: double
-             * @description Output cost per million tokens (USD)
-             */
-            output: number;
-        };
-        /** @description Token limits for the model */
-        LlmModelLimits: {
-            /**
-             * Format: int32
-             * @description Maximum context window size in tokens
-             */
-            context: number;
-            /**
-             * Format: int32
-             * @description Maximum input tokens (if different from context - output)
-             */
-            input?: number | null;
-            /**
-             * Format: int32
-             * @description Maximum images or PDF pages per request
-             */
-            max_media?: number | null;
-            /**
-             * Format: int32
-             * @description Maximum output tokens
-             */
-            output: number;
-        };
-        /** @description Model modalities for input and output */
-        LlmModelModalities: {
-            /** @description Supported input modalities */
-            input: components["schemas"]["Modality"][];
-            /** @description Supported output modalities */
-            output: components["schemas"]["Modality"][];
-        };
+        id: string;
+        /** @description Starter files copied into each new session for this harness. */
+        initial_files?: components["schemas"]["InitialFile"][];
         /**
-         * @description LLM Model Profile describing model capabilities
-         *     Based on models.dev structure (<https://models.dev/api.json>)
-         *
-         *     NOTE: Currently only includes profiles for:
-         *     - OpenAI: gpt-4o, gpt-4o-mini, o1, o1-mini, o1-pro, o3-mini
-         *     - Anthropic: claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus, claude-3-sonnet, claude-3-haiku, claude-sonnet-4, claude-opus-4
-         *
-         *     Additional model profiles can be added as needed.
+         * @description Whether this harness is built-in (system-managed, readonly).
+         *     Built-in harnesses are provisioned during org initialization and
+         *     cannot be modified or deleted via the API. Users can copy them.
          */
-        LlmModelProfile: {
-            /** @description Whether the model supports file/image attachments */
-            attachment: boolean;
-            cost?: null | components["schemas"]["LlmModelCost"];
-            /** @description Short human-readable description of the model's strengths and intended use */
-            description?: string | null;
-            /** @description Model family (e.g., "gpt-4o", "claude-3-5-sonnet") */
-            family: string;
-            /** @description Knowledge cutoff date (YYYY-MM-DD format) */
-            knowledge?: string | null;
-            /** @description Last updated date (YYYY-MM-DD format) */
-            last_updated?: string | null;
-            limits?: null | components["schemas"]["LlmModelLimits"];
-            modalities?: null | components["schemas"]["LlmModelModalities"];
-            /** @description Display name of the model */
-            name: string;
-            /** @description Whether the model has open weights */
-            open_weights: boolean;
-            /** @description Whether the model has reasoning/chain-of-thought capabilities */
-            reasoning: boolean;
-            reasoning_effort?: null | components["schemas"]["ReasoningEffortConfig"];
-            /** @description Release date (YYYY-MM-DD format) */
-            release_date?: string | null;
-            /** @description Whether the model supports structured output (JSON mode) */
-            structured_output: boolean;
-            /**
-             * @description Whether the model supports native execution phases ("commentary" / "final_answer").
-             *     When true, the driver sends the `phase` field on assistant messages in the wire format.
-             *     Currently supported by GPT-5.4+ via OpenAI Responses API.
-             */
-            supports_phases?: boolean;
-            /** @description Whether temperature control is supported */
-            temperature: boolean;
-            /** @description Whether the model supports tool/function calling */
-            tool_call: boolean;
-            /**
-             * @description Whether the model supports tool_search (deferred tool loading).
-             *     When true, the driver can use namespaces and defer_loading to reduce
-             *     token usage for large tool sets. Currently supported by GPT-5.4+.
-             */
-            tool_search?: boolean;
-        };
+        is_built_in?: boolean;
+        /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
+        mcpServers?: components["schemas"]["BTreeMap"];
+        /** @description Name, unique per org (e.g. "generic"). */
+        name: string;
+        network_access?: null | components["schemas"]["NetworkAccessList"];
         /**
-         * @description How the model was added to the system
-         * @enum {string}
+         * @description Optional parent harness that this harness inherits from.
+         * @example harness_01933b5a000070008000000000000602
          */
-        LlmModelSource: "manual" | "discovered" | "predefined";
+        parent_harness_id?: string | null;
+        /** @description Current lifecycle status of the harness. */
+        status: components["schemas"]["HarnessStatus"];
         /**
-         * @description LLM model status
-         * @enum {string}
+         * @description System prompt that defines the harness's base behavior.
+         *     Forms the foundation of the prompt stack.
          */
-        LlmModelStatus: "active" | "disabled";
-        /** @description LLM Model with provider info */
-        LlmModelWithProvider: {
-            capabilities: string[];
-            /** Format: date-time */
-            created_at: string;
-            display_name: string;
-            /** @description Whether this model is enabled (visible in UI model pickers) */
-            enabled: boolean;
-            /** @example model_01933b5a00007000800000000000001 */
-            id: string;
-            is_favorite: boolean;
-            model_id: string;
-            profile?: null | components["schemas"]["LlmModelProfile"];
-            /** @example provider_01933b5a00007000800000000000001 */
-            provider_id: string;
-            provider_name: string;
-            provider_type: components["schemas"]["LlmProviderType"];
-            /** @description How the model was added to the system */
-            source: components["schemas"]["LlmModelSource"];
-            status: components["schemas"]["LlmModelStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        };
+        system_prompt: string;
+        /** @description Tags for organizing and filtering harnesses. */
+        tags?: string[];
         /**
-         * @description LLM Provider entity (API keys never exposed)
-         *     Note: This is the entity struct, separate from the LlmProvider trait in llm.rs
+         * Format: date-time
+         * @description Timestamp when the harness was last updated.
          */
-        LlmProvider: {
-            /** @description Whether an API key is configured (key is never returned) */
-            api_key_set: boolean;
-            base_url?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** @example provider_01933b5a00007000800000000000001 */
-            id: string;
-            /**
-             * Format: date-time
-             * @description When models were last synced from provider API
-             */
-            last_synced_at?: string | null;
-            name: string;
-            provider_type: components["schemas"]["LlmProviderType"];
-            status: components["schemas"]["LlmProviderStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        };
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_KeyValueInfo: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** @description When the key was created */
+        created_at: string;
+        /** @description The key name */
+        key: string;
+        /** @description When the key was last updated */
+        updated_at: string;
+        /** @description The stored value */
+        value: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_KnowledgeBaseResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** Format: date-time */
+        archived_at?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        /** Format: date-time */
+        deleted_at?: string | null;
+        description?: string | null;
+        /** @example kb_01933b5a000070008000000000000001 */
+        id: string;
+        name: string;
+        status: string;
+        /** Format: date-time */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_KnowledgeEntryResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        body: string;
+        /** Format: date-time */
+        created_at: string;
+        /** @example kbe_01933b5a000070008000000000000001 */
+        id: string;
+        /** @example kb_01933b5a000070008000000000000001 */
+        kb_id: string;
+        kind: string;
+        tags: string[];
+        title: string;
+        /** Format: date-time */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_McpServer: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** @description Whether an API key has been configured. */
+        api_key_set: boolean;
         /**
-         * @description LLM provider status
-         * @enum {string}
+         * Format: date-time
+         * @description Timestamp when the MCP server was archived.
          */
-        LlmProviderStatus: "active" | "disabled";
+        archived_at?: string | null;
+        /** @description Authentication mode for this MCP server. */
+        auth_mode?: components["schemas"]["McpServerAuthMode"];
         /**
-         * @description LLM provider type
-         * @enum {string}
+         * Format: date-time
+         * @description Timestamp when the MCP server was created.
          */
-        LlmProviderType: "openai" | "openai_completions" | "anthropic" | "gemini" | "llmsim";
-        /** @description Information about rate limit retries during LLM generation */
-        LlmRetryInfo: {
-            /**
-             * Format: int32
-             * @description Number of retry attempts made (0 = succeeded on first try)
-             */
-            attempts: number;
-            /**
-             * Format: int64
-             * @description Total time spent waiting between retries in milliseconds
-             */
-            total_wait_ms: number;
-        };
-        /** @description Query for log endpoint */
-        LogQuery: {
-            /** @description Max commits to return (default: 50) */
-            limit?: number | null;
-            /** @description Ref to start from (default: HEAD) */
-            ref?: string | null;
-        };
+        created_at: string;
         /**
-         * @description MCP Server configuration.
-         *     Represents a remote MCP server that can provide tools and resources.
+         * Format: date-time
+         * @description Timestamp when the MCP server was deleted.
          */
-        McpServer: {
-            /** @description Whether an API key has been configured. */
-            api_key_set: boolean;
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was archived.
-             */
-            archived_at?: string | null;
-            /** @description Authentication mode for this MCP server. */
-            auth_mode?: components["schemas"]["McpServerAuthMode"];
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was created.
-             */
-            created_at: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was deleted.
-             */
-            deleted_at?: string | null;
-            /**
-             * @description Human-readable description of the MCP server.
-             * @example Atlassian MCP Server for Jira and Confluence
-             */
-            description?: string | null;
-            /**
-             * @description Additional HTTP headers for authentication.
-             *     Keys are header names, values are header values.
-             */
-            headers?: {
-                [key: string]: string;
-            };
-            /**
-             * @description Unique identifier for the MCP server.
-             * @example mcp_01933b5a00007000800000000000001
-             */
-            id: string;
-            /**
-             * @description Display name of the MCP server.
-             * @example atlassian-mcp-server
-             */
-            name: string;
-            /** @description Stable provider id used for user-scoped OAuth connections. */
-            oauth_provider_id?: string | null;
-            /** @description Current lifecycle status of the MCP server. */
-            status: components["schemas"]["McpServerStatus"];
-            /** @description Transport type (currently only HTTP supported). */
-            transport_type: components["schemas"]["McpServerTransportType"];
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was last updated.
-             */
-            updated_at: string;
-            /**
-             * @description URL of the MCP server endpoint.
-             * @example https://mcp.atlassian.com/v1/mcp
-             */
-            url: string;
-        };
+        deleted_at?: string | null;
         /**
-         * @description MCP server authentication mode.
-         * @enum {string}
+         * @description Human-readable description of the MCP server.
+         * @example Atlassian MCP Server for Jira and Confluence
          */
-        McpServerAuthMode: "none" | "api_key" | "o_auth";
+        description?: string | null;
         /**
-         * @description MCP Server lifecycle status.
-         *     - `active`: Server is available for use
-         *     - `disabled`: Server is disabled and not used
-         *     - `archived`: Server is hidden from listings and cannot be modified or assigned
-         *     - `deleted`: Server is a tombstone kept only for historical references
-         * @enum {string}
+         * @description Additional HTTP headers for authentication.
+         *     Keys are header names, values are header values.
          */
-        McpServerStatus: "active" | "disabled" | "archived" | "deleted";
+        headers?: {
+          [key: string]: string;
+        };
         /**
-         * @description MCP Server transport type.
-         *     Currently only HTTP is supported.
-         * @enum {string}
+         * @description Unique identifier for the MCP server.
+         * @example mcp_01933b5a00007000800000000000001
          */
-        McpServerTransportType: "http";
+        id: string;
         /**
-         * @description MCP tool annotations as defined by the MCP specification.
-         *     All fields are optional booleans following the MCP convention.
+         * @description Display name of the MCP server.
+         * @example atlassian-mcp-server
          */
-        McpToolAnnotations: {
-            destructiveHint?: boolean | null;
-            idempotentHint?: boolean | null;
-            openWorldHint?: boolean | null;
-            readOnlyHint?: boolean | null;
-        };
-        /** @description A message in the conversation */
-        Message: {
-            /** @description Message content as array of content parts (text, images, tool calls, tool results) */
-            content: components["schemas"]["ContentPart"][];
-            controls?: null | components["schemas"]["Controls"];
-            /**
-             * Format: date-time
-             * @description Timestamp when the message was created
-             */
-            created_at: string;
-            external_actor?: null | components["schemas"]["ExternalActor"];
-            /**
-             * @description Unique message ID (format: message_{32-hex})
-             * @example message_01933b5a00007000800000000000001
-             */
-            id: string;
-            /** @description Message-level metadata */
-            metadata?: Record<string, never> | null;
-            phase?: null | components["schemas"]["ExecutionPhase"];
-            /** @description Message role */
-            role: components["schemas"]["MessageRole"];
-            /**
-             * @description Thinking content from extended thinking models (Anthropic Claude)
-             *     This is the model's chain-of-thought reasoning before producing the response.
-             *     Must be included in subsequent API calls when thinking is enabled.
-             */
-            thinking?: string | null;
-            /**
-             * @description Cryptographic signature for thinking content (Anthropic Claude)
-             *     Required when sending thinking back in subsequent API calls.
-             */
-            thinking_signature?: string | null;
-        };
+        name: string;
+        /** @description Stable provider id used for user-scoped OAuth connections. */
+        oauth_provider_id?: string | null;
+        /** @description Current lifecycle status of the MCP server. */
+        status: components["schemas"]["McpServerStatus"];
+        /** @description Transport type (currently only HTTP supported). */
+        transport_type: components["schemas"]["McpServerTransportType"];
         /**
-         * @description Message role in the conversation
-         * @enum {string}
+         * Format: date-time
+         * @description Timestamp when the MCP server was last updated.
          */
-        MessageRole: "system" | "user" | "agent" | "tool_result";
+        updated_at: string;
         /**
-         * @description Modality type (text, image, audio, video)
-         * @enum {string}
+         * @description URL of the MCP server endpoint.
+         * @example https://mcp.atlassian.com/v1/mcp
          */
-        Modality: "text" | "image" | "audio" | "video" | "pdf";
-        /** @description Metadata about the model used for generation */
-        ModelMetadata: {
-            /** @description Model name (e.g., "gpt-4o", "claude-3-sonnet") */
-            model: string;
-            /**
-             * Format: uuid
-             * @description Model ID (internal identifier)
-             */
-            model_id?: string | null;
-            /**
-             * Format: uuid
-             * @description Provider ID (internal identifier)
-             */
-            provider_id?: string | null;
-        };
-        /** @description Request to move/rename a file */
-        MoveFileRequest: {
-            /** @description Destination path */
-            dst_path: string;
-            /** @description Source path */
-            src_path: string;
-        };
+        url: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_MemoryStoreResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** Format: int64 */
+        active_memory_count: number;
+        /** Format: date-time */
+        created_at: string;
+        /** @example mst_01933b5a000070008000000000000001 */
+        id: string;
+        is_default: boolean;
+        name: string;
+        /** Format: date-time */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_Message: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** @description Array of content parts */
+        content: components["schemas"]["ContentPart"][];
+        controls?: null | components["schemas"]["Controls"];
+        /** Format: date-time */
+        created_at: string;
+        external_actor?: null | components["schemas"]["ExternalActor"];
         /**
-         * @description Network access list controlling which hosts/URLs an agent session can reach.
-         *
-         *     - `allowed`: if non-empty, only URLs matching these patterns are permitted.
-         *     - `blocked`: URLs matching these patterns are always denied (takes precedence over allowed).
-         *
-         *     Pattern format:
-         *     - `example.com` — exact domain match (any port, any path)
-         *     - `*.example.com` — domain and all subdomains
-         *     - `https://example.com/api/` — exact URL prefix (scheme + host + path)
+         * @description Unique message ID (format: message_{32-hex})
+         * @example message_01933b5a00007000800000000000001
          */
-        NetworkAccessList: {
-            /**
-             * @description Allowed host patterns. If non-empty, only matching URLs are permitted.
-             *     An empty list means "no restriction from this layer" (inherit parent).
-             */
-            allowed?: string[];
-            /** @description Blocked host patterns. Always denied, even if matched by `allowed`. */
-            blocked?: string[];
-        };
-        /** @description Response for organization operations */
-        OrganizationResponse: {
-            /** @description Base harness used when session creation omits harness_id. */
-            base_harness_id?: string | null;
-            /**
-             * Format: date-time
-             * @description When the organization was created
-             */
-            created_at: string;
-            /** @description Default harness to preselect in the UI. */
-            default_harness_id?: string | null;
-            /** @description Default LLM model for the organization. */
-            default_model_id?: string | null;
-            /** @description External identifier (org_<32-hex-chars>) */
-            id: string;
-            /** @description Display name */
-            name: string;
-            /**
-             * Format: date-time
-             * @description When the organization was last updated
-             */
-            updated_at: string;
-        };
-        /** @description Data for output.message.completed event */
-        OutputMessageCompletedData: {
-            /** @description The agent message */
-            message: components["schemas"]["Message"];
-            metadata?: null | components["schemas"]["ModelMetadata"];
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
+        id: string;
+        /** @description Message-level metadata (locale, etc.) */
+        metadata?: {
+          [key: string]: unknown;
+        } | null;
+        role: components["schemas"]["MessageRole"];
+        /** Format: int32 */
+        sequence: number;
         /**
-         * @description Data for output.message.delta event
-         *
-         *     Incremental text update during LLM generation. Events are batched (~100ms)
-         *     to reduce volume while providing real-time feedback.
+         * @description Session ID this message belongs to (format: session_{32-hex})
+         * @example session_01933b5a00007000800000000000001
          */
-        OutputMessageDeltaData: {
-            /** @description Accumulated text so far */
-            accumulated: string;
-            /** @description The new text chunk */
-            delta: string;
-            /**
-             * @description Turn ID this delta belongs to
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
+        session_id: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_OrganizationResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** @description Base harness used when session creation omits harness_id. */
+        base_harness_id?: string | null;
         /**
-         * @description Data for output.message.started event
-         *
-         *     Emitted when the LLM starts generating a response. UI can show a
-         *     "thinking" indicator until output.message.delta or output.message.completed events arrive.
+         * Format: date-time
+         * @description When the organization was created
          */
-        OutputMessageStartedData: {
-            /**
-             * Format: int32
-             * @description Current iteration number within this turn (1-based).
-             *     Useful for UI to show progress during multi-step tool-calling flows.
-             */
-            iteration?: number | null;
-            /** @description Optional model name being used */
-            model?: string | null;
-            /**
-             * @description Turn ID this output belongs to
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
+        created_at: string;
+        /** @description Default harness to preselect in the UI. */
+        default_harness_id?: string | null;
+        /** @description Default LLM model for the organization. */
+        default_model_id?: string | null;
+        /** @description External identifier (org_<32-hex-chars>) */
+        id: string;
+        /** @description Display name */
+        name: string;
         /**
-         * @description Response wrapper for paginated list endpoints.
-         *     Includes pagination metadata along with the data array.
+         * Format: date-time
+         * @description When the organization was last updated
          */
-        PaginatedResponse_Session: {
-            /** @description Array of items returned by the list operation. */
-            data: {
-                /**
-                 * Format: int32
-                 * @description Number of active (enabled) schedules for this session.
-                 *     Populated when the session is fetched for API responses.
-                 */
-                active_schedule_count?: number | null;
-                /**
-                 * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
-                 * @example agent_01933b5a00007000800000000000001
-                 */
-                agent_id?: string | null;
-                /**
-                 * @description Optional resident agent identity for unattended/background execution.
-                 * @example identity_01933b5a00007000800000000000001
-                 */
-                agent_identity_id?: string | null;
-                /** @description Validated config passed by host at blueprint spawn time. */
-                blueprint_config?: unknown;
-                /**
-                 * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
-                 *     from the blueprint definition instead of from harness_id/agent_id.
-                 */
-                blueprint_id?: string | null;
-                /**
-                 * @description Session-level capabilities (additive to agent capabilities).
-                 *     Applied after agent capabilities when building RuntimeAgent.
-                 */
-                capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session was created.
-                 */
-                created_at: string;
-                /**
-                 * @description Aggregated UI features from all active capabilities (harness + agent + session).
-                 *     Computed at read time from the capability registry.
-                 *     Known features: "file_system", "schedules", "secrets", "key_value",
-                 *     "sql_database", "leased_resources".
-                 */
-                features?: string[];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session finished (completed or failed).
-                 */
-                finished_at?: string | null;
-                /**
-                 * @description ID of the harness for this session (format: harness_{32-hex}).
-                 * @example harness_01933b5a00007000800000000000001
-                 */
-                harness_id: string;
-                /**
-                 * @description Session-level client hints — arbitrary key-value pairs declared by the
-                 *     client at session creation time. These are defaults for every turn;
-                 *     per-message `controls.hints` override these key-by-key (shallow merge).
-                 *
-                 *     Examples: `{"setup_connection": true, "rich_media": true}`
-                 */
-                hints?: {
-                    [key: string]: unknown;
-                } | null;
-                /**
-                 * @description Unique identifier for the session (format: session_{32-hex}).
-                 * @example session_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /**
-                 * @description Session-level initial files (additive to agent initial_files).
-                 *     Files with matching paths override agent/harness files; new paths are appended.
-                 */
-                initial_files?: components["schemas"]["InitialFile"][];
-                /**
-                 * @description Whether this session is pinned by the current user.
-                 *     Only populated when the request has an authenticated user context.
-                 */
-                is_pinned?: boolean | null;
-                /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
-                locale?: string | null;
-                /** @description Maximum number of LLM iterations per turn for this session. */
-                max_iterations?: number | null;
-                /**
-                 * @description LLM model ID to use for this session (format: model_{32-hex}).
-                 *     Overrides the agent's default model if set.
-                 * @example model_01933b5a00007000800000000000001
-                 */
-                model_id?: string | null;
-                network_access?: null | components["schemas"]["NetworkAccessList"];
-                /**
-                 * @description Organization this session belongs to (format: org_{32-hex}).
-                 * @example org_00000000000000000000000000000001
-                 */
-                organization_id: string;
-                /** @description Preview text from the last assistant response (truncated). */
-                output_preview?: string | null;
-                /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
-                parent_session_id?: string | null;
-                /** @description Preview text from the first user message (truncated). */
-                preview?: string | null;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session started executing.
-                 */
-                started_at?: string | null;
-                /** @description Current execution status of the session. */
-                status: components["schemas"]["SessionStatus"];
-                /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
-                subagent_name?: string | null;
-                subagent_status?: null | components["schemas"]["SubagentStatus"];
-                /** @description Original task description given to this subagent. */
-                subagent_task?: string | null;
-                /**
-                 * @description Session-level system prompt override.
-                 *     Prepended to the agent's system prompt when building RuntimeAgent.
-                 */
-                system_prompt?: string | null;
-                /** @description Tags for organizing and filtering sessions. */
-                tags?: string[];
-                /** @description Human-readable title for the session. */
-                title?: string | null;
-                /** @description Client-side tools for this session (additive to agent tools). */
-                tools?: components["schemas"]["ToolDefinition"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session was last updated.
-                 */
-                updated_at: string;
-                usage?: null | components["schemas"]["TokenUsage"];
-            }[];
-            /**
-             * Format: int32
-             * @description Maximum number of items per page.
-             */
-            limit: number;
-            /**
-             * Format: int32
-             * @description Current offset (starting position).
-             */
-            offset: number;
-            /**
-             * Format: int32
-             * @description Total number of items matching the query (across all pages).
-             */
-            total: number;
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_SecretInfo: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** @description When the secret was created */
+        created_at: string;
+        /** @description The secret name */
+        name: string;
+        /** @description When the secret was last updated */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_Skill: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        allowed_tools?: string | null;
+        /** Format: date-time */
+        archived_at?: string | null;
+        compatibility?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        /** Format: date-time */
+        deleted_at?: string | null;
+        /** @example Extract text and tables from PDF files. */
+        description: string;
+        /** @description Whether the model is prevented from auto-invoking this skill */
+        disable_model_invocation?: boolean;
+        /** @example skill_01933b5a00007000800000000000001 */
+        id: string;
+        license?: string | null;
+        metadata?: {
+          [key: string]: unknown;
         };
+        /** @example pdf-processing */
+        name: string;
+        source_type: components["schemas"]["SkillSourceType"];
+        status: components["schemas"]["SkillStatus"];
+        /** Format: date-time */
+        updated_at: string;
+        /** @description Whether this skill appears as a /slash command for users */
+        user_invocable?: boolean;
+        version: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_User: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        auth_provider?: string | null;
+        avatar_url?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        email: string;
+        id: string;
+        name: string;
+        roles: string[];
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_VolumeResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** Format: date-time */
+        archived_at?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        /** Format: date-time */
+        deleted_at?: string | null;
+        description?: string | null;
+        /** @example vol_01933b5a000070008000000000000001 */
+        id: string;
+        name: string;
+        status: string;
+        /** Format: date-time */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_LlmModel: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        capabilities: string[];
+        /** Format: date-time */
+        created_at: string;
+        display_name: string;
         /**
-         * @description Response wrapper for paginated list endpoints.
-         *     Includes pagination metadata along with the data array.
+         * @description Whether this model is enabled (visible in UI model pickers).
+         *     All models are available via API regardless of this flag.
          */
-        PaginatedResponse_WithUrls_Agent: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was archived.
-                 */
-                archived_at?: string | null;
-                /**
-                 * @description Capabilities enabled for this agent with per-agent configuration.
-                 *     Capabilities add tools and system prompt modifications.
-                 */
-                capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was created.
-                 */
-                created_at: string;
-                /**
-                 * @description Default LLM model ID for this agent.
-                 *     Can be overridden at the session level.
-                 * @example model_01933b5a00007000800000000000001
-                 */
-                default_model_id?: string | null;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was deleted.
-                 */
-                deleted_at?: string | null;
-                /** @description Human-readable description of what the agent does. */
-                description?: string | null;
-                /**
-                 * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
-                 *     Falls back to `name` when absent.
-                 */
-                display_name?: string | null;
-                /**
-                 * @description External identifier (agent_<32-hex>). Shown as "id" in API.
-                 *     Client-supplied or auto-generated.
-                 * @example agent_01933b5a000070008000000000000001
-                 */
-                id: string;
-                /** @description Starter files copied into each new session for this agent. */
-                initial_files?: components["schemas"]["InitialFile"][];
-                /** @description Maximum number of LLM iterations per turn for this agent. */
-                max_iterations?: number | null;
-                /** @description Name, unique per org (e.g. "customer-support"). */
-                name: string;
-                network_access?: null | components["schemas"]["NetworkAccessList"];
-                /** @description Current lifecycle status of the agent. */
-                status: components["schemas"]["AgentStatus"];
-                /**
-                 * @description System prompt that defines the agent's behavior.
-                 *     Sent as the first message in every conversation.
-                 */
-                system_prompt: string;
-                /** @description Tags for organizing and filtering agents. */
-                tags?: string[];
-                /**
-                 * @description Client-side tools registered for this agent.
-                 *     These tools are executed by the client, not the server.
-                 */
-                tools?: components["schemas"]["ToolDefinition"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the agent was last updated.
-                 */
-                updated_at: string;
-                usage?: null | components["schemas"]["TokenUsage"];
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-            /**
-             * Format: int32
-             * @description Maximum number of items per page.
-             */
-            limit: number;
-            /**
-             * Format: int32
-             * @description Current offset (starting position).
-             */
-            offset: number;
-            /**
-             * Format: int32
-             * @description Total number of items matching the query (across all pages).
-             */
-            total: number;
-        };
+        enabled: boolean;
+        /** @example model_01933b5a00007000800000000000001 */
+        id: string;
+        is_favorite: boolean;
+        model_id: string;
+        /** @example provider_01933b5a00007000800000000000001 */
+        provider_id: string;
+        /** @description How the model was added to the system */
+        source: components["schemas"]["LlmModelSource"];
+        /** Format: date-time */
+        updated_at: string;
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_LlmModelWithProvider: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        capabilities: string[];
+        /** Format: date-time */
+        created_at: string;
+        display_name: string;
+        /** @description Whether this model is enabled (visible in UI model pickers) */
+        enabled: boolean;
         /**
-         * @description Response wrapper for paginated list endpoints.
-         *     Includes pagination metadata along with the data array.
+         * @description Derived: model is configured and ready for use. Currently means the
+         *     joined provider is active and has an API key set; over time this may
+         *     also incorporate live reachability checks. Not persisted.
          */
-        PaginatedResponse_WithUrls_CapabilityInfo: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                /** @description Category for grouping in UI */
-                category?: string | null;
-                /**
-                 * @description IDs of capabilities that this capability depends on.
-                 *     When this capability is selected, its dependencies are automatically included.
-                 */
-                dependencies?: string[];
-                /** @description Description of what this capability provides */
-                description: string;
-                /**
-                 * @description UI feature strings this capability contributes to.
-                 *     Multiple capabilities can contribute the same feature.
-                 */
-                features?: string[];
-                /** @description Icon name (for UI rendering) */
-                icon?: string | null;
-                /** @description Unique capability identifier */
-                id: string;
-                /** @description Whether this is an MCP server capability (for UI badge) */
-                is_mcp?: boolean;
-                /** @description Whether this is an Agent Skill capability (for UI badge) */
-                is_skill?: boolean;
-                /** @description Display name */
-                name: string;
-                /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
-                risk_level?: components["schemas"]["RiskLevel"];
-                /** @description Current status */
-                status: string;
-                /** @description System prompt addition contributed by this capability */
-                system_prompt?: string | null;
-                /** @description Tool definitions provided by this capability */
-                tool_definitions?: Record<string, never>[];
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-            /**
-             * Format: int32
-             * @description Maximum number of items per page.
-             */
-            limit: number;
-            /**
-             * Format: int32
-             * @description Current offset (starting position).
-             */
-            offset: number;
-            /**
-             * Format: int32
-             * @description Total number of items matching the query (across all pages).
-             */
-            total: number;
-        };
+        healthy: boolean;
+        /** @example model_01933b5a00007000800000000000001 */
+        id: string;
+        is_favorite: boolean;
+        model_id: string;
+        profile?: null | components["schemas"]["LlmModelProfile"];
+        /** @example provider_01933b5a00007000800000000000001 */
+        provider_id: string;
+        provider_name: string;
+        provider_type: components["schemas"]["LlmProviderType"];
+        /** @description How the model was added to the system */
+        source: components["schemas"]["LlmModelSource"];
+        /** Format: date-time */
+        updated_at: string;
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_LlmProvider: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /** @description Whether an API key is configured (key is never returned) */
+        api_key_set: boolean;
+        base_url?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        /** @example provider_01933b5a00007000800000000000001 */
+        id: string;
         /**
-         * @description Response wrapper for paginated list endpoints.
-         *     Includes pagination metadata along with the data array.
+         * Format: date-time
+         * @description When models were last synced from provider API
          */
-        PaginatedResponse_WithUrls_Session: {
-            /** @description Array of items returned by the list operation. */
-            data: ({
-                /**
-                 * Format: int32
-                 * @description Number of active (enabled) schedules for this session.
-                 *     Populated when the session is fetched for API responses.
-                 */
-                active_schedule_count?: number | null;
-                /**
-                 * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
-                 * @example agent_01933b5a00007000800000000000001
-                 */
-                agent_id?: string | null;
-                /**
-                 * @description Optional resident agent identity for unattended/background execution.
-                 * @example identity_01933b5a00007000800000000000001
-                 */
-                agent_identity_id?: string | null;
-                /** @description Validated config passed by host at blueprint spawn time. */
-                blueprint_config?: unknown;
-                /**
-                 * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
-                 *     from the blueprint definition instead of from harness_id/agent_id.
-                 */
-                blueprint_id?: string | null;
-                /**
-                 * @description Session-level capabilities (additive to agent capabilities).
-                 *     Applied after agent capabilities when building RuntimeAgent.
-                 */
-                capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session was created.
-                 */
-                created_at: string;
-                /**
-                 * @description Aggregated UI features from all active capabilities (harness + agent + session).
-                 *     Computed at read time from the capability registry.
-                 *     Known features: "file_system", "schedules", "secrets", "key_value",
-                 *     "sql_database", "leased_resources".
-                 */
-                features?: string[];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session finished (completed or failed).
-                 */
-                finished_at?: string | null;
-                /**
-                 * @description ID of the harness for this session (format: harness_{32-hex}).
-                 * @example harness_01933b5a00007000800000000000001
-                 */
-                harness_id: string;
-                /**
-                 * @description Session-level client hints — arbitrary key-value pairs declared by the
-                 *     client at session creation time. These are defaults for every turn;
-                 *     per-message `controls.hints` override these key-by-key (shallow merge).
-                 *
-                 *     Examples: `{"setup_connection": true, "rich_media": true}`
-                 */
-                hints?: {
-                    [key: string]: unknown;
-                } | null;
-                /**
-                 * @description Unique identifier for the session (format: session_{32-hex}).
-                 * @example session_01933b5a00007000800000000000001
-                 */
-                id: string;
-                /**
-                 * @description Session-level initial files (additive to agent initial_files).
-                 *     Files with matching paths override agent/harness files; new paths are appended.
-                 */
-                initial_files?: components["schemas"]["InitialFile"][];
-                /**
-                 * @description Whether this session is pinned by the current user.
-                 *     Only populated when the request has an authenticated user context.
-                 */
-                is_pinned?: boolean | null;
-                /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
-                locale?: string | null;
-                /** @description Maximum number of LLM iterations per turn for this session. */
-                max_iterations?: number | null;
-                /**
-                 * @description LLM model ID to use for this session (format: model_{32-hex}).
-                 *     Overrides the agent's default model if set.
-                 * @example model_01933b5a00007000800000000000001
-                 */
-                model_id?: string | null;
-                network_access?: null | components["schemas"]["NetworkAccessList"];
-                /**
-                 * @description Organization this session belongs to (format: org_{32-hex}).
-                 * @example org_00000000000000000000000000000001
-                 */
-                organization_id: string;
-                /** @description Preview text from the last assistant response (truncated). */
-                output_preview?: string | null;
-                /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
-                parent_session_id?: string | null;
-                /** @description Preview text from the first user message (truncated). */
-                preview?: string | null;
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session started executing.
-                 */
-                started_at?: string | null;
-                /** @description Current execution status of the session. */
-                status: components["schemas"]["SessionStatus"];
-                /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
-                subagent_name?: string | null;
-                subagent_status?: null | components["schemas"]["SubagentStatus"];
-                /** @description Original task description given to this subagent. */
-                subagent_task?: string | null;
-                /**
-                 * @description Session-level system prompt override.
-                 *     Prepended to the agent's system prompt when building RuntimeAgent.
-                 */
-                system_prompt?: string | null;
-                /** @description Tags for organizing and filtering sessions. */
-                tags?: string[];
-                /** @description Human-readable title for the session. */
-                title?: string | null;
-                /** @description Client-side tools for this session (additive to agent tools). */
-                tools?: components["schemas"]["ToolDefinition"][];
-                /**
-                 * Format: date-time
-                 * @description Timestamp when the session was last updated.
-                 */
-                updated_at: string;
-                usage?: null | components["schemas"]["TokenUsage"];
-            } & {
-                /** @description Full API endpoint URL for this resource. */
-                self_url: string;
-                /** @description Full UI URL for viewing this resource. */
-                view_url: string;
-            })[];
-            /**
-             * Format: int32
-             * @description Maximum number of items per page.
-             */
-            limit: number;
-            /**
-             * Format: int32
-             * @description Current offset (starting position).
-             */
-            offset: number;
-            /**
-             * Format: int32
-             * @description Total number of items matching the query (across all pages).
-             */
-            total: number;
-        };
-        /** @description Request to preview the final agent shape with capabilities applied */
-        PreviewAgentRequest: {
-            /**
-             * @description Capabilities to apply with per-agent configuration.
-             * @example [
-             *       {
-             *         "config": {},
-             *         "ref": "current_time"
-             *       },
-             *       {
-             *         "config": {},
-             *         "ref": "test_math"
-             *       }
-             *     ]
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * @description The base system prompt (before capability additions)
-             * @example You are a helpful customer support agent.
-             */
-            system_prompt: string;
-            /** @description Client-side tools to include in the preview. */
-            tools?: Record<string, never>[];
-        };
-        /** @description Request to preview harness shape with capabilities applied */
-        PreviewHarnessRequest: {
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /** @example harness_01933b5a000070008000000000000602 */
-            parent_harness_id?: string | null;
-            /** @example You are a research assistant. */
-            system_prompt: string;
-        };
-        /** @description Data for reason.completed event */
-        ReasonCompletedData: {
-            /**
-             * Format: int64
-             * @description Duration of the reason phase in milliseconds
-             */
-            duration_ms?: number | null;
-            /** @description Error message if failed */
-            error?: string | null;
-            /** @description Whether tool calls were requested */
-            has_tool_calls: boolean;
-            /** @description Whether the LLM call succeeded */
-            success: boolean;
-            /** @description Text response preview (first 200 chars) */
-            text_preview?: string | null;
-            /**
-             * Format: int32
-             * @description Number of tool calls requested
-             */
-            tool_call_count: number;
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
-        /** @description Data for reason.started event */
-        ReasonStartedData: {
-            agent_id?: null | components["schemas"]["TypedId"];
-            /** @description Harness ID being used */
-            harness_id: components["schemas"]["TypedId"];
-            metadata?: null | components["schemas"]["ModelMetadata"];
-        };
+        last_synced_at?: string | null;
+        name: string;
+        provider_type: components["schemas"]["LlmProviderType"];
+        status: components["schemas"]["LlmProviderStatus"];
+        /** Format: date-time */
+        updated_at: string;
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_McpServer: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /** @description Whether an API key has been configured. */
+        api_key_set: boolean;
         /**
-         * @description Data for reason.thinking.completed event
-         *
-         *     Emitted when extended thinking completes and the model transitions
-         *     to producing the final response. Contains the complete thinking content.
+         * Format: date-time
+         * @description Timestamp when the MCP server was archived.
          */
-        ReasonThinkingCompletedData: {
-            /** @description Complete thinking content */
-            thinking: string;
-            /**
-             * @description Turn ID this thinking belongs to
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
+        archived_at?: string | null;
+        /** @description Authentication mode for this MCP server. */
+        auth_mode?: components["schemas"]["McpServerAuthMode"];
         /**
-         * @description Data for reason.thinking.delta event (extended thinking content from models like Claude)
-         *
-         *     This event streams incremental thinking/reasoning content from models that support
-         *     extended thinking mode (e.g., Claude with thinking enabled). The thinking content
-         *     represents the model's chain-of-thought reasoning before producing the final response.
+         * Format: date-time
+         * @description Timestamp when the MCP server was created.
          */
-        ReasonThinkingDeltaData: {
-            /** @description Accumulated thinking text so far (convenience for UI) */
-            accumulated: string;
-            /** @description The thinking delta (new thinking text since last delta) */
-            delta: string;
-            /**
-             * @description Turn ID this delta belongs to (for correlation)
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
+        created_at: string;
         /**
-         * @description Data for reason.thinking.started event
-         *
-         *     Emitted when extended thinking begins during reasoning phase.
-         *     This signals the model is using chain-of-thought reasoning.
-         *     UI can show a "thinking" indicator.
+         * Format: date-time
+         * @description Timestamp when the MCP server was deleted.
          */
-        ReasonThinkingStartedData: {
-            /** @description Optional model name being used */
-            model?: string | null;
-            /**
-             * @description Turn ID this thinking belongs to
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
-        /** @description Reasoning configuration for the model */
-        ReasoningConfig: {
-            /** @description Effort level for reasoning (low, medium, high) */
-            effort?: string | null;
-        };
+        deleted_at?: string | null;
         /**
-         * @description Reasoning effort level for models that support it
-         * @enum {string}
+         * @description Human-readable description of the MCP server.
+         * @example Atlassian MCP Server for Jira and Confluence
          */
-        ReasoningEffort: "none" | "minimal" | "low" | "medium" | "high" | "xhigh";
-        /** @description Reasoning effort configuration for a model */
-        ReasoningEffortConfig: {
-            /** @description Default reasoning effort for this model */
-            default: components["schemas"]["ReasoningEffort"];
-            /** @description Available reasoning effort values for this model */
-            values: components["schemas"]["ReasoningEffortValue"][];
-        };
-        /** @description Named reasoning effort value for UI display */
-        ReasoningEffortValue: {
-            /** @description Display name (e.g., "Low", "Medium") */
-            name: string;
-            /** @description The API value (e.g., "low", "medium") */
-            value: components["schemas"]["ReasoningEffort"];
-        };
+        description?: string | null;
         /**
-         * @description Response type for per-resource config endpoints.
-         *
-         *     Every resource exposes `GET /v1/{resource}/config` returning this type.
-         *     UI uses it to gate controls (create/edit/delete buttons, admin panels).
+         * @description Additional HTTP headers for authentication.
+         *     Keys are header names, values are header values.
          */
-        ResourceConfigResponse: {
-            /** @description Map of policy ID → whether the caller satisfies it. */
-            policies: {
-                [key: string]: boolean;
-            };
+        headers?: {
+          [key: string]: string;
         };
         /**
-         * @description Risk classification for capabilities (TM-AGENT-005).
-         *
-         *     Used to enforce approval requirements when assigning capabilities.
-         * @enum {string}
+         * @description Unique identifier for the MCP server.
+         * @example mcp_01933b5a00007000800000000000001
          */
-        RiskLevel: "low" | "medium" | "high";
-        /** @description Schedule execution response */
-        ScheduleExecutionResponse: {
-            /** Format: date-time */
-            completed_at?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: int32 */
-            duration_ms?: number | null;
-            error?: string | null;
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            schedule_id: string;
-            /** Format: date-time */
-            scheduled_at: string;
-            /** Format: date-time */
-            started_at: string;
-            status: string;
-            /** Format: uuid */
-            task_id?: string | null;
-            /** Format: uuid */
-            workflow_id?: string | null;
-        };
-        /** @description Schedule executions list response */
-        ScheduleExecutionsListResponse: {
-            data: components["schemas"]["ScheduleExecutionResponse"][];
-            total: number;
-        };
-        /** @description Schedule response */
-        ScheduleResponse: {
-            catch_up_missed: boolean;
-            /** Format: date-time */
-            created_at: string;
-            cron_expression: string;
-            description?: string | null;
-            enabled: boolean;
-            /** Format: uuid */
-            id: string;
-            /** Format: date-time */
-            last_triggered_at?: string | null;
-            /** Format: int32 */
-            max_catch_up?: number | null;
-            /** Format: int32 */
-            max_concurrent?: number | null;
-            name: string;
-            /** Format: date-time */
-            next_trigger_at?: string | null;
-            retry_policy?: unknown;
-            target: components["schemas"]["ScheduleTargetResponse"];
-            timezone: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        /** @description Schedule stats response */
-        ScheduleStatsResponse: {
-            /** Format: int64 */
-            avg_duration_ms?: number | null;
-            /** Format: int64 */
-            failed_executions: number;
-            last_execution_status?: string | null;
-            /** Format: int64 */
-            skipped_executions: number;
-            /** Format: int64 */
-            successful_executions: number;
-            /** Format: int64 */
-            total_executions: number;
-        };
-        /** @description Target for a schedule - either a workflow or activity */
-        ScheduleTarget: {
-            /** @description Input JSON for the workflow/activity */
-            input?: unknown;
-            /** @description Workflow type name or activity type name */
-            name: string;
-            /** @description Target type: "workflow" or "activity" */
-            type: string;
-        };
-        /** @description Schedule target response */
-        ScheduleTargetResponse: {
-            input: unknown;
-            name: string;
-            type: string;
-        };
-        /** @description Schedules list response */
-        SchedulesListResponse: {
-            data: components["schemas"]["ScheduleResponse"][];
-            /** Format: int64 */
-            total: number;
-        };
-        /** @description Schema response for a database. */
-        SchemaResponse: {
-            database: string;
-            tables: unknown[];
-        };
-        /** @description Secret entry info (name and timestamps only, no value) */
-        SecretInfo: {
-            /** @description When the secret was created */
-            created_at: string;
-            /** @description The secret name */
-            name: string;
-            /** @description When the secret was last updated */
-            updated_at: string;
-        };
+        id: string;
         /**
-         * @description Session - instance of agentic loop execution.
-         *     A session represents a single conversation with an agent.
+         * @description Display name of the MCP server.
+         * @example atlassian-mcp-server
          */
-        Session: {
-            /**
-             * Format: int32
-             * @description Number of active (enabled) schedules for this session.
-             *     Populated when the session is fetched for API responses.
-             */
-            active_schedule_count?: number | null;
-            /**
-             * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
-             * @example agent_01933b5a00007000800000000000001
-             */
-            agent_id?: string | null;
-            /**
-             * @description Optional resident agent identity for unattended/background execution.
-             * @example identity_01933b5a00007000800000000000001
-             */
-            agent_identity_id?: string | null;
-            /** @description Validated config passed by host at blueprint spawn time. */
-            blueprint_config?: unknown;
-            /**
-             * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
-             *     from the blueprint definition instead of from harness_id/agent_id.
-             */
-            blueprint_id?: string | null;
-            /**
-             * @description Session-level capabilities (additive to agent capabilities).
-             *     Applied after agent capabilities when building RuntimeAgent.
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the session was created.
-             */
-            created_at: string;
-            /**
-             * @description Aggregated UI features from all active capabilities (harness + agent + session).
-             *     Computed at read time from the capability registry.
-             *     Known features: "file_system", "schedules", "secrets", "key_value",
-             *     "sql_database", "leased_resources".
-             */
-            features?: string[];
-            /**
-             * Format: date-time
-             * @description Timestamp when the session finished (completed or failed).
-             */
-            finished_at?: string | null;
-            /**
-             * @description ID of the harness for this session (format: harness_{32-hex}).
-             * @example harness_01933b5a00007000800000000000001
-             */
-            harness_id: string;
-            /**
-             * @description Session-level client hints — arbitrary key-value pairs declared by the
-             *     client at session creation time. These are defaults for every turn;
-             *     per-message `controls.hints` override these key-by-key (shallow merge).
-             *
-             *     Examples: `{"setup_connection": true, "rich_media": true}`
-             */
-            hints?: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * @description Unique identifier for the session (format: session_{32-hex}).
-             * @example session_01933b5a00007000800000000000001
-             */
-            id: string;
-            /**
-             * @description Session-level initial files (additive to agent initial_files).
-             *     Files with matching paths override agent/harness files; new paths are appended.
-             */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /**
-             * @description Whether this session is pinned by the current user.
-             *     Only populated when the request has an authenticated user context.
-             */
-            is_pinned?: boolean | null;
-            /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
-            locale?: string | null;
-            /** @description Maximum number of LLM iterations per turn for this session. */
-            max_iterations?: number | null;
-            /**
-             * @description LLM model ID to use for this session (format: model_{32-hex}).
-             *     Overrides the agent's default model if set.
-             * @example model_01933b5a00007000800000000000001
-             */
-            model_id?: string | null;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /**
-             * @description Organization this session belongs to (format: org_{32-hex}).
-             * @example org_00000000000000000000000000000001
-             */
-            organization_id: string;
-            /** @description Preview text from the last assistant response (truncated). */
-            output_preview?: string | null;
-            /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
-            parent_session_id?: string | null;
-            /** @description Preview text from the first user message (truncated). */
-            preview?: string | null;
-            /**
-             * Format: date-time
-             * @description Timestamp when the session started executing.
-             */
-            started_at?: string | null;
-            /** @description Current execution status of the session. */
-            status: components["schemas"]["SessionStatus"];
-            /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
-            subagent_name?: string | null;
-            subagent_status?: null | components["schemas"]["SubagentStatus"];
-            /** @description Original task description given to this subagent. */
-            subagent_task?: string | null;
-            /**
-             * @description Session-level system prompt override.
-             *     Prepended to the agent's system prompt when building RuntimeAgent.
-             */
-            system_prompt?: string | null;
-            /** @description Tags for organizing and filtering sessions. */
-            tags?: string[];
-            /** @description Human-readable title for the session. */
-            title?: string | null;
-            /** @description Client-side tools for this session (additive to agent tools). */
-            tools?: components["schemas"]["ToolDefinition"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the session was last updated.
-             */
-            updated_at: string;
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
-        /** @description Data for session.activated event (turn started, session now active) */
-        SessionActivatedData: {
-            /**
-             * @description Input message ID that triggered the turn
-             * @example message_01933b5a00007000800000000000001
-             */
-            input_message_id: string;
-            /**
-             * @description Turn ID that activated the session
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
-        /** @description Complete file with content */
-        SessionFile: {
-            /** @description Base64-encoded content for binary files, plain text for text files */
-            content?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** @description Content encoding: "text" or "base64" */
-            encoding?: string;
-            /** Format: uuid */
-            id: string;
-            is_directory: boolean;
-            is_readonly: boolean;
-            name: string;
-            path: string;
-            /** Format: uuid */
-            session_id: string;
-            /** Format: int64 */
-            size_bytes: number;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        /** @description Data for session.idled event (turn completed, session now idle) */
-        SessionIdledData: {
-            /**
-             * Format: int32
-             * @description Number of iterations in the completed turn
-             */
-            iterations?: number | null;
-            /**
-             * @description Turn ID that just completed
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
-        /** @description A resource registered in the session resource registry. */
-        SessionResourceEntry: {
-            /** Format: date-time */
-            created_at: string;
-            /** @description Human-readable label. */
-            display_name: string;
-            /** @description Resource kind: "sandbox", "subagent", "browser_session", etc. */
-            kind: string;
-            /** @description Kind-specific non-secret metadata. */
-            metadata?: unknown;
-            /** @description Caller-provided stable ID (unique per session). */
-            resource_id: string;
-            /** @description Parent session. */
-            session_id: string;
-            /** @description Lifecycle status. */
-            status: components["schemas"]["SessionResourceStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        };
+        name: string;
+        /** @description Stable provider id used for user-scoped OAuth connections. */
+        oauth_provider_id?: string | null;
+        /** @description Current lifecycle status of the MCP server. */
+        status: components["schemas"]["McpServerStatus"];
+        /** @description Transport type (currently only HTTP supported). */
+        transport_type: components["schemas"]["McpServerTransportType"];
         /**
-         * @description Status of a resource in the session resource registry.
-         * @enum {string}
+         * Format: date-time
+         * @description Timestamp when the MCP server was last updated.
          */
-        SessionResourceStatus: "active" | "completed" | "failed" | "released";
-        /** @description Data for session.started event */
-        SessionStartedData: {
-            /**
-             * @description Agent ID (optional)
-             * @example agent_01933b5a00007000800000000000001
-             */
-            agent_id?: string | null;
-            /**
-             * @description Harness ID
-             * @example harness_01933b5a00007000800000000000001
-             */
-            harness_id: string;
-            /**
-             * @description Model ID if specified
-             * @example model_01933b5a00007000800000000000001
-             */
-            model_id?: string | null;
-        };
+        updated_at: string;
         /**
-         * @description Session execution status.
-         *     - `started`: Session just created, no turn executed yet
-         *     - `active`: A turn is currently running
-         *     - `idle`: Turn completed, session waiting for next input
-         *     - `paused`: Budget limit reached, waiting for user to increase limit or resume
-         * @enum {string}
+         * @description URL of the MCP server endpoint.
+         * @example https://mcp.atlassian.com/v1/mcp
          */
-        SessionStatus: "started" | "active" | "idle" | "waitingfortoolresults" | "paused";
-        /** @description Skill entity (API response type) */
-        Skill: {
-            allowed_tools?: string | null;
-            /** Format: date-time */
-            archived_at?: string | null;
-            compatibility?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            deleted_at?: string | null;
-            /** @example Extract text and tables from PDF files. */
-            description: string;
-            /** @description Whether the model is prevented from auto-invoking this skill */
-            disable_model_invocation?: boolean;
-            /** @example skill_01933b5a00007000800000000000001 */
-            id: string;
-            license?: string | null;
-            metadata?: {
-                [key: string]: unknown;
-            };
-            /** @example pdf-processing */
-            name: string;
-            source_type: components["schemas"]["SkillSourceType"];
-            status: components["schemas"]["SkillStatus"];
-            /** Format: date-time */
-            updated_at: string;
-            /** @description Whether this skill appears as a /slash command for users */
-            user_invocable?: boolean;
-            version: string;
-        };
-        /** @description Skill content response (for /content endpoint) */
-        SkillContent: {
-            files: components["schemas"]["SkillFileEntry"][];
-            skill_md: string;
-        };
-        /** @description A file entry in a skill archive */
-        SkillFileEntry: {
-            content: string;
-            path: string;
-        };
+        url: string;
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_ResourceWithCounts_Harness: {
+      /** @description Array of items returned by the list operation. */
+      data: (({
         /**
-         * @description Skill source type
-         * @enum {string}
+         * Format: date-time
+         * @description Timestamp when the harness was archived.
          */
-        SkillSourceType: "markdown" | "archive";
+        archived_at?: string | null;
+        /** @description Capabilities enabled for this harness with per-harness configuration. */
+        capabilities?: components["schemas"]["AgentCapabilityConfig"][];
         /**
-         * @description Skill lifecycle status
-         * @enum {string}
+         * Format: date-time
+         * @description Timestamp when the harness was created.
          */
-        SkillStatus: "active" | "disabled" | "archived" | "deleted";
-        /** @description Validation result for SKILL.md */
-        SkillValidationResult: {
-            description?: string | null;
-            errors?: string[];
-            name?: string | null;
-            valid: boolean;
-            warnings?: string[];
-        };
-        /** @description Request to get file stat */
-        StatRequest: {
-            /** @description Path to the file or directory */
-            path: string;
-        };
-        /** @description Data for subagent lifecycle events (spawned, completed, failed, cancelled). */
-        SubagentEventData: {
-            /** @description Error message (only for failed) */
-            error?: string | null;
-            /** @description Result summary (only for completed/failed) */
-            result?: string | null;
-            /** @description Subagent status (spawning, running, completed, failed, cancelled) */
-            status: string;
-            /** @description Human-readable subagent name */
-            subagent_name: string;
-            /** @description The subagent's child session ID */
-            subagent_session_id: string;
-            /** @description Task description */
-            task: string;
-        };
+        created_at: string;
         /**
-         * @description Subagent lifecycle status.
-         * @enum {string}
+         * @description Default LLM model ID for this harness.
+         *     Lowest priority in chain: controls > session > agent > harness.
+         * @example model_01933b5a00007000800000000000001
          */
-        SubagentStatus: "spawning" | "running" | "completed" | "failed" | "cancelled" | "max_iterations_reached";
-        /** @description Request to submit client-side tool results */
-        SubmitToolResultsRequest: {
-            /** @description Tool results from the client */
-            tool_results: components["schemas"]["ClientToolResult"][];
-        };
-        /** @description Response from submitting tool results */
-        SubmitToolResultsResponse: {
-            /** @description Number of tool results accepted */
-            accepted: number;
-            /** @description Session status after submission */
-            status: string;
-        };
-        /** @description Generic success response */
-        SuccessResponse: {
-            ok: boolean;
-        };
-        /** @description Request to switch organization */
-        SwitchOrgRequest: {
-            /**
-             * @description Organization public ID to switch to
-             * @example org_2f3c1b3e6a9d4c6f8a1d4e9c9b7f21a0
-             */
-            org_id: string;
-        };
-        /** @description Response from switch org endpoint */
-        SwitchOrgResponse: {
-            /** @description The organization ID that was switched to */
-            org_id: string;
-            /** @description Whether the switch was successful */
-            success: boolean;
-        };
-        /** @description Response from syncing models from a provider */
-        SyncModelsResponse: {
-            /** @description Number of new models discovered */
-            created: number;
-            /** @description Number of models marked as stale (not seen in this sync) */
-            stale: number;
-            /** @enum {string} */
-            status: "success";
-            /** @description Number of existing models updated */
-            updated: number;
-        } | {
-            /** @enum {string} */
-            status: "not_supported";
-        };
-        /** @description Text content part */
-        TextContentPart: {
-            text: string;
-        };
+        default_model_id?: string | null;
         /**
-         * @description Token usage statistics
-         *
-         *     Tracks token consumption per LLM call including cache tokens for cost optimization.
-         *     Cache tokens are provider-specific:
-         *     - OpenAI: `cache_read_tokens` from prompt_tokens_details.cached_tokens
-         *     - Anthropic: `cache_read_tokens` from cache_read_input_tokens,
-         *       `cache_creation_tokens` from cache_creation_input_tokens
+         * Format: date-time
+         * @description Timestamp when the harness was deleted.
          */
-        TokenUsage: {
-            /**
-             * Format: int32
-             * @description Number of tokens written to cache (Anthropic-specific)
-             */
-            cache_creation_tokens?: number | null;
-            /**
-             * Format: int32
-             * @description Number of tokens read from cache (reduces cost)
-             */
-            cache_read_tokens?: number | null;
-            /**
-             * Format: int32
-             * @description Number of input/prompt tokens
-             */
-            input_tokens: number;
-            /**
-             * Format: int32
-             * @description Number of output/completion tokens
-             */
-            output_tokens: number;
-        };
-        /** @description Tool call from LLM response */
-        ToolCall: {
-            /** @description Arguments as JSON */
-            arguments: Record<string, never>;
-            /** @description Unique ID for this tool call */
-            id: string;
-            /** @description Tool name to execute */
-            name: string;
-        };
-        /** @description Tool call content part (assistant requesting tool execution) */
-        ToolCallContentPart: {
-            arguments: unknown;
-            id: string;
-            name: string;
-        };
+        deleted_at?: string | null;
+        /** @description Human-readable description of what the harness does. */
+        description?: string | null;
+        /** @description Human-readable display name shown in UI. */
+        display_name?: string | null;
         /**
-         * @description Data for tool.call_requested event
-         *
-         *     Emitted when the agent needs client-side tool calls executed.
-         *     The workflow pauses until the client submits results via the API.
+         * @description Unique identifier for the harness (format: harness_{32-hex}).
+         * @example harness_01933b5a00007000800000000000001
          */
-        ToolCallRequestedData: {
-            /** @description Human-readable headline for the requested batch */
-            headline?: string | null;
-            /** @description Tool calls that need to be executed by the client */
-            tool_calls: components["schemas"]["ToolCall"][];
-            /** @description Optional summaries with display names and narration for UI rendering */
-            tool_summaries?: components["schemas"]["ToolCallSummary"][];
-        };
-        /** @description Summary of a tool call (compact form without arguments) */
-        ToolCallSummary: {
-            /** @description Human-readable display name for UI rendering */
-            display_name?: string | null;
-            id: string;
-            name: string;
-            /** @description Human-readable narration for timeline rendering */
-            narration?: string | null;
-        };
-        /** @description Data for tool.completed event */
-        ToolCompletedData: {
-            /** @description Human-readable display name for UI rendering */
-            display_name?: string | null;
-            /**
-             * Format: int64
-             * @description Duration of the tool call in milliseconds
-             */
-            duration_ms?: number | null;
-            /** @description Error message if failed */
-            error?: string | null;
-            /** @description Human-readable narration for timeline rendering */
-            narration?: string | null;
-            /** @description Result content (for successful calls) */
-            result?: components["schemas"]["ContentPart"][] | null;
-            /** @description Status: "success", "error", "timeout", "cancelled" */
-            status: string;
-            /** @description Whether the tool call succeeded */
-            success: boolean;
-            /** @description Tool call ID */
-            tool_call_id: string;
-            /** @description Tool name */
-            tool_name: string;
-        };
-        /** @description Tool definition in agent configuration */
-        ToolDefinition: (components["schemas"]["BuiltinTool"] & {
-            /** @enum {string} */
-            type: "builtin";
-        }) | (components["schemas"]["ClientSideTool"] & {
-            /** @enum {string} */
-            type: "client_side";
-        });
-        /** @description Summary of a tool definition (compact form for events) */
-        ToolDefinitionSummary: {
-            /** @description Tool description */
-            description: string;
-            /** @description Human-readable display name for UI rendering */
-            display_name?: string | null;
-            /** @description Tool name */
-            name: string;
-        };
+        id: string;
+        /** @description Starter files copied into each new session for this harness. */
+        initial_files?: components["schemas"]["InitialFile"][];
         /**
-         * @description Semantic hints describing a tool's behavioral properties.
-         *
-         *     Follows the MCP tool annotations convention (readOnlyHint, destructiveHint,
-         *     idempotentHint, openWorldHint) plus everruns-specific hints. All fields are
-         *     optional booleans — `None` means "unknown/unspecified". Consumers should
-         *     treat `None` as the conservative default (e.g., assume not readonly, assume
-         *     not idempotent).
-         *
-         *     These hints are informational — they do not enforce policy. Use `ToolPolicy`
-         *     for execution gating (auto vs requires_approval).
+         * @description Whether this harness is built-in (system-managed, readonly).
+         *     Built-in harnesses are provisioned during org initialization and
+         *     cannot be modified or deleted via the API. Users can copy them.
          */
-        ToolHints: {
-            /**
-             * @description Tool may irreversibly destroy or delete data.
-             *     Subset of non-readonly — a tool can be non-readonly (writes) without
-             *     being destructive (e.g., create/update operations).
-             */
-            destructive?: boolean | null;
-            /**
-             * @description Calling the tool repeatedly with the same arguments produces the same
-             *     effect. Safe to retry on transient failures.
-             */
-            idempotent?: boolean | null;
-            /**
-             * @description Tool may take significant time to complete (> ~5s typical).
-             *     Useful for clients to show progress indicators and set timeouts.
-             */
-            long_running?: boolean | null;
-            /**
-             * @description Entity noun for operation-based narration (e.g. "agent", "harness").
-             *     When set, the narration system reads the `operation` argument and
-             *     produces verb-based narration like "Created agent: Neon Cartographer"
-             *     instead of the generic "Ran Manage Agents".
-             */
-            narration_noun?: string | null;
-            /**
-             * @description Tool interacts with external entities beyond the local system
-             *     (network calls, third-party APIs, cloud services).
-             */
-            open_world?: boolean | null;
-            /**
-             * @description Tool output should be persisted to session VFS before truncation.
-             *     When set, the `tool_output_persistence` capability (EVE-222, EVE-245) writes
-             *     stdout to `/.outputs/{tool_call_id}.stdout` and stderr to
-             *     `/.outputs/{tool_call_id}.stderr`, injecting `full_output`, `total_lines`,
-             *     and `output_files` into the result.
-             */
-            persist_output?: boolean | null;
-            /**
-             * @description Tool does not modify any state (read-only queries, lookups).
-             *     When true: safe to call speculatively, result can be cached.
-             */
-            readonly?: boolean | null;
-            /**
-             * @description Tool requires API keys, credentials, or other secrets to function.
-             *     Useful for UI to show connection prompts and for LLMs to anticipate
-             *     authentication failures.
-             */
-            requires_secrets?: boolean | null;
-        };
+        is_built_in?: boolean;
+        /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
+        mcpServers?: components["schemas"]["BTreeMap"];
+        /** @description Name, unique per org (e.g. "generic"). */
+        name: string;
+        network_access?: null | components["schemas"]["NetworkAccessList"];
         /**
-         * @description Data for tool.output.delta event.
-         *
-         *     Emitted by tools during execution to stream incremental output chunks.
-         *     This enables live output rendering (e.g., bash stdout/stderr, command output)
-         *     between tool.started and tool.completed. Generic — usable by any tool that
-         *     produces streamed output (bashkit, Daytona exec, subagent speech, etc.).
-         *
-         *     The consumer accumulates deltas by tool_call_id for display. The final
-         *     tool.completed result is authoritative — deltas are informational only.
+         * @description Optional parent harness that this harness inherits from.
+         * @example harness_01933b5a000070008000000000000602
          */
-        ToolOutputDeltaData: {
-            /** @description Incremental output chunk */
-            delta: string;
-            /** @description Output stream identifier (e.g., "stdout", "stderr") */
-            stream: string;
-            /** @description Tool call ID this output belongs to */
-            tool_call_id: string;
-            /** @description Tool name */
-            tool_name: string;
-        };
+        parent_harness_id?: string | null;
+        /** @description Current lifecycle status of the harness. */
+        status: components["schemas"]["HarnessStatus"];
         /**
-         * @description Tool policy determines how tool calls are handled
-         * @enum {string}
+         * @description System prompt that defines the harness's base behavior.
+         *     Forms the foundation of the prompt stack.
          */
-        ToolPolicy: "auto" | "requires_approval" | "client_side";
+        system_prompt: string;
+        /** @description Tags for organizing and filtering harnesses. */
+        tags?: string[];
         /**
-         * @description Data for tool.progress event.
-         *
-         *     Emitted by tools during execution to report interim status updates.
-         *     This allows long-running tools (e.g., browser operations, sandbox setup)
-         *     to stream progress feedback between tool.started and tool.completed.
+         * Format: date-time
+         * @description Timestamp when the harness was last updated.
          */
-        ToolProgressData: {
-            /** @description Human-readable display name for UI rendering */
-            display_name?: string | null;
-            /** @description Human-readable status message (e.g., "Connecting to browser…") */
-            message: string;
-            /** @description Tool call ID this progress belongs to */
-            tool_call_id: string;
-            /** @description Tool name */
-            tool_name: string;
-        };
-        /** @description Tool result content part (result of tool execution) */
-        ToolResultContentPart: {
-            error?: string | null;
-            result?: unknown;
-            /** @description ID of the tool call this result corresponds to */
-            tool_call_id: string;
-        };
-        /** @description Data for tool.started event */
-        ToolStartedData: {
-            /** @description Human-readable display name for UI rendering */
-            display_name?: string | null;
-            /** @description Human-readable narration for timeline rendering */
-            narration?: string | null;
-            /** @description The tool call being executed */
-            tool_call: components["schemas"]["ToolCall"];
-        };
-        /** @description Manual trigger response */
-        TriggerResponse: {
-            /** Format: uuid */
-            execution_id: string;
-        };
-        /** @description Data for turn.cancelled event */
-        TurnCancelledData: {
-            /** @description Reason for cancellation */
-            reason?: string | null;
-            /**
-             * @description Turn identifier
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
-        /** @description Data for turn.completed event */
-        TurnCompletedData: {
-            /**
-             * Format: int64
-             * @description Duration in milliseconds
-             */
-            duration_ms?: number | null;
-            /** @description Input message content (for observability, passed through from turn.started) */
-            input_content?: string | null;
-            /**
-             * Format: int32
-             * @description Number of iterations in this turn
-             */
-            iterations: number;
-            /**
-             * @description Turn identifier
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-            usage?: null | components["schemas"]["TokenUsage"];
-        };
-        /** @description Data for turn.failed event */
-        TurnFailedData: {
-            /** @description Error message */
-            error: string;
-            /** @description Error code */
-            error_code?: string | null;
-            /**
-             * @description Turn identifier
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
-        /** @description Data for turn.started event */
-        TurnStartedData: {
-            /** @description Input message content (for observability) */
-            input_content?: string | null;
-            /**
-             * @description Input message ID that triggered this turn
-             * @example message_01933b5a00007000800000000000001
-             */
-            input_message_id: string;
-            /**
-             * @description Turn identifier
-             * @example turn_01933b5a00007000800000000000001
-             */
-            turn_id: string;
-        };
+        updated_at: string;
+      } & {
         /**
-         * @description Prefixed identifier with 'agent' prefix
+         * Format: int64
+         * @description Number of non-deleted apps using this resource.
+         */
+        app_count: number;
+        /**
+         * Format: int64
+         * @description Number of sessions using this resource.
+         */
+        session_count: number;
+      }) & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_Skill: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        allowed_tools?: string | null;
+        /** Format: date-time */
+        archived_at?: string | null;
+        compatibility?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        /** Format: date-time */
+        deleted_at?: string | null;
+        /** @example Extract text and tables from PDF files. */
+        description: string;
+        /** @description Whether the model is prevented from auto-invoking this skill */
+        disable_model_invocation?: boolean;
+        /** @example skill_01933b5a00007000800000000000001 */
+        id: string;
+        license?: string | null;
+        metadata?: {
+          [key: string]: unknown;
+        };
+        /** @example pdf-processing */
+        name: string;
+        source_type: components["schemas"]["SkillSourceType"];
+        status: components["schemas"]["SkillStatus"];
+        /** Format: date-time */
+        updated_at: string;
+        /** @description Whether this skill appears as a /slash command for users */
+        user_invocable?: boolean;
+        version: string;
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    ListSchedulesQuery: {
+      /** @description Filter by enabled status */
+      enabled?: boolean | null;
+      /**
+       * Format: int32
+       * @description Pagination limit (default: 20, max: 100)
+       */
+      limit?: number | null;
+      /**
+       * Format: int32
+       * @description Pagination offset
+       */
+      offset?: number | null;
+      /** @description Filter by target type ("workflow" or "activity") */
+      target_type?: string | null;
+    };
+    /** @description Query parameters for listing users */
+    ListUsersQuery: {
+      /** @description Search query to filter by name or email */
+      search?: string | null;
+    };
+    ListVolumesQuery: {
+      include_archived?: boolean | null;
+      search?: string | null;
+    };
+    /**
+     * @description Information about context compaction performed before LLM generation
+     *
+     *     When the conversation context exceeds the model's limit, compaction is
+     *     automatically triggered to compress the context before retrying.
+     */
+    LlmCompactionInfo: {
+      /** @description Whether compaction was performed */
+      compacted: boolean;
+      /**
+       * Format: int64
+       * @description Duration of the compaction operation in milliseconds
+       */
+      duration_ms?: number | null;
+      /**
+       * Format: int32
+       * @description Number of input tokens after compaction
+       */
+      input_tokens_after?: number | null;
+      /**
+       * Format: int32
+       * @description Number of input tokens before compaction
+       */
+      input_tokens_before?: number | null;
+    };
+    /**
+     * @description Data for llm.generation event
+     *
+     *     Emitted after each LLM API call to provide full visibility into
+     *     the messages sent to the model and the response received.
+     */
+    LlmGenerationData: {
+      /** @description Messages sent to the LLM (including system prompt) */
+      messages: components["schemas"]["Message"][];
+      /** @description Metadata about the generation */
+      metadata: components["schemas"]["LlmGenerationMetadata"];
+      /** @description Output from the LLM */
+      output: components["schemas"]["LlmGenerationOutput"];
+      /** @description Tools available to the LLM for this generation */
+      tools?: components["schemas"]["ToolDefinitionSummary"][];
+    };
+    /** @description Metadata about an LLM generation */
+    LlmGenerationMetadata: {
+      compaction?: null | components["schemas"]["LlmCompactionInfo"];
+      /**
+       * Format: int64
+       * @description Duration of the generation in milliseconds
+       */
+      duration_ms?: number | null;
+      /** @description Error message if generation failed */
+      error?: string | null;
+      /**
+       * @description Finish reasons from the LLM (e.g., ["stop"], ["tool_calls"])
+       *     Required for gen-ai semantic conventions
+       */
+      finish_reasons?: string[] | null;
+      /** @description Model identifier used for generation */
+      model: string;
+      /** @description Provider type (openai, anthropic, etc.) */
+      provider?: string | null;
+      request_options?: null | components["schemas"]["LlmRequestOptions"];
+      /**
+       * @description Unique response identifier from the LLM provider
+       *     Required for gen-ai semantic conventions
+       */
+      response_id?: string | null;
+      retry?: null | components["schemas"]["LlmRetryInfo"];
+      /** @description Whether the generation was successful */
+      success: boolean;
+      /**
+       * Format: int64
+       * @description Time to first token in milliseconds (streaming latency)
+       */
+      time_to_first_token_ms?: number | null;
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /** @description LLM generation output */
+    LlmGenerationOutput: {
+      /** @description Text response from the model */
+      text?: string | null;
+      /** @description Tool calls requested by the model */
+      tool_calls?: components["schemas"]["ToolCall"][];
+    };
+    /** @description LLM Model entity */
+    LlmModel: {
+      capabilities: string[];
+      /** Format: date-time */
+      created_at: string;
+      display_name: string;
+      /**
+       * @description Whether this model is enabled (visible in UI model pickers).
+       *     All models are available via API regardless of this flag.
+       */
+      enabled: boolean;
+      /** @example model_01933b5a00007000800000000000001 */
+      id: string;
+      is_favorite: boolean;
+      model_id: string;
+      /** @example provider_01933b5a00007000800000000000001 */
+      provider_id: string;
+      /** @description How the model was added to the system */
+      source: components["schemas"]["LlmModelSource"];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description Cost information for the model (per million tokens) */
+    LlmModelCost: {
+      /**
+       * Format: double
+       * @description Cached read cost per million tokens (USD), if supported
+       */
+      cache_read?: number | null;
+      /**
+       * @description Tiered pricing that applies above certain context thresholds.
+       *     When present, the base cost fields apply up to the tier threshold,
+       *     and each tier's costs apply for tokens beyond that threshold.
+       */
+      cost_tiers?: components["schemas"]["CostTier"][];
+      /**
+       * Format: double
+       * @description Input cost per million tokens (USD)
+       */
+      input: number;
+      /**
+       * Format: double
+       * @description Output cost per million tokens (USD)
+       */
+      output: number;
+    };
+    /** @description Token limits for the model */
+    LlmModelLimits: {
+      /**
+       * Format: int32
+       * @description Maximum context window size in tokens
+       */
+      context: number;
+      /**
+       * Format: int32
+       * @description Maximum input tokens (if different from context - output)
+       */
+      input?: number | null;
+      /**
+       * Format: int32
+       * @description Maximum images or PDF pages per request
+       */
+      max_media?: number | null;
+      /**
+       * Format: int32
+       * @description Maximum output tokens
+       */
+      output: number;
+    };
+    /** @description Model modalities for input and output */
+    LlmModelModalities: {
+      /** @description Supported input modalities */
+      input: components["schemas"]["Modality"][];
+      /** @description Supported output modalities */
+      output: components["schemas"]["Modality"][];
+    };
+    /**
+     * @description LLM Model Profile describing model capabilities
+     *     Based on models.dev structure (<https://models.dev/api.json>)
+     *
+     *     NOTE: Currently only includes profiles for:
+     *     - OpenAI: gpt-4o, gpt-4o-mini, o1, o1-mini, o1-pro, o3-mini
+     *     - Anthropic: claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus, claude-3-sonnet, claude-3-haiku, claude-sonnet-4, claude-opus-4
+     *
+     *     Additional model profiles can be added as needed.
+     */
+    LlmModelProfile: {
+      /** @description Whether the model supports file/image attachments */
+      attachment: boolean;
+      cost?: null | components["schemas"]["LlmModelCost"];
+      /** @description Short human-readable description of the model's strengths and intended use */
+      description?: string | null;
+      /** @description Model family (e.g., "gpt-4o", "claude-3-5-sonnet") */
+      family: string;
+      /** @description Knowledge cutoff date (YYYY-MM-DD format) */
+      knowledge?: string | null;
+      /** @description Last updated date (YYYY-MM-DD format) */
+      last_updated?: string | null;
+      limits?: null | components["schemas"]["LlmModelLimits"];
+      modalities?: null | components["schemas"]["LlmModelModalities"];
+      /** @description Display name of the model */
+      name: string;
+      /** @description Whether the model has open weights */
+      open_weights: boolean;
+      /** @description Whether the model has reasoning/chain-of-thought capabilities */
+      reasoning: boolean;
+      reasoning_effort?: null | components["schemas"]["ReasoningEffortConfig"];
+      /** @description Release date (YYYY-MM-DD format) */
+      release_date?: string | null;
+      /** @description Whether the model supports structured output (JSON mode) */
+      structured_output: boolean;
+      /**
+       * @description Whether the model supports native execution phases ("commentary" / "final_answer").
+       *     When true, the driver sends the `phase` field on assistant messages in the wire format.
+       *     Currently supported by GPT-5.4 and newer via OpenAI Responses API.
+       */
+      supports_phases?: boolean;
+      /** @description Whether temperature control is supported */
+      temperature: boolean;
+      /** @description Whether the model supports tool/function calling */
+      tool_call: boolean;
+      /**
+       * @description Whether the model supports tool_search (deferred tool loading).
+       *     When true, the driver can use namespaces and defer_loading to reduce
+       *     token usage for large tool sets. Currently supported by GPT-5.4 and newer.
+       */
+      tool_search?: boolean;
+    };
+    /**
+     * @description How the model was added to the system
+     * @enum {string}
+     */
+    LlmModelSource: "manual" | "discovered" | "predefined";
+    /** @description LLM Model with provider info */
+    LlmModelWithProvider: {
+      capabilities: string[];
+      /** Format: date-time */
+      created_at: string;
+      display_name: string;
+      /** @description Whether this model is enabled (visible in UI model pickers) */
+      enabled: boolean;
+      /**
+       * @description Derived: model is configured and ready for use. Currently means the
+       *     joined provider is active and has an API key set; over time this may
+       *     also incorporate live reachability checks. Not persisted.
+       */
+      healthy: boolean;
+      /** @example model_01933b5a00007000800000000000001 */
+      id: string;
+      is_favorite: boolean;
+      model_id: string;
+      profile?: null | components["schemas"]["LlmModelProfile"];
+      /** @example provider_01933b5a00007000800000000000001 */
+      provider_id: string;
+      provider_name: string;
+      provider_type: components["schemas"]["LlmProviderType"];
+      /** @description How the model was added to the system */
+      source: components["schemas"]["LlmModelSource"];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description Request-side prompt cache settings for an LLM generation. */
+    LlmPromptCacheInfo: {
+      /** @description Whether prompt caching was enabled on the request. */
+      enabled: boolean;
+      /** @description Provider-specific prompt-cache mode used by the driver. */
+      provider_mode?: string | null;
+      /** @description Strategy used to enable prompt caching. */
+      strategy: components["schemas"]["PromptCacheStrategy"];
+    };
+    /**
+     * @description LLM Provider entity (API keys never exposed)
+     *     Note: This is the entity struct, separate from the LlmProvider trait in llm.rs
+     */
+    LlmProvider: {
+      /** @description Whether an API key is configured (key is never returned) */
+      api_key_set: boolean;
+      base_url?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** @example provider_01933b5a00007000800000000000001 */
+      id: string;
+      /**
+       * Format: date-time
+       * @description When models were last synced from provider API
+       */
+      last_synced_at?: string | null;
+      name: string;
+      provider_type: components["schemas"]["LlmProviderType"];
+      status: components["schemas"]["LlmProviderStatus"];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /**
+     * @description LLM provider status
+     * @enum {string}
+     */
+    LlmProviderStatus: "active" | "disabled";
+    /**
+     * @description LLM provider type
+     * @enum {string}
+     */
+    LlmProviderType:
+      | "openai"
+      | "azure_openai"
+      | "openai_completions"
+      | "anthropic"
+      | "gemini"
+      | "llmsim";
+    /**
+     * @description Request options applied to an LLM generation.
+     *
+     *     These fields capture request-side intent such as prompt caching or deferred
+     *     tool loading. They complement `usage`, which captures what actually happened.
+     */
+    LlmRequestOptions: {
+      prompt_cache?: null | components["schemas"]["LlmPromptCacheInfo"];
+      /** @description Provider-specific request options that do not warrant dedicated fields. */
+      provider_options?: {
+        [key: string]: unknown;
+      };
+      tool_search?: null | components["schemas"]["LlmToolSearchInfo"];
+    };
+    /** @description Information about rate limit retries during LLM generation */
+    LlmRetryInfo: {
+      /**
+       * Format: int32
+       * @description Number of retry attempts made (0 = succeeded on first try)
+       */
+      attempts: number;
+      /**
+       * Format: int64
+       * @description Total time spent waiting between retries in milliseconds
+       */
+      total_wait_ms: number;
+    };
+    /** @description Request-side tool_search settings for an LLM generation. */
+    LlmToolSearchInfo: {
+      /** @description Whether tool_search was enabled on the request. */
+      enabled: boolean;
+      /** @description Minimum number of tools before deferred loading activates. */
+      threshold: number;
+    };
+    /** @description Query for log endpoint */
+    LogQuery: {
+      /** @description Max commits to return (default: 50) */
+      limit?: number | null;
+      /** @description Ref to start from (default: HEAD) */
+      ref?: string | null;
+    };
+    ManageSessionSandboxRequest: {
+      action: components["schemas"]["SessionSandboxAction"];
+    };
+    ManageSessionSandboxResponse: {
+      action: components["schemas"]["SessionSandboxAction"];
+      deleted: boolean;
+      display_name?: string | null;
+      exists: boolean;
+      external_id?: string | null;
+      provider?: string | null;
+      session_status?:
+        | null
+        | components["schemas"]["SessionSandboxStatusValue"];
+      workspace_path?: string | null;
+    };
+    /**
+     * @description MCP Server configuration.
+     *     Represents a remote MCP server that can provide tools and resources.
+     */
+    McpServer: {
+      /** @description Whether an API key has been configured. */
+      api_key_set: boolean;
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was archived.
+       */
+      archived_at?: string | null;
+      /** @description Authentication mode for this MCP server. */
+      auth_mode?: components["schemas"]["McpServerAuthMode"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was created.
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was deleted.
+       */
+      deleted_at?: string | null;
+      /**
+       * @description Human-readable description of the MCP server.
+       * @example Atlassian MCP Server for Jira and Confluence
+       */
+      description?: string | null;
+      /**
+       * @description Additional HTTP headers for authentication.
+       *     Keys are header names, values are header values.
+       */
+      headers?: {
+        [key: string]: string;
+      };
+      /**
+       * @description Unique identifier for the MCP server.
+       * @example mcp_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * @description Display name of the MCP server.
+       * @example atlassian-mcp-server
+       */
+      name: string;
+      /** @description Stable provider id used for user-scoped OAuth connections. */
+      oauth_provider_id?: string | null;
+      /** @description Current lifecycle status of the MCP server. */
+      status: components["schemas"]["McpServerStatus"];
+      /** @description Transport type (currently only HTTP supported). */
+      transport_type: components["schemas"]["McpServerTransportType"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was last updated.
+       */
+      updated_at: string;
+      /**
+       * @description URL of the MCP server endpoint.
+       * @example https://mcp.atlassian.com/v1/mcp
+       */
+      url: string;
+    };
+    /**
+     * @description MCP server authentication mode.
+     * @enum {string}
+     */
+    McpServerAuthMode: "none" | "api_key" | "o_auth";
+    /**
+     * @description MCP Server lifecycle status.
+     *     - `active`: Server is available for use
+     *     - `disabled`: Server is disabled and not used
+     *     - `archived`: Server is hidden from listings and cannot be modified or assigned
+     *     - `deleted`: Server is a tombstone kept only for historical references
+     * @enum {string}
+     */
+    McpServerStatus: "active" | "disabled" | "archived" | "deleted";
+    /**
+     * @description MCP Server transport type.
+     *     Currently only HTTP is supported.
+     * @enum {string}
+     */
+    McpServerTransportType: "http";
+    /**
+     * @description MCP tool annotations as defined by the MCP specification.
+     *     All fields are optional booleans following the MCP convention.
+     */
+    McpToolAnnotations: {
+      destructiveHint?: boolean | null;
+      idempotentHint?: boolean | null;
+      openWorldHint?: boolean | null;
+      readOnlyHint?: boolean | null;
+    };
+    MemoryResponse: {
+      active: boolean;
+      content: string;
+      content_parts: unknown;
+      /** Format: date-time */
+      created_at: string;
+      /** @example mem_01933b5a000070008000000000000001 */
+      id: string;
+      /** Format: int32 */
+      importance: number;
+      kind: string;
+      /** @example mst_01933b5a000070008000000000000001 */
+      store_id: string;
+      tags: string[];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    MemoryStoreResponse: {
+      /** Format: int64 */
+      active_memory_count: number;
+      /** Format: date-time */
+      created_at: string;
+      /** @example mst_01933b5a000070008000000000000001 */
+      id: string;
+      is_default: boolean;
+      name: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description A message in the conversation */
+    Message: {
+      /** @description Message content as array of content parts (text, images, tool calls, tool results) */
+      content: components["schemas"]["ContentPart"][];
+      controls?: null | components["schemas"]["Controls"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the message was created
+       */
+      created_at: string;
+      external_actor?: null | components["schemas"]["ExternalActor"];
+      /**
+       * @description Unique message ID (format: message_{32-hex})
+       * @example message_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Message-level metadata */
+      metadata?: Record<string, never> | null;
+      phase?: null | components["schemas"]["ExecutionPhase"];
+      /** @description Message role */
+      role: components["schemas"]["MessageRole"];
+      /**
+       * @description Thinking content from extended thinking models (Anthropic Claude)
+       *     This is the model's chain-of-thought reasoning before producing the response.
+       *     Must be included in subsequent API calls when thinking is enabled.
+       */
+      thinking?: string | null;
+      /**
+       * @description Cryptographic signature for thinking content (Anthropic Claude)
+       *     Required when sending thinking back in subsequent API calls.
+       */
+      thinking_signature?: string | null;
+    };
+    /**
+     * @description Message role in the conversation
+     * @enum {string}
+     */
+    MessageRole: "system" | "user" | "agent" | "tool_result";
+    /**
+     * @description Modality type (text, image, audio, video)
+     * @enum {string}
+     */
+    Modality: "text" | "image" | "audio" | "video" | "pdf";
+    /** @description Metadata about the model used for generation */
+    ModelMetadata: {
+      /** @description Model name (e.g., "gpt-4o", "claude-3-sonnet") */
+      model: string;
+      /**
+       * Format: uuid
+       * @description Model ID (internal identifier)
+       */
+      model_id?: string | null;
+      /**
+       * Format: uuid
+       * @description Provider ID (internal identifier)
+       */
+      provider_id?: string | null;
+    };
+    /** @description Request to move/rename a file */
+    MoveFileRequest: {
+      /** @description Destination path */
+      dst_path: string;
+      /** @description Source path */
+      src_path: string;
+    };
+    /**
+     * @description Network access list controlling which hosts/URLs an agent session can reach.
+     *
+     *     - `allowed`: if non-empty, only URLs matching these patterns are permitted.
+     *     - `blocked`: URLs matching these patterns are always denied (takes precedence over allowed).
+     *
+     *     Pattern format:
+     *     - `example.com` — exact domain match (any port, any path)
+     *     - `*.example.com` — domain and all subdomains
+     *     - `https://example.com/api/` — exact URL prefix (scheme + host + path)
+     */
+    NetworkAccessList: {
+      /**
+       * @description Allowed host patterns. If non-empty, only matching URLs are permitted.
+       *     An empty list means "no restriction from this layer" (inherit parent).
+       */
+      allowed?: string[];
+      /** @description Blocked host patterns. Always denied, even if matched by `allowed`. */
+      blocked?: string[];
+    };
+    /** @description Response for organization operations */
+    OrganizationResponse: {
+      /** @description Base harness used when session creation omits harness_id. */
+      base_harness_id?: string | null;
+      /**
+       * Format: date-time
+       * @description When the organization was created
+       */
+      created_at: string;
+      /** @description Default harness to preselect in the UI. */
+      default_harness_id?: string | null;
+      /** @description Default LLM model for the organization. */
+      default_model_id?: string | null;
+      /** @description External identifier (org_<32-hex-chars>) */
+      id: string;
+      /** @description Display name */
+      name: string;
+      /**
+       * Format: date-time
+       * @description When the organization was last updated
+       */
+      updated_at: string;
+    };
+    /** @description Data for output.message.completed event */
+    OutputMessageCompletedData: {
+      /** @description Stable error code for user-facing failures surfaced as assistant text. */
+      error_code?: string | null;
+      /** @description Structured interpolation fields for localized error rendering. */
+      error_fields?: Record<string, never> | null;
+      /** @description The agent message */
+      message: components["schemas"]["Message"];
+      metadata?: null | components["schemas"]["ModelMetadata"];
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /**
+     * @description Data for output.message.delta event
+     *
+     *     Incremental text update during LLM generation. Events are batched (~100ms)
+     *     to reduce volume while providing real-time feedback.
+     */
+    OutputMessageDeltaData: {
+      /** @description Accumulated text so far */
+      accumulated: string;
+      /** @description The new text chunk */
+      delta: string;
+      /**
+       * @description Turn ID this delta belongs to
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /**
+     * @description Data for `output.message.replaced` event.
+     *
+     *     Emitted between the last (suppressed) `output.message.delta` and the final
+     *     `output.message.completed`. Tells the client to discard everything it has
+     *     accumulated for `turn_id` and use `replacement` as the assistant message
+     *     text. The original model output is never persisted or replayed.
+     */
+    OutputMessageReplacedData: {
+      /**
+       * @description Stable ID of the capability that contributed the guardrail
+       *     (e.g. `"prompt_canary_guardrail"`).
+       */
+      guardrail_capability_id: string;
+      /** @description Stable ID of the guardrail itself (e.g. `"prompt_canary"`). */
+      guardrail_id: string;
+      /**
+       * @description Stable machine-readable reason code (e.g. `"system_prompt_leak"`).
+       *     Clients localize their copy from this rather than the human text.
+       */
+      reason_code: string;
+      /** @description Replacement text shown to the user and stored as the assistant message. */
+      replacement: string;
+      /**
+       * @description Turn ID this replacement belongs to.
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /**
+     * @description Data for output.message.started event
+     *
+     *     Emitted when the LLM starts generating a response. UI can show a
+     *     "thinking" indicator until output.message.delta or output.message.completed events arrive.
+     */
+    OutputMessageStartedData: {
+      /**
+       * Format: int32
+       * @description Current iteration number within this turn (1-based).
+       *     Useful for UI to show progress during multi-step tool-calling flows.
+       */
+      iteration?: number | null;
+      /** @description Optional model name being used */
+      model?: string | null;
+      /**
+       * @description Turn ID this output belongs to
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /**
+     * @description Response wrapper for paginated list endpoints.
+     *     Includes pagination metadata along with the data array.
+     */
+    PaginatedResponse_Session: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /**
+         * Format: int32
+         * @description Number of active (enabled) schedules for this session.
+         *     Populated when the session is fetched for API responses.
+         */
+        active_schedule_count?: number | null;
+        /**
+         * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
          * @example agent_01933b5a00007000800000000000001
          */
-        TypedId: string;
-        /** @description Request to update an agent. Only provided fields will be updated. */
-        UpdateAgentRequest: {
-            /**
-             * @description Capabilities to enable for this agent with per-agent configuration.
-             *     Replaces existing capabilities. Each has a `ref` (capability ID) and optional `config`.
-             * @example [
-             *       {
-             *         "config": {},
-             *         "ref": "current_time"
-             *       },
-             *       {
-             *         "config": {},
-             *         "ref": "web_fetch"
-             *       }
-             *     ]
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][] | null;
-            /**
-             * @description The ID of the default LLM model to use for this agent.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * @description A human-readable description of what the agent does.
-             * @example Updated description for the agent
-             */
-            description?: string | null;
-            /**
-             * @description Human-readable display name shown in UI.
-             * @example Updated Support Agent
-             */
-            display_name?: string | null;
-            /** @description Starter files copied into each new session for this agent. */
-            initial_files?: components["schemas"]["InitialFile"][] | null;
-            /** @description Maximum number of LLM iterations per turn for this agent. */
-            max_iterations?: number | null;
-            /**
-             * @description Name, unique per org. Lowercase alphanumeric and hyphens.
-             * @example updated-support
-             */
-            name?: string | null;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            status?: null | components["schemas"]["AgentStatus"];
-            /**
-             * @description The system prompt that defines the agent's behavior and capabilities.
-             * @example You are an updated helpful assistant.
-             */
-            system_prompt?: string | null;
-            /**
-             * @description Tags for organizing and filtering agents.
-             * @example [
-             *       "updated-tag"
-             *     ]
-             */
-            tags?: string[] | null;
-            /**
-             * @description Client-side tools for this agent.
-             *     Replaces existing tools if provided.
-             */
-            tools?: components["schemas"]["ToolDefinition"][] | null;
-        };
-        /** @description Request to update a file */
-        UpdateFileRequest: {
-            /** @description New file content */
-            content?: string | null;
-            /** @description Content encoding: "text" or "base64" */
-            encoding?: string | null;
-            /** @description Whether file is read-only */
-            is_readonly?: boolean | null;
-        };
-        /** @description Request to update a harness. Only provided fields will be updated. */
-        UpdateHarnessRequest: {
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][] | null;
-            default_model_id?: string | null;
-            description?: string | null;
-            /**
-             * @description Human-readable display name.
-             * @example Updated Research Harness
-             */
-            display_name?: string | null;
-            initial_files?: components["schemas"]["InitialFile"][] | null;
-            /**
-             * @description Name, unique per org.
-             * @example updated-research
-             */
-            name?: string | null;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            parent_harness_id?: string | null;
-            status?: null | components["schemas"]["HarnessStatus"];
-            system_prompt?: string | null;
-            tags?: string[] | null;
-        };
-        /** @description Request to update an LLM model. Only provided fields will be updated. */
-        UpdateLlmModelRequest: {
-            /**
-             * @description List of capabilities this model supports.
-             * @example [
-             *       "chat",
-             *       "tools"
-             *     ]
-             */
-            capabilities?: string[] | null;
-            /**
-             * @description Human-readable display name for the model.
-             * @example GPT-4o Mini
-             */
-            display_name?: string | null;
-            /**
-             * @description Whether this model should be enabled (visible in UI model pickers).
-             * @example true
-             */
-            enabled?: boolean | null;
-            /**
-             * @description Whether this model should be marked as a favorite for quick access.
-             * @example true
-             */
-            is_favorite?: boolean | null;
-            /**
-             * @description The model identifier used by the provider's API.
-             * @example gpt-4o-mini
-             */
-            model_id?: string | null;
-            status?: null | components["schemas"]["LlmModelStatus"];
-        };
-        /** @description Request to update an LLM provider. Only provided fields will be updated. */
-        UpdateLlmProviderRequest: {
-            /**
-             * @description API key for authenticating with the provider.
-             *     Will be encrypted at rest if encryption is configured.
-             */
-            api_key?: string | null;
-            /**
-             * @description Base URL for the provider's API.
-             * @example https://api.openai.com/v1
-             */
-            base_url?: string | null;
-            /**
-             * @description Display name for the provider.
-             * @example OpenAI Development
-             */
-            name?: string | null;
-            provider_type?: null | components["schemas"]["LlmProviderType"];
-            status?: null | components["schemas"]["LlmProviderStatus"];
-        };
-        /** @description Request to update an MCP server. Only provided fields will be updated. */
-        UpdateMcpServerRequest: {
-            /** @description API key for authentication. Set to update. */
-            api_key?: string | null;
-            auth_mode?: null | components["schemas"]["McpServerAuthMode"];
-            /**
-             * @description A human-readable description of what the MCP server provides.
-             * @example Updated description
-             */
-            description?: string | null;
-            /** @description Additional HTTP headers for authentication. */
-            headers?: {
-                [key: string]: string;
-            } | null;
-            /**
-             * @description The name of the MCP server.
-             * @example updated-mcp-server
-             */
-            name?: string | null;
-            status?: null | components["schemas"]["McpServerStatus"];
-            transport_type?: null | components["schemas"]["McpServerTransportType"];
-            /**
-             * @description The URL of the MCP server endpoint.
-             * @example https://mcp.example.com/v1/mcp
-             */
-            url?: string | null;
-        };
-        /** @description Request to update an organization */
-        UpdateOrganizationRequest: {
-            /**
-             * @description Base harness to use when a session is started without an explicit harness_id.
-             * @example harness_01933b5a000070008000000000000601
-             */
-            base_harness_id?: string | null;
-            /**
-             * @description Default harness to preselect in the UI for new sessions.
-             *     Mutually exclusive with `default_harness_name`.
-             * @example harness_01933b5a000070008000000000000602
-             */
-            default_harness_id?: string | null;
-            /**
-             * @description Alternative to `default_harness_id` — looked up by stable name within the org.
-             *     Mutually exclusive with `default_harness_id`.
-             * @example generic
-             */
-            default_harness_name?: string | null;
-            /**
-             * @description Default LLM model for this organization. Must be an enabled model.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * @description The display name of the organization.
-             * @example Acme Corporation
-             */
-            name?: string | null;
-        };
-        /** @description Update schedule request */
-        UpdateScheduleRequest: {
-            /** @description Catch up missed triggers */
-            catch_up_missed?: boolean | null;
-            /** @description New cron expression */
-            cron_expression?: string | null;
-            /** @description New description */
-            description?: string | null;
-            /** @description Enable/disable */
-            enabled?: boolean | null;
-            /**
-             * Format: int32
-             * @description Max catch-up executions
-             */
-            max_catch_up?: number | null;
-            /**
-             * Format: int32
-             * @description Max concurrent executions
-             */
-            max_concurrent?: number | null;
-            /** @description Retry policy */
-            retry_policy?: unknown;
-            target?: null | components["schemas"]["ScheduleTarget"];
-            /** @description New timezone */
-            timezone?: string | null;
-        };
-        /** @description Request to update a session. Only provided fields will be updated. */
-        UpdateSessionRequest: {
-            /**
-             * @description Optional resident agent identity used for unattended/background execution.
-             * @example identity_01933b5a00007000800000000000001
-             */
-            agent_identity_id?: string | null;
-            /**
-             * @description Session locale (BCP 47, e.g. `uk-UA`).
-             * @example uk-UA
-             */
-            locale?: string | null;
-            /**
-             * @description Tags for organizing and filtering sessions.
-             * @example [
-             *       "resolved"
-             *     ]
-             */
-            tags?: string[] | null;
-            /**
-             * @description Human-readable title for the session.
-             * @example Updated session title
-             */
-            title?: string | null;
-        };
-        /** @description Request to update a skill */
-        UpdateSkillRequest: {
-            /** @description Updated SKILL.md content (re-parses frontmatter) */
-            skill_md?: string | null;
-            status?: null | components["schemas"]["SkillStatus"];
-        };
-        /** @description User response for listing */
-        User: {
-            auth_provider?: string | null;
-            avatar_url?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            email: string;
-            id: string;
-            name: string;
-            roles: string[];
-        };
-        /** @description Request to validate a SKILL.md */
-        ValidateSkillRequest: {
-            /** @description SKILL.md content to validate */
-            skill_md: string;
-        };
+        agent_id?: string | null;
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * @description Optional resident agent identity for unattended/background execution.
+         * @example identity_01933b5a00007000800000000000001
          */
-        WithUrls_Agent: {
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was archived.
-             */
-            archived_at?: string | null;
-            /**
-             * @description Capabilities enabled for this agent with per-agent configuration.
-             *     Capabilities add tools and system prompt modifications.
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was created.
-             */
-            created_at: string;
-            /**
-             * @description Default LLM model ID for this agent.
-             *     Can be overridden at the session level.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was deleted.
-             */
-            deleted_at?: string | null;
-            /** @description Human-readable description of what the agent does. */
-            description?: string | null;
-            /**
-             * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
-             *     Falls back to `name` when absent.
-             */
-            display_name?: string | null;
-            /**
-             * @description External identifier (agent_<32-hex>). Shown as "id" in API.
-             *     Client-supplied or auto-generated.
-             * @example agent_01933b5a000070008000000000000001
-             */
-            id: string;
-            /** @description Starter files copied into each new session for this agent. */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /** @description Maximum number of LLM iterations per turn for this agent. */
-            max_iterations?: number | null;
-            /** @description Name, unique per org (e.g. "customer-support"). */
-            name: string;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /** @description Current lifecycle status of the agent. */
-            status: components["schemas"]["AgentStatus"];
-            /**
-             * @description System prompt that defines the agent's behavior.
-             *     Sent as the first message in every conversation.
-             */
-            system_prompt: string;
-            /** @description Tags for organizing and filtering agents. */
-            tags?: string[];
-            /**
-             * @description Client-side tools registered for this agent.
-             *     These tools are executed by the client, not the server.
-             */
-            tools?: components["schemas"]["ToolDefinition"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the agent was last updated.
-             */
-            updated_at: string;
-            usage?: null | components["schemas"]["TokenUsage"];
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        agent_identity_id?: string | null;
+        /** @description Validated config passed by host at blueprint spawn time. */
+        blueprint_config?: unknown;
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
+         *     from the blueprint definition instead of from harness_id/agent_id.
          */
-        WithUrls_CapabilityInfo: {
-            /** @description Category for grouping in UI */
-            category?: string | null;
-            /**
-             * @description IDs of capabilities that this capability depends on.
-             *     When this capability is selected, its dependencies are automatically included.
-             */
-            dependencies?: string[];
-            /** @description Description of what this capability provides */
-            description: string;
-            /**
-             * @description UI feature strings this capability contributes to.
-             *     Multiple capabilities can contribute the same feature.
-             */
-            features?: string[];
-            /** @description Icon name (for UI rendering) */
-            icon?: string | null;
-            /** @description Unique capability identifier */
-            id: string;
-            /** @description Whether this is an MCP server capability (for UI badge) */
-            is_mcp?: boolean;
-            /** @description Whether this is an Agent Skill capability (for UI badge) */
-            is_skill?: boolean;
-            /** @description Display name */
-            name: string;
-            /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
-            risk_level?: components["schemas"]["RiskLevel"];
-            /** @description Current status */
-            status: string;
-            /** @description System prompt addition contributed by this capability */
-            system_prompt?: string | null;
-            /** @description Tool definitions provided by this capability */
-            tool_definitions?: Record<string, never>[];
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        blueprint_id?: string | null;
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * @description Session-level capabilities (additive to agent capabilities).
+         *     Applied after agent capabilities when building RuntimeAgent.
          */
-        WithUrls_Harness: {
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was archived.
-             */
-            archived_at?: string | null;
-            /** @description Capabilities enabled for this harness with per-harness configuration. */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was created.
-             */
-            created_at: string;
-            /**
-             * @description Default LLM model ID for this harness.
-             *     Lowest priority in chain: controls > session > agent > harness.
-             * @example model_01933b5a00007000800000000000001
-             */
-            default_model_id?: string | null;
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was deleted.
-             */
-            deleted_at?: string | null;
-            /** @description Human-readable description of what the harness does. */
-            description?: string | null;
-            /** @description Human-readable display name shown in UI. */
-            display_name?: string | null;
-            /**
-             * @description Unique identifier for the harness (format: harness_{32-hex}).
-             * @example harness_01933b5a00007000800000000000001
-             */
-            id: string;
-            /** @description Starter files copied into each new session for this harness. */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /**
-             * @description Whether this harness is built-in (system-managed, readonly).
-             *     Built-in harnesses are provisioned during org initialization and
-             *     cannot be modified or deleted via the API. Users can copy them.
-             */
-            is_built_in?: boolean;
-            /** @description Name, unique per org (e.g. "generic"). */
-            name: string;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /**
-             * @description Optional parent harness that this harness inherits from.
-             * @example harness_01933b5a000070008000000000000602
-             */
-            parent_harness_id?: string | null;
-            /** @description Current lifecycle status of the harness. */
-            status: components["schemas"]["HarnessStatus"];
-            /**
-             * @description System prompt that defines the harness's base behavior.
-             *     Forms the foundation of the prompt stack.
-             */
-            system_prompt: string;
-            /** @description Tags for organizing and filtering harnesses. */
-            tags?: string[];
-            /**
-             * Format: date-time
-             * @description Timestamp when the harness was last updated.
-             */
-            updated_at: string;
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        capabilities?: components["schemas"]["AgentCapabilityConfig"][];
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * Format: date-time
+         * @description Timestamp when the session was created.
          */
-        WithUrls_LlmModel: {
-            capabilities: string[];
-            /** Format: date-time */
-            created_at: string;
-            display_name: string;
-            /**
-             * @description Whether this model is enabled (visible in UI model pickers).
-             *     All models are available via API regardless of this flag.
-             */
-            enabled: boolean;
-            /** @example model_01933b5a00007000800000000000001 */
-            id: string;
-            is_favorite: boolean;
-            model_id: string;
-            /** @example provider_01933b5a00007000800000000000001 */
-            provider_id: string;
-            /** @description How the model was added to the system */
-            source: components["schemas"]["LlmModelSource"];
-            status: components["schemas"]["LlmModelStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        created_at: string;
+        effective_owner?: null | components["schemas"]["PrincipalSummary"];
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * @description Aggregated UI features from all active capabilities (harness + agent + session).
+         *     Computed at read time from the capability registry.
+         *     Known features: "file_system", "schedules", "secrets", "key_value",
+         *     "sql_database", "leased_resources".
          */
-        WithUrls_LlmModelWithProvider: {
-            capabilities: string[];
-            /** Format: date-time */
-            created_at: string;
-            display_name: string;
-            /** @description Whether this model is enabled (visible in UI model pickers) */
-            enabled: boolean;
-            /** @example model_01933b5a00007000800000000000001 */
-            id: string;
-            is_favorite: boolean;
-            model_id: string;
-            profile?: null | components["schemas"]["LlmModelProfile"];
-            /** @example provider_01933b5a00007000800000000000001 */
-            provider_id: string;
-            provider_name: string;
-            provider_type: components["schemas"]["LlmProviderType"];
-            /** @description How the model was added to the system */
-            source: components["schemas"]["LlmModelSource"];
-            status: components["schemas"]["LlmModelStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        features?: string[];
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * Format: date-time
+         * @description Timestamp when the session finished (completed or failed).
          */
-        WithUrls_LlmProvider: {
-            /** @description Whether an API key is configured (key is never returned) */
-            api_key_set: boolean;
-            base_url?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** @example provider_01933b5a00007000800000000000001 */
-            id: string;
-            /**
-             * Format: date-time
-             * @description When models were last synced from provider API
-             */
-            last_synced_at?: string | null;
-            name: string;
-            provider_type: components["schemas"]["LlmProviderType"];
-            status: components["schemas"]["LlmProviderStatus"];
-            /** Format: date-time */
-            updated_at: string;
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        finished_at?: string | null;
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * @description ID of the harness for this session (format: harness_{32-hex}).
+         * @example harness_01933b5a00007000800000000000001
          */
-        WithUrls_McpServer: {
-            /** @description Whether an API key has been configured. */
-            api_key_set: boolean;
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was archived.
-             */
-            archived_at?: string | null;
-            /** @description Authentication mode for this MCP server. */
-            auth_mode?: components["schemas"]["McpServerAuthMode"];
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was created.
-             */
-            created_at: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was deleted.
-             */
-            deleted_at?: string | null;
-            /**
-             * @description Human-readable description of the MCP server.
-             * @example Atlassian MCP Server for Jira and Confluence
-             */
-            description?: string | null;
-            /**
-             * @description Additional HTTP headers for authentication.
-             *     Keys are header names, values are header values.
-             */
-            headers?: {
-                [key: string]: string;
-            };
-            /**
-             * @description Unique identifier for the MCP server.
-             * @example mcp_01933b5a00007000800000000000001
-             */
-            id: string;
-            /**
-             * @description Display name of the MCP server.
-             * @example atlassian-mcp-server
-             */
-            name: string;
-            /** @description Stable provider id used for user-scoped OAuth connections. */
-            oauth_provider_id?: string | null;
-            /** @description Current lifecycle status of the MCP server. */
-            status: components["schemas"]["McpServerStatus"];
-            /** @description Transport type (currently only HTTP supported). */
-            transport_type: components["schemas"]["McpServerTransportType"];
-            /**
-             * Format: date-time
-             * @description Timestamp when the MCP server was last updated.
-             */
-            updated_at: string;
-            /**
-             * @description URL of the MCP server endpoint.
-             * @example https://mcp.atlassian.com/v1/mcp
-             */
-            url: string;
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        harness_id: string;
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
+         * @description Session-level client hints — arbitrary key-value pairs declared by the
+         *     client at session creation time. These are defaults for every turn;
+         *     per-message `controls.hints` override these key-by-key (shallow merge).
          *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         *     Examples: `{"setup_connection": true, "rich_media": true}`
          */
-        WithUrls_Session: {
-            /**
-             * Format: int32
-             * @description Number of active (enabled) schedules for this session.
-             *     Populated when the session is fetched for API responses.
-             */
-            active_schedule_count?: number | null;
-            /**
-             * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
-             * @example agent_01933b5a00007000800000000000001
-             */
-            agent_id?: string | null;
-            /**
-             * @description Optional resident agent identity for unattended/background execution.
-             * @example identity_01933b5a00007000800000000000001
-             */
-            agent_identity_id?: string | null;
-            /** @description Validated config passed by host at blueprint spawn time. */
-            blueprint_config?: unknown;
-            /**
-             * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
-             *     from the blueprint definition instead of from harness_id/agent_id.
-             */
-            blueprint_id?: string | null;
-            /**
-             * @description Session-level capabilities (additive to agent capabilities).
-             *     Applied after agent capabilities when building RuntimeAgent.
-             */
-            capabilities?: components["schemas"]["AgentCapabilityConfig"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the session was created.
-             */
-            created_at: string;
-            /**
-             * @description Aggregated UI features from all active capabilities (harness + agent + session).
-             *     Computed at read time from the capability registry.
-             *     Known features: "file_system", "schedules", "secrets", "key_value",
-             *     "sql_database", "leased_resources".
-             */
-            features?: string[];
-            /**
-             * Format: date-time
-             * @description Timestamp when the session finished (completed or failed).
-             */
-            finished_at?: string | null;
-            /**
-             * @description ID of the harness for this session (format: harness_{32-hex}).
-             * @example harness_01933b5a00007000800000000000001
-             */
-            harness_id: string;
-            /**
-             * @description Session-level client hints — arbitrary key-value pairs declared by the
-             *     client at session creation time. These are defaults for every turn;
-             *     per-message `controls.hints` override these key-by-key (shallow merge).
-             *
-             *     Examples: `{"setup_connection": true, "rich_media": true}`
-             */
-            hints?: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * @description Unique identifier for the session (format: session_{32-hex}).
-             * @example session_01933b5a00007000800000000000001
-             */
-            id: string;
-            /**
-             * @description Session-level initial files (additive to agent initial_files).
-             *     Files with matching paths override agent/harness files; new paths are appended.
-             */
-            initial_files?: components["schemas"]["InitialFile"][];
-            /**
-             * @description Whether this session is pinned by the current user.
-             *     Only populated when the request has an authenticated user context.
-             */
-            is_pinned?: boolean | null;
-            /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
-            locale?: string | null;
-            /** @description Maximum number of LLM iterations per turn for this session. */
-            max_iterations?: number | null;
-            /**
-             * @description LLM model ID to use for this session (format: model_{32-hex}).
-             *     Overrides the agent's default model if set.
-             * @example model_01933b5a00007000800000000000001
-             */
-            model_id?: string | null;
-            network_access?: null | components["schemas"]["NetworkAccessList"];
-            /**
-             * @description Organization this session belongs to (format: org_{32-hex}).
-             * @example org_00000000000000000000000000000001
-             */
-            organization_id: string;
-            /** @description Preview text from the last assistant response (truncated). */
-            output_preview?: string | null;
-            /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
-            parent_session_id?: string | null;
-            /** @description Preview text from the first user message (truncated). */
-            preview?: string | null;
-            /**
-             * Format: date-time
-             * @description Timestamp when the session started executing.
-             */
-            started_at?: string | null;
-            /** @description Current execution status of the session. */
-            status: components["schemas"]["SessionStatus"];
-            /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
-            subagent_name?: string | null;
-            subagent_status?: null | components["schemas"]["SubagentStatus"];
-            /** @description Original task description given to this subagent. */
-            subagent_task?: string | null;
-            /**
-             * @description Session-level system prompt override.
-             *     Prepended to the agent's system prompt when building RuntimeAgent.
-             */
-            system_prompt?: string | null;
-            /** @description Tags for organizing and filtering sessions. */
-            tags?: string[];
-            /** @description Human-readable title for the session. */
-            title?: string | null;
-            /** @description Client-side tools for this session (additive to agent tools). */
-            tools?: components["schemas"]["ToolDefinition"][];
-            /**
-             * Format: date-time
-             * @description Timestamp when the session was last updated.
-             */
-            updated_at: string;
-            usage?: null | components["schemas"]["TokenUsage"];
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        hints?: {
+          [key: string]: unknown;
+        } | null;
         /**
-         * @description Wrapper that adds `self_url` and `view_url` to a serialized resource.
-         *
-         *     Uses `self_url` (not `url`) for the API link to avoid collision with
-         *     resources that already have a `url` field (e.g. McpServer).
+         * @description Unique identifier for the session (format: session_{32-hex}).
+         * @example session_01933b5a00007000800000000000001
          */
-        WithUrls_Skill: {
-            allowed_tools?: string | null;
-            /** Format: date-time */
-            archived_at?: string | null;
-            compatibility?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            deleted_at?: string | null;
-            /** @example Extract text and tables from PDF files. */
-            description: string;
-            /** @description Whether the model is prevented from auto-invoking this skill */
-            disable_model_invocation?: boolean;
-            /** @example skill_01933b5a00007000800000000000001 */
-            id: string;
-            license?: string | null;
-            metadata?: {
-                [key: string]: unknown;
-            };
-            /** @example pdf-processing */
-            name: string;
-            source_type: components["schemas"]["SkillSourceType"];
-            status: components["schemas"]["SkillStatus"];
-            /** Format: date-time */
-            updated_at: string;
-            /** @description Whether this skill appears as a /slash command for users */
-            user_invocable?: boolean;
-            version: string;
-        } & {
-            /** @description Full API endpoint URL for this resource. */
-            self_url: string;
-            /** @description Full UI URL for viewing this resource. */
-            view_url: string;
-        };
+        id: string;
+        /**
+         * @description Session-level initial files (additive to agent initial_files).
+         *     Files with matching paths override agent/harness files; new paths are appended.
+         */
+        initial_files?: components["schemas"]["InitialFile"][];
+        /**
+         * @description Whether this session is pinned by the current user.
+         *     Only populated when the request has an authenticated user context.
+         */
+        is_pinned?: boolean | null;
+        /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+        locale?: string | null;
+        /** @description Maximum number of LLM iterations per turn for this session. */
+        max_iterations?: number | null;
+        /** @description Remote MCP servers scoped to this session only. */
+        mcpServers?: components["schemas"]["BTreeMap"];
+        /**
+         * @description LLM model ID to use for this session (format: model_{32-hex}).
+         *     Overrides the agent's default model if set.
+         * @example model_01933b5a00007000800000000000001
+         */
+        model_id?: string | null;
+        network_access?: null | components["schemas"]["NetworkAccessList"];
+        /**
+         * @description Organization this session belongs to (format: org_{32-hex}).
+         * @example org_00000000000000000000000000000001
+         */
+        organization_id: string;
+        /** @description Preview text from the last assistant response (truncated). */
+        output_preview?: string | null;
+        owner?: null | components["schemas"]["PrincipalSummary"];
+        /**
+         * @description Owning principal for this session.
+         * @example principal_01933b5a000070008000000000000001
+         */
+        owner_principal_id: string;
+        /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+        parent_session_id?: string | null;
+        /** @description Preview text from the first user message (truncated). */
+        preview?: string | null;
+        /**
+         * Format: uuid
+         * @description Denormalized effective human owner of the owning principal lineage.
+         */
+        resolved_owner_user_id?: string | null;
+        /**
+         * Format: date-time
+         * @description Timestamp when the session started executing.
+         */
+        started_at?: string | null;
+        /** @description Current execution status of the session. */
+        status: components["schemas"]["SessionStatus"];
+        /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+        subagent_name?: string | null;
+        subagent_status?: null | components["schemas"]["SubagentStatus"];
+        /** @description Original task description given to this subagent. */
+        subagent_task?: string | null;
+        /**
+         * @description Session-level system prompt override.
+         *     Prepended to the agent's system prompt when building RuntimeAgent.
+         */
+        system_prompt?: string | null;
+        /** @description Tags for organizing and filtering sessions. */
+        tags?: string[];
+        /** @description Human-readable title for the session. */
+        title?: string | null;
+        /** @description Client-side tools for this session (additive to agent tools). */
+        tools?: components["schemas"]["ToolDefinition"][];
+        /**
+         * Format: date-time
+         * @description Timestamp when the session was last updated.
+         */
+        updated_at: string;
+        usage?: null | components["schemas"]["TokenUsage"];
+      }[];
+      /**
+       * Format: int32
+       * @description Maximum number of items per page.
+       */
+      limit: number;
+      /**
+       * Format: int32
+       * @description Current offset (starting position).
+       */
+      offset: number;
+      /**
+       * Format: int32
+       * @description Total number of items matching the query (across all pages).
+       */
+      total: number;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /**
+     * @description Response wrapper for paginated list endpoints.
+     *     Includes pagination metadata along with the data array.
+     */
+    PaginatedResponse_WithUrls_CapabilityInfo: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /**
+         * Format: int64
+         * @description Number of active agents referencing this capability in the org.
+         */
+        agent_count?: number;
+        /** @description Category for grouping in UI */
+        category?: string | null;
+        /** @description JSON Schema for capability-specific per-agent config. */
+        config_schema?: Record<string, never>;
+        /** @description react-jsonschema-form uiSchema hints for rendering config_schema. */
+        config_ui_schema?: Record<string, never>;
+        /**
+         * @description IDs of capabilities that this capability depends on.
+         *     When this capability is selected, its dependencies are automatically included.
+         */
+        dependencies?: string[];
+        /** @description Description of what this capability provides */
+        description: string;
+        /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+        docs_slug?: string | null;
+        /**
+         * @description UI feature strings this capability contributes to.
+         *     Multiple capabilities can contribute the same feature.
+         */
+        features?: string[];
+        /**
+         * Format: int64
+         * @description Number of active harnesses referencing this capability in the org.
+         */
+        harness_count?: number;
+        /** @description Icon name (for UI rendering) */
+        icon?: string | null;
+        /** @description Unique capability identifier */
+        id: string;
+        /** @description Whether this is an MCP server capability (for UI badge) */
+        is_mcp?: boolean;
+        /** @description Whether this is an Agent Skill capability (for UI badge) */
+        is_skill?: boolean;
+        /** @description Display name */
+        name: string;
+        /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
+        risk_level?: components["schemas"]["RiskLevel"];
+        /** @description Current status */
+        status: string;
+        /** @description System prompt addition contributed by this capability */
+        system_prompt?: string | null;
+        /** @description Tool definitions provided by this capability */
+        tool_definitions?: Record<string, never>[];
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+      /**
+       * Format: int32
+       * @description Maximum number of items per page.
+       */
+      limit: number;
+      /**
+       * Format: int32
+       * @description Current offset (starting position).
+       */
+      offset: number;
+      /**
+       * Format: int32
+       * @description Total number of items matching the query (across all pages).
+       */
+      total: number;
+    };
+    /**
+     * @description Response wrapper for paginated list endpoints.
+     *     Includes pagination metadata along with the data array.
+     */
+    PaginatedResponse_WithUrls_ResourceWithCounts_Agent: {
+      /** @description Array of items returned by the list operation. */
+      data: (({
+        /**
+         * Format: date-time
+         * @description Timestamp when the agent was archived.
+         */
+        archived_at?: string | null;
+        /**
+         * @description Capabilities enabled for this agent with per-agent configuration.
+         *     Capabilities add tools and system prompt modifications.
+         */
+        capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+        /**
+         * Format: date-time
+         * @description Timestamp when the agent was created.
+         */
+        created_at: string;
+        /**
+         * @description Default LLM model ID for this agent.
+         *     Can be overridden at the session level.
+         * @example model_01933b5a00007000800000000000001
+         */
+        default_model_id?: string | null;
+        /**
+         * Format: date-time
+         * @description Timestamp when the agent was deleted.
+         */
+        deleted_at?: string | null;
+        /** @description Human-readable description of what the agent does. */
+        description?: string | null;
+        /**
+         * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
+         *     Falls back to `name` when absent.
+         */
+        display_name?: string | null;
+        /**
+         * @description External identifier (agent_<32-hex>). Shown as "id" in API.
+         *     Client-supplied or auto-generated.
+         * @example agent_01933b5a000070008000000000000001
+         */
+        id: string;
+        /** @description Starter files copied into each new session for this agent. */
+        initial_files?: components["schemas"]["InitialFile"][];
+        /** @description Maximum number of LLM iterations per turn for this agent. */
+        max_iterations?: number | null;
+        /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
+        mcpServers?: components["schemas"]["BTreeMap"];
+        /** @description Name, unique per org (e.g. "customer-support"). */
+        name: string;
+        network_access?: null | components["schemas"]["NetworkAccessList"];
+        /** @description Current lifecycle status of the agent. */
+        status: components["schemas"]["AgentStatus"];
+        /**
+         * @description System prompt that defines the agent's behavior.
+         *     Sent as the first message in every conversation.
+         */
+        system_prompt: string;
+        /** @description Tags for organizing and filtering agents. */
+        tags?: string[];
+        /**
+         * @description Client-side tools registered for this agent.
+         *     These tools are executed by the client, not the server.
+         */
+        tools?: components["schemas"]["ToolDefinition"][];
+        /**
+         * Format: date-time
+         * @description Timestamp when the agent was last updated.
+         */
+        updated_at: string;
+        usage?: null | components["schemas"]["TokenUsage"];
+      } & {
+        /**
+         * Format: int64
+         * @description Number of non-deleted apps using this resource.
+         */
+        app_count: number;
+        /**
+         * Format: int64
+         * @description Number of sessions using this resource.
+         */
+        session_count: number;
+      }) & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+      /**
+       * Format: int32
+       * @description Maximum number of items per page.
+       */
+      limit: number;
+      /**
+       * Format: int32
+       * @description Current offset (starting position).
+       */
+      offset: number;
+      /**
+       * Format: int32
+       * @description Total number of items matching the query (across all pages).
+       */
+      total: number;
+    };
+    /**
+     * @description Response wrapper for paginated list endpoints.
+     *     Includes pagination metadata along with the data array.
+     */
+    PaginatedResponse_WithUrls_Session: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /**
+         * Format: int32
+         * @description Number of active (enabled) schedules for this session.
+         *     Populated when the session is fetched for API responses.
+         */
+        active_schedule_count?: number | null;
+        /**
+         * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
+         * @example agent_01933b5a00007000800000000000001
+         */
+        agent_id?: string | null;
+        /**
+         * @description Optional resident agent identity for unattended/background execution.
+         * @example identity_01933b5a00007000800000000000001
+         */
+        agent_identity_id?: string | null;
+        /** @description Validated config passed by host at blueprint spawn time. */
+        blueprint_config?: unknown;
+        /**
+         * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
+         *     from the blueprint definition instead of from harness_id/agent_id.
+         */
+        blueprint_id?: string | null;
+        /**
+         * @description Session-level capabilities (additive to agent capabilities).
+         *     Applied after agent capabilities when building RuntimeAgent.
+         */
+        capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+        /**
+         * Format: date-time
+         * @description Timestamp when the session was created.
+         */
+        created_at: string;
+        effective_owner?: null | components["schemas"]["PrincipalSummary"];
+        /**
+         * @description Aggregated UI features from all active capabilities (harness + agent + session).
+         *     Computed at read time from the capability registry.
+         *     Known features: "file_system", "schedules", "secrets", "key_value",
+         *     "sql_database", "leased_resources".
+         */
+        features?: string[];
+        /**
+         * Format: date-time
+         * @description Timestamp when the session finished (completed or failed).
+         */
+        finished_at?: string | null;
+        /**
+         * @description ID of the harness for this session (format: harness_{32-hex}).
+         * @example harness_01933b5a00007000800000000000001
+         */
+        harness_id: string;
+        /**
+         * @description Session-level client hints — arbitrary key-value pairs declared by the
+         *     client at session creation time. These are defaults for every turn;
+         *     per-message `controls.hints` override these key-by-key (shallow merge).
+         *
+         *     Examples: `{"setup_connection": true, "rich_media": true}`
+         */
+        hints?: {
+          [key: string]: unknown;
+        } | null;
+        /**
+         * @description Unique identifier for the session (format: session_{32-hex}).
+         * @example session_01933b5a00007000800000000000001
+         */
+        id: string;
+        /**
+         * @description Session-level initial files (additive to agent initial_files).
+         *     Files with matching paths override agent/harness files; new paths are appended.
+         */
+        initial_files?: components["schemas"]["InitialFile"][];
+        /**
+         * @description Whether this session is pinned by the current user.
+         *     Only populated when the request has an authenticated user context.
+         */
+        is_pinned?: boolean | null;
+        /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+        locale?: string | null;
+        /** @description Maximum number of LLM iterations per turn for this session. */
+        max_iterations?: number | null;
+        /** @description Remote MCP servers scoped to this session only. */
+        mcpServers?: components["schemas"]["BTreeMap"];
+        /**
+         * @description LLM model ID to use for this session (format: model_{32-hex}).
+         *     Overrides the agent's default model if set.
+         * @example model_01933b5a00007000800000000000001
+         */
+        model_id?: string | null;
+        network_access?: null | components["schemas"]["NetworkAccessList"];
+        /**
+         * @description Organization this session belongs to (format: org_{32-hex}).
+         * @example org_00000000000000000000000000000001
+         */
+        organization_id: string;
+        /** @description Preview text from the last assistant response (truncated). */
+        output_preview?: string | null;
+        owner?: null | components["schemas"]["PrincipalSummary"];
+        /**
+         * @description Owning principal for this session.
+         * @example principal_01933b5a000070008000000000000001
+         */
+        owner_principal_id: string;
+        /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+        parent_session_id?: string | null;
+        /** @description Preview text from the first user message (truncated). */
+        preview?: string | null;
+        /**
+         * Format: uuid
+         * @description Denormalized effective human owner of the owning principal lineage.
+         */
+        resolved_owner_user_id?: string | null;
+        /**
+         * Format: date-time
+         * @description Timestamp when the session started executing.
+         */
+        started_at?: string | null;
+        /** @description Current execution status of the session. */
+        status: components["schemas"]["SessionStatus"];
+        /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+        subagent_name?: string | null;
+        subagent_status?: null | components["schemas"]["SubagentStatus"];
+        /** @description Original task description given to this subagent. */
+        subagent_task?: string | null;
+        /**
+         * @description Session-level system prompt override.
+         *     Prepended to the agent's system prompt when building RuntimeAgent.
+         */
+        system_prompt?: string | null;
+        /** @description Tags for organizing and filtering sessions. */
+        tags?: string[];
+        /** @description Human-readable title for the session. */
+        title?: string | null;
+        /** @description Client-side tools for this session (additive to agent tools). */
+        tools?: components["schemas"]["ToolDefinition"][];
+        /**
+         * Format: date-time
+         * @description Timestamp when the session was last updated.
+         */
+        updated_at: string;
+        usage?: null | components["schemas"]["TokenUsage"];
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+      /**
+       * Format: int32
+       * @description Maximum number of items per page.
+       */
+      limit: number;
+      /**
+       * Format: int32
+       * @description Current offset (starting position).
+       */
+      offset: number;
+      /**
+       * Format: int32
+       * @description Total number of items matching the query (across all pages).
+       */
+      total: number;
+    };
+    /** @description Request to preview the final agent shape with capabilities applied */
+    PreviewAgentRequest: {
+      /**
+       * @description Capabilities to apply with per-agent configuration.
+       * @example [
+       *       {
+       *         "config": {},
+       *         "ref": "current_time"
+       *       },
+       *       {
+       *         "config": {},
+       *         "ref": "test_math"
+       *       }
+       *     ]
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /** @description Remote MCP servers scoped to the previewed agent. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /**
+       * @description The base system prompt (before capability additions)
+       * @example You are a helpful customer support agent.
+       */
+      system_prompt: string;
+      /** @description Client-side tools to include in the preview. */
+      tools?: Record<string, never>[];
+    };
+    /** @description Request to preview harness shape with capabilities applied */
+    PreviewHarnessRequest: {
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /** @example harness_01933b5a000070008000000000000602 */
+      parent_harness_id?: string | null;
+      /** @example You are a research assistant. */
+      system_prompt: string;
+    };
+    /** @enum {string} */
+    PrincipalKind: "user" | "agent_identity" | "system";
+    PrincipalSummary: {
+      /** @example principal_01933b5a000070008000000000000001 */
+      id: string;
+      kind: components["schemas"]["PrincipalKind"];
+      metadata?: unknown;
+      /** Format: uuid */
+      subject_id?: string | null;
+    };
+    /**
+     * @description Strategy for prompt caching.
+     * @enum {string}
+     */
+    PromptCacheStrategy: "auto";
+    /** @description Data for reason.completed event */
+    ReasonCompletedData: {
+      /**
+       * Format: int64
+       * @description Duration of the reason phase in milliseconds
+       */
+      duration_ms?: number | null;
+      /** @description Error message if failed */
+      error?: string | null;
+      /** @description Whether tool calls were requested */
+      has_tool_calls: boolean;
+      /** @description Whether the LLM call succeeded */
+      success: boolean;
+      /** @description Text response preview (first 200 chars) */
+      text_preview?: string | null;
+      /**
+       * Format: int32
+       * @description Number of tool calls requested
+       */
+      tool_call_count: number;
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /** @description Data for reason.started event */
+    ReasonStartedData: {
+      agent_id?: null | components["schemas"]["TypedId"];
+      /** @description Harness ID being used */
+      harness_id: components["schemas"]["TypedId"];
+      metadata?: null | components["schemas"]["ModelMetadata"];
+    };
+    /**
+     * @description Data for reason.thinking.completed event
+     *
+     *     Emitted when extended thinking completes and the model transitions
+     *     to producing the final response. Contains the complete thinking content.
+     */
+    ReasonThinkingCompletedData: {
+      /** @description Complete thinking content */
+      thinking: string;
+      /**
+       * @description Turn ID this thinking belongs to
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /**
+     * @description Data for reason.thinking.delta event (extended thinking content from models like Claude)
+     *
+     *     This event streams incremental thinking/reasoning content from models that support
+     *     extended thinking mode (e.g., Claude with thinking enabled). The thinking content
+     *     represents the model's chain-of-thought reasoning before producing the final response.
+     */
+    ReasonThinkingDeltaData: {
+      /** @description Accumulated thinking text so far (convenience for UI) */
+      accumulated: string;
+      /** @description The thinking delta (new thinking text since last delta) */
+      delta: string;
+      /**
+       * @description Turn ID this delta belongs to (for correlation)
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /**
+     * @description Data for reason.thinking.started event
+     *
+     *     Emitted when extended thinking begins during reasoning phase.
+     *     This signals the model is using chain-of-thought reasoning.
+     *     UI can show a "thinking" indicator.
+     */
+    ReasonThinkingStartedData: {
+      /** @description Optional model name being used */
+      model?: string | null;
+      /**
+       * @description Turn ID this thinking belongs to
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /** @description Reasoning configuration for the model */
+    ReasoningConfig: {
+      /** @description Effort level for reasoning (low, medium, high) */
+      effort?: string | null;
+    };
+    /**
+     * @description Reasoning effort level for models that support it
+     * @enum {string}
+     */
+    ReasoningEffort: "none" | "minimal" | "low" | "medium" | "high" | "xhigh";
+    /** @description Reasoning effort configuration for a model */
+    ReasoningEffortConfig: {
+      /** @description Default reasoning effort for this model */
+      default: components["schemas"]["ReasoningEffort"];
+      /** @description Available reasoning effort values for this model */
+      values: components["schemas"]["ReasoningEffortValue"][];
+    };
+    /** @description Named reasoning effort value for UI display */
+    ReasoningEffortValue: {
+      /** @description Display name (e.g., "Low", "Medium") */
+      name: string;
+      /** @description The API value (e.g., "low", "medium") */
+      value: components["schemas"]["ReasoningEffort"];
+    };
+    /**
+     * @description Response type for per-resource config endpoints.
+     *
+     *     Every resource exposes `GET /v1/{resource}/config` returning this type.
+     *     UI uses it to gate controls (create/edit/delete buttons, admin panels).
+     */
+    ResourceConfigResponse: {
+      /** @description Map of policy ID → whether the caller satisfies it. */
+      policies: {
+        [key: string]: boolean;
+      };
+    };
+    ResourceStatsResponse: {
+      /** Format: int64 */
+      active_session_count: number;
+      /** Format: int64 */
+      avg_session_duration_ms?: number | null;
+      /** Format: int64 */
+      execution_count: number;
+      /** Format: date-time */
+      first_session_at?: string | null;
+      /** Format: int64 */
+      idle_session_count: number;
+      /** Format: date-time */
+      last_execution_at?: string | null;
+      /** Format: date-time */
+      last_session_at?: string | null;
+      /** Format: int64 */
+      session_count: number;
+      /** Format: int64 */
+      started_session_count: number;
+      /** Format: int64 */
+      total_cache_creation_tokens: number;
+      /** Format: int64 */
+      total_cache_read_tokens: number;
+      /** Format: int64 */
+      total_input_tokens: number;
+      /** Format: int64 */
+      total_output_tokens: number;
+      /** Format: int64 */
+      total_session_duration_ms: number;
+      /** Format: int64 */
+      waiting_for_tool_results_session_count: number;
+    };
+    /**
+     * @description Risk classification for capabilities (TM-AGENT-005).
+     *
+     *     Used to enforce approval requirements when assigning capabilities.
+     * @enum {string}
+     */
+    RiskLevel: "low" | "medium" | "high";
+    /** @description Schedule execution response */
+    ScheduleExecutionResponse: {
+      /** Format: date-time */
+      completed_at?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: int32 */
+      duration_ms?: number | null;
+      error?: string | null;
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      schedule_id: string;
+      /** Format: date-time */
+      scheduled_at: string;
+      /** Format: date-time */
+      started_at: string;
+      status: string;
+      /** Format: uuid */
+      task_id?: string | null;
+      /** Format: uuid */
+      workflow_id?: string | null;
+    };
+    /** @description Schedule executions list response */
+    ScheduleExecutionsListResponse: {
+      data: components["schemas"]["ScheduleExecutionResponse"][];
+      total: number;
+    };
+    /** @description Schedule response */
+    ScheduleResponse: {
+      catch_up_missed: boolean;
+      /** Format: date-time */
+      created_at: string;
+      cron_expression: string;
+      description?: string | null;
+      enabled: boolean;
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      last_triggered_at?: string | null;
+      /** Format: int32 */
+      max_catch_up?: number | null;
+      /** Format: int32 */
+      max_concurrent?: number | null;
+      name: string;
+      /** Format: date-time */
+      next_trigger_at?: string | null;
+      retry_policy?: unknown;
+      target: components["schemas"]["ScheduleTargetResponse"];
+      timezone: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description Schedule stats response */
+    ScheduleStatsResponse: {
+      /** Format: int64 */
+      avg_duration_ms?: number | null;
+      /** Format: int64 */
+      failed_executions: number;
+      last_execution_status?: string | null;
+      /** Format: int64 */
+      skipped_executions: number;
+      /** Format: int64 */
+      successful_executions: number;
+      /** Format: int64 */
+      total_executions: number;
+    };
+    /** @description Target for a schedule - either a workflow or activity */
+    ScheduleTarget: {
+      /** @description Input JSON for the workflow/activity */
+      input?: unknown;
+      /** @description Workflow type name or activity type name */
+      name: string;
+      /** @description Target type: "workflow" or "activity" */
+      type: string;
+    };
+    /** @description Schedule target response */
+    ScheduleTargetResponse: {
+      input: unknown;
+      name: string;
+      type: string;
+    };
+    /** @description Schedules list response */
+    SchedulesListResponse: {
+      data: components["schemas"]["ScheduleResponse"][];
+      /** Format: int64 */
+      total: number;
+    };
+    /** @description Schema response for a database. */
+    SchemaResponse: {
+      database: string;
+      tables: unknown[];
+    };
+    /** @description Secret entry info (name and timestamps only, no value) */
+    SecretInfo: {
+      /** @description When the secret was created */
+      created_at: string;
+      /** @description The secret name */
+      name: string;
+      /** @description When the secret was last updated */
+      updated_at: string;
+    };
+    /**
+     * @description Session - instance of agentic loop execution.
+     *     A session represents a single conversation with an agent.
+     */
+    Session: {
+      /**
+       * Format: int32
+       * @description Number of active (enabled) schedules for this session.
+       *     Populated when the session is fetched for API responses.
+       */
+      active_schedule_count?: number | null;
+      /**
+       * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /**
+       * @description Optional resident agent identity for unattended/background execution.
+       * @example identity_01933b5a00007000800000000000001
+       */
+      agent_identity_id?: string | null;
+      /** @description Validated config passed by host at blueprint spawn time. */
+      blueprint_config?: unknown;
+      /**
+       * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
+       *     from the blueprint definition instead of from harness_id/agent_id.
+       */
+      blueprint_id?: string | null;
+      /**
+       * @description Session-level capabilities (additive to agent capabilities).
+       *     Applied after agent capabilities when building RuntimeAgent.
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the session was created.
+       */
+      created_at: string;
+      effective_owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description Aggregated UI features from all active capabilities (harness + agent + session).
+       *     Computed at read time from the capability registry.
+       *     Known features: "file_system", "schedules", "secrets", "key_value",
+       *     "sql_database", "leased_resources".
+       */
+      features?: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when the session finished (completed or failed).
+       */
+      finished_at?: string | null;
+      /**
+       * @description ID of the harness for this session (format: harness_{32-hex}).
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id: string;
+      /**
+       * @description Session-level client hints — arbitrary key-value pairs declared by the
+       *     client at session creation time. These are defaults for every turn;
+       *     per-message `controls.hints` override these key-by-key (shallow merge).
+       *
+       *     Examples: `{"setup_connection": true, "rich_media": true}`
+       */
+      hints?: {
+        [key: string]: unknown;
+      } | null;
+      /**
+       * @description Unique identifier for the session (format: session_{32-hex}).
+       * @example session_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * @description Session-level initial files (additive to agent initial_files).
+       *     Files with matching paths override agent/harness files; new paths are appended.
+       */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /**
+       * @description Whether this session is pinned by the current user.
+       *     Only populated when the request has an authenticated user context.
+       */
+      is_pinned?: boolean | null;
+      /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+      locale?: string | null;
+      /** @description Maximum number of LLM iterations per turn for this session. */
+      max_iterations?: number | null;
+      /** @description Remote MCP servers scoped to this session only. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /**
+       * @description LLM model ID to use for this session (format: model_{32-hex}).
+       *     Overrides the agent's default model if set.
+       * @example model_01933b5a00007000800000000000001
+       */
+      model_id?: string | null;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Organization this session belongs to (format: org_{32-hex}).
+       * @example org_00000000000000000000000000000001
+       */
+      organization_id: string;
+      /** @description Preview text from the last assistant response (truncated). */
+      output_preview?: string | null;
+      owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description Owning principal for this session.
+       * @example principal_01933b5a000070008000000000000001
+       */
+      owner_principal_id: string;
+      /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+      parent_session_id?: string | null;
+      /** @description Preview text from the first user message (truncated). */
+      preview?: string | null;
+      /**
+       * Format: uuid
+       * @description Denormalized effective human owner of the owning principal lineage.
+       */
+      resolved_owner_user_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the session started executing.
+       */
+      started_at?: string | null;
+      /** @description Current execution status of the session. */
+      status: components["schemas"]["SessionStatus"];
+      /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+      subagent_name?: string | null;
+      subagent_status?: null | components["schemas"]["SubagentStatus"];
+      /** @description Original task description given to this subagent. */
+      subagent_task?: string | null;
+      /**
+       * @description Session-level system prompt override.
+       *     Prepended to the agent's system prompt when building RuntimeAgent.
+       */
+      system_prompt?: string | null;
+      /** @description Tags for organizing and filtering sessions. */
+      tags?: string[];
+      /** @description Human-readable title for the session. */
+      title?: string | null;
+      /** @description Client-side tools for this session (additive to agent tools). */
+      tools?: components["schemas"]["ToolDefinition"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the session was last updated.
+       */
+      updated_at: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /** @description Data for session.activated event (turn started, session now active) */
+    SessionActivatedData: {
+      /**
+       * @description Input message ID that triggered the turn
+       * @example message_01933b5a00007000800000000000001
+       */
+      input_message_id: string;
+      /**
+       * @description Turn ID that activated the session
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    SessionContextReport: {
+      /** Format: int32 */
+      context_window_tokens?: number | null;
+      contributions: components["schemas"]["ContextReportContribution"][];
+      cumulative_usage?: null | components["schemas"]["TokenUsage"];
+      /** Format: int32 */
+      estimated_input_tokens: number;
+      model: string;
+      sections: components["schemas"]["ContextReportSection"][];
+      session_id: string;
+    };
+    /** @description Complete file with content */
+    SessionFile: {
+      /** @description Base64-encoded content for binary files, plain text for text files */
+      content?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** @description Content encoding: "text" or "base64" */
+      encoding?: string;
+      /** Format: uuid */
+      id: string;
+      is_directory: boolean;
+      is_readonly: boolean;
+      name: string;
+      path: string;
+      /** Format: uuid */
+      session_id: string;
+      /** Format: int64 */
+      size_bytes: number;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /** @description Data for session.idled event (turn completed, session now idle) */
+    SessionIdledData: {
+      /**
+       * Format: int32
+       * @description Number of iterations in the completed turn
+       */
+      iterations?: number | null;
+      /**
+       * @description Turn ID that just completed
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /** @description A resource registered in the session resource registry. */
+    SessionResourceEntry: {
+      /** Format: date-time */
+      created_at: string;
+      /** @description Human-readable label. */
+      display_name: string;
+      /** @description Resource kind: "sandbox", "subagent", "browser_session", etc. */
+      kind: string;
+      /** @description Kind-specific non-secret metadata. */
+      metadata?: unknown;
+      /** @description Caller-provided stable ID (unique per session). */
+      resource_id: string;
+      /** @description Parent session. */
+      session_id: string;
+      /** @description Lifecycle status. */
+      status: components["schemas"]["SessionResourceStatus"];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /**
+     * @description Status of a resource in the session resource registry.
+     * @enum {string}
+     */
+    SessionResourceStatus: "active" | "completed" | "failed" | "released";
+    /** @enum {string} */
+    SessionSandboxAction: "pause" | "resume" | "delete";
+    /** @enum {string} */
+    SessionSandboxStatusValue: "running" | "paused";
+    /** @description Data for session.started event */
+    SessionStartedData: {
+      /**
+       * @description Agent ID (optional)
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /**
+       * @description Harness ID
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id: string;
+      /**
+       * @description Model ID if specified
+       * @example model_01933b5a00007000800000000000001
+       */
+      model_id?: string | null;
+    };
+    /**
+     * @description Session execution status.
+     *     - `started`: Session just created, no turn executed yet
+     *     - `active`: A turn is currently running
+     *     - `idle`: Turn completed, session waiting for next input
+     *     - `paused`: Budget limit reached, waiting for user to increase limit or resume
+     * @enum {string}
+     */
+    SessionStatus:
+      | "started"
+      | "active"
+      | "idle"
+      | "waitingfortoolresults"
+      | "paused";
+    /** @description Skill entity (API response type) */
+    Skill: {
+      allowed_tools?: string | null;
+      /** Format: date-time */
+      archived_at?: string | null;
+      compatibility?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      deleted_at?: string | null;
+      /** @example Extract text and tables from PDF files. */
+      description: string;
+      /** @description Whether the model is prevented from auto-invoking this skill */
+      disable_model_invocation?: boolean;
+      /** @example skill_01933b5a00007000800000000000001 */
+      id: string;
+      license?: string | null;
+      metadata?: {
+        [key: string]: unknown;
+      };
+      /** @example pdf-processing */
+      name: string;
+      source_type: components["schemas"]["SkillSourceType"];
+      status: components["schemas"]["SkillStatus"];
+      /** Format: date-time */
+      updated_at: string;
+      /** @description Whether this skill appears as a /slash command for users */
+      user_invocable?: boolean;
+      version: string;
+    };
+    /** @description Skill content response (for /content endpoint) */
+    SkillContent: {
+      files: components["schemas"]["SkillFileEntry"][];
+      skill_md: string;
+    };
+    /** @description A file entry in a skill archive */
+    SkillFileEntry: {
+      content: string;
+      path: string;
+    };
+    /**
+     * @description Skill source type
+     * @enum {string}
+     */
+    SkillSourceType: "markdown" | "archive";
+    /**
+     * @description Skill lifecycle status
+     * @enum {string}
+     */
+    SkillStatus: "active" | "disabled" | "archived" | "deleted";
+    /** @description Validation result for SKILL.md */
+    SkillValidationResult: {
+      description?: string | null;
+      errors?: string[];
+      name?: string | null;
+      valid: boolean;
+      warnings?: string[];
+    };
+    /** @description Request to get file stat */
+    StatRequest: {
+      /** @description Path to the file or directory */
+      path: string;
+    };
+    /** @description Data for subagent lifecycle events (spawned, completed, failed, cancelled). */
+    SubagentEventData: {
+      /** @description Error message (only for failed) */
+      error?: string | null;
+      /** @description Result summary (only for completed/failed) */
+      result?: string | null;
+      /** @description Subagent status (spawning, running, completed, failed, cancelled) */
+      status: string;
+      /** @description Human-readable subagent name */
+      subagent_name: string;
+      /** @description The subagent's child session ID */
+      subagent_session_id: string;
+      /** @description Task description */
+      task: string;
+    };
+    /**
+     * @description Subagent lifecycle status.
+     * @enum {string}
+     */
+    SubagentStatus:
+      | "spawning"
+      | "running"
+      | "completed"
+      | "failed"
+      | "cancelled"
+      | "max_iterations_reached";
+    /** @description Request to submit client-side tool results */
+    SubmitToolResultsRequest: {
+      /** @description Tool results from the client */
+      tool_results: components["schemas"]["ClientToolResult"][];
+    };
+    /** @description Response from submitting tool results */
+    SubmitToolResultsResponse: {
+      /** @description Number of tool results accepted */
+      accepted: number;
+      /** @description Session status after submission */
+      status: string;
+    };
+    /** @description Generic success response */
+    SuccessResponse: {
+      ok: boolean;
+    };
+    /** @description Request to switch organization */
+    SwitchOrgRequest: {
+      /**
+       * @description Organization public ID to switch to
+       * @example org_2f3c1b3e6a9d4c6f8a1d4e9c9b7f21a0
+       */
+      org_id: string;
+    };
+    /** @description Response from switch org endpoint */
+    SwitchOrgResponse: {
+      /** @description The organization ID that was switched to */
+      org_id: string;
+      /** @description Whether the switch was successful */
+      success: boolean;
+    };
+    /** @description Response from syncing models from a provider */
+    SyncModelsResponse:
+      | {
+          /** @description Number of new models discovered */
+          created: number;
+          /** @description Number of models marked as stale (not seen in this sync) */
+          stale: number;
+          /** @enum {string} */
+          status: "success";
+          /** @description Number of existing models updated */
+          updated: number;
+        }
+      | {
+          /** @enum {string} */
+          status: "not_supported";
+        };
+    /** @description Text content part */
+    TextContentPart: {
+      text: string;
+    };
+    /**
+     * @description Token usage statistics
+     *
+     *     Tracks token consumption per LLM call including cache tokens for cost optimization.
+     *     Cache tokens are provider-specific:
+     *     - OpenAI: `cache_read_tokens` from prompt_tokens_details.cached_tokens
+     *     - Anthropic: `cache_read_tokens` from cache_read_input_tokens,
+     *       `cache_creation_tokens` from cache_creation_input_tokens
+     */
+    TokenUsage: {
+      /**
+       * Format: int32
+       * @description Number of tokens written to cache (Anthropic-specific)
+       */
+      cache_creation_tokens?: number | null;
+      /**
+       * Format: int32
+       * @description Number of tokens read from cache (reduces cost)
+       */
+      cache_read_tokens?: number | null;
+      /**
+       * Format: int32
+       * @description Number of input/prompt tokens
+       */
+      input_tokens: number;
+      /**
+       * Format: int32
+       * @description Number of output/completion tokens
+       */
+      output_tokens: number;
+    };
+    /** @description Tool call from LLM response */
+    ToolCall: {
+      /** @description Arguments as JSON */
+      arguments: Record<string, never>;
+      /** @description Unique ID for this tool call */
+      id: string;
+      /** @description Tool name to execute */
+      name: string;
+    };
+    /** @description Tool call content part (assistant requesting tool execution) */
+    ToolCallContentPart: {
+      arguments: unknown;
+      id: string;
+      name: string;
+    };
+    /**
+     * @description Data for tool.call_requested event
+     *
+     *     Emitted when the agent needs client-side tool calls executed.
+     *     The workflow pauses until the client submits results via the API.
+     */
+    ToolCallRequestedData: {
+      /** @description Human-readable headline for the requested batch */
+      headline?: string | null;
+      /** @description Tool calls that need to be executed by the client */
+      tool_calls: components["schemas"]["ToolCall"][];
+      /** @description Optional summaries with display names and narration for UI rendering */
+      tool_summaries?: components["schemas"]["ToolCallSummary"][];
+    };
+    /** @description Summary of a tool call (compact form without arguments) */
+    ToolCallSummary: {
+      /** @description Human-readable display name for UI rendering */
+      display_name?: string | null;
+      id: string;
+      name: string;
+      /** @description Human-readable narration for timeline rendering */
+      narration?: string | null;
+    };
+    /** @description Data for tool.completed event */
+    ToolCompletedData: {
+      /** @description Human-readable display name for UI rendering */
+      display_name?: string | null;
+      /**
+       * Format: int64
+       * @description Duration of the tool call in milliseconds
+       */
+      duration_ms?: number | null;
+      /** @description Error message if failed */
+      error?: string | null;
+      /** @description Human-readable narration for timeline rendering */
+      narration?: string | null;
+      /** @description Result content (for successful calls) */
+      result?: components["schemas"]["ContentPart"][] | null;
+      /** @description Status: "success", "error", "timeout", "cancelled" */
+      status: string;
+      /** @description Whether the tool call succeeded */
+      success: boolean;
+      /** @description Tool call ID */
+      tool_call_id: string;
+      /** @description Tool name */
+      tool_name: string;
+    };
+    /** @description Tool definition in agent configuration */
+    ToolDefinition:
+      | (components["schemas"]["BuiltinTool"] & {
+          /** @enum {string} */
+          type: "builtin";
+        })
+      | (components["schemas"]["ClientSideTool"] & {
+          /** @enum {string} */
+          type: "client_side";
+        });
+    /** @description Summary of a tool definition (compact form for events) */
+    ToolDefinitionSummary: {
+      /** @description Tool description */
+      description: string;
+      /** @description Human-readable display name for UI rendering */
+      display_name?: string | null;
+      /** @description Tool name */
+      name: string;
+    };
+    /**
+     * @description Semantic hints describing a tool's behavioral properties.
+     *
+     *     Follows the MCP tool annotations convention (readOnlyHint, destructiveHint,
+     *     idempotentHint, openWorldHint) plus everruns-specific hints. All fields are
+     *     optional booleans — `None` means "unknown/unspecified". Consumers should
+     *     treat `None` as the conservative default (e.g., assume not readonly, assume
+     *     not idempotent).
+     *
+     *     These hints are informational — they do not enforce policy. Use `ToolPolicy`
+     *     for execution gating (auto vs requires_approval).
+     */
+    ToolHints: {
+      /**
+       * @description Tool may irreversibly destroy or delete data.
+       *     Subset of non-readonly — a tool can be non-readonly (writes) without
+       *     being destructive (e.g., create/update operations).
+       */
+      destructive?: boolean | null;
+      /**
+       * @description Calling the tool repeatedly with the same arguments produces the same
+       *     effect. Safe to retry on transient failures.
+       */
+      idempotent?: boolean | null;
+      /**
+       * @description Tool may take significant time to complete (> ~5s typical).
+       *     Useful for clients to show progress indicators and set timeouts.
+       */
+      long_running?: boolean | null;
+      /**
+       * @description Entity noun for operation-based narration (e.g. "agent", "harness").
+       *     When set, the narration system reads the `operation` argument and
+       *     produces verb-based narration like "Created agent: Neon Cartographer"
+       *     instead of the generic "Ran Manage Agents".
+       */
+      narration_noun?: string | null;
+      /**
+       * @description Tool interacts with external entities beyond the local system
+       *     (network calls, third-party APIs, cloud services).
+       */
+      open_world?: boolean | null;
+      /**
+       * @description Tool output should be persisted to session VFS before truncation.
+       *     When set, the `tool_output_persistence` capability (EVE-222, EVE-245) writes
+       *     stdout to `/.outputs/{tool_call_id}.stdout` and stderr to
+       *     `/.outputs/{tool_call_id}.stderr`, injecting `full_output`, `total_lines`,
+       *     and `output_files` into the result.
+       */
+      persist_output?: boolean | null;
+      /**
+       * @description Tool does not modify any state (read-only queries, lookups).
+       *     When true: safe to call speculatively, result can be cached.
+       */
+      readonly?: boolean | null;
+      /**
+       * @description Tool requires API keys, credentials, or other secrets to function.
+       *     Useful for UI to show connection prompts and for LLMs to anticipate
+       *     authentication failures.
+       */
+      requires_secrets?: boolean | null;
+      /**
+       * @description Tool supports detached background execution via `spawn_background`.
+       *     When true, the tool may be executed asynchronously outside the current
+       *     foreground tool call and report status back later.
+       */
+      supports_background?: boolean | null;
+    };
+    /**
+     * @description Data for tool.output.delta event.
+     *
+     *     Emitted by tools during execution to stream incremental output chunks.
+     *     This enables live output rendering (e.g., bash stdout/stderr, command output)
+     *     between tool.started and tool.completed. Generic — usable by any tool that
+     *     produces streamed output (bashkit, Daytona exec, subagent speech, etc.).
+     *
+     *     The consumer accumulates deltas by tool_call_id for display. The final
+     *     tool.completed result is authoritative — deltas are informational only.
+     */
+    ToolOutputDeltaData: {
+      /** @description Incremental output chunk */
+      delta: string;
+      /** @description Output stream identifier (e.g., "stdout", "stderr") */
+      stream: string;
+      /** @description Tool call ID this output belongs to */
+      tool_call_id: string;
+      /** @description Tool name */
+      tool_name: string;
+    };
+    /**
+     * @description Tool policy determines how tool calls are handled
+     * @enum {string}
+     */
+    ToolPolicy: "auto" | "requires_approval" | "client_side";
+    /**
+     * @description Data for tool.progress event.
+     *
+     *     Emitted by tools during execution to report interim status updates.
+     *     This allows long-running tools (e.g., browser operations, sandbox setup)
+     *     to stream progress feedback between tool.started and tool.completed.
+     */
+    ToolProgressData: {
+      /** @description Human-readable display name for UI rendering */
+      display_name?: string | null;
+      /** @description Human-readable status message (e.g., "Connecting to browser…") */
+      message: string;
+      /** @description Tool call ID this progress belongs to */
+      tool_call_id: string;
+      /** @description Tool name */
+      tool_name: string;
+    };
+    /** @description Tool result content part (result of tool execution) */
+    ToolResultContentPart: {
+      error?: string | null;
+      result?: unknown;
+      /** @description ID of the tool call this result corresponds to */
+      tool_call_id: string;
+    };
+    /** @description Data for tool.started event */
+    ToolStartedData: {
+      /** @description Human-readable display name for UI rendering */
+      display_name?: string | null;
+      /** @description Human-readable narration for timeline rendering */
+      narration?: string | null;
+      /** @description The tool call being executed */
+      tool_call: components["schemas"]["ToolCall"];
+    };
+    /** @description Manual trigger response */
+    TriggerResponse: {
+      /** Format: uuid */
+      execution_id: string;
+    };
+    /** @description Data for turn.cancelled event */
+    TurnCancelledData: {
+      /** @description Reason for cancellation */
+      reason?: string | null;
+      /**
+       * @description Turn identifier
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /** @description Data for turn.completed event */
+    TurnCompletedData: {
+      /**
+       * Format: int64
+       * @description Duration in milliseconds
+       */
+      duration_ms?: number | null;
+      /** @description Input message content (for observability, passed through from turn.started) */
+      input_content?: string | null;
+      /**
+       * Format: int32
+       * @description Number of iterations in this turn
+       */
+      iterations: number;
+      /**
+       * @description Turn identifier
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /** @description Data for turn.failed event */
+    TurnFailedData: {
+      /** @description Error message */
+      error: string;
+      /** @description Error code */
+      error_code?: string | null;
+      /** @description Structured interpolation fields for localized error rendering. */
+      error_fields?: Record<string, never> | null;
+      /**
+       * @description Turn identifier
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /** @description Data for turn.started event */
+    TurnStartedData: {
+      /** @description Input message content (for observability) */
+      input_content?: string | null;
+      /**
+       * @description Input message ID that triggered this turn
+       * @example message_01933b5a00007000800000000000001
+       */
+      input_message_id: string;
+      /**
+       * @description Turn identifier
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /**
+     * @description Prefixed identifier with 'agent' prefix
+     * @example agent_01933b5a00007000800000000000001
+     */
+    TypedId: string;
+    /** @description Request to update an agent. Only provided fields will be updated. */
+    UpdateAgentRequest: {
+      /**
+       * @description Capabilities to enable for this agent with per-agent configuration.
+       *     Replaces existing capabilities. Each has a `ref` (capability ID) and optional `config`.
+       * @example [
+       *       {
+       *         "config": {},
+       *         "ref": "current_time"
+       *       },
+       *       {
+       *         "config": {},
+       *         "ref": "web_fetch"
+       *       }
+       *     ]
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][] | null;
+      /**
+       * @description The ID of the default LLM model to use for this agent.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * @description A human-readable description of what the agent does.
+       * @example Updated description for the agent
+       */
+      description?: string | null;
+      /**
+       * @description Human-readable display name shown in UI.
+       * @example Updated Support Agent
+       */
+      display_name?: string | null;
+      /** @description Starter files copied into each new session for this agent. */
+      initial_files?: components["schemas"]["InitialFile"][] | null;
+      /** @description Maximum number of LLM iterations per turn for this agent. */
+      max_iterations?: number | null;
+      mcpServers?: null | components["schemas"]["BTreeMap"];
+      /**
+       * @description Name, unique per org. Lowercase alphanumeric and hyphens.
+       * @example updated-support
+       */
+      name?: string | null;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      status?: null | components["schemas"]["AgentStatus"];
+      /**
+       * @description The system prompt that defines the agent's behavior and capabilities.
+       * @example You are an updated helpful assistant.
+       */
+      system_prompt?: string | null;
+      /**
+       * @description Tags for organizing and filtering agents.
+       * @example [
+       *       "updated-tag"
+       *     ]
+       */
+      tags?: string[] | null;
+      /**
+       * @description Client-side tools for this agent.
+       *     Replaces existing tools if provided.
+       */
+      tools?: components["schemas"]["ToolDefinition"][] | null;
+    };
+    /** @description Request to update a file */
+    UpdateFileRequest: {
+      /** @description New file content */
+      content?: string | null;
+      /** @description Content encoding: "text" or "base64" */
+      encoding?: string | null;
+      /** @description Whether file is read-only */
+      is_readonly?: boolean | null;
+    };
+    /** @description Request to update a harness. Only provided fields will be updated. */
+    UpdateHarnessRequest: {
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][] | null;
+      default_model_id?: string | null;
+      description?: string | null;
+      /**
+       * @description Human-readable display name.
+       * @example Updated Research Harness
+       */
+      display_name?: string | null;
+      initial_files?: components["schemas"]["InitialFile"][] | null;
+      mcpServers?: null | components["schemas"]["BTreeMap"];
+      /**
+       * @description Name, unique per org.
+       * @example updated-research
+       */
+      name?: string | null;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      parent_harness_id?: string | null;
+      status?: null | components["schemas"]["HarnessStatus"];
+      system_prompt?: string | null;
+      tags?: string[] | null;
+    };
+    UpdateKnowledgeBaseRequest: {
+      description?: string | null;
+      name?: string | null;
+    };
+    UpdateKnowledgeEntryRequest: {
+      body?: string | null;
+      kind?: string | null;
+      tags?: string[] | null;
+      title?: string | null;
+    };
+    /** @description Request to update an LLM model. Only provided fields will be updated. */
+    UpdateLlmModelRequest: {
+      /**
+       * @description List of capabilities this model supports.
+       * @example [
+       *       "chat",
+       *       "tools"
+       *     ]
+       */
+      capabilities?: string[] | null;
+      /**
+       * @description Human-readable display name for the model.
+       * @example GPT-4o Mini
+       */
+      display_name?: string | null;
+      /**
+       * @description Whether this model should be enabled (visible in UI model pickers).
+       * @example true
+       */
+      enabled?: boolean | null;
+      /**
+       * @description Whether this model should be marked as a favorite for quick access.
+       * @example true
+       */
+      is_favorite?: boolean | null;
+      /**
+       * @description The model identifier used by the provider's API.
+       * @example gpt-4o-mini
+       */
+      model_id?: string | null;
+    };
+    /** @description Request to update an LLM provider. Only provided fields will be updated. */
+    UpdateLlmProviderRequest: {
+      /**
+       * @description API key for authenticating with the provider.
+       *     Will be encrypted at rest if encryption is configured.
+       */
+      api_key?: string | null;
+      /**
+       * @description Base URL for the provider's API.
+       * @example https://api.openai.com/v1
+       */
+      base_url?: string | null;
+      /**
+       * @description Display name for the provider.
+       * @example OpenAI Development
+       */
+      name?: string | null;
+      provider_type?: null | components["schemas"]["LlmProviderType"];
+      status?: null | components["schemas"]["LlmProviderStatus"];
+    };
+    /** @description Request to update an MCP server. Only provided fields will be updated. */
+    UpdateMcpServerRequest: {
+      /** @description API key for authentication. Set to update. */
+      api_key?: string | null;
+      auth_mode?: null | components["schemas"]["McpServerAuthMode"];
+      /**
+       * @description A human-readable description of what the MCP server provides.
+       * @example Updated description
+       */
+      description?: string | null;
+      /** @description Additional HTTP headers for authentication. */
+      headers?: {
+        [key: string]: string;
+      } | null;
+      /**
+       * @description The name of the MCP server.
+       * @example updated-mcp-server
+       */
+      name?: string | null;
+      status?: null | components["schemas"]["McpServerStatus"];
+      transport_type?: null | components["schemas"]["McpServerTransportType"];
+      /**
+       * @description The URL of the MCP server endpoint.
+       * @example https://mcp.example.com/v1/mcp
+       */
+      url?: string | null;
+    };
+    /** @description Request to update an organization */
+    UpdateOrganizationRequest: {
+      /**
+       * @description Base harness to use when a session is started without an explicit harness_id.
+       * @example harness_01933b5a000070008000000000000601
+       */
+      base_harness_id?: string | null;
+      /**
+       * @description Default harness to preselect in the UI for new sessions.
+       *     Mutually exclusive with `default_harness_name`.
+       * @example harness_01933b5a000070008000000000000602
+       */
+      default_harness_id?: string | null;
+      /**
+       * @description Alternative to `default_harness_id` — looked up by stable name within the org.
+       *     Mutually exclusive with `default_harness_id`.
+       * @example generic
+       */
+      default_harness_name?: string | null;
+      /**
+       * @description Default LLM model for this organization. Must be an enabled model.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * @description The display name of the organization.
+       * @example Acme Corporation
+       */
+      name?: string | null;
+    };
+    /** @description Update schedule request */
+    UpdateScheduleRequest: {
+      /** @description Catch up missed triggers */
+      catch_up_missed?: boolean | null;
+      /** @description New cron expression */
+      cron_expression?: string | null;
+      /** @description New description */
+      description?: string | null;
+      /** @description Enable/disable */
+      enabled?: boolean | null;
+      /**
+       * Format: int32
+       * @description Max catch-up executions
+       */
+      max_catch_up?: number | null;
+      /**
+       * Format: int32
+       * @description Max concurrent executions
+       */
+      max_concurrent?: number | null;
+      /** @description Retry policy */
+      retry_policy?: unknown;
+      target?: null | components["schemas"]["ScheduleTarget"];
+      /** @description New timezone */
+      timezone?: string | null;
+    };
+    /** @description Request to update a session. Only provided fields will be updated. */
+    UpdateSessionRequest: {
+      /**
+       * @description Optional resident agent identity used for unattended/background execution.
+       * @example identity_01933b5a00007000800000000000001
+       */
+      agent_identity_id?: string | null;
+      /**
+       * @description Session locale (BCP 47, e.g. `uk-UA`).
+       * @example uk-UA
+       */
+      locale?: string | null;
+      /**
+       * @description Tags for organizing and filtering sessions.
+       * @example [
+       *       "resolved"
+       *     ]
+       */
+      tags?: string[] | null;
+      /**
+       * @description Human-readable title for the session.
+       * @example Updated session title
+       */
+      title?: string | null;
+    };
+    /** @description Request to update a skill */
+    UpdateSkillRequest: {
+      /** @description Updated SKILL.md content (re-parses frontmatter) */
+      skill_md?: string | null;
+      status?: null | components["schemas"]["SkillStatus"];
+    };
+    UpdateVolumeRequest: {
+      description?: string | null;
+      name?: string | null;
+    };
+    /** @description User response for listing */
+    User: {
+      auth_provider?: string | null;
+      avatar_url?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      email: string;
+      id: string;
+      name: string;
+      roles: string[];
+    };
+    /** @description Request to validate a SKILL.md */
+    ValidateSkillRequest: {
+      /** @description SKILL.md content to validate */
+      skill_md: string;
+    };
+    VolumeResponse: {
+      /** Format: date-time */
+      archived_at?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      deleted_at?: string | null;
+      description?: string | null;
+      /** @example vol_01933b5a000070008000000000000001 */
+      id: string;
+      name: string;
+      status: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    WebhookInvocationResponse: {
+      accepted: boolean;
+      created_session: boolean;
+      session_id: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_Agent: {
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was archived.
+       */
+      archived_at?: string | null;
+      /**
+       * @description Capabilities enabled for this agent with per-agent configuration.
+       *     Capabilities add tools and system prompt modifications.
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was created.
+       */
+      created_at: string;
+      /**
+       * @description Default LLM model ID for this agent.
+       *     Can be overridden at the session level.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the agent does. */
+      description?: string | null;
+      /**
+       * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
+       *     Falls back to `name` when absent.
+       */
+      display_name?: string | null;
+      /**
+       * @description External identifier (agent_<32-hex>). Shown as "id" in API.
+       *     Client-supplied or auto-generated.
+       * @example agent_01933b5a000070008000000000000001
+       */
+      id: string;
+      /** @description Starter files copied into each new session for this agent. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /** @description Maximum number of LLM iterations per turn for this agent. */
+      max_iterations?: number | null;
+      /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /** @description Name, unique per org (e.g. "customer-support"). */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /** @description Current lifecycle status of the agent. */
+      status: components["schemas"]["AgentStatus"];
+      /**
+       * @description System prompt that defines the agent's behavior.
+       *     Sent as the first message in every conversation.
+       */
+      system_prompt: string;
+      /** @description Tags for organizing and filtering agents. */
+      tags?: string[];
+      /**
+       * @description Client-side tools registered for this agent.
+       *     These tools are executed by the client, not the server.
+       */
+      tools?: components["schemas"]["ToolDefinition"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was last updated.
+       */
+      updated_at: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_CapabilityInfo: {
+      /**
+       * Format: int64
+       * @description Number of active agents referencing this capability in the org.
+       */
+      agent_count?: number;
+      /** @description Category for grouping in UI */
+      category?: string | null;
+      /** @description JSON Schema for capability-specific per-agent config. */
+      config_schema?: Record<string, never>;
+      /** @description react-jsonschema-form uiSchema hints for rendering config_schema. */
+      config_ui_schema?: Record<string, never>;
+      /**
+       * @description IDs of capabilities that this capability depends on.
+       *     When this capability is selected, its dependencies are automatically included.
+       */
+      dependencies?: string[];
+      /** @description Description of what this capability provides */
+      description: string;
+      /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+      docs_slug?: string | null;
+      /**
+       * @description UI feature strings this capability contributes to.
+       *     Multiple capabilities can contribute the same feature.
+       */
+      features?: string[];
+      /**
+       * Format: int64
+       * @description Number of active harnesses referencing this capability in the org.
+       */
+      harness_count?: number;
+      /** @description Icon name (for UI rendering) */
+      icon?: string | null;
+      /** @description Unique capability identifier */
+      id: string;
+      /** @description Whether this is an MCP server capability (for UI badge) */
+      is_mcp?: boolean;
+      /** @description Whether this is an Agent Skill capability (for UI badge) */
+      is_skill?: boolean;
+      /** @description Display name */
+      name: string;
+      /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
+      risk_level?: components["schemas"]["RiskLevel"];
+      /** @description Current status */
+      status: string;
+      /** @description System prompt addition contributed by this capability */
+      system_prompt?: string | null;
+      /** @description Tool definitions provided by this capability */
+      tool_definitions?: Record<string, never>[];
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_Harness: {
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was archived.
+       */
+      archived_at?: string | null;
+      /** @description Capabilities enabled for this harness with per-harness configuration. */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was created.
+       */
+      created_at: string;
+      /**
+       * @description Default LLM model ID for this harness.
+       *     Lowest priority in chain: controls > session > agent > harness.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the harness does. */
+      description?: string | null;
+      /** @description Human-readable display name shown in UI. */
+      display_name?: string | null;
+      /**
+       * @description Unique identifier for the harness (format: harness_{32-hex}).
+       * @example harness_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Starter files copied into each new session for this harness. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /**
+       * @description Whether this harness is built-in (system-managed, readonly).
+       *     Built-in harnesses are provisioned during org initialization and
+       *     cannot be modified or deleted via the API. Users can copy them.
+       */
+      is_built_in?: boolean;
+      /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /** @description Name, unique per org (e.g. "generic"). */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Optional parent harness that this harness inherits from.
+       * @example harness_01933b5a000070008000000000000602
+       */
+      parent_harness_id?: string | null;
+      /** @description Current lifecycle status of the harness. */
+      status: components["schemas"]["HarnessStatus"];
+      /**
+       * @description System prompt that defines the harness's base behavior.
+       *     Forms the foundation of the prompt stack.
+       */
+      system_prompt: string;
+      /** @description Tags for organizing and filtering harnesses. */
+      tags?: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was last updated.
+       */
+      updated_at: string;
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_LlmModel: {
+      capabilities: string[];
+      /** Format: date-time */
+      created_at: string;
+      display_name: string;
+      /**
+       * @description Whether this model is enabled (visible in UI model pickers).
+       *     All models are available via API regardless of this flag.
+       */
+      enabled: boolean;
+      /** @example model_01933b5a00007000800000000000001 */
+      id: string;
+      is_favorite: boolean;
+      model_id: string;
+      /** @example provider_01933b5a00007000800000000000001 */
+      provider_id: string;
+      /** @description How the model was added to the system */
+      source: components["schemas"]["LlmModelSource"];
+      /** Format: date-time */
+      updated_at: string;
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_LlmModelWithProvider: {
+      capabilities: string[];
+      /** Format: date-time */
+      created_at: string;
+      display_name: string;
+      /** @description Whether this model is enabled (visible in UI model pickers) */
+      enabled: boolean;
+      /**
+       * @description Derived: model is configured and ready for use. Currently means the
+       *     joined provider is active and has an API key set; over time this may
+       *     also incorporate live reachability checks. Not persisted.
+       */
+      healthy: boolean;
+      /** @example model_01933b5a00007000800000000000001 */
+      id: string;
+      is_favorite: boolean;
+      model_id: string;
+      profile?: null | components["schemas"]["LlmModelProfile"];
+      /** @example provider_01933b5a00007000800000000000001 */
+      provider_id: string;
+      provider_name: string;
+      provider_type: components["schemas"]["LlmProviderType"];
+      /** @description How the model was added to the system */
+      source: components["schemas"]["LlmModelSource"];
+      /** Format: date-time */
+      updated_at: string;
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_LlmProvider: {
+      /** @description Whether an API key is configured (key is never returned) */
+      api_key_set: boolean;
+      base_url?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** @example provider_01933b5a00007000800000000000001 */
+      id: string;
+      /**
+       * Format: date-time
+       * @description When models were last synced from provider API
+       */
+      last_synced_at?: string | null;
+      name: string;
+      provider_type: components["schemas"]["LlmProviderType"];
+      status: components["schemas"]["LlmProviderStatus"];
+      /** Format: date-time */
+      updated_at: string;
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_McpServer: {
+      /** @description Whether an API key has been configured. */
+      api_key_set: boolean;
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was archived.
+       */
+      archived_at?: string | null;
+      /** @description Authentication mode for this MCP server. */
+      auth_mode?: components["schemas"]["McpServerAuthMode"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was created.
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was deleted.
+       */
+      deleted_at?: string | null;
+      /**
+       * @description Human-readable description of the MCP server.
+       * @example Atlassian MCP Server for Jira and Confluence
+       */
+      description?: string | null;
+      /**
+       * @description Additional HTTP headers for authentication.
+       *     Keys are header names, values are header values.
+       */
+      headers?: {
+        [key: string]: string;
+      };
+      /**
+       * @description Unique identifier for the MCP server.
+       * @example mcp_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * @description Display name of the MCP server.
+       * @example atlassian-mcp-server
+       */
+      name: string;
+      /** @description Stable provider id used for user-scoped OAuth connections. */
+      oauth_provider_id?: string | null;
+      /** @description Current lifecycle status of the MCP server. */
+      status: components["schemas"]["McpServerStatus"];
+      /** @description Transport type (currently only HTTP supported). */
+      transport_type: components["schemas"]["McpServerTransportType"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the MCP server was last updated.
+       */
+      updated_at: string;
+      /**
+       * @description URL of the MCP server endpoint.
+       * @example https://mcp.atlassian.com/v1/mcp
+       */
+      url: string;
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_ResourceWithCounts_Agent: ({
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was archived.
+       */
+      archived_at?: string | null;
+      /**
+       * @description Capabilities enabled for this agent with per-agent configuration.
+       *     Capabilities add tools and system prompt modifications.
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was created.
+       */
+      created_at: string;
+      /**
+       * @description Default LLM model ID for this agent.
+       *     Can be overridden at the session level.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the agent does. */
+      description?: string | null;
+      /**
+       * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
+       *     Falls back to `name` when absent.
+       */
+      display_name?: string | null;
+      /**
+       * @description External identifier (agent_<32-hex>). Shown as "id" in API.
+       *     Client-supplied or auto-generated.
+       * @example agent_01933b5a000070008000000000000001
+       */
+      id: string;
+      /** @description Starter files copied into each new session for this agent. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /** @description Maximum number of LLM iterations per turn for this agent. */
+      max_iterations?: number | null;
+      /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /** @description Name, unique per org (e.g. "customer-support"). */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /** @description Current lifecycle status of the agent. */
+      status: components["schemas"]["AgentStatus"];
+      /**
+       * @description System prompt that defines the agent's behavior.
+       *     Sent as the first message in every conversation.
+       */
+      system_prompt: string;
+      /** @description Tags for organizing and filtering agents. */
+      tags?: string[];
+      /**
+       * @description Client-side tools registered for this agent.
+       *     These tools are executed by the client, not the server.
+       */
+      tools?: components["schemas"]["ToolDefinition"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the agent was last updated.
+       */
+      updated_at: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    } & {
+      /**
+       * Format: int64
+       * @description Number of non-deleted apps using this resource.
+       */
+      app_count: number;
+      /**
+       * Format: int64
+       * @description Number of sessions using this resource.
+       */
+      session_count: number;
+    }) & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_ResourceWithCounts_Harness: ({
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was archived.
+       */
+      archived_at?: string | null;
+      /** @description Capabilities enabled for this harness with per-harness configuration. */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was created.
+       */
+      created_at: string;
+      /**
+       * @description Default LLM model ID for this harness.
+       *     Lowest priority in chain: controls > session > agent > harness.
+       * @example model_01933b5a00007000800000000000001
+       */
+      default_model_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the harness does. */
+      description?: string | null;
+      /** @description Human-readable display name shown in UI. */
+      display_name?: string | null;
+      /**
+       * @description Unique identifier for the harness (format: harness_{32-hex}).
+       * @example harness_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Starter files copied into each new session for this harness. */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /**
+       * @description Whether this harness is built-in (system-managed, readonly).
+       *     Built-in harnesses are provisioned during org initialization and
+       *     cannot be modified or deleted via the API. Users can copy them.
+       */
+      is_built_in?: boolean;
+      /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /** @description Name, unique per org (e.g. "generic"). */
+      name: string;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Optional parent harness that this harness inherits from.
+       * @example harness_01933b5a000070008000000000000602
+       */
+      parent_harness_id?: string | null;
+      /** @description Current lifecycle status of the harness. */
+      status: components["schemas"]["HarnessStatus"];
+      /**
+       * @description System prompt that defines the harness's base behavior.
+       *     Forms the foundation of the prompt stack.
+       */
+      system_prompt: string;
+      /** @description Tags for organizing and filtering harnesses. */
+      tags?: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when the harness was last updated.
+       */
+      updated_at: string;
+    } & {
+      /**
+       * Format: int64
+       * @description Number of non-deleted apps using this resource.
+       */
+      app_count: number;
+      /**
+       * Format: int64
+       * @description Number of sessions using this resource.
+       */
+      session_count: number;
+    }) & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_Session: {
+      /**
+       * Format: int32
+       * @description Number of active (enabled) schedules for this session.
+       *     Populated when the session is fetched for API responses.
+       */
+      active_schedule_count?: number | null;
+      /**
+       * @description ID of the agent working in this session (format: agent_{32-hex}). Optional.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /**
+       * @description Optional resident agent identity for unattended/background execution.
+       * @example identity_01933b5a00007000800000000000001
+       */
+      agent_identity_id?: string | null;
+      /** @description Validated config passed by host at blueprint spawn time. */
+      blueprint_config?: unknown;
+      /**
+       * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
+       *     from the blueprint definition instead of from harness_id/agent_id.
+       */
+      blueprint_id?: string | null;
+      /**
+       * @description Session-level capabilities (additive to agent capabilities).
+       *     Applied after agent capabilities when building RuntimeAgent.
+       */
+      capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the session was created.
+       */
+      created_at: string;
+      effective_owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description Aggregated UI features from all active capabilities (harness + agent + session).
+       *     Computed at read time from the capability registry.
+       *     Known features: "file_system", "schedules", "secrets", "key_value",
+       *     "sql_database", "leased_resources".
+       */
+      features?: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when the session finished (completed or failed).
+       */
+      finished_at?: string | null;
+      /**
+       * @description ID of the harness for this session (format: harness_{32-hex}).
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id: string;
+      /**
+       * @description Session-level client hints — arbitrary key-value pairs declared by the
+       *     client at session creation time. These are defaults for every turn;
+       *     per-message `controls.hints` override these key-by-key (shallow merge).
+       *
+       *     Examples: `{"setup_connection": true, "rich_media": true}`
+       */
+      hints?: {
+        [key: string]: unknown;
+      } | null;
+      /**
+       * @description Unique identifier for the session (format: session_{32-hex}).
+       * @example session_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * @description Session-level initial files (additive to agent initial_files).
+       *     Files with matching paths override agent/harness files; new paths are appended.
+       */
+      initial_files?: components["schemas"]["InitialFile"][];
+      /**
+       * @description Whether this session is pinned by the current user.
+       *     Only populated when the request has an authenticated user context.
+       */
+      is_pinned?: boolean | null;
+      /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+      locale?: string | null;
+      /** @description Maximum number of LLM iterations per turn for this session. */
+      max_iterations?: number | null;
+      /** @description Remote MCP servers scoped to this session only. */
+      mcpServers?: components["schemas"]["BTreeMap"];
+      /**
+       * @description LLM model ID to use for this session (format: model_{32-hex}).
+       *     Overrides the agent's default model if set.
+       * @example model_01933b5a00007000800000000000001
+       */
+      model_id?: string | null;
+      network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Organization this session belongs to (format: org_{32-hex}).
+       * @example org_00000000000000000000000000000001
+       */
+      organization_id: string;
+      /** @description Preview text from the last assistant response (truncated). */
+      output_preview?: string | null;
+      owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description Owning principal for this session.
+       * @example principal_01933b5a000070008000000000000001
+       */
+      owner_principal_id: string;
+      /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+      parent_session_id?: string | null;
+      /** @description Preview text from the first user message (truncated). */
+      preview?: string | null;
+      /**
+       * Format: uuid
+       * @description Denormalized effective human owner of the owning principal lineage.
+       */
+      resolved_owner_user_id?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when the session started executing.
+       */
+      started_at?: string | null;
+      /** @description Current execution status of the session. */
+      status: components["schemas"]["SessionStatus"];
+      /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+      subagent_name?: string | null;
+      subagent_status?: null | components["schemas"]["SubagentStatus"];
+      /** @description Original task description given to this subagent. */
+      subagent_task?: string | null;
+      /**
+       * @description Session-level system prompt override.
+       *     Prepended to the agent's system prompt when building RuntimeAgent.
+       */
+      system_prompt?: string | null;
+      /** @description Tags for organizing and filtering sessions. */
+      tags?: string[];
+      /** @description Human-readable title for the session. */
+      title?: string | null;
+      /** @description Client-side tools for this session (additive to agent tools). */
+      tools?: components["schemas"]["ToolDefinition"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the session was last updated.
+       */
+      updated_at: string;
+      usage?: null | components["schemas"]["TokenUsage"];
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_Skill: {
+      allowed_tools?: string | null;
+      /** Format: date-time */
+      archived_at?: string | null;
+      compatibility?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      deleted_at?: string | null;
+      /** @example Extract text and tables from PDF files. */
+      description: string;
+      /** @description Whether the model is prevented from auto-invoking this skill */
+      disable_model_invocation?: boolean;
+      /** @example skill_01933b5a00007000800000000000001 */
+      id: string;
+      license?: string | null;
+      metadata?: {
+        [key: string]: unknown;
+      };
+      /** @example pdf-processing */
+      name: string;
+      source_type: components["schemas"]["SkillSourceType"];
+      status: components["schemas"]["SkillStatus"];
+      /** Format: date-time */
+      updated_at: string;
+      /** @description Whether this skill appears as a /slash command for users */
+      user_invocable?: boolean;
+      version: string;
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    list_agents: {
-        parameters: {
-            query?: {
-                /** @description Search by name or description (case-insensitive substring match). */
-                search?: string | null;
-                /** @description Include archived agents. Deleted agents never appear in lists. */
-                include_archived?: boolean | null;
-                /** @description Pagination offset (default 0). */
-                offset?: number | null;
-                /** @description Maximum items to return (default 20, max 100). */
-                limit?: number | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of agents */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_WithUrls_Agent"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAgentRequest"];
-            };
-        };
-        responses: {
-            /** @description Agent created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Input exceeds allowed limits */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    import_agent: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Import from a built-in example by name (e.g. `dad-jokes-agent`).
-                 *     When set, the request body is ignored.
-                 */
-                "from-example"?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "text/plain": string;
-            };
-        };
-        responses: {
-            /** @description Agent updated via import */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Agent imported successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Invalid format or input exceeds limits */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description High-risk capabilities require admin role */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Example not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    preview_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PreviewAgentRequest"];
-            };
-        };
-        responses: {
-            /** @description Agent preview generated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentPreviewResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Agent ID (prefixed) or name */
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Agent found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Invalid agent ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Agent not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    upsert_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Agent ID (prefixed) or name */
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAgentRequest"];
-            };
-        };
-        responses: {
-            /** @description Agent updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Agent created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    delete_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Agent ID (prefixed, e.g., agt_...) */
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Agent archived successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid agent ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Agent not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Agent ID (prefixed, e.g., agt_...) */
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateAgentRequest"];
-            };
-        };
-        responses: {
-            /** @description Agent updated successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Invalid agent ID or input exceeds allowed limits */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Agent not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    copy_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Source agent ID to copy */
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Agent copied successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Agent"];
-                };
-            };
-            /** @description Invalid agent ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Source agent not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    export_agent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Agent ID (prefixed, e.g., agt_...) */
-                agent_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Agent exported as Markdown */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/markdown": unknown;
-                };
-            };
-            /** @description Invalid agent ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Agent not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_capabilities: {
-        parameters: {
-            query?: {
-                /** @description Search by name/description */
-                search?: string;
-                /** @description Pagination offset (default: 0) */
-                offset?: number;
-                /** @description Page size (default: 20, max: 100) */
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of capabilities */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_WithUrls_CapabilityInfo"];
-                };
-            };
-        };
-    };
-    get_capability: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Capability ID */
-                capability_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Capability found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_CapabilityInfo"];
-                };
-            };
-            /** @description Capability not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_execution: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Execution ID */
-                execution_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Execution details */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleExecutionResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Execution not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    list_schedules: {
-        parameters: {
-            query?: {
-                /** @description Filter by enabled status */
-                enabled?: boolean;
-                /** @description Filter by target type */
-                target_type?: string;
-                /** @description Pagination offset */
-                offset?: number;
-                /** @description Pagination limit */
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of schedules */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SchedulesListResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    create_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateScheduleRequest"];
-            };
-        };
-        responses: {
-            /** @description Schedule created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleResponse"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule name already exists */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Schedule details */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    delete_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Schedule deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    update_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateScheduleRequest"];
-            };
-        };
-        responses: {
-            /** @description Schedule updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleResponse"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    list_schedule_executions: {
-        parameters: {
-            query?: {
-                /** @description Filter by status */
-                status?: string;
-                /** @description Pagination offset */
-                offset?: number;
-                /** @description Pagination limit */
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of executions */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleExecutionsListResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    pause_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Schedule paused */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    resume_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Schedule resumed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_schedule_stats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Schedule statistics */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScheduleStatsResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    trigger_schedule: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Schedule ID */
-                schedule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Schedule triggered */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TriggerResponse"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Schedule not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    list_harnesses: {
-        parameters: {
-            query?: {
-                /** @description Search by name or description (case-insensitive substring match). */
-                search?: string | null;
-                /** @description Include archived harnesses. Deleted harnesses never appear in lists. */
-                include_archived?: boolean | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of harnesses */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_WithUrls_Harness"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_harness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateHarnessRequest"];
-            };
-        };
-        responses: {
-            /** @description Harness created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Harness"];
-                };
-            };
-            /** @description Invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    harness_config: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Resource config for harnesses */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResourceConfigResponse"];
-                };
-            };
-        };
-    };
-    preview_harness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PreviewHarnessRequest"];
-            };
-        };
-        responses: {
-            /** @description Harness preview generated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HarnessPreviewResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_harness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Harness ID (prefixed) or name */
-                harness_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Harness found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Harness"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Harness not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_harness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Harness ID (prefixed) */
-                harness_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Harness archived */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid harness ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Harness not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_harness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Harness ID (prefixed) */
-                harness_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateHarnessRequest"];
-            };
-        };
-        responses: {
-            /** @description Harness updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Harness"];
-                };
-            };
-            /** @description Invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Harness not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    copy_harness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Source harness ID to copy */
-                harness_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Harness copied successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Harness"];
-                };
-            };
-            /** @description Invalid harness ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Source harness not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    list_images: {
-        parameters: {
-            query?: {
-                /** @description Max items to return (default 50) */
-                limit?: number;
-                /** @description Items to skip */
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of images */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImageInfo"][];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    upload_image: {
-        parameters: {
-            query?: {
-                /** @description Optional: session ID stored as metadata for tracking (not required for upload) */
-                session_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Multipart form data with 'file' field */
-        requestBody: {
-            content: {
-                "multipart/form-data": string;
-            };
-        };
-        responses: {
-            /** @description Image uploaded successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImageUploadResponse"];
-                };
-            };
-            /** @description Invalid request (bad format, size exceeded, etc.) */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_image: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Image ID (prefixed, e.g., img_...) */
-                image_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Image binary data */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "image/*": unknown;
-                };
-            };
-            /** @description Invalid image ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Image not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_image: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Image ID (prefixed, e.g., img_...) */
-                image_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Image deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid image ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Image not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_thumbnail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Image ID (prefixed, e.g., img_...) */
-                image_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Thumbnail binary data */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "image/jpeg": unknown;
-                };
-            };
-            /** @description Invalid image ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Image not found or no thumbnail */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_all_models: {
-        parameters: {
-            query?: {
-                /** @description Filter by model source (manual, discovered, predefined) */
-                source?: null | components["schemas"]["LlmModelSource"];
-                /** @description Include models that are stale (not seen in recent sync). Default: true */
-                include_stale?: boolean;
-                /** @description Only return favorite models. Default: false */
-                favorites_only?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of all models */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_WithUrls_LlmModelWithProvider"];
-                };
-            };
-        };
-    };
-    get_model: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Model ID (prefixed, e.g., mod_...) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Model found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_LlmModelWithProvider"];
-                };
-            };
-            /** @description Invalid model ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Model not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_model: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Model ID (prefixed, e.g., mod_...) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Model deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid model ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Model not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_model: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Model ID (prefixed, e.g., mod_...) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateLlmModelRequest"];
-            };
-        };
-        responses: {
-            /** @description Model updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_LlmModel"];
-                };
-            };
-            /** @description Invalid model ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Model not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_providers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of providers */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_WithUrls_LlmProvider"];
-                };
-            };
-        };
-    };
-    create_provider: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateLlmProviderRequest"];
-            };
-        };
-        responses: {
-            /** @description Provider created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_LlmProvider"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_provider: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Provider ID (prefixed, e.g., prov_...) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Provider found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_LlmProvider"];
-                };
-            };
-            /** @description Invalid provider ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_provider: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Provider ID (prefixed, e.g., prov_...) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Provider deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid provider ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_provider: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Provider ID (prefixed, e.g., prov_...) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateLlmProviderRequest"];
-            };
-        };
-        responses: {
-            /** @description Provider updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_LlmProvider"];
-                };
-            };
-            /** @description Invalid provider ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    sync_models: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Provider ID (prefixed, e.g., prov_...) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Models synced */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncModelsResponse"];
-                };
-            };
-            /** @description Invalid provider ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Sync failed */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_provider_models: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Provider ID (prefixed, e.g., prov_...) */
-                provider_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of models */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_WithUrls_LlmModel"];
-                };
-            };
-            /** @description Invalid provider ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_model: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Provider ID (prefixed, e.g., prov_...) */
-                provider_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateLlmModelRequest"];
-            };
-        };
-        responses: {
-            /** @description Model created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_LlmModel"];
-                };
-            };
-            /** @description Invalid provider ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_mcp_servers: {
-        parameters: {
-            query?: {
-                /** @description Search by name or description (case-insensitive substring match). */
-                search?: string | null;
-                /** @description Include archived MCP servers. Deleted MCP servers never appear in lists. */
-                include_archived?: boolean | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of MCP servers */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_WithUrls_McpServer"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_mcp_server: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateMcpServerRequest"];
-            };
-        };
-        responses: {
-            /** @description MCP server created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_McpServer"];
-                };
-            };
-            /** @description Invalid input or duplicate name */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_mcp_server: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description MCP server ID (prefixed, e.g., mcp_...) */
-                server_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description MCP server found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_McpServer"];
-                };
-            };
-            /** @description Invalid server ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description MCP server not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_mcp_server: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description MCP server ID (prefixed, e.g., mcp_...) */
-                server_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description MCP server deleted successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid server ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description MCP server not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_mcp_server: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description MCP server ID (prefixed, e.g., mcp_...) */
-                server_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateMcpServerRequest"];
-            };
-        };
-        responses: {
-            /** @description MCP server updated successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_McpServer"];
-                };
-            };
-            /** @description Invalid server ID or input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description MCP server not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    list_organizations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of organizations */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_OrganizationResponse"];
-                };
-            };
-        };
-    };
-    create_organization: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateOrganizationRequest"];
-            };
-        };
-        responses: {
-            /** @description Organization created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrganizationResponse"];
-                };
-            };
-            /** @description Invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_organization: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization public ID */
-                org: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Organization details */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrganizationResponse"];
-                };
-            };
-            /** @description Organization not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    update_organization: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization public ID */
-                org: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateOrganizationRequest"];
-            };
-        };
-        responses: {
-            /** @description Organization updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrganizationResponse"];
-                };
-            };
-            /** @description Organization not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    list_sessions: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Filter sessions by agent ID.
-                 * @example agent_01933b5a00007000800000000000001
-                 */
-                agent_id?: string | null;
-                /** @description Search by title (case-insensitive substring match). */
-                search?: string | null;
-                /** @description Number of items to skip (for pagination). */
-                offset?: number | null;
-                /** @description Maximum number of items to return (for pagination). */
-                limit?: number | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated list of sessions */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_WithUrls_Session"];
-                };
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_session: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description Session created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Session"];
-                };
-            };
-            /** @description Harness, Agent, or Model not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_or_create_chat_session: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": null | components["schemas"]["GetOrCreateChatSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description Chat session returned */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Session"];
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_session: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Session found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Session"];
-                };
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_session: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Session deleted successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_session: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description Session updated successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Session"];
-                };
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    cancel_turn: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Turn cancelled successfully (or no-op if idle) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CancelTurnResponse"];
-                };
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_databases: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of databases */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_DatabaseInfoResponse"];
-                };
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_database: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateDatabaseRequest"];
-            };
-        };
-        responses: {
-            /** @description Database created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DatabaseInfoResponse"];
-                };
-            };
-            /** @description Invalid name or session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Database already exists */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_database: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-                /** @description Database name */
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Database info */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DatabaseInfoResponse"];
-                };
-            };
-            /** @description Database not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_database: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-                /** @description Database name */
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Database deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Database not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_schema: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-                /** @description Database name */
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Database schema */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SchemaResponse"];
-                };
-            };
-            /** @description Database not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_events: {
-        parameters: {
-            query?: {
-                /** @description Filter events with ID greater than this event ID (prefixed format: event_{32-hex}) */
-                since_id?: null | components["schemas"]["TypedId"];
-                /**
-                 * @description Positive type filter: only return events matching these types (can be specified multiple times).
-                 *     When empty, all types are returned. Example: ?types=turn.started&types=turn.completed
-                 */
-                types?: string[];
-                /**
-                 * @description Event types to exclude from the response (can be specified multiple times).
-                 *     Applied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta
-                 */
-                exclude?: string[];
-                /**
-                 * @description Max events to return (backward pagination). When set, returns the last N events
-                 *     (or last N before `before_sequence`). Results are ordered oldest→newest.
-                 */
-                limit?: number | null;
-                /**
-                 * @description Cursor for backward pagination: only return events with sequence < this value.
-                 *     Used with `limit` to paginate backward through event history.
-                 */
-                before_sequence?: number | null;
-            };
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Events list */
-            200: {
-                headers: {
-                    /** @description Total non-delta event count for the session (only present when limit is used) */
-                    "X-Total-Count"?: number;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_Event"];
-                };
-            };
-            /** @description Invalid session ID or invalid event type filter */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    export_session_jsonl: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description JSONL file with one message per line */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/x-ndjson": unknown;
-                };
-            };
-            /** @description Invalid ID format */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_root: {
-        parameters: {
-            query?: {
-                /** @description List recursively */
-                recursive?: boolean;
-            };
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Directory listing */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    copy_file: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CopyFileRequest"];
-            };
-        };
-        responses: {
-            /** @description Copied successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionFile"];
-                };
-            };
-            /** @description Invalid session ID or cannot copy directories */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Source not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Destination exists */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    grep_files: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GrepRequest"];
-            };
-        };
-        responses: {
-            /** @description Search results */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_GrepResult"];
-                };
-            };
-            /** @description Invalid session ID or regex pattern */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    move_file: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MoveFileRequest"];
-            };
-        };
-        responses: {
-            /** @description Moved successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionFile"];
-                };
-            };
-            /** @description Invalid session ID or path */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Source not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Destination exists */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    stat_file: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StatRequest"];
-            };
-        };
-        responses: {
-            /** @description Stat info */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FileStat"];
-                };
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_path: {
-        parameters: {
-            query?: {
-                /** @description List recursively */
-                recursive?: boolean;
-            };
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-                /** @description File or directory path */
-                path: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description File content or directory listing */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_path: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-                /** @description File path */
-                path: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateFileRequest"];
-            };
-        };
-        responses: {
-            /** @description Updated successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionFile"];
-                };
-            };
-            /** @description Invalid session ID or cannot modify readonly file or directory */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_path: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-                /** @description File or directory path */
-                path: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateFileRequest"];
-            };
-        };
-        responses: {
-            /** @description Created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionFile"];
-                };
-            };
-            /** @description Invalid session ID or request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Already exists */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_path: {
-        parameters: {
-            query?: {
-                /** @description Delete recursively */
-                recursive?: boolean;
-            };
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-                /** @description File or directory path */
-                path: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Deleted */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeleteResponse"];
-                };
-            };
-            /** @description Invalid session ID or directory not empty */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Cannot delete readonly file or directory containing readonly files */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_branch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateBranchRequest"];
-            };
-        };
-        responses: {
-            /** @description Branch created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuccessResponse"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_branch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-                /** @description Branch name */
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Branch deleted */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SuccessResponse"];
-                };
-            };
-            /** @description Branch not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    commit: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CommitRequest"];
-            };
-        };
-        responses: {
-            /** @description Commit created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CommitResult"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    diff: {
-        parameters: {
-            query: {
-                /** @description Commit OID to diff */
-                oid: string;
-                /** @description Base commit OID (default: parent) */
-                base?: string;
-            };
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Diff result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GitDiff"];
-                };
-            };
-            /** @description Invalid commit OID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Commit not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    log: {
-        parameters: {
-            query?: {
-                /** @description Ref to start from (default: HEAD) */
-                ref?: string;
-                /** @description Max commits (default: 50) */
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Commit log */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GitCommitInfo"][];
-                };
-            };
-            /** @description Session or ref not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_refs: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of refs */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GitRefInfo"][];
-                };
-            };
-        };
-    };
-    list_messages: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of messages */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_Message"];
-                };
-            };
-            /** @description Invalid ID format */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_message: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateMessageRequest"];
-            };
-        };
-        responses: {
-            /** @description Message created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Message"];
-                };
-            };
-            /** @description Invalid ID format */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    pin_session: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Session pinned successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    unpin_session: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Session unpinned successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_resources: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Session resources */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionResourceEntry"][];
-                };
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    stream_sse: {
-        parameters: {
-            query?: {
-                /** @description Filter events with ID greater than this event ID (prefixed format: event_{32-hex}) */
-                since_id?: null | components["schemas"]["TypedId"];
-                /**
-                 * @description Positive type filter: only return events matching these types (can be specified multiple times).
-                 *     When empty, all types are returned. Example: ?types=turn.started&types=turn.completed
-                 */
-                types?: string[];
-                /**
-                 * @description Event types to exclude from the response (can be specified multiple times).
-                 *     Applied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta
-                 */
-                exclude?: string[];
-                /**
-                 * @description Max events to return (backward pagination). When set, returns the last N events
-                 *     (or last N before `before_sequence`). Results are ordered oldest→newest.
-                 */
-                limit?: number | null;
-                /**
-                 * @description Cursor for backward pagination: only return events with sequence < this value.
-                 *     Used with `limit` to paginate backward through event history.
-                 */
-                before_sequence?: number | null;
-            };
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., sess_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Event stream. Includes 'connected' on open, domain events during streaming, and 'disconnecting' before graceful close. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/event-stream": unknown;
-                };
-            };
-            /** @description Invalid session ID */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_keys: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of key-value pairs */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_KeyValueInfo"];
-                };
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_secrets: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of secrets (names only, no values) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_SecretInfo"];
-                };
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    submit_tool_results: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Session ID (prefixed, e.g., session_...) */
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubmitToolResultsRequest"];
-            };
-        };
-        responses: {
-            /** @description Tool results accepted and workflow resumed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubmitToolResultsResponse"];
-                };
-            };
-            /** @description Invalid session ID or request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Session not in waiting_for_tool_results state */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_skills: {
-        parameters: {
-            query?: {
-                /** @description Search by name or description (case-insensitive substring match). */
-                search?: string | null;
-                /** @description Include archived skills. Deleted skills never appear in lists. */
-                include_archived?: boolean | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of skills */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_WithUrls_Skill"];
-                };
-            };
-        };
-    };
-    create_skill: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateSkillRequest"];
-            };
-        };
-        responses: {
-            /** @description Skill created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Skill"];
-                };
-            };
-            /** @description Duplicate skill name */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Invalid SKILL.md */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    upload_skill: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Skill created from archive */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Skill"];
-                };
-            };
-            /** @description Duplicate skill name */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Archive too large */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Invalid archive or SKILL.md */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    validate_skill: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ValidateSkillRequest"];
-            };
-        };
-        responses: {
-            /** @description Validation result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SkillValidationResult"];
-                };
-            };
-        };
-    };
-    get_skill: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Skill ID (prefixed, e.g., skill_...) */
-                skill_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Skill found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Skill"];
-                };
-            };
-            /** @description Skill not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    delete_skill: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Skill ID */
-                skill_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Skill deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Skill not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_skill: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                skill_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateSkillRequest"];
-            };
-        };
-        responses: {
-            /** @description Skill updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WithUrls_Skill"];
-                };
-            };
-            /** @description Skill not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Duplicate skill name */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Invalid SKILL.md */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_skill_content: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Skill ID */
-                skill_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Skill content */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SkillContent"];
-                };
-            };
-            /** @description Skill not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    list_users: {
-        parameters: {
-            query?: {
-                /** @description Search by name or email */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of users in organization */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListResponse_User"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    switch_org: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SwitchOrgRequest"];
-            };
-        };
-        responses: {
-            /** @description Organization switched successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SwitchOrgResponse"];
-                };
-            };
-            /** @description Invalid organization ID format */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Organization not found or user is not a member */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
+  list_agents: {
+    parameters: {
+      query?: {
+        /** @description Search by name or description (case-insensitive substring match). */
+        search?: string | null;
+        /** @description Include archived agents. Deleted agents never appear in lists. */
+        include_archived?: boolean | null;
+        /** @description Pagination offset (default 0). */
+        offset?: number | null;
+        /** @description Maximum items to return (default 20, max 100). */
+        limit?: number | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated list of agents */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedResponse_WithUrls_ResourceWithCounts_Agent"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateAgentRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Input exceeds allowed limits */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  import_agent: {
+    parameters: {
+      query?: {
+        /**
+         * @description Import from a built-in example by name (e.g. `dad-jokes-agent`).
+         *     When set, the request body is ignored.
+         */
+        "from-example"?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "text/plain": string;
+      };
+    };
+    responses: {
+      /** @description Agent updated via import */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Agent imported successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Invalid format or input exceeds limits */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description High-risk capabilities require admin role */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Example not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  preview_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PreviewAgentRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent preview generated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AgentPreviewResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Agent found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_ResourceWithCounts_Agent"];
+        };
+      };
+      /** @description Invalid agent ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Agent not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  upsert_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateAgentRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Agent created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed, e.g., agt_...) */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Agent archived successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid agent ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Agent not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed, e.g., agt_...) */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAgentRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Invalid agent ID or input exceeds allowed limits */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Agent not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  copy_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Source agent ID to copy */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Agent copied successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Invalid agent ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Source agent not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  export_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed, e.g., agt_...) */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Agent exported as Markdown */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Invalid agent ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Agent not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_agent_stats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Agent aggregate stats */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceStatsResponse"];
+        };
+      };
+      /** @description Agent not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  invoke_a2a: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+        /** @description A2A channel ID */
+        channel_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description JSON-RPC 2.0 response (success or A2A error envelope) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid API key */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App is not published or channel disabled */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App or channel not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  agent_card: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+        /** @description A2A channel ID */
+        channel_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Agent Card JSON */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description App or channel not found / unpublished / disabled */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  invoke_webhook: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+        /** @description Webhook channel ID */
+        channel_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/octet-stream": string;
+      };
+    };
+    responses: {
+      /** @description Webhook accepted */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WebhookInvocationResponse"];
+        };
+      };
+      /** @description Invalid or missing webhook token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App is not published or channel disabled */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App or channel not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_capabilities: {
+    parameters: {
+      query?: {
+        /** @description Search by name/description */
+        search?: string;
+        /** @description Pagination offset (default: 0) */
+        offset?: number;
+        /** @description Page size (default: 20, max: 100) */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated list of capabilities */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedResponse_WithUrls_CapabilityInfo"];
+        };
+      };
+      /** @description Invalid query parameters */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_capability: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Capability ID */
+        capability_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Capability found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_CapabilityInfo"];
+        };
+      };
+      /** @description Capability not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  durable_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for durable surfaces */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
+  get_execution: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Execution ID */
+        execution_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Execution details */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleExecutionResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Execution not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_schedules: {
+    parameters: {
+      query?: {
+        /** @description Filter by enabled status */
+        enabled?: boolean;
+        /** @description Filter by target type */
+        target_type?: string;
+        /** @description Pagination offset */
+        offset?: number;
+        /** @description Pagination limit */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of schedules */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SchedulesListResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  create_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateScheduleRequest"];
+      };
+    };
+    responses: {
+      /** @description Schedule created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleResponse"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule name already exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Schedule details */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Schedule deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateScheduleRequest"];
+      };
+    };
+    responses: {
+      /** @description Schedule updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleResponse"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_schedule_executions: {
+    parameters: {
+      query?: {
+        /** @description Filter by status */
+        status?: string;
+        /** @description Pagination offset */
+        offset?: number;
+        /** @description Pagination limit */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of executions */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleExecutionsListResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  pause_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Schedule paused */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  resume_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Schedule resumed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_schedule_stats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Schedule statistics */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleStatsResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  trigger_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Schedule ID */
+        schedule_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Schedule triggered */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TriggerResponse"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Schedule not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_examples: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of harness examples */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HarnessExample"][];
+        };
+      };
+    };
+  };
+  list_harnesses: {
+    parameters: {
+      query?: {
+        /** @description Search by name or description (case-insensitive substring match). */
+        search?: string | null;
+        /** @description Include archived harnesses. Deleted harnesses never appear in lists. */
+        include_archived?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of harnesses */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_ResourceWithCounts_Harness"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_harness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateHarnessRequest"];
+      };
+    };
+    responses: {
+      /** @description Harness created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Harness"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  harness_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for harnesses */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
+  import_harness: {
+    parameters: {
+      query: {
+        /**
+         * @description Import from a built-in harness example by name (e.g. `data-analyst`).
+         *     Required: the only currently supported import mode is from-example.
+         */
+        "from-example": string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Harness adopted from example */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Harness"];
+        };
+      };
+      /** @description Invalid input or missing capabilities */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Example not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  preview_harness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PreviewHarnessRequest"];
+      };
+    };
+    responses: {
+      /** @description Harness preview generated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HarnessPreviewResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_harness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Harness ID (prefixed) or name */
+        harness_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Harness found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_ResourceWithCounts_Harness"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Harness not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_harness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Harness ID (prefixed) */
+        harness_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Harness archived */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid harness ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Harness not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_harness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Harness ID (prefixed) */
+        harness_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateHarnessRequest"];
+      };
+    };
+    responses: {
+      /** @description Harness updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Harness"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Harness not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  copy_harness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Source harness ID to copy */
+        harness_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Harness copied successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Harness"];
+        };
+      };
+      /** @description Invalid harness ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Source harness not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_harness_stats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Harness ID (prefixed) or name */
+        harness_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Harness aggregate stats */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceStatsResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Harness not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_images: {
+    parameters: {
+      query?: {
+        /** @description Max items to return (default 50) */
+        limit?: number;
+        /** @description Items to skip */
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of images */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImageInfo"][];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  upload_image: {
+    parameters: {
+      query?: {
+        /** @description Optional: session ID stored as metadata for tracking (not required for upload) */
+        session_id?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Multipart form data with 'file' field */
+    requestBody: {
+      content: {
+        "multipart/form-data": string;
+      };
+    };
+    responses: {
+      /** @description Image uploaded successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImageUploadResponse"];
+        };
+      };
+      /** @description Invalid request (bad format, size exceeded, etc.) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_image: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Image ID (prefixed, e.g., img_...) */
+        image_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Image binary data */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "image/*": unknown;
+        };
+      };
+      /** @description Invalid image ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Image not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_image: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Image ID (prefixed, e.g., img_...) */
+        image_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Image deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid image ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Image not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_thumbnail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Image ID (prefixed, e.g., img_...) */
+        image_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Thumbnail binary data */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "image/jpeg": unknown;
+        };
+      };
+      /** @description Invalid image ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Image not found or no thumbnail */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_kbs: {
+    parameters: {
+      query?: {
+        search?: string | null;
+        include_archived?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List knowledge bases */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_KnowledgeBaseResponse"];
+        };
+      };
+    };
+  };
+  create_kb: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKnowledgeBaseRequest"];
+      };
+    };
+    responses: {
+      /** @description Knowledge base created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["KnowledgeBaseResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Duplicate knowledge base name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_kb: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Knowledge base found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["KnowledgeBaseResponse"];
+        };
+      };
+      /** @description Knowledge base not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_kb: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Knowledge base archived */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Knowledge base not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_kb: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateKnowledgeBaseRequest"];
+      };
+    };
+    responses: {
+      /** @description Knowledge base updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["KnowledgeBaseResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Knowledge base not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Duplicate knowledge base name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_entries: {
+    parameters: {
+      query?: {
+        search?: string | null;
+        kind?: string | null;
+      };
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List entries */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_KnowledgeEntryResponse"];
+        };
+      };
+      /** @description Knowledge base not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  create_entry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKnowledgeEntryRequest"];
+      };
+    };
+    responses: {
+      /** @description Entry created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["KnowledgeEntryResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Knowledge base not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_entry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+        /** @description Entry ID */
+        entry_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Entry found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["KnowledgeEntryResponse"];
+        };
+      };
+      /** @description Entry not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_entry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+        /** @description Entry ID */
+        entry_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Entry deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entry not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_entry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Knowledge base ID */
+        kb_id: string;
+        /** @description Entry ID */
+        entry_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateKnowledgeEntryRequest"];
+      };
+    };
+    responses: {
+      /** @description Entry updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["KnowledgeEntryResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Entry not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_all_models: {
+    parameters: {
+      query?: {
+        /** @description Filter by model source (manual, discovered, predefined) */
+        source?: null | components["schemas"]["LlmModelSource"];
+        /** @description Include models that are stale (not seen in recent sync). Default: true */
+        include_stale?: boolean;
+        /** @description Only return favorite models. Default: false */
+        favorites_only?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of all models */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_LlmModelWithProvider"];
+        };
+      };
+    };
+  };
+  get_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Model ID (prefixed, e.g., mod_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Model found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_LlmModelWithProvider"];
+        };
+      };
+      /** @description Invalid model ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Model not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Model ID (prefixed, e.g., mod_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Model deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid model ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Model not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Model ID (prefixed, e.g., mod_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateLlmModelRequest"];
+      };
+    };
+    responses: {
+      /** @description Model updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_LlmModel"];
+        };
+      };
+      /** @description Invalid model ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Model not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_providers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of providers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_LlmProvider"];
+        };
+      };
+    };
+  };
+  create_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateLlmProviderRequest"];
+      };
+    };
+    responses: {
+      /** @description Provider created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_LlmProvider"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Provider found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_LlmProvider"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Provider deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateLlmProviderRequest"];
+      };
+    };
+    responses: {
+      /** @description Provider updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_LlmProvider"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  sync_models: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Models synced */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SyncModelsResponse"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Sync failed */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_provider_models: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        provider_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of models */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_LlmModel"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        provider_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateLlmModelRequest"];
+      };
+    };
+    responses: {
+      /** @description Model created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_LlmModel"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_mcp_servers: {
+    parameters: {
+      query?: {
+        /** @description Search by name or description (case-insensitive substring match). */
+        search?: string | null;
+        /** @description Include archived MCP servers. Deleted MCP servers never appear in lists. */
+        include_archived?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of MCP servers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_McpServer"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_mcp_server: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMcpServerRequest"];
+      };
+    };
+    responses: {
+      /** @description MCP server created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_McpServer"];
+        };
+      };
+      /** @description Invalid input or duplicate name */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_mcp_server: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description MCP server ID (prefixed, e.g., mcp_...) */
+        server_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description MCP server found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_McpServer"];
+        };
+      };
+      /** @description Invalid server ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description MCP server not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_mcp_server: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description MCP server ID (prefixed, e.g., mcp_...) */
+        server_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description MCP server deleted successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid server ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description MCP server not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_mcp_server: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description MCP server ID (prefixed, e.g., mcp_...) */
+        server_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMcpServerRequest"];
+      };
+    };
+    responses: {
+      /** @description MCP server updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_McpServer"];
+        };
+      };
+      /** @description Invalid server ID or input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description MCP server not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_memory_stores: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List org memory stores */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_MemoryStoreResponse"];
+        };
+      };
+    };
+  };
+  create_memory_store: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMemoryStoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Memory store created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryStoreResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Duplicate name or default conflict */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_memory_store: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory store ID */
+        store_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Memory store */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryStoreResponse"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_memories: {
+    parameters: {
+      query?: {
+        query?: string | null;
+        kind?: string | null;
+        tag?: string[] | null;
+        include_inactive?: boolean | null;
+        limit?: number | null;
+      };
+      header?: never;
+      path: {
+        /** @description Memory store ID */
+        store_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Memories */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListMemoriesResponse"];
+        };
+      };
+      /** @description Store not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  forget_memory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory store ID */
+        store_id: string;
+        /** @description Memory ID */
+        memory_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Memory deactivated */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_organizations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of organizations */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_OrganizationResponse"];
+        };
+      };
+    };
+  };
+  create_organization: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateOrganizationRequest"];
+      };
+    };
+    responses: {
+      /** @description Organization created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrganizationResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_organization: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization public ID */
+        org: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Organization details */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrganizationResponse"];
+        };
+      };
+      /** @description Organization not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_organization: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization public ID */
+        org: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOrganizationRequest"];
+      };
+    };
+    responses: {
+      /** @description Organization updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrganizationResponse"];
+        };
+      };
+      /** @description Organization not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_sessions: {
+    parameters: {
+      query?: {
+        /**
+         * @description Filter sessions by agent ID.
+         * @example agent_01933b5a00007000800000000000001
+         */
+        agent_id?: string | null;
+        /** @description Search by title (case-insensitive substring match). */
+        search?: string | null;
+        /** @description Number of items to skip (for pagination). */
+        offset?: number | null;
+        /** @description Maximum number of items to return (for pagination). */
+        limit?: number | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated list of sessions */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedResponse_WithUrls_Session"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Session created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Session"];
+        };
+      };
+      /** @description Harness, Agent, or Model not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_or_create_chat_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json":
+          | null
+          | components["schemas"]["GetOrCreateChatSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Chat session returned */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Session"];
+        };
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Session"];
+        };
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session deleted successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Session updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Session"];
+        };
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  cancel_turn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Turn cancelled successfully (or no-op if idle) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancelTurnResponse"];
+        };
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_session_context_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session context report */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionContextReport"];
+        };
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_databases: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of databases */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_DatabaseInfoResponse"];
+        };
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_database: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateDatabaseRequest"];
+      };
+    };
+    responses: {
+      /** @description Database created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DatabaseInfoResponse"];
+        };
+      };
+      /** @description Invalid name or session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Database already exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session database limit exceeded */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_database: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+        /** @description Database name */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Database info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DatabaseInfoResponse"];
+        };
+      };
+      /** @description Database not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_database: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+        /** @description Database name */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Database deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Database not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_schema: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+        /** @description Database name */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Database schema */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SchemaResponse"];
+        };
+      };
+      /** @description Database not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_events: {
+    parameters: {
+      query?: {
+        /** @description Filter events with ID greater than this event ID (prefixed format: event_{32-hex}) */
+        since_id?: null | components["schemas"]["TypedId"];
+        /**
+         * @description Positive type filter: only return events matching these types (can be specified multiple times).
+         *     When empty, all types are returned. Example: ?types=turn.started&types=turn.completed
+         */
+        types?: string[];
+        /**
+         * @description Event types to exclude from the response (can be specified multiple times).
+         *     Applied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta
+         */
+        exclude?: string[];
+        /**
+         * @description Max events to return (backward pagination). When set, returns the last N events
+         *     (or last N before `before_sequence`). Results are ordered oldest→newest.
+         */
+        limit?: number | null;
+        /**
+         * @description Cursor for backward pagination: only return events with sequence < this value.
+         *     Used with `limit` to paginate backward through event history.
+         */
+        before_sequence?: number | null;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Events list */
+      200: {
+        headers: {
+          /** @description Total non-delta event count for the session (only present when limit is used) */
+          "X-Total-Count"?: number;
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_Event"];
+        };
+      };
+      /** @description Invalid session ID or invalid event type filter */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  export_session_jsonl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description JSONL file with one message per line */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/x-ndjson": unknown;
+        };
+      };
+      /** @description Invalid ID format */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_root: {
+    parameters: {
+      query?: {
+        /** @description List recursively */
+        recursive?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Directory listing */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  copy_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CopyFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Copied successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid session ID or cannot copy directories */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Source not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Destination exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  download_path: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+        /** @description File path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Raw file bytes */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": unknown;
+        };
+      };
+      /** @description Invalid session ID or path points to a directory */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  grep_files: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GrepRequest"];
+      };
+    };
+    responses: {
+      /** @description Search results */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_GrepResult"];
+        };
+      };
+      /** @description Invalid session ID or regex pattern */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  move_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MoveFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Moved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid session ID or path */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Source not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Destination exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  stat_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StatRequest"];
+      };
+    };
+    responses: {
+      /** @description Stat info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FileStat"];
+        };
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_path: {
+    parameters: {
+      query?: {
+        /** @description List recursively */
+        recursive?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+        /** @description File or directory path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File content or directory listing */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_path: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+        /** @description File path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid session ID or cannot modify readonly file or directory */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_path: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+        /** @description File or directory path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid session ID or request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Already exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_path: {
+    parameters: {
+      query?: {
+        /** @description Delete recursively */
+        recursive?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+        /** @description File or directory path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeleteResponse"];
+        };
+      };
+      /** @description Invalid session ID or directory not empty */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cannot delete readonly file or directory containing readonly files */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_branch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateBranchRequest"];
+      };
+    };
+    responses: {
+      /** @description Branch created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SuccessResponse"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_branch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+        /** @description Branch name */
+        name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Branch deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SuccessResponse"];
+        };
+      };
+      /** @description Branch not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  commit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CommitRequest"];
+      };
+    };
+    responses: {
+      /** @description Commit created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CommitResult"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  diff: {
+    parameters: {
+      query: {
+        /** @description Commit OID to diff */
+        oid: string;
+        /** @description Base commit OID (default: parent) */
+        base?: string;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Diff result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GitDiff"];
+        };
+      };
+      /** @description Invalid commit OID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Commit not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  log: {
+    parameters: {
+      query?: {
+        /** @description Ref to start from (default: HEAD) */
+        ref?: string;
+        /** @description Max commits (default: 50) */
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Commit log */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GitCommitInfo"][];
+        };
+      };
+      /** @description Session or ref not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_refs: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of refs */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GitRefInfo"][];
+        };
+      };
+    };
+  };
+  list_messages: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of messages */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_Message"];
+        };
+      };
+      /** @description Invalid ID format */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_message: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMessageRequest"];
+      };
+    };
+    responses: {
+      /** @description Message created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Message"];
+        };
+      };
+      /** @description Invalid ID format */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  pin_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session pinned successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  unpin_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session unpinned successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Authentication required */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_resources: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session resources */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionResourceEntry"][];
+        };
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_sandbox: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Managed sandbox status */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GetSessionSandboxResponse"];
+        };
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  manage_sandbox: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ManageSessionSandboxRequest"];
+      };
+    };
+    responses: {
+      /** @description Managed sandbox lifecycle updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ManageSessionSandboxResponse"];
+        };
+      };
+      /** @description Invalid action or sandbox not configured */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  stream_sse: {
+    parameters: {
+      query?: {
+        /** @description Filter events with ID greater than this event ID (prefixed format: event_{32-hex}) */
+        since_id?: null | components["schemas"]["TypedId"];
+        /**
+         * @description Positive type filter: only return events matching these types (can be specified multiple times).
+         *     When empty, all types are returned. Example: ?types=turn.started&types=turn.completed
+         */
+        types?: string[];
+        /**
+         * @description Event types to exclude from the response (can be specified multiple times).
+         *     Applied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta
+         */
+        exclude?: string[];
+        /**
+         * @description Max events to return (backward pagination). When set, returns the last N events
+         *     (or last N before `before_sequence`). Results are ordered oldest→newest.
+         */
+        limit?: number | null;
+        /**
+         * @description Cursor for backward pagination: only return events with sequence < this value.
+         *     Used with `limit` to paginate backward through event history.
+         */
+        before_sequence?: number | null;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event stream. Includes 'connected' on open, domain events during streaming, and 'disconnecting' before graceful close. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/event-stream": unknown;
+        };
+      };
+      /** @description Invalid session ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_keys: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of key-value pairs */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_KeyValueInfo"];
+        };
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_secrets: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of secrets (names only, no values) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_SecretInfo"];
+        };
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  submit_tool_results: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., session_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubmitToolResultsRequest"];
+      };
+    };
+    responses: {
+      /** @description Tool results accepted and workflow resumed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubmitToolResultsResponse"];
+        };
+      };
+      /** @description Invalid session ID or request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not in waiting_for_tool_results state */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_skills: {
+    parameters: {
+      query?: {
+        /** @description Search by name or description (case-insensitive substring match). */
+        search?: string | null;
+        /** @description Include archived skills. Deleted skills never appear in lists. */
+        include_archived?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of skills */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_Skill"];
+        };
+      };
+    };
+  };
+  create_skill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSkillRequest"];
+      };
+    };
+    responses: {
+      /** @description Skill created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Skill"];
+        };
+      };
+      /** @description Duplicate skill name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Invalid SKILL.md */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  upload_skill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Skill created from archive */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Skill"];
+        };
+      };
+      /** @description Duplicate skill name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Archive too large */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Invalid archive or SKILL.md */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  validate_skill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ValidateSkillRequest"];
+      };
+    };
+    responses: {
+      /** @description Validation result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SkillValidationResult"];
+        };
+      };
+    };
+  };
+  get_skill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Skill ID (prefixed, e.g., skill_...) */
+        skill_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Skill found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Skill"];
+        };
+      };
+      /** @description Skill not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_skill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Skill ID */
+        skill_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Skill deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Skill not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_skill: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        skill_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSkillRequest"];
+      };
+    };
+    responses: {
+      /** @description Skill updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Skill"];
+        };
+      };
+      /** @description Skill not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate skill name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Invalid SKILL.md */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_skill_content: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Skill ID */
+        skill_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Skill content */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SkillContent"];
+        };
+      };
+      /** @description Skill not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_users: {
+    parameters: {
+      query?: {
+        /** @description Search by name or email */
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of users in organization */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_User"];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  switch_org: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SwitchOrgRequest"];
+      };
+    };
+    responses: {
+      /** @description Organization switched successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SwitchOrgResponse"];
+        };
+      };
+      /** @description Invalid organization ID format */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Organization not found or user is not a member */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_volumes: {
+    parameters: {
+      query?: {
+        search?: string | null;
+        include_archived?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List volumes */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_VolumeResponse"];
+        };
+      };
+    };
+  };
+  create_volume: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateVolumeRequest"];
+      };
+    };
+    responses: {
+      /** @description Volume created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Duplicate volume name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_volume: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Volume ID */
+        volume_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Volume found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeResponse"];
+        };
+      };
+      /** @description Volume not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_volume: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Volume ID */
+        volume_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Volume archived */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Volume not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_volume: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Volume ID */
+        volume_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateVolumeRequest"];
+      };
+    };
+    responses: {
+      /** @description Volume updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Volume not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Duplicate volume name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
 }

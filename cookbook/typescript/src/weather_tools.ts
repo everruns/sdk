@@ -12,6 +12,7 @@ import {
   Everruns,
   type ContentPart,
   type ToolCallInfo,
+  type ToolDefinition,
   extractToolCalls,
   toolResult,
   toolError,
@@ -43,6 +44,25 @@ function handleToolCall(call: ToolCallInfo): ContentPart {
   return toolError(call.id, `Unknown tool: ${call.name}`);
 }
 
+function weatherTool(): ToolDefinition {
+  return {
+    type: "client_side",
+    name: "get_weather",
+    description: "Get current weather for a city.",
+    parameters: {
+      type: "object",
+      properties: {
+        city: {
+          type: "string",
+          description: "City name",
+        },
+      },
+      required: ["city"],
+      additionalProperties: false,
+    },
+  };
+}
+
 interface MessageData {
   message?: {
     content?: Array<{ type: string; text?: string }>;
@@ -68,21 +88,62 @@ async function main() {
   const agent = await client.agents.create({
     name: "weather-assistant-ts",
     systemPrompt: SYSTEM_PROMPT,
+    tools: [weatherTool()],
   });
   console.log(`Created agent: ${agent.id}`);
 
   // Create session
   const session = await client.sessions.create({
     agentId: agent.id,
+    tools: [weatherTool()],
   });
   console.log(`Created session: ${session.id}\n`);
 
+  const existingEvents = await client.events.list(session.id);
+  const baselineEventId = existingEvents[existingEvents.length - 1]?.id;
+
+  const stream = client.events.stream(session.id, {
+    maxRetries: 3,
+    sinceId: baselineEventId,
+  });
+  const eventTask = handleEvents(client, session.id, stream, verbose);
+  await sleep(250);
+
   // Send user message
-  await client.messages.create(session.id, "What's the weather like in Paris?");
+  try {
+    await withTimeout(
+      client.messages.create(session.id, "What's the weather like in Paris?"),
+      30_000,
+    );
+  } catch (error) {
+    if (error instanceof TimeoutError) {
+      console.log("Timed out waiting for message submission; ending demo.");
+      stream.abort();
+      return;
+    }
+    throw error;
+  }
 
-  // Stream events and handle tool calls
-  const stream = client.events.stream(session.id, { maxRetries: 3 });
+  try {
+    await withTimeout(eventTask, 60_000);
+  } catch (error) {
+    if (error instanceof TimeoutError) {
+      console.log("Timed out waiting for turn completion; ending demo.");
+      stream.abort();
+      return;
+    }
+    throw error;
+  }
+}
 
+async function handleEvents(
+  client: Everruns,
+  sessionId: string,
+  stream: AsyncIterable<{ type: string; data: Record<string, unknown> }> & {
+    abort: () => void;
+  },
+  verbose: boolean,
+) {
   for await (const event of stream) {
     if (verbose) {
       console.log(
@@ -91,7 +152,7 @@ async function main() {
     }
 
     switch (event.type) {
-      case "output.message.completed": {
+      case "tool.call_requested": {
         const toolCalls = extractToolCalls(event.data);
         if (toolCalls.length > 0) {
           console.log(`Agent requested ${toolCalls.length} tool call(s)`);
@@ -103,13 +164,16 @@ async function main() {
           });
 
           // Send tool results back
-          await client.messages.createToolResults(session.id, results);
+          await client.messages.createToolResults(sessionId, results);
           console.log("  <- Sent tool results\n");
-        } else {
-          const text = extractText(event.data);
-          if (text) {
-            console.log(`Assistant: ${text}`);
-          }
+        }
+        break;
+      }
+
+      case "output.message.completed": {
+        const text = extractText(event.data);
+        if (text) {
+          console.log(`Assistant: ${text}`);
         }
         break;
       }
@@ -125,6 +189,28 @@ async function main() {
         return;
     }
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+class TimeoutError extends Error {}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new TimeoutError()), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timeout);
+        reject(error);
+      },
+    );
+  });
 }
 
 function devClient(): Everruns {

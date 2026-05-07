@@ -9,6 +9,31 @@ export interface AgentCapabilityConfig {
   config?: Record<string, unknown>;
 }
 
+export interface ClientSideTool {
+  type: "client_side";
+  name: string;
+  description: string;
+  parameters: unknown;
+  display_name?: string | null;
+  category?: string | null;
+  hints?: Record<string, unknown>;
+  deferrable?: Record<string, unknown>;
+}
+
+export interface BuiltinTool {
+  type: "builtin";
+  name: string;
+  description: string;
+  parameters: unknown;
+  display_name?: string | null;
+  category?: string | null;
+  hints?: Record<string, unknown>;
+  deferrable?: Record<string, unknown>;
+  policy?: "auto" | "requires_approval" | "client_side";
+}
+
+export type ToolDefinition = ClientSideTool | BuiltinTool;
+
 export interface CapabilityInfo {
   id: string;
   name: string;
@@ -37,6 +62,7 @@ export interface Agent {
   systemPrompt: string;
   model?: string;
   capabilities?: AgentCapabilityConfig[];
+  tools?: ToolDefinition[];
   initialFiles?: InitialFile[];
   createdAt: string;
   updatedAt: string;
@@ -56,6 +82,7 @@ export interface CreateAgentRequest {
   systemPrompt: string;
   model?: string;
   capabilities?: AgentCapabilityConfig[];
+  tools?: ToolDefinition[];
   initialFiles?: InitialFile[];
 }
 
@@ -93,6 +120,7 @@ export interface Session {
   locale?: string | null;
   modelId?: string | null;
   capabilities?: AgentCapabilityConfig[];
+  tools?: ToolDefinition[];
   createdAt: string;
   updatedAt: string;
   /** Number of active (enabled) schedules for this session */
@@ -101,6 +129,25 @@ export interface Session {
   features?: string[];
   /** Whether this session is pinned by the current user */
   isPinned?: boolean | null;
+}
+
+/** Aggregate usage statistics for an agent or harness. */
+export interface ResourceStats {
+  session_count: number;
+  active_session_count: number;
+  idle_session_count: number;
+  started_session_count: number;
+  waiting_for_tool_results_session_count: number;
+  execution_count: number;
+  total_session_duration_ms: number;
+  avg_session_duration_ms?: number | null;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_cache_read_tokens: number;
+  total_cache_creation_tokens: number;
+  first_session_at?: string | null;
+  last_session_at?: string | null;
+  last_execution_at?: string | null;
 }
 
 export interface InitialFile {
@@ -124,6 +171,7 @@ export interface CreateSessionRequest {
   modelId?: string;
   tags?: string[];
   capabilities?: AgentCapabilityConfig[];
+  tools?: ToolDefinition[];
   initialFiles?: InitialFile[];
 }
 
@@ -224,10 +272,40 @@ export function toolError(toolCallId: string, error: string): ContentPart {
   return { type: "tool_result", tool_call_id: toolCallId, error };
 }
 
-/** Extract tool calls from event data (`data.message.content`) */
+/** A single tool result from the client. */
+export interface ClientToolResult {
+  tool_call_id: string;
+  result?: unknown;
+  error?: string;
+}
+
+/** Response from submitting tool results. */
+export interface SubmitToolResultsResponse {
+  accepted: number;
+  status: string;
+}
+
+/** Extract tool calls from `tool.call_requested` or message event data. */
 export function extractToolCalls(
   data: Record<string, unknown>,
 ): ToolCallInfo[] {
+  const requested = data.tool_calls;
+  if (Array.isArray(requested)) {
+    return requested
+      .filter((call) => {
+        const c = call as Record<string, unknown>;
+        return typeof c.id === "string" && typeof c.name === "string";
+      })
+      .map((call) => {
+        const c = call as Record<string, unknown>;
+        return {
+          id: c.id as string,
+          name: c.name as string,
+          arguments: (c.arguments as Record<string, unknown>) ?? {},
+        };
+      });
+  }
+
   const message = data.message as { content?: unknown[] } | undefined;
   const content = message?.content;
   if (!Array.isArray(content)) return [];

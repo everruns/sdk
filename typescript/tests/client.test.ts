@@ -25,7 +25,9 @@ import {
   type FileStat,
   type GrepResult,
   type Message,
+  type ResourceStats,
   type ResumeSessionResponse,
+  type ToolDefinition,
 } from "../src/models.js";
 
 afterEach(() => {
@@ -272,6 +274,42 @@ describe("Everruns", () => {
     );
   });
 
+  it("should get agent stats", async () => {
+    const stats: ResourceStats = {
+      session_count: 4,
+      active_session_count: 1,
+      idle_session_count: 2,
+      started_session_count: 1,
+      waiting_for_tool_results_session_count: 0,
+      execution_count: 7,
+      total_session_duration_ms: 12345,
+      avg_session_duration_ms: 3086,
+      total_input_tokens: 100,
+      total_output_tokens: 50,
+      total_cache_read_tokens: 25,
+      total_cache_creation_tokens: 10,
+      first_session_at: "2026-05-01T00:00:00Z",
+      last_session_at: "2026-05-02T00:00:00Z",
+      last_execution_at: "2026-05-02T01:00:00Z",
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => stats,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.agents.stats("agent_123");
+
+    expect(response.session_count).toBe(4);
+    expect(response.execution_count).toBe(7);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/agents/agent_123/stats",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
   it("should list capabilities with search and pagination", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -306,6 +344,40 @@ describe("Everruns", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/capabilities?search=web&offset=20&limit=10",
       expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should submit tool results with the tool-results endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        accepted: 1,
+        status: "active",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.messages.createToolResults("session_123", [
+      toolResult("call_123", { weather: "sunny" }),
+    ]);
+
+    expect(response.accepted).toBe(1);
+    expect(response.status).toBe("active");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/session_123/tool-results",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          tool_results: [
+            {
+              tool_call_id: "call_123",
+              result: { weather: "sunny" },
+            },
+          ],
+        }),
+      }),
     );
   });
 });
@@ -357,6 +429,25 @@ describe("CreateAgentRequest with capabilities", () => {
       systemPrompt: "You are helpful.",
     };
     expect(request.capabilities).toBeUndefined();
+  });
+});
+
+describe("CreateAgentRequest with tools", () => {
+  it("should include client-side tools", () => {
+    const tool: ToolDefinition = {
+      type: "client_side",
+      name: "get_weather",
+      description: "Get weather",
+      parameters: { type: "object" },
+    };
+    const request: CreateAgentRequest = {
+      name: "Test Agent",
+      systemPrompt: "You are helpful.",
+      tools: [tool],
+    };
+
+    expect(request.tools?.[0].type).toBe("client_side");
+    expect(request.tools?.[0].name).toBe("get_weather");
   });
 });
 
@@ -700,6 +791,23 @@ describe("CreateMessageRequest with external_actor", () => {
 });
 
 describe("extractToolCalls", () => {
+  it("should extract tool calls from requested event data", () => {
+    const calls = extractToolCalls({
+      tool_calls: [
+        {
+          id: "call_123",
+          name: "get_weather",
+          arguments: { city: "Paris" },
+        },
+      ],
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].id).toBe("call_123");
+    expect(calls[0].name).toBe("get_weather");
+    expect(calls[0].arguments).toEqual({ city: "Paris" });
+  });
+
   it("should extract tool calls from event data", () => {
     const data = {
       message: {

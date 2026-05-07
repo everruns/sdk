@@ -23,8 +23,10 @@ import {
   Event,
   ListEventsOptions,
   ListResponse,
+  ResourceStats,
   ResumeSessionResponse,
   SessionFile,
+  SubmitToolResultsResponse,
   StreamOptions,
   TopUpRequest,
   UpdateBudgetRequest,
@@ -229,6 +231,11 @@ class AgentsClient {
     return this.client.fetch(`/agents/${agentId}`);
   }
 
+  /** Get aggregate usage stats for an agent. */
+  async stats(agentId: string): Promise<ResourceStats> {
+    return this.client.fetch(`/agents/${agentId}/stats`);
+  }
+
   async list(options?: { search?: string }): Promise<Agent[]> {
     const query = options?.search
       ? `?search=${encodeURIComponent(options.search)}`
@@ -308,6 +315,9 @@ class SessionsClient {
     }
     if (request.capabilities?.length) {
       body.capabilities = request.capabilities;
+    }
+    if (request.tools?.length) {
+      body.tools = request.tools;
     }
     if (request.initialFiles !== undefined) {
       body.initial_files = request.initialFiles.map((file) => ({
@@ -434,20 +444,42 @@ class MessagesClient {
   /**
    * Send tool results back to the session.
    *
-   * Use after receiving tool calls from an `output.message.completed`
+   * Use after receiving tool calls from a `tool.call_requested`
    * event to provide results from locally-executed tools.
    */
   async createToolResults(
     sessionId: string,
     results: ContentPart[],
-  ): Promise<Message> {
-    const request: CreateMessageRequest = {
-      message: { role: "tool_result", content: results },
-    };
-    return this.client.fetch(`/sessions/${sessionId}/messages`, {
-      method: "POST",
-      body: JSON.stringify(request),
+  ): Promise<SubmitToolResultsResponse> {
+    const toolResults = results.map((part) => {
+      if (part.type !== "tool_result" || !part.tool_call_id) {
+        throw new Error(
+          "createToolResults accepts only tool_result content parts",
+        );
+      }
+      return {
+        tool_call_id: part.tool_call_id,
+        result: part.result,
+        error: part.error,
+      };
     });
+    const body = JSON.stringify({ tool_results: toolResults });
+    let delay = 100;
+    for (let attempt = 0; attempt <= 5; attempt++) {
+      try {
+        return await this.client.fetch(`/sessions/${sessionId}/tool-results`, {
+          method: "POST",
+          body,
+        });
+      } catch (error) {
+        if (attempt >= 5 || !isToolResultsPendingConflict(error)) {
+          throw error;
+        }
+        await sleep(delay);
+        delay *= 2;
+      }
+    }
+    throw new Error("unreachable");
   }
 
   async list(sessionId: string): Promise<Message[]> {
@@ -456,6 +488,18 @@ class MessagesClient {
     );
     return response.messages;
   }
+}
+
+function isToolResultsPendingConflict(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    error.statusCode === 409 &&
+    String(error.body).includes("not waiting for tool results")
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 class EventsClient {
@@ -528,10 +572,15 @@ class CapabilitiesClient {
     if (options?.offset != null) params.set("offset", String(options.offset));
     if (options?.limit != null) params.set("limit", String(options.limit));
     const query = params.toString() ? `?${params.toString()}` : "";
-    const response = await this.client.fetch<
-      ListResponse<CapabilityInfo>
-    >(`/capabilities${query}`);
-    return { data: response.data, total: response.total ?? 0, offset: response.offset ?? 0, limit: response.limit ?? 0 };
+    const response = await this.client.fetch<ListResponse<CapabilityInfo>>(
+      `/capabilities${query}`,
+    );
+    return {
+      data: response.data,
+      total: response.total ?? 0,
+      offset: response.offset ?? 0,
+      limit: response.limit ?? 0,
+    };
   }
 
   /** Get a specific capability by ID. */
@@ -557,7 +606,12 @@ class SessionFilesClient {
     const response = await this.client.fetch<ListResponse<FileInfo>>(
       `${fsPath}${query}`,
     );
-    return { data: response.data, total: response.total ?? 0, offset: response.offset ?? 0, limit: response.limit ?? 0 };
+    return {
+      data: response.data,
+      total: response.total ?? 0,
+      offset: response.offset ?? 0,
+      limit: response.limit ?? 0,
+    };
   }
 
   /** Read a file's content. */
@@ -795,6 +849,9 @@ function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
   }
   if (request.capabilities?.length) {
     body.capabilities = request.capabilities;
+  }
+  if (request.tools?.length) {
+    body.tools = request.tools;
   }
   if (request.initialFiles?.length) {
     body.initial_files = request.initialFiles.map((file) => ({
