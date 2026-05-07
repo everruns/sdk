@@ -12,7 +12,7 @@ import json
 import os
 import sys
 
-from everruns_sdk import ContentPart, Everruns, extract_tool_calls
+from everruns_sdk import ContentPart, Everruns, ToolDefinition, extract_tool_calls
 from everruns_sdk.sse import EventStream, StreamOptions
 
 SYSTEM_PROMPT = (
@@ -43,6 +43,25 @@ def handle_tool_call(call_id: str, name: str, arguments: dict) -> ContentPart:
     return ContentPart.make_tool_error(call_id, f"Unknown tool: {name}")
 
 
+def weather_tool() -> ToolDefinition:
+    """Define the client-side weather tool exposed to the agent."""
+    return ToolDefinition(
+        name="get_weather",
+        description="Get current weather for a city.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "City name",
+                },
+            },
+            "required": ["city"],
+            "additionalProperties": False,
+        },
+    )
+
+
 def extract_text(data: dict) -> str | None:
     """Extract text content from message event data."""
     message = data.get("message")
@@ -69,56 +88,85 @@ async def main():
         agent = await client.agents.create(
             name="weather-assistant-py",
             system_prompt=SYSTEM_PROMPT,
+            tools=[weather_tool()],
         )
         print(f"Created agent: {agent.id}")
 
         # Create session
-        session = await client.sessions.create(agent_id=agent.id)
+        session = await client.sessions.create(agent_id=agent.id, tools=[weather_tool()])
         print(f"Created session: {session.id}\n")
 
+        existing_events = await client.events.list(session.id)
+        baseline_event_id = existing_events[-1].id if existing_events else None
+
+        options = StreamOptions(max_retries=3, since_id=baseline_event_id)
+        event_task = asyncio.create_task(handle_events(client, session.id, options, verbose))
+        await asyncio.sleep(0.25)
+
         # Send user message
-        await client.messages.create(
-            session_id=session.id,
-            text="What's the weather like in Paris?",
-        )
+        try:
+            await asyncio.wait_for(
+                client.messages.create(
+                    session_id=session.id,
+                    text="What's the weather like in Paris?",
+                ),
+                timeout=30,
+            )
+        except TimeoutError:
+            print("Timed out waiting for message submission; ending demo.")
+            event_task.cancel()
+            return
 
-        # Stream events and handle tool calls
-        options = StreamOptions(max_retries=3)
-        stream = EventStream(client, session.id, options)
-        async for event in stream:
-            if verbose:
-                print(f"\n[EVENT] {event.type}: {json.dumps(event.data, indent=2)}")
-
-            if event.type == "output.message.completed":
-                tool_calls = extract_tool_calls(event.data)
-                if tool_calls:
-                    print(f"Agent requested {len(tool_calls)} tool call(s)")
-                    results = []
-                    for tc in tool_calls:
-                        print(f"  -> Executing {tc.name}({tc.arguments})")
-                        results.append(handle_tool_call(tc.id, tc.name, tc.arguments))
-
-                    # Send tool results back
-                    await client.messages.create_tool_results(
-                        session_id=session.id,
-                        results=results,
-                    )
-                    print("  <- Sent tool results\n")
-                else:
-                    text = extract_text(event.data)
-                    if text:
-                        print(f"Assistant: {text}")
-
-            elif event.type == "turn.completed":
-                print("\n[Turn completed]")
-                break
-
-            elif event.type == "turn.failed":
-                print("\n[Turn failed]")
-                break
+        try:
+            await asyncio.wait_for(event_task, timeout=60)
+        except TimeoutError:
+            print("Timed out waiting for turn completion; ending demo.")
+            event_task.cancel()
 
     finally:
         await client.close()
+
+
+async def handle_events(
+    client: Everruns,
+    session_id: str,
+    options: StreamOptions,
+    verbose: bool,
+) -> None:
+    """Stream events and handle tool calls."""
+    stream = EventStream(client, session_id, options)
+    async for event in stream:
+        if verbose:
+            print(f"\n[EVENT] {event.type}: {json.dumps(event.data, indent=2)}")
+
+        if event.type == "tool.call_requested":
+            tool_calls = extract_tool_calls(event.data)
+            if tool_calls:
+                print(f"Agent requested {len(tool_calls)} tool call(s)")
+                results = []
+                for tc in tool_calls:
+                    print(f"  -> Executing {tc.name}({tc.arguments})")
+                    results.append(handle_tool_call(tc.id, tc.name, tc.arguments))
+
+                # Send tool results back
+                await client.messages.create_tool_results(
+                    session_id=session_id,
+                    results=results,
+                )
+                print("  <- Sent tool results\n")
+
+        elif event.type == "output.message.completed":
+            text = extract_text(event.data)
+            if text:
+                print(f"Assistant: {text}")
+
+        elif event.type == "turn.completed":
+            print("\n[Turn completed]")
+            break
+
+        elif event.type == "turn.failed":
+            print("\n[Turn failed]")
+            break
 
 
 def dev_client() -> Everruns:

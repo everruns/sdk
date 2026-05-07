@@ -5,7 +5,8 @@
 use everruns_sdk::{
     Agent, AgentCapabilityConfig, CapabilityInfo, CreateAgentRequest, CreateMessageRequest,
     CreateSessionRequest, Event, ExternalActor, InitialFile, ListResponse, Message, Session,
-    generate_agent_id, generate_harness_id, validate_agent_name, validate_harness_name,
+    ToolDefinition, extract_tool_calls, generate_agent_id, generate_harness_id,
+    validate_agent_name, validate_harness_name,
 };
 
 /// Test that ListResponse<Agent> can be serialized and deserialized (round-trip)
@@ -363,6 +364,21 @@ fn test_create_agent_request_with_capabilities() {
     assert_eq!(caps[1]["config"]["timeout"], 30);
 }
 
+#[test]
+fn test_create_agent_request_with_tools() {
+    let req = CreateAgentRequest::new("test-agent", "You are helpful.").tools(vec![
+        ToolDefinition::client_side(
+            "get_weather",
+            "Get weather",
+            serde_json::json!({"type": "object"}),
+        ),
+    ]);
+
+    let raw = serde_json::to_value(req).unwrap();
+    assert_eq!(raw["tools"][0]["type"], "client_side");
+    assert_eq!(raw["tools"][0]["name"], "get_weather");
+}
+
 /// Test CreateAgentRequest without capabilities omits empty array
 #[test]
 fn test_create_agent_request_without_capabilities() {
@@ -658,6 +674,23 @@ fn test_event_type_field_rename() {
         raw.get("event_type").is_none(),
         "Serialized Event should NOT have 'event_type' field"
     );
+}
+
+#[test]
+fn test_extract_tool_calls_from_requested_event() {
+    let data = serde_json::json!({
+        "tool_calls": [{
+            "id": "call_123",
+            "name": "get_weather",
+            "arguments": {"city": "Paris"}
+        }]
+    });
+
+    let calls = extract_tool_calls(&data);
+    assert_eq!(calls.len(), 1);
+    assert_eq!(calls[0].id, "call_123");
+    assert_eq!(calls[0].name, "get_weather");
+    assert_eq!(calls[0].arguments["city"], "Paris");
 }
 
 /// Test ExternalActor serialization round-trip

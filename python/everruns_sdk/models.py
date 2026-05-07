@@ -71,6 +71,20 @@ class AgentCapabilityConfig(BaseModel):
     config: Optional[dict[str, Any]] = None
 
 
+class ToolDefinition(BaseModel):
+    """Tool definition in agent/session configuration."""
+
+    type: Literal["client_side", "builtin"] = "client_side"
+    name: str
+    description: str
+    parameters: Any
+    display_name: Optional[str] = None
+    category: Optional[str] = None
+    hints: Optional[dict[str, Any]] = None
+    deferrable: Optional[dict[str, Any]] = None
+    policy: Optional[Literal["auto", "requires_approval", "client_side"]] = None
+
+
 class CapabilityInfo(BaseModel):
     """Public capability information."""
 
@@ -99,6 +113,7 @@ class Agent(BaseModel):
     default_model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
+    tools: list[ToolDefinition] = Field(default_factory=list)
     initial_files: list[InitialFile] = Field(default_factory=list)
     status: Literal["active", "archived"]
     created_at: str
@@ -126,6 +141,7 @@ class CreateAgentRequest(BaseModel):
     default_model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
+    tools: list[ToolDefinition] = Field(default_factory=list)
     initial_files: list[InitialFile] = Field(default_factory=list)
 
 
@@ -141,6 +157,7 @@ class Session(BaseModel):
     locale: Optional[str] = None
     model_id: Optional[str] = None
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
+    tools: list[ToolDefinition] = Field(default_factory=list)
     status: Literal["started", "active", "idle", "waitingfortoolresults"]
     created_at: str
     updated_at: str
@@ -198,6 +215,7 @@ class CreateSessionRequest(BaseModel):
     model_id: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
+    tools: list[ToolDefinition] = Field(default_factory=list)
     initial_files: Optional[list[InitialFile]] = None
 
 
@@ -264,6 +282,27 @@ class ContentPart(BaseModel):
         if self.type != "tool_call" or self.id is None or self.name is None:
             return None
         return ToolCallInfo(id=self.id, name=self.name, arguments=self.arguments or {})
+
+
+class ClientToolResult(BaseModel):
+    """A single tool result from the client."""
+
+    tool_call_id: str
+    result: Optional[Any] = None
+    error: Optional[str] = None
+
+
+class SubmitToolResultsRequest(BaseModel):
+    """Request to submit client-side tool results."""
+
+    tool_results: list[ClientToolResult]
+
+
+class SubmitToolResultsResponse(BaseModel):
+    """Response from submitting tool results."""
+
+    accepted: int
+    status: str
 
 
 class ToolCallInfo(BaseModel):
@@ -501,7 +540,21 @@ class Connection(BaseModel):
 
 
 def extract_tool_calls(data: dict[str, Any]) -> list[ToolCallInfo]:
-    """Extract tool call info from event data (``data.message.content``)."""
+    """Extract tool call info from ``tool.call_requested`` or message event data."""
+    requested = data.get("tool_calls")
+    if isinstance(requested, list):
+        results: list[ToolCallInfo] = []
+        for call in requested:
+            if not isinstance(call, dict):
+                continue
+            call_id = call.get("id")
+            call_name = call.get("name")
+            if call_id and call_name:
+                results.append(
+                    ToolCallInfo(id=call_id, name=call_name, arguments=call.get("arguments", {}))
+                )
+        return results
+
     message = data.get("message")
     if not isinstance(message, dict):
         return []

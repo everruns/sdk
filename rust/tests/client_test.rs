@@ -1,8 +1,8 @@
 //! Integration tests for Everruns SDK
 
 use everruns_sdk::{
-    CreateAgentRequest, CreateBudgetRequest, CreateSessionRequest, Everruns, InitialFile,
-    TopUpRequest, UpdateBudgetRequest,
+    ContentPart, CreateAgentRequest, CreateBudgetRequest, CreateSessionRequest, Everruns,
+    InitialFile, TopUpRequest, UpdateBudgetRequest,
 };
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -314,6 +314,42 @@ async fn test_capabilities_list_with_options() {
     assert_eq!(response.total, 21);
     assert_eq!(response.offset, 20);
     assert_eq!(response.limit, 10);
+}
+
+#[tokio::test]
+async fn test_create_tool_results_uses_tool_results_endpoint() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions/session_123/tool-results"))
+        .and(body_json(serde_json::json!({
+            "tool_results": [{
+                "tool_call_id": "call_123",
+                "result": {"weather": "sunny"}
+            }]
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "accepted": 1,
+            "status": "active"
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client
+        .messages()
+        .create_tool_results(
+            "session_123",
+            vec![ContentPart::tool_result(
+                "call_123",
+                serde_json::json!({"weather": "sunny"}),
+            )],
+        )
+        .await
+        .expect("tool results should submit");
+
+    assert_eq!(response.accepted, 1);
+    assert_eq!(response.status, "active");
 }
 
 // --- Session Files Tests ---

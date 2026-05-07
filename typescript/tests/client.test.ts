@@ -27,6 +27,7 @@ import {
   type Message,
   type ResourceStats,
   type ResumeSessionResponse,
+  type ToolDefinition,
 } from "../src/models.js";
 
 afterEach(() => {
@@ -345,6 +346,40 @@ describe("Everruns", () => {
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
+
+  it("should submit tool results with the tool-results endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        accepted: 1,
+        status: "active",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.messages.createToolResults("session_123", [
+      toolResult("call_123", { weather: "sunny" }),
+    ]);
+
+    expect(response.accepted).toBe(1);
+    expect(response.status).toBe("active");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/session_123/tool-results",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          tool_results: [
+            {
+              tool_call_id: "call_123",
+              result: { weather: "sunny" },
+            },
+          ],
+        }),
+      }),
+    );
+  });
 });
 
 describe("AgentCapabilityConfig", () => {
@@ -394,6 +429,25 @@ describe("CreateAgentRequest with capabilities", () => {
       systemPrompt: "You are helpful.",
     };
     expect(request.capabilities).toBeUndefined();
+  });
+});
+
+describe("CreateAgentRequest with tools", () => {
+  it("should include client-side tools", () => {
+    const tool: ToolDefinition = {
+      type: "client_side",
+      name: "get_weather",
+      description: "Get weather",
+      parameters: { type: "object" },
+    };
+    const request: CreateAgentRequest = {
+      name: "Test Agent",
+      systemPrompt: "You are helpful.",
+      tools: [tool],
+    };
+
+    expect(request.tools?.[0].type).toBe("client_side");
+    expect(request.tools?.[0].name).toBe("get_weather");
   });
 });
 
@@ -737,6 +791,23 @@ describe("CreateMessageRequest with external_actor", () => {
 });
 
 describe("extractToolCalls", () => {
+  it("should extract tool calls from requested event data", () => {
+    const calls = extractToolCalls({
+      tool_calls: [
+        {
+          id: "call_123",
+          name: "get_weather",
+          arguments: { city: "Paris" },
+        },
+      ],
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].id).toBe("call_123");
+    expect(calls[0].name).toBe("get_weather");
+    expect(calls[0].arguments).toEqual({ city: "Paris" });
+  });
+
   it("should extract tool calls from event data", () => {
     const data = {
       message: {

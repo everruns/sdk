@@ -566,17 +566,43 @@ impl<'a> MessagesClient<'a> {
 
     /// Send tool results back to the session.
     ///
-    /// Use this after receiving tool calls from an `output.message.completed`
+    /// Use this after receiving tool calls from a `tool.call_requested`
     /// event to provide results from locally-executed tools.
     pub async fn create_tool_results(
         &self,
         session_id: &str,
         results: Vec<ContentPart>,
-    ) -> Result<Message> {
-        let req = CreateMessageRequest::tool_results(results);
-        self.client
-            .post(&format!("/sessions/{}/messages", session_id), &req)
-            .await
+    ) -> Result<SubmitToolResultsResponse> {
+        let tool_results = results
+            .into_iter()
+            .map(|part| match part {
+                ContentPart::ToolResult {
+                    tool_call_id,
+                    result,
+                    error,
+                } => Ok(ClientToolResult {
+                    tool_call_id,
+                    result,
+                    error,
+                }),
+                _ => Err(Error::Validation(
+                    "create_tool_results accepts only tool_result content parts".to_string(),
+                )),
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let req = SubmitToolResultsRequest { tool_results };
+        let path = format!("/sessions/{}/tool-results", session_id);
+        let mut delay = std::time::Duration::from_millis(100);
+        for attempt in 0..=5 {
+            match self.client.post(&path, &req).await {
+                Err(err) if attempt < 5 && is_tool_results_pending_conflict(&err) => {
+                    tokio::time::sleep(delay).await;
+                    delay = delay.saturating_mul(2);
+                }
+                result => return result,
+            }
+        }
+        unreachable!()
     }
 
     /// Create a message with full options
@@ -588,6 +614,15 @@ impl<'a> MessagesClient<'a> {
         self.client
             .post(&format!("/sessions/{}/messages", session_id), &req)
             .await
+    }
+}
+
+fn is_tool_results_pending_conflict(error: &Error) -> bool {
+    match error {
+        Error::Api {
+            status, message, ..
+        } => *status == 409 && message.contains("not waiting for tool results"),
+        _ => false,
     }
 }
 

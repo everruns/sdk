@@ -32,6 +32,110 @@ impl AgentCapabilityConfig {
     }
 }
 
+/// Client-side tool definition executed by SDK users.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ClientSideTool {
+    pub name: String,
+    pub description: String,
+    pub parameters: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hints: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deferrable: Option<serde_json::Value>,
+}
+
+/// Built-in tool definition executed by the server.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct BuiltinTool {
+    pub name: String,
+    pub description: String,
+    pub parameters: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hints: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deferrable: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub policy: Option<String>,
+}
+
+impl ClientSideTool {
+    pub fn new(
+        name: impl Into<String>,
+        description: impl Into<String>,
+        parameters: serde_json::Value,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            description: description.into(),
+            parameters,
+            display_name: None,
+            category: None,
+            hints: None,
+            deferrable: None,
+        }
+    }
+
+    pub fn display_name(mut self, display_name: impl Into<String>) -> Self {
+        self.display_name = Some(display_name.into());
+        self
+    }
+}
+
+impl BuiltinTool {
+    pub fn new(
+        name: impl Into<String>,
+        description: impl Into<String>,
+        parameters: serde_json::Value,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            description: description.into(),
+            parameters,
+            display_name: None,
+            category: None,
+            hints: None,
+            deferrable: None,
+            policy: None,
+        }
+    }
+}
+
+/// Tool definition in agent/session configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum ToolDefinition {
+    ClientSide(ClientSideTool),
+    Builtin(BuiltinTool),
+}
+
+impl ToolDefinition {
+    pub fn client_side(
+        name: impl Into<String>,
+        description: impl Into<String>,
+        parameters: serde_json::Value,
+    ) -> Self {
+        Self::ClientSide(ClientSideTool::new(name, description, parameters))
+    }
+
+    pub fn builtin(
+        name: impl Into<String>,
+        description: impl Into<String>,
+        parameters: serde_json::Value,
+    ) -> Self {
+        Self::Builtin(BuiltinTool::new(name, description, parameters))
+    }
+}
+
 /// Public capability information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -118,6 +222,8 @@ pub struct CreateAgentRequest {
     pub tags: Vec<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub capabilities: Vec<AgentCapabilityConfig>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub tools: Vec<ToolDefinition>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub initial_files: Vec<InitialFile>,
 }
@@ -134,6 +240,7 @@ impl CreateAgentRequest {
             default_model_id: None,
             tags: vec![],
             capabilities: vec![],
+            tools: vec![],
             initial_files: vec![],
         }
     }
@@ -171,6 +278,12 @@ impl CreateAgentRequest {
     /// Set the capabilities
     pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
         self.capabilities = capabilities;
+        self
+    }
+
+    /// Set client-side tools for this agent
+    pub fn tools(mut self, tools: Vec<ToolDefinition>) -> Self {
+        self.tools = tools;
         self
     }
 
@@ -376,6 +489,8 @@ pub struct CreateSessionRequest {
     pub tags: Vec<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub capabilities: Vec<AgentCapabilityConfig>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub tools: Vec<ToolDefinition>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub initial_files: Vec<InitialFile>,
 }
@@ -398,6 +513,7 @@ impl CreateSessionRequest {
             model_id: None,
             tags: vec![],
             capabilities: vec![],
+            tools: vec![],
             initial_files: vec![],
         }
     }
@@ -449,6 +565,12 @@ impl CreateSessionRequest {
     /// Set the capabilities
     pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
         self.capabilities = capabilities;
+        self
+    }
+
+    /// Set client-side tools for this session
+    pub fn tools(mut self, tools: Vec<ToolDefinition>) -> Self {
+        self.tools = tools;
         self
     }
 
@@ -609,6 +731,32 @@ pub struct ToolCallInfo<'a> {
     pub arguments: &'a serde_json::Value,
 }
 
+/// A single tool result from the client.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ClientToolResult {
+    pub tool_call_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+/// Request to submit client-side tool results.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct SubmitToolResultsRequest {
+    pub tool_results: Vec<ClientToolResult>,
+}
+
+/// Response from submitting tool results.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SubmitToolResultsResponse {
+    pub accepted: u64,
+    pub status: String,
+}
+
 /// Request to create a message
 #[derive(Debug, Clone, Serialize)]
 #[non_exhaustive]
@@ -765,8 +913,21 @@ impl Event {
     }
 }
 
-/// Extract tool call info from event data (`data.message.content`).
+/// Extract tool call info from `tool.call_requested` or `output.message.completed` event data.
 pub fn extract_tool_calls(data: &serde_json::Value) -> Vec<ToolCallInfo<'_>> {
+    if let Some(tool_calls) = data.get("tool_calls").and_then(|c| c.as_array()) {
+        return tool_calls
+            .iter()
+            .filter_map(|part| {
+                Some(ToolCallInfo {
+                    id: part.get("id")?.as_str()?,
+                    name: part.get("name")?.as_str()?,
+                    arguments: part.get("arguments")?,
+                })
+            })
+            .collect();
+    }
+
     let Some(content) = data
         .get("message")
         .and_then(|m| m.get("content"))

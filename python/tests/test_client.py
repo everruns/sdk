@@ -10,6 +10,7 @@ import respx
 from everruns_sdk import (
     ApiError,
     ApiKey,
+    ContentPart,
     Everruns,
     InitialFile,
 )
@@ -166,6 +167,26 @@ def test_create_agent_request_with_capabilities():
     assert data["capabilities"][1]["config"] == {"timeout": 30}
 
 
+def test_create_agent_request_with_tools():
+    """Test CreateAgentRequest serialization with client-side tools."""
+    from everruns_sdk.models import CreateAgentRequest, ToolDefinition
+
+    req = CreateAgentRequest(
+        name="test-agent",
+        system_prompt="You are helpful.",
+        tools=[
+            ToolDefinition(
+                name="get_weather",
+                description="Get weather",
+                parameters={"type": "object"},
+            )
+        ],
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["tools"][0]["type"] == "client_side"
+    assert data["tools"][0]["name"] == "get_weather"
+
+
 def test_create_agent_request_with_initial_files():
     """Test CreateAgentRequest serialization with initial_files."""
     from everruns_sdk.models import CreateAgentRequest
@@ -191,6 +212,27 @@ def test_create_agent_request_with_initial_files():
             "is_readonly": True,
         }
     ]
+
+
+def test_extract_tool_calls_from_requested_event():
+    """Test extracting tool calls from tool.call_requested data."""
+    from everruns_sdk import extract_tool_calls
+
+    calls = extract_tool_calls(
+        {
+            "tool_calls": [
+                {
+                    "id": "call_123",
+                    "name": "get_weather",
+                    "arguments": {"city": "Paris"},
+                }
+            ]
+        }
+    )
+    assert len(calls) == 1
+    assert calls[0].id == "call_123"
+    assert calls[0].name == "get_weather"
+    assert calls[0].arguments == {"city": "Paris"}
 
 
 def test_create_session_request_with_capabilities():
@@ -680,6 +722,7 @@ async def test_create_session_with_initial_files():
         "model_id": "model_123",
         "tags": [],
         "capabilities": [],
+        "tools": [],
         "initial_files": [
             {
                 "path": "/workspace/README.md",
@@ -886,6 +929,41 @@ async def test_capabilities_list_with_options():
     assert len(items) == 1
     assert items[0].id == "web_search"
     assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_tool_results_uses_tool_results_endpoint():
+    route = respx.post("https://custom.example.com/api/v1/sessions/session_123/tool-results").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "accepted": 1,
+                "status": "active",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        response = await client.messages.create_tool_results(
+            session_id="session_123",
+            results=[ContentPart.make_tool_result("call_123", {"weather": "sunny"})],
+        )
+    finally:
+        await client.close()
+
+    assert response.accepted == 1
+    assert response.status == "active"
+    assert route.called
+    assert json.loads(route.calls[0].request.content) == {
+        "tool_results": [
+            {
+                "tool_call_id": "call_123",
+                "result": {"weather": "sunny"},
+            }
+        ]
+    }
 
 
 # --- Session Files Tests ---

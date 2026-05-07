@@ -6,7 +6,10 @@
 //! Run: cargo run --bin weather-tools
 //! Run with verbose: cargo run --bin weather-tools -- --verbose
 
-use everruns_sdk::{ContentPart, Everruns, extract_tool_calls};
+use everruns_sdk::{
+    ContentPart, CreateAgentRequest, CreateSessionRequest, Everruns, ToolDefinition,
+    extract_tool_calls,
+};
 use futures::StreamExt;
 
 /// Simulated local weather lookup.
@@ -40,6 +43,24 @@ fn handle_tool_call(call_id: &str, name: &str, arguments: &serde_json::Value) ->
     }
 }
 
+fn weather_tool() -> ToolDefinition {
+    ToolDefinition::client_side(
+        "get_weather",
+        "Get current weather for a city.",
+        serde_json::json!({
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "City name"
+                }
+            },
+            "required": ["city"],
+            "additionalProperties": false
+        }),
+    )
+}
+
 const SYSTEM_PROMPT: &str = "\
 You are a helpful weather assistant. You have access to a tool called `get_weather` \
 that accepts a JSON argument `{\"city\": \"<city name>\"}` and returns current weather. \
@@ -53,26 +74,80 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create agent with tool-aware system prompt
     let agent = client
         .agents()
-        .create("weather-assistant-rs", SYSTEM_PROMPT)
+        .create_with_options(
+            CreateAgentRequest::new("weather-assistant-rs", SYSTEM_PROMPT)
+                .tools(vec![weather_tool()]),
+        )
         .await?;
     println!("Created agent: {}", agent.id);
 
     // Create session
-    let session = client.sessions().create().await?;
+    let session = client
+        .sessions()
+        .create_with_options(
+            CreateSessionRequest::new()
+                .agent_id(&agent.id)
+                .tools(vec![weather_tool()]),
+        )
+        .await?;
     println!("Created session: {}\n", session.id);
 
-    // Send user message
-    client
-        .messages()
-        .create(&session.id, "What's the weather like in Paris?")
-        .await?;
+    let baseline_event_id = client
+        .events()
+        .list(&session.id)
+        .await?
+        .data
+        .last()
+        .map(|event| event.id.clone());
 
     // Stream events and handle tool calls
     use everruns_sdk::sse::StreamOptions;
-    let mut stream = client
-        .events()
-        .stream_with_options(&session.id, StreamOptions::default().with_max_retries(3));
+    let mut options = StreamOptions::default().with_max_retries(3);
+    if let Some(event_id) = baseline_event_id {
+        options = options.with_since_id(event_id);
+    }
+    let event_client = client.clone();
+    let event_session_id = session.id.clone();
+    let event_task = tokio::spawn(async move {
+        handle_events(event_client, event_session_id, options, verbose).await
+    });
+    tokio::time::sleep(std::time::Duration::from_millis(250)).await;
 
+    // Send user message
+    match tokio::time::timeout(
+        std::time::Duration::from_secs(30),
+        client
+            .messages()
+            .create(&session.id, "What's the weather like in Paris?"),
+    )
+    .await
+    {
+        Ok(result) => {
+            result?;
+        }
+        Err(_) => {
+            println!("Timed out waiting for message submission; ending demo.");
+            return Ok(());
+        }
+    }
+
+    match tokio::time::timeout(std::time::Duration::from_secs(60), event_task).await {
+        Ok(joined) => joined
+            .map_err(|err| std::io::Error::other(err.to_string()))?
+            .map_err(std::io::Error::other)?,
+        Err(_) => println!("Timed out waiting for turn completion; ending demo."),
+    }
+
+    Ok(())
+}
+
+async fn handle_events(
+    client: Everruns,
+    session_id: String,
+    options: everruns_sdk::sse::StreamOptions,
+    verbose: bool,
+) -> Result<(), String> {
+    let mut stream = client.events().stream_with_options(&session_id, options);
     while let Some(event) = stream.next().await {
         match event {
             Ok(e) => {
@@ -80,12 +155,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!(
                         "\n[EVENT] {}: {}",
                         e.event_type,
-                        serde_json::to_string_pretty(&e.data)?
+                        serde_json::to_string_pretty(&e.data).map_err(|err| err.to_string())?
                     );
                 }
                 match e.event_type.as_str() {
-                    "output.message.completed" => {
-                        // Check for tool calls in the completed message
+                    "tool.call_requested" => {
                         let tool_calls = extract_tool_calls(&e.data);
                         if !tool_calls.is_empty() {
                             println!("Agent requested {} tool call(s)", tool_calls.len());
@@ -100,10 +174,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             // Send tool results back
                             client
                                 .messages()
-                                .create_tool_results(&session.id, results)
-                                .await?;
+                                .create_tool_results(&session_id, results)
+                                .await
+                                .map_err(|err| err.to_string())?;
                             println!("  <- Sent tool results\n");
-                        } else if let Some(text) = extract_text(&e.data) {
+                        }
+                    }
+                    "output.message.completed" => {
+                        if let Some(text) = extract_text(&e.data) {
                             println!("Assistant: {}", text);
                         }
                     }
@@ -124,7 +202,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-
     Ok(())
 }
 
