@@ -23,6 +23,7 @@ import {
   Event,
   ListEventsOptions,
   ListResponse,
+  ResourceStats,
   ResumeSessionResponse,
   SessionFile,
   StreamOptions,
@@ -227,6 +228,11 @@ class AgentsClient {
 
   async get(agentId: string): Promise<Agent> {
     return this.client.fetch(`/agents/${agentId}`);
+  }
+
+  /** Get aggregate usage stats for an agent. */
+  async stats(agentId: string): Promise<ResourceStats> {
+    return this.client.fetch(`/agents/${agentId}/stats`);
   }
 
   async list(options?: { search?: string }): Promise<Agent[]> {
@@ -528,10 +534,15 @@ class CapabilitiesClient {
     if (options?.offset != null) params.set("offset", String(options.offset));
     if (options?.limit != null) params.set("limit", String(options.limit));
     const query = params.toString() ? `?${params.toString()}` : "";
-    const response = await this.client.fetch<
-      ListResponse<CapabilityInfo>
-    >(`/capabilities${query}`);
-    return { data: response.data, total: response.total ?? 0, offset: response.offset ?? 0, limit: response.limit ?? 0 };
+    const response = await this.client.fetch<ListResponse<CapabilityInfo>>(
+      `/capabilities${query}`,
+    );
+    return {
+      data: response.data,
+      total: response.total ?? 0,
+      offset: response.offset ?? 0,
+      limit: response.limit ?? 0,
+    };
   }
 
   /** Get a specific capability by ID. */
@@ -557,7 +568,12 @@ class SessionFilesClient {
     const response = await this.client.fetch<ListResponse<FileInfo>>(
       `${fsPath}${query}`,
     );
-    return { data: response.data, total: response.total ?? 0, offset: response.offset ?? 0, limit: response.limit ?? 0 };
+    return {
+      data: response.data,
+      total: response.total ?? 0,
+      offset: response.offset ?? 0,
+      limit: response.limit ?? 0,
+    };
   }
 
   /** Read a file's content. */

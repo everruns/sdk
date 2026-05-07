@@ -86,7 +86,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_WithUrls_Agent"
+                  "$ref": "#/components/schemas/PaginatedResponse_WithUrls_ResourceWithCounts_Agent"
                 }
               }
             }
@@ -306,7 +306,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WithUrls_Agent"
+                  "$ref": "#/components/schemas/WithUrls_ResourceWithCounts_Agent"
                 }
               }
             }
@@ -596,6 +596,264 @@
         }
       }
     },
+    "/v1/agents/{agent_id}/stats": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "GET /v1/agents/{agent_id}/stats - Get aggregate usage stats for an agent",
+        "operationId": "get_agent_stats",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Agent ID (prefixed) or name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent aggregate stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceStatsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/a2a/{channel_id}": {
+      "post": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "POST /v1/apps/{app_id}/a2a/{channel_id}",
+        "operationId": "invoke_a2a",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "A2A channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "JSON-RPC 2.0 response (success or A2A error envelope)"
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App is not published or channel disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App or channel not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/a2a/{channel_id}/.well-known/agent-card.json": {
+      "get": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "GET /v1/apps/{app_id}/a2a/{channel_id}/.well-known/agent-card.json",
+        "operationId": "agent_card",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "A2A channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent Card JSON"
+          },
+          "404": {
+            "description": "App or channel not found / unpublished / disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/webhooks/{channel_id}": {
+      "post": {
+        "tags": [
+          "apps"
+        ],
+        "operationId": "invoke_webhook",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "Webhook channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Webhook accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookInvocationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing webhook token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App is not published or channel disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App or channel not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/capabilities": {
       "get": {
         "tags": [
@@ -646,6 +904,26 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -680,7 +958,45 @@
             }
           },
           "404": {
-            "description": "Capability not found"
+            "description": "Capability not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/durable/config": {
+      "get": {
+        "tags": [
+          "durable"
+        ],
+        "summary": "GET /v1/durable/config - Durable policy results for UI gating.",
+        "operationId": "durable_config",
+        "responses": {
+          "200": {
+            "description": "Resource config for durable surfaces",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceConfigResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -1367,6 +1683,30 @@
         }
       }
     },
+    "/v1/harness-examples": {
+      "get": {
+        "tags": [
+          "harness-examples"
+        ],
+        "summary": "GET /v1/harness-examples — list all available harness examples.",
+        "operationId": "list_examples",
+        "responses": {
+          "200": {
+            "description": "List of harness examples",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HarnessExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/harnesses": {
       "get": {
         "tags": [
@@ -1406,7 +1746,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListResponse_WithUrls_Harness"
+                  "$ref": "#/components/schemas/ListResponse_WithUrls_ResourceWithCounts_Harness"
                 }
               }
             }
@@ -1501,6 +1841,69 @@
         }
       }
     },
+    "/v1/harnesses/import": {
+      "post": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "POST /v1/harnesses/import - Adopt a harness example as a regular org-owned harness.",
+        "description": "Creates a normal harness (`is_built_in = false`) from a code-defined\nexample. The new harness inherits from the org's `generic` harness by\nname — no UUIDs are hardcoded. Capabilities and other config flow through\nthe same validation paths as `POST /v1/harnesses`.\n\nReturns 201 on creation. If the example name collides with an existing\nharness in the org, a random alphanumeric suffix is appended (parity with\nagent example import).",
+        "operationId": "import_harness",
+        "parameters": [
+          {
+            "name": "from-example",
+            "in": "query",
+            "description": "Import from a built-in harness example by name (e.g. `data-analyst`).\nRequired: the only currently supported import mode is from-example.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Harness adopted from example",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithUrls_Harness"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or missing capabilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Example not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/harnesses/preview": {
       "post": {
         "tags": [
@@ -1567,7 +1970,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WithUrls_Harness"
+                  "$ref": "#/components/schemas/WithUrls_ResourceWithCounts_Harness"
                 }
               }
             }
@@ -1751,6 +2154,68 @@
           },
           "404": {
             "description": "Source harness not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/harnesses/{harness_id}/stats": {
+      "get": {
+        "tags": [
+          "harnesses"
+        ],
+        "summary": "GET /v1/harnesses/{harness_id}/stats - Get aggregate usage stats for a harness",
+        "operationId": "get_harness_stats",
+        "parameters": [
+          {
+            "name": "harness_id",
+            "in": "path",
+            "description": "Harness ID (prefixed) or name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Harness aggregate stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceStatsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Harness not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1970,6 +2435,521 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/knowledge-bases": {
+      "get": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "list_kbs",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List knowledge bases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_KnowledgeBaseResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "create_kb",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKnowledgeBaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Knowledge base created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeBaseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate knowledge base name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-bases/{kb_id}": {
+      "get": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "get_kb",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Knowledge base found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeBaseResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge base not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "delete_kb",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Knowledge base archived"
+          },
+          "404": {
+            "description": "Knowledge base not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "update_kb",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKnowledgeBaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Knowledge base updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeBaseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge base not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate knowledge base name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-bases/{kb_id}/entries": {
+      "get": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "list_entries",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_KnowledgeEntryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge base not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "create_entry",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKnowledgeEntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Entry created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge base not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-bases/{kb_id}/entries/{entry_id}": {
+      "get": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "get_entry",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entry_id",
+            "in": "path",
+            "description": "Entry ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entry found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeEntryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entry not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "delete_entry",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entry_id",
+            "in": "path",
+            "description": "Entry ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Entry deleted"
+          },
+          "404": {
+            "description": "Entry not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "operationId": "update_entry",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entry_id",
+            "in": "path",
+            "description": "Entry ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKnowledgeEntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Entry updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entry not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -2681,6 +3661,258 @@
         }
       }
     },
+    "/v1/memory-stores": {
+      "get": {
+        "tags": [
+          "memory_stores"
+        ],
+        "operationId": "list_memory_stores",
+        "responses": {
+          "200": {
+            "description": "List org memory stores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_MemoryStoreResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "memory_stores"
+        ],
+        "operationId": "create_memory_store",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMemoryStoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Memory store created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryStoreResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate name or default conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/memory-stores/{store_id}": {
+      "get": {
+        "tags": [
+          "memory_stores"
+        ],
+        "operationId": "get_memory_store",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "path",
+            "description": "Memory store ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Memory store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryStoreResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/memory-stores/{store_id}/memories": {
+      "get": {
+        "tags": [
+          "memory_stores"
+        ],
+        "operationId": "list_memories",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "path",
+            "description": "Memory store ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "include_inactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Memories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMemoriesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Store not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/memory-stores/{store_id}/memories/{memory_id}": {
+      "delete": {
+        "tags": [
+          "memory_stores"
+        ],
+        "operationId": "forget_memory",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "path",
+            "description": "Memory store ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memory_id",
+            "in": "path",
+            "description": "Memory ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Memory deactivated"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/orgs": {
       "get": {
         "tags": [
@@ -3190,6 +4422,47 @@
         }
       }
     },
+    "/v1/sessions/{session_id}/context-report": {
+      "get": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "GET /v1/sessions/{session_id}/context-report - Latest context breakdown",
+        "operationId": "get_session_context_report",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID (prefixed, e.g., session_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session context report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionContextReport"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid session ID"
+          },
+          "404": {
+            "description": "Session not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v1/sessions/{session_id}/databases": {
       "get": {
         "tags": [
@@ -3267,6 +4540,9 @@
           },
           "409": {
             "description": "Database already exists"
+          },
+          "422": {
+            "description": "Session database limit exceeded"
           }
         }
       }
@@ -3645,6 +4921,52 @@
           },
           "409": {
             "description": "Destination exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/sessions/{session_id}/fs/_/download/{path}": {
+      "get": {
+        "tags": [
+          "filesystem"
+        ],
+        "summary": "GET /fs/_/download/*path - Download raw file bytes",
+        "operationId": "download_path",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID (prefixed, e.g., sess_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "File path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Raw file bytes",
+            "content": {
+              "application/octet-stream": {}
+            }
+          },
+          "400": {
+            "description": "Invalid session ID or path points to a directory"
+          },
+          "404": {
+            "description": "File not found"
           },
           "500": {
             "description": "Internal server error"
@@ -4502,6 +5824,85 @@
         }
       }
     },
+    "/v1/sessions/{session_id}/sandbox": {
+      "get": {
+        "tags": [
+          "session-sandbox"
+        ],
+        "operationId": "get_sandbox",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Managed sandbox status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSessionSandboxResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "session-sandbox"
+        ],
+        "operationId": "manage_sandbox",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManageSessionSandboxRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Managed sandbox lifecycle updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManageSessionSandboxResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid action or sandbox not configured"
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    },
     "/v1/sessions/{session_id}/sse": {
       "get": {
         "tags": [
@@ -5158,6 +6559,240 @@
           }
         }
       }
+    },
+    "/v1/volumes": {
+      "get": {
+        "tags": [
+          "volumes"
+        ],
+        "operationId": "list_volumes",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List volumes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_VolumeResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "volumes"
+        ],
+        "operationId": "create_volume",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVolumeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Volume created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate volume name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/volumes/{volume_id}": {
+      "get": {
+        "tags": [
+          "volumes"
+        ],
+        "operationId": "get_volume",
+        "parameters": [
+          {
+            "name": "volume_id",
+            "in": "path",
+            "description": "Volume ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Volume found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Volume not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "volumes"
+        ],
+        "operationId": "delete_volume",
+        "parameters": [
+          {
+            "name": "volume_id",
+            "in": "path",
+            "description": "Volume ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Volume archived"
+          },
+          "404": {
+            "description": "Volume not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "volumes"
+        ],
+        "operationId": "update_volume",
+        "parameters": [
+          {
+            "name": "volume_id",
+            "in": "path",
+            "description": "Volume ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVolumeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Volume updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Volume not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate volume name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5310,6 +6945,10 @@
             "description": "Maximum number of LLM iterations per turn for this agent.",
             "minimum": 0
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap",
+            "description": "Remote MCP servers scoped to this agent and inherited by its sessions."
+          },
           "name": {
             "type": "string",
             "description": "Name, unique per org (e.g. \"customer-support\")."
@@ -5410,6 +7049,54 @@
           "archived",
           "deleted"
         ]
+      },
+      "BTreeMap": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "description": "Session-, agent-, or harness-scoped remote MCP server configuration.\n\nThis intentionally mirrors the `mcpServers` object shape used by common MCP\nclient config files while staying within Everruns' current remote-HTTP-only\nsupport.",
+          "required": [
+            "url"
+          ],
+          "properties": {
+            "auth_mode": {
+              "$ref": "#/components/schemas/McpServerAuthMode",
+              "description": "Authentication mode used when executing tools from this scoped server."
+            },
+            "headers": {
+              "type": "object",
+              "description": "Additional HTTP headers sent on MCP requests.",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "propertyNames": {
+                "type": "string"
+              }
+            },
+            "oauth_provider_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Provider id used to resolve a user-scoped bearer token."
+            },
+            "tool_discovery": {
+              "type": "boolean",
+              "description": "Whether to discover tool definitions live from this server."
+            },
+            "type": {
+              "$ref": "#/components/schemas/McpServerTransportType",
+              "description": "MCP transport type. Only remote HTTP is supported today."
+            },
+            "url": {
+              "type": "string",
+              "description": "URL of the remote MCP server endpoint."
+            }
+          }
+        },
+        "propertyNames": {
+          "type": "string"
+        }
       },
       "BudgetEventData": {
         "type": "object",
@@ -5541,12 +7228,26 @@
           "status"
         ],
         "properties": {
+          "agent_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of active agents referencing this capability in the org.",
+            "minimum": 0
+          },
           "category": {
             "type": [
               "string",
               "null"
             ],
             "description": "Category for grouping in UI"
+          },
+          "config_schema": {
+            "type": "object",
+            "description": "JSON Schema for capability-specific per-agent config."
+          },
+          "config_ui_schema": {
+            "type": "object",
+            "description": "react-jsonschema-form uiSchema hints for rendering config_schema."
           },
           "dependencies": {
             "type": "array",
@@ -5559,12 +7260,25 @@
             "type": "string",
             "description": "Description of what this capability provides"
           },
+          "docs_slug": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Slug under https://dev.everruns.com/capabilities/ when public docs exist."
+          },
           "features": {
             "type": "array",
             "items": {
               "type": "string"
             },
             "description": "UI feature strings this capability contributes to.\nMultiple capabilities can contribute the same feature."
+          },
+          "harness_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of active harnesses referencing this capability in the org.",
+            "minimum": 0
           },
           "icon": {
             "type": [
@@ -5953,6 +7667,58 @@
           }
         }
       },
+      "ContextReportContribution": {
+        "type": "object",
+        "required": [
+          "section_key",
+          "source_id",
+          "label",
+          "tokens"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "section_key": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "ContextReportSection": {
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "tokens",
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
       "Controls": {
         "type": "object",
         "description": "Runtime controls for message processing",
@@ -6116,6 +7882,10 @@
             "description": "Maximum number of LLM iterations per turn for this agent.",
             "minimum": 0
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap",
+            "description": "Remote MCP servers scoped to this agent."
+          },
           "name": {
             "type": "string",
             "description": "Name, unique per org. Lowercase alphanumeric and hyphens.\nFormat: lowercase alphanumeric and hyphens (e.g. \"customer-support\").",
@@ -6278,6 +8048,10 @@
             },
             "description": "Starter files copied into each new session for this harness."
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap",
+            "description": "Remote MCP servers scoped to this harness."
+          },
           "name": {
             "type": "string",
             "description": "Name, unique per org. Lowercase alphanumeric and hyphens.",
@@ -6317,6 +8091,53 @@
               "research",
               "planning"
             ]
+          }
+        }
+      },
+      "CreateKnowledgeBaseRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateKnowledgeEntryRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tags": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
           }
         }
       },
@@ -6456,6 +8277,20 @@
             "type": "string",
             "description": "The URL of the MCP server endpoint.",
             "example": "https://mcp.atlassian.com/v1/mcp"
+          }
+        }
+      },
+      "CreateMemoryStoreRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -6665,6 +8500,10 @@
             "description": "Maximum number of LLM iterations per turn for this session.",
             "minimum": 0
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap",
+            "description": "Remote MCP servers scoped to this session only."
+          },
           "model_id": {
             "type": [
               "string",
@@ -6730,6 +8569,23 @@
             "type": "string",
             "description": "Full SKILL.md content (YAML frontmatter + markdown body)",
             "example": "---\nname: pdf-processing\ndescription: Extract text from PDFs.\n---\n\n# PDF Processing\n\nUse pdfplumber..."
+          }
+        }
+      },
+      "CreateVolumeRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -6950,6 +8806,9 @@
           },
           {
             "$ref": "#/components/schemas/OutputMessageStartedData"
+          },
+          {
+            "$ref": "#/components/schemas/OutputMessageReplacedData"
           },
           {
             "$ref": "#/components/schemas/OutputMessageCompletedData"
@@ -7254,6 +9113,82 @@
         ],
         "description": "Unified response for GET that can be file or directory listing"
       },
+      "GetSessionSandboxResponse": {
+        "type": "object",
+        "required": [
+          "configured",
+          "exists"
+        ],
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exists": {
+            "type": "boolean"
+          },
+          "external_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "init_completed_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_init_error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_status": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SessionSandboxStatusValue"
+              }
+            ]
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "workspace_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "GitCommitInfo": {
         "type": "object",
         "description": "A commit entry in the log",
@@ -7518,6 +9453,10 @@
             "type": "boolean",
             "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap",
+            "description": "Remote MCP servers scoped to this harness and inherited by descendant layers."
+          },
           "name": {
             "type": "string",
             "description": "Name, unique per org (e.g. \"generic\")."
@@ -7560,6 +9499,57 @@
             "type": "string",
             "format": "date-time",
             "description": "Timestamp when the harness was last updated."
+          }
+        }
+      },
+      "HarnessExample": {
+        "type": "object",
+        "description": "A read-only harness example defined in code.",
+        "required": [
+          "name",
+          "display_name",
+          "description",
+          "tags",
+          "capabilities",
+          "dev_only"
+        ],
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentCapabilityConfig"
+            },
+            "description": "Capabilities the example will assign with their per-harness config."
+          },
+          "description": {
+            "type": "string",
+            "description": "Short description."
+          },
+          "dev_only": {
+            "type": "boolean",
+            "description": "Whether this example is only available when experimental features are on."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Human-readable display name (e.g. `Data Analyst`)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Unique slug (e.g. `data-analyst`)."
+          },
+          "parent_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Name of the parent harness this example inherits from when adopted\n(e.g. `generic`). Resolved per-org at import time — no UUIDs are\nhardcoded."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorization."
           }
         }
       },
@@ -7660,7 +9650,7 @@
           },
           "id": {
             "type": "string",
-            "format": "uuid"
+            "example": "img_01933b5a00007000800000000000001"
           },
           "metadata": {},
           "size_bytes": {
@@ -7692,7 +9682,7 @@
           },
           "id": {
             "type": "string",
-            "format": "uuid"
+            "example": "img_01933b5a00007000800000000000001"
           },
           "size_bytes": {
             "type": "integer",
@@ -7861,6 +9851,102 @@
           }
         }
       },
+      "KnowledgeBaseResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "archived_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "example": "kb_01933b5a000070008000000000000001"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "KnowledgeEntryResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "kb_id",
+          "title",
+          "body",
+          "kind",
+          "tags",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "example": "kbe_01933b5a000070008000000000000001"
+          },
+          "kb_id": {
+            "type": "string",
+            "example": "kb_01933b5a000070008000000000000001"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "LeasedResource": {
         "type": "object",
         "description": "A lifecycle-managed external resource owned by a session-capable workflow.",
@@ -8020,6 +10106,98 @@
           }
         }
       },
+      "ListKnowledgeBasesQuery": {
+        "type": "object",
+        "properties": {
+          "include_archived": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "search": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ListKnowledgeEntriesQuery": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "search": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ListMemoriesQuery": {
+        "type": "object",
+        "properties": {
+          "include_inactive": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "query": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tag": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ListMemoriesResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "total"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryResponse"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "ListResponse_Agent": {
         "type": "object",
         "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
@@ -8111,6 +10289,10 @@
                   "description": "Maximum number of LLM iterations per turn for this agent.",
                   "minimum": 0
                 },
+                "mcpServers": {
+                  "$ref": "#/components/schemas/BTreeMap",
+                  "description": "Remote MCP servers scoped to this agent and inherited by its sessions."
+                },
                 "name": {
                   "type": "string",
                   "description": "Name, unique per org (e.g. \"customer-support\")."
@@ -8189,12 +10371,26 @@
                 "status"
               ],
               "properties": {
+                "agent_count": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Number of active agents referencing this capability in the org.",
+                  "minimum": 0
+                },
                 "category": {
                   "type": [
                     "string",
                     "null"
                   ],
                   "description": "Category for grouping in UI"
+                },
+                "config_schema": {
+                  "type": "object",
+                  "description": "JSON Schema for capability-specific per-agent config."
+                },
+                "config_ui_schema": {
+                  "type": "object",
+                  "description": "react-jsonschema-form uiSchema hints for rendering config_schema."
                 },
                 "dependencies": {
                   "type": "array",
@@ -8207,12 +10403,25 @@
                   "type": "string",
                   "description": "Description of what this capability provides"
                 },
+                "docs_slug": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Slug under https://dev.everruns.com/capabilities/ when public docs exist."
+                },
                 "features": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   },
                   "description": "UI feature strings this capability contributes to.\nMultiple capabilities can contribute the same feature."
+                },
+                "harness_count": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Number of active harnesses referencing this capability in the org.",
+                  "minimum": 0
                 },
                 "icon": {
                   "type": [
@@ -8564,6 +10773,10 @@
                   "type": "boolean",
                   "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
                 },
+                "mcpServers": {
+                  "$ref": "#/components/schemas/BTreeMap",
+                  "description": "Remote MCP servers scoped to this harness and inherited by descendant layers."
+                },
                 "name": {
                   "type": "string",
                   "description": "Name, unique per org (e.g. \"generic\")."
@@ -8647,6 +10860,128 @@
                 "value": {
                   "type": "string",
                   "description": "The stored value"
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
+      "ListResponse_KnowledgeBaseResponse": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "status",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "example": "kb_01933b5a000070008000000000000001"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
+      "ListResponse_KnowledgeEntryResponse": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kb_id",
+                "title",
+                "body",
+                "kind",
+                "tags",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "body": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "id": {
+                  "type": "string",
+                  "example": "kbe_01933b5a000070008000000000000001"
+                },
+                "kb_id": {
+                  "type": "string",
+                  "example": "kb_01933b5a000070008000000000000001"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "title": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
                 }
               }
             },
@@ -8758,6 +11093,54 @@
                   "type": "string",
                   "description": "URL of the MCP server endpoint.",
                   "example": "https://mcp.atlassian.com/v1/mcp"
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
+      "ListResponse_MemoryStoreResponse": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "is_default",
+                "active_memory_count",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "active_memory_count": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "id": {
+                  "type": "string",
+                  "example": "mst_01933b5a000070008000000000000001"
+                },
+                "is_default": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
                 }
               }
             },
@@ -9115,7 +11498,7 @@
           }
         }
       },
-      "ListResponse_WithUrls_Harness": {
+      "ListResponse_VolumeResponse": {
         "type": "object",
         "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
         "required": [
@@ -9125,149 +11508,54 @@
           "data": {
             "type": "array",
             "items": {
-              "allOf": [
-                {
-                  "type": "object",
-                  "description": "Harness configuration for sessions.\nA harness defines the base behavior and capabilities that apply to all sessions.",
-                  "required": [
-                    "id",
-                    "name",
-                    "system_prompt",
-                    "status",
-                    "created_at",
-                    "updated_at"
-                  ],
-                  "properties": {
-                    "archived_at": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "date-time",
-                      "description": "Timestamp when the harness was archived."
-                    },
-                    "capabilities": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/AgentCapabilityConfig"
-                      },
-                      "description": "Capabilities enabled for this harness with per-harness configuration."
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the harness was created."
-                    },
-                    "default_model_id": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Default LLM model ID for this harness.\nLowest priority in chain: controls > session > agent > harness.",
-                      "example": "model_01933b5a00007000800000000000001"
-                    },
-                    "deleted_at": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "date-time",
-                      "description": "Timestamp when the harness was deleted."
-                    },
-                    "description": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Human-readable description of what the harness does."
-                    },
-                    "display_name": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Human-readable display name shown in UI."
-                    },
-                    "id": {
-                      "type": "string",
-                      "description": "Unique identifier for the harness (format: harness_{32-hex}).",
-                      "example": "harness_01933b5a00007000800000000000001"
-                    },
-                    "initial_files": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/InitialFile"
-                      },
-                      "description": "Starter files copied into each new session for this harness."
-                    },
-                    "is_built_in": {
-                      "type": "boolean",
-                      "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Name, unique per org (e.g. \"generic\")."
-                    },
-                    "network_access": {
-                      "oneOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "$ref": "#/components/schemas/NetworkAccessList",
-                          "description": "Network access list controlling which hosts/URLs sessions can reach.\nMerged with agent and session layers (allowed: intersect, blocked: union)."
-                        }
-                      ]
-                    },
-                    "parent_harness_id": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Optional parent harness that this harness inherits from.",
-                      "example": "harness_01933b5a000070008000000000000602"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/HarnessStatus",
-                      "description": "Current lifecycle status of the harness."
-                    },
-                    "system_prompt": {
-                      "type": "string",
-                      "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack."
-                    },
-                    "tags": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Tags for organizing and filtering harnesses."
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the harness was last updated."
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "self_url",
-                    "view_url"
-                  ],
-                  "properties": {
-                    "self_url": {
-                      "type": "string",
-                      "description": "Full API endpoint URL for this resource."
-                    },
-                    "view_url": {
-                      "type": "string",
-                      "description": "Full UI URL for viewing this resource."
-                    }
-                  }
-                }
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "status",
+                "created_at",
+                "updated_at"
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "properties": {
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "example": "vol_01933b5a000070008000000000000001"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
             },
             "description": "Array of items returned by the list operation."
           }
@@ -9295,7 +11583,6 @@
                     "capabilities",
                     "is_favorite",
                     "enabled",
-                    "status",
                     "source",
                     "created_at",
                     "updated_at"
@@ -9336,9 +11623,6 @@
                       "$ref": "#/components/schemas/LlmModelSource",
                       "description": "How the model was added to the system"
                     },
-                    "status": {
-                      "$ref": "#/components/schemas/LlmModelStatus"
-                    },
                     "updated_at": {
                       "type": "string",
                       "format": "date-time"
@@ -9349,12 +11633,17 @@
                   "type": "object",
                   "required": [
                     "self_url",
-                    "view_url"
+                    "view_url",
+                    "ui_link"
                   ],
                   "properties": {
                     "self_url": {
                       "type": "string",
                       "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
                     },
                     "view_url": {
                       "type": "string",
@@ -9363,7 +11652,7 @@
                   }
                 }
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
             },
             "description": "Array of items returned by the list operation."
           }
@@ -9391,12 +11680,12 @@
                     "capabilities",
                     "is_favorite",
                     "enabled",
-                    "status",
                     "source",
                     "created_at",
                     "updated_at",
                     "provider_name",
-                    "provider_type"
+                    "provider_type",
+                    "healthy"
                   ],
                   "properties": {
                     "capabilities": {
@@ -9415,6 +11704,10 @@
                     "enabled": {
                       "type": "boolean",
                       "description": "Whether this model is enabled (visible in UI model pickers)"
+                    },
+                    "healthy": {
+                      "type": "boolean",
+                      "description": "Derived: model is configured and ready for use. Currently means the\njoined provider is active and has an API key set; over time this may\nalso incorporate live reachability checks. Not persisted."
                     },
                     "id": {
                       "type": "string",
@@ -9451,9 +11744,6 @@
                       "$ref": "#/components/schemas/LlmModelSource",
                       "description": "How the model was added to the system"
                     },
-                    "status": {
-                      "$ref": "#/components/schemas/LlmModelStatus"
-                    },
                     "updated_at": {
                       "type": "string",
                       "format": "date-time"
@@ -9464,12 +11754,17 @@
                   "type": "object",
                   "required": [
                     "self_url",
-                    "view_url"
+                    "view_url",
+                    "ui_link"
                   ],
                   "properties": {
                     "self_url": {
                       "type": "string",
                       "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
                     },
                     "view_url": {
                       "type": "string",
@@ -9478,7 +11773,7 @@
                   }
                 }
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
             },
             "description": "Array of items returned by the list operation."
           }
@@ -9553,12 +11848,17 @@
                   "type": "object",
                   "required": [
                     "self_url",
-                    "view_url"
+                    "view_url",
+                    "ui_link"
                   ],
                   "properties": {
                     "self_url": {
                       "type": "string",
                       "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
                     },
                     "view_url": {
                       "type": "string",
@@ -9567,7 +11867,7 @@
                   }
                 }
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
             },
             "description": "Array of items returned by the list operation."
           }
@@ -9686,12 +11986,17 @@
                   "type": "object",
                   "required": [
                     "self_url",
-                    "view_url"
+                    "view_url",
+                    "ui_link"
                   ],
                   "properties": {
                     "self_url": {
                       "type": "string",
                       "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
                     },
                     "view_url": {
                       "type": "string",
@@ -9700,7 +12005,200 @@
                   }
                 }
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
+      "ListResponse_WithUrls_ResourceWithCounts_Harness": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "Harness configuration for sessions.\nA harness defines the base behavior and capabilities that apply to all sessions.",
+                      "required": [
+                        "id",
+                        "name",
+                        "system_prompt",
+                        "status",
+                        "created_at",
+                        "updated_at"
+                      ],
+                      "properties": {
+                        "archived_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "Timestamp when the harness was archived."
+                        },
+                        "capabilities": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AgentCapabilityConfig"
+                          },
+                          "description": "Capabilities enabled for this harness with per-harness configuration."
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Timestamp when the harness was created."
+                        },
+                        "default_model_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Default LLM model ID for this harness.\nLowest priority in chain: controls > session > agent > harness.",
+                          "example": "model_01933b5a00007000800000000000001"
+                        },
+                        "deleted_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "Timestamp when the harness was deleted."
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Human-readable description of what the harness does."
+                        },
+                        "display_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Human-readable display name shown in UI."
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "Unique identifier for the harness (format: harness_{32-hex}).",
+                          "example": "harness_01933b5a00007000800000000000001"
+                        },
+                        "initial_files": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/InitialFile"
+                          },
+                          "description": "Starter files copied into each new session for this harness."
+                        },
+                        "is_built_in": {
+                          "type": "boolean",
+                          "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
+                        },
+                        "mcpServers": {
+                          "$ref": "#/components/schemas/BTreeMap",
+                          "description": "Remote MCP servers scoped to this harness and inherited by descendant layers."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Name, unique per org (e.g. \"generic\")."
+                        },
+                        "network_access": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "$ref": "#/components/schemas/NetworkAccessList",
+                              "description": "Network access list controlling which hosts/URLs sessions can reach.\nMerged with agent and session layers (allowed: intersect, blocked: union)."
+                            }
+                          ]
+                        },
+                        "parent_harness_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Optional parent harness that this harness inherits from.",
+                          "example": "harness_01933b5a000070008000000000000602"
+                        },
+                        "status": {
+                          "$ref": "#/components/schemas/HarnessStatus",
+                          "description": "Current lifecycle status of the harness."
+                        },
+                        "system_prompt": {
+                          "type": "string",
+                          "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack."
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Tags for organizing and filtering harnesses."
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Timestamp when the harness was last updated."
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "session_count",
+                        "app_count"
+                      ],
+                      "properties": {
+                        "app_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of non-deleted apps using this resource.",
+                          "minimum": 0
+                        },
+                        "session_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of sessions using this resource.",
+                          "minimum": 0
+                        }
+                      }
+                    }
+                  ],
+                  "description": "Wrapper that flattens lightweight relationship counts into resource responses."
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "self_url",
+                    "view_url",
+                    "ui_link"
+                  ],
+                  "properties": {
+                    "self_url": {
+                      "type": "string",
+                      "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
+                    },
+                    "view_url": {
+                      "type": "string",
+                      "description": "Full UI URL for viewing this resource."
+                    }
+                  }
+                }
+              ],
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
             },
             "description": "Array of items returned by the list operation."
           }
@@ -9813,12 +12311,17 @@
                   "type": "object",
                   "required": [
                     "self_url",
-                    "view_url"
+                    "view_url",
+                    "ui_link"
                   ],
                   "properties": {
                     "self_url": {
                       "type": "string",
                       "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
                     },
                     "view_url": {
                       "type": "string",
@@ -9827,7 +12330,7 @@
                   }
                 }
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
             },
             "description": "Array of items returned by the list operation."
           }
@@ -9880,6 +12383,23 @@
               "null"
             ],
             "description": "Search query to filter by name or email"
+          }
+        }
+      },
+      "ListVolumesQuery": {
+        "type": "object",
+        "properties": {
+          "include_archived": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "search": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -10012,6 +12532,17 @@
             ],
             "description": "Provider type (openai, anthropic, etc.)"
           },
+          "request_options": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LlmRequestOptions",
+                "description": "Request-side driver options that were enabled for this generation."
+              }
+            ]
+          },
           "response_id": {
             "type": [
               "string",
@@ -10087,7 +12618,6 @@
           "capabilities",
           "is_favorite",
           "enabled",
-          "status",
           "source",
           "created_at",
           "updated_at"
@@ -10127,9 +12657,6 @@
           "source": {
             "$ref": "#/components/schemas/LlmModelSource",
             "description": "How the model was added to the system"
-          },
-          "status": {
-            "$ref": "#/components/schemas/LlmModelStatus"
           },
           "updated_at": {
             "type": "string",
@@ -10344,7 +12871,7 @@
           },
           "supports_phases": {
             "type": "boolean",
-            "description": "Whether the model supports native execution phases (\"commentary\" / \"final_answer\").\nWhen true, the driver sends the `phase` field on assistant messages in the wire format.\nCurrently supported by GPT-5.4+ via OpenAI Responses API."
+            "description": "Whether the model supports native execution phases (\"commentary\" / \"final_answer\").\nWhen true, the driver sends the `phase` field on assistant messages in the wire format.\nCurrently supported by GPT-5.4 and newer via OpenAI Responses API."
           },
           "temperature": {
             "type": "boolean",
@@ -10356,7 +12883,7 @@
           },
           "tool_search": {
             "type": "boolean",
-            "description": "Whether the model supports tool_search (deferred tool loading).\nWhen true, the driver can use namespaces and defer_loading to reduce\ntoken usage for large tool sets. Currently supported by GPT-5.4+."
+            "description": "Whether the model supports tool_search (deferred tool loading).\nWhen true, the driver can use namespaces and defer_loading to reduce\ntoken usage for large tool sets. Currently supported by GPT-5.4 and newer."
           }
         }
       },
@@ -10367,14 +12894,6 @@
           "manual",
           "discovered",
           "predefined"
-        ]
-      },
-      "LlmModelStatus": {
-        "type": "string",
-        "description": "LLM model status",
-        "enum": [
-          "active",
-          "disabled"
         ]
       },
       "LlmModelWithProvider": {
@@ -10388,12 +12907,12 @@
           "capabilities",
           "is_favorite",
           "enabled",
-          "status",
           "source",
           "created_at",
           "updated_at",
           "provider_name",
-          "provider_type"
+          "provider_type",
+          "healthy"
         ],
         "properties": {
           "capabilities": {
@@ -10412,6 +12931,10 @@
           "enabled": {
             "type": "boolean",
             "description": "Whether this model is enabled (visible in UI model pickers)"
+          },
+          "healthy": {
+            "type": "boolean",
+            "description": "Derived: model is configured and ready for use. Currently means the\njoined provider is active and has an API key set; over time this may\nalso incorporate live reachability checks. Not persisted."
           },
           "id": {
             "type": "string",
@@ -10448,12 +12971,34 @@
             "$ref": "#/components/schemas/LlmModelSource",
             "description": "How the model was added to the system"
           },
-          "status": {
-            "$ref": "#/components/schemas/LlmModelStatus"
-          },
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "LlmPromptCacheInfo": {
+        "type": "object",
+        "description": "Request-side prompt cache settings for an LLM generation.",
+        "required": [
+          "enabled",
+          "strategy"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether prompt caching was enabled on the request."
+          },
+          "provider_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Provider-specific prompt-cache mode used by the driver."
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/PromptCacheStrategy",
+            "description": "Strategy used to enable prompt caching."
           }
         }
       },
@@ -10524,11 +13069,48 @@
         "description": "LLM provider type",
         "enum": [
           "openai",
+          "azure_openai",
           "openai_completions",
           "anthropic",
           "gemini",
           "llmsim"
         ]
+      },
+      "LlmRequestOptions": {
+        "type": "object",
+        "description": "Request options applied to an LLM generation.\n\nThese fields capture request-side intent such as prompt caching or deferred\ntool loading. They complement `usage`, which captures what actually happened.",
+        "properties": {
+          "prompt_cache": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LlmPromptCacheInfo",
+                "description": "Prompt caching configuration for this request."
+              }
+            ]
+          },
+          "provider_options": {
+            "type": "object",
+            "description": "Provider-specific request options that do not warrant dedicated fields.",
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "tool_search": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LlmToolSearchInfo",
+                "description": "Deferred tool-loading configuration for this request."
+              }
+            ]
+          }
+        }
       },
       "LlmRetryInfo": {
         "type": "object",
@@ -10552,6 +13134,25 @@
           }
         }
       },
+      "LlmToolSearchInfo": {
+        "type": "object",
+        "description": "Request-side tool_search settings for an LLM generation.",
+        "required": [
+          "enabled",
+          "threshold"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether tool_search was enabled on the request."
+          },
+          "threshold": {
+            "type": "integer",
+            "description": "Minimum number of tools before deferred loading activates.",
+            "minimum": 0
+          }
+        }
+      },
       "LogQuery": {
         "type": "object",
         "description": "Query for log endpoint",
@@ -10570,6 +13171,70 @@
               "null"
             ],
             "description": "Ref to start from (default: HEAD)"
+          }
+        }
+      },
+      "ManageSessionSandboxRequest": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/SessionSandboxAction"
+          }
+        }
+      },
+      "ManageSessionSandboxResponse": {
+        "type": "object",
+        "required": [
+          "action",
+          "exists",
+          "deleted"
+        ],
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/SessionSandboxAction"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "display_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exists": {
+            "type": "boolean"
+          },
+          "external_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "session_status": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SessionSandboxStatusValue"
+              }
+            ]
+          },
+          "workspace_path": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -10724,6 +13389,94 @@
               "boolean",
               "null"
             ]
+          }
+        }
+      },
+      "MemoryResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "store_id",
+          "content",
+          "content_parts",
+          "kind",
+          "importance",
+          "tags",
+          "active",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "content": {
+            "type": "string"
+          },
+          "content_parts": {},
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "example": "mem_01933b5a000070008000000000000001"
+          },
+          "importance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "store_id": {
+            "type": "string",
+            "example": "mst_01933b5a000070008000000000000001"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MemoryStoreResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "is_default",
+          "active_memory_count",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "active_memory_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "example": "mst_01933b5a000070008000000000000001"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -10960,6 +13713,20 @@
           "message"
         ],
         "properties": {
+          "error_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Stable error code for user-facing failures surfaced as assistant text."
+          },
+          "error_fields": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Structured interpolation fields for localized error rendering."
+          },
           "message": {
             "$ref": "#/components/schemas/Message",
             "description": "The agent message"
@@ -11008,6 +13775,40 @@
           "turn_id": {
             "type": "string",
             "description": "Turn ID this delta belongs to",
+            "example": "turn_01933b5a00007000800000000000001"
+          }
+        }
+      },
+      "OutputMessageReplacedData": {
+        "type": "object",
+        "description": "Data for `output.message.replaced` event.\n\nEmitted between the last (suppressed) `output.message.delta` and the final\n`output.message.completed`. Tells the client to discard everything it has\naccumulated for `turn_id` and use `replacement` as the assistant message\ntext. The original model output is never persisted or replayed.",
+        "required": [
+          "turn_id",
+          "guardrail_capability_id",
+          "guardrail_id",
+          "reason_code",
+          "replacement"
+        ],
+        "properties": {
+          "guardrail_capability_id": {
+            "type": "string",
+            "description": "Stable ID of the capability that contributed the guardrail\n(e.g. `\"prompt_canary_guardrail\"`)."
+          },
+          "guardrail_id": {
+            "type": "string",
+            "description": "Stable ID of the guardrail itself (e.g. `\"prompt_canary\"`)."
+          },
+          "reason_code": {
+            "type": "string",
+            "description": "Stable machine-readable reason code (e.g. `\"system_prompt_leak\"`).\nClients localize their copy from this rather than the human text."
+          },
+          "replacement": {
+            "type": "string",
+            "description": "Replacement text shown to the user and stored as the assistant message."
+          },
+          "turn_id": {
+            "type": "string",
+            "description": "Turn ID this replacement belongs to.",
             "example": "turn_01933b5a00007000800000000000001"
           }
         }
@@ -11061,6 +13862,7 @@
                 "id",
                 "organization_id",
                 "harness_id",
+                "owner_principal_id",
                 "status",
                 "created_at",
                 "updated_at"
@@ -11112,6 +13914,17 @@
                   "type": "string",
                   "format": "date-time",
                   "description": "Timestamp when the session was created."
+                },
+                "effective_owner": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PrincipalSummary",
+                      "description": "Effective human owner summary."
+                    }
+                  ]
                 },
                 "features": {
                   "type": "array",
@@ -11178,6 +13991,10 @@
                   "description": "Maximum number of LLM iterations per turn for this session.",
                   "minimum": 0
                 },
+                "mcpServers": {
+                  "$ref": "#/components/schemas/BTreeMap",
+                  "description": "Remote MCP servers scoped to this session only."
+                },
                 "model_id": {
                   "type": [
                     "string",
@@ -11209,6 +14026,22 @@
                   ],
                   "description": "Preview text from the last assistant response (truncated)."
                 },
+                "owner": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PrincipalSummary",
+                      "description": "Owning principal summary."
+                    }
+                  ]
+                },
+                "owner_principal_id": {
+                  "type": "string",
+                  "description": "Owning principal for this session.",
+                  "example": "principal_01933b5a000070008000000000000001"
+                },
                 "parent_session_id": {
                   "type": [
                     "string",
@@ -11222,6 +14055,14 @@
                     "null"
                   ],
                   "description": "Preview text from the first user message (truncated)."
+                },
+                "resolved_owner_user_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uuid",
+                  "description": "Denormalized effective human owner of the owning principal lineage."
                 },
                 "started_at": {
                   "type": [
@@ -11328,199 +14169,6 @@
           }
         }
       },
-      "PaginatedResponse_WithUrls_Agent": {
-        "type": "object",
-        "description": "Response wrapper for paginated list endpoints.\nIncludes pagination metadata along with the data array.",
-        "required": [
-          "data",
-          "total",
-          "offset",
-          "limit"
-        ],
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "allOf": [
-                {
-                  "type": "object",
-                  "description": "Agent configuration for agentic loop.\nAn agent defines the behavior and capabilities of an AI assistant.",
-                  "required": [
-                    "id",
-                    "name",
-                    "system_prompt",
-                    "status",
-                    "created_at",
-                    "updated_at"
-                  ],
-                  "properties": {
-                    "archived_at": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "date-time",
-                      "description": "Timestamp when the agent was archived."
-                    },
-                    "capabilities": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/AgentCapabilityConfig"
-                      },
-                      "description": "Capabilities enabled for this agent with per-agent configuration.\nCapabilities add tools and system prompt modifications."
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the agent was created."
-                    },
-                    "default_model_id": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Default LLM model ID for this agent.\nCan be overridden at the session level.",
-                      "example": "model_01933b5a00007000800000000000001"
-                    },
-                    "deleted_at": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "format": "date-time",
-                      "description": "Timestamp when the agent was deleted."
-                    },
-                    "description": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Human-readable description of what the agent does."
-                    },
-                    "display_name": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Human-readable display name shown in UI (e.g. \"Customer Support Agent\").\nFalls back to `name` when absent."
-                    },
-                    "id": {
-                      "type": "string",
-                      "description": "External identifier (agent_<32-hex>). Shown as \"id\" in API.\nClient-supplied or auto-generated.",
-                      "example": "agent_01933b5a000070008000000000000001"
-                    },
-                    "initial_files": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/InitialFile"
-                      },
-                      "description": "Starter files copied into each new session for this agent."
-                    },
-                    "max_iterations": {
-                      "type": [
-                        "integer",
-                        "null"
-                      ],
-                      "description": "Maximum number of LLM iterations per turn for this agent.",
-                      "minimum": 0
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Name, unique per org (e.g. \"customer-support\")."
-                    },
-                    "network_access": {
-                      "oneOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "$ref": "#/components/schemas/NetworkAccessList",
-                          "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
-                        }
-                      ]
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/AgentStatus",
-                      "description": "Current lifecycle status of the agent."
-                    },
-                    "system_prompt": {
-                      "type": "string",
-                      "description": "System prompt that defines the agent's behavior.\nSent as the first message in every conversation."
-                    },
-                    "tags": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Tags for organizing and filtering agents."
-                    },
-                    "tools": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ToolDefinition"
-                      },
-                      "description": "Client-side tools registered for this agent.\nThese tools are executed by the client, not the server."
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the agent was last updated."
-                    },
-                    "usage": {
-                      "oneOf": [
-                        {
-                          "type": "null"
-                        },
-                        {
-                          "$ref": "#/components/schemas/TokenUsage",
-                          "description": "Cumulative token usage across all sessions for this agent."
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "self_url",
-                    "view_url"
-                  ],
-                  "properties": {
-                    "self_url": {
-                      "type": "string",
-                      "description": "Full API endpoint URL for this resource."
-                    },
-                    "view_url": {
-                      "type": "string",
-                      "description": "Full UI URL for viewing this resource."
-                    }
-                  }
-                }
-              ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
-            },
-            "description": "Array of items returned by the list operation."
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Maximum number of items per page.",
-            "minimum": 0
-          },
-          "offset": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Current offset (starting position).",
-            "minimum": 0
-          },
-          "total": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Total number of items matching the query (across all pages).",
-            "minimum": 0
-          }
-        }
-      },
       "PaginatedResponse_WithUrls_CapabilityInfo": {
         "type": "object",
         "description": "Response wrapper for paginated list endpoints.\nIncludes pagination metadata along with the data array.",
@@ -11545,12 +14193,26 @@
                     "status"
                   ],
                   "properties": {
+                    "agent_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of active agents referencing this capability in the org.",
+                      "minimum": 0
+                    },
                     "category": {
                       "type": [
                         "string",
                         "null"
                       ],
                       "description": "Category for grouping in UI"
+                    },
+                    "config_schema": {
+                      "type": "object",
+                      "description": "JSON Schema for capability-specific per-agent config."
+                    },
+                    "config_ui_schema": {
+                      "type": "object",
+                      "description": "react-jsonschema-form uiSchema hints for rendering config_schema."
                     },
                     "dependencies": {
                       "type": "array",
@@ -11563,12 +14225,25 @@
                       "type": "string",
                       "description": "Description of what this capability provides"
                     },
+                    "docs_slug": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Slug under https://dev.everruns.com/capabilities/ when public docs exist."
+                    },
                     "features": {
                       "type": "array",
                       "items": {
                         "type": "string"
                       },
                       "description": "UI feature strings this capability contributes to.\nMultiple capabilities can contribute the same feature."
+                    },
+                    "harness_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of active harnesses referencing this capability in the org.",
+                      "minimum": 0
                     },
                     "icon": {
                       "type": [
@@ -11621,12 +14296,17 @@
                   "type": "object",
                   "required": [
                     "self_url",
-                    "view_url"
+                    "view_url",
+                    "ui_link"
                   ],
                   "properties": {
                     "self_url": {
                       "type": "string",
                       "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
                     },
                     "view_url": {
                       "type": "string",
@@ -11635,7 +14315,235 @@
                   }
                 }
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+            },
+            "description": "Array of items returned by the list operation."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Maximum number of items per page.",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Current offset (starting position).",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Total number of items matching the query (across all pages).",
+            "minimum": 0
+          }
+        }
+      },
+      "PaginatedResponse_WithUrls_ResourceWithCounts_Agent": {
+        "type": "object",
+        "description": "Response wrapper for paginated list endpoints.\nIncludes pagination metadata along with the data array.",
+        "required": [
+          "data",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "Agent configuration for agentic loop.\nAn agent defines the behavior and capabilities of an AI assistant.",
+                      "required": [
+                        "id",
+                        "name",
+                        "system_prompt",
+                        "status",
+                        "created_at",
+                        "updated_at"
+                      ],
+                      "properties": {
+                        "archived_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "Timestamp when the agent was archived."
+                        },
+                        "capabilities": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AgentCapabilityConfig"
+                          },
+                          "description": "Capabilities enabled for this agent with per-agent configuration.\nCapabilities add tools and system prompt modifications."
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Timestamp when the agent was created."
+                        },
+                        "default_model_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Default LLM model ID for this agent.\nCan be overridden at the session level.",
+                          "example": "model_01933b5a00007000800000000000001"
+                        },
+                        "deleted_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "Timestamp when the agent was deleted."
+                        },
+                        "description": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Human-readable description of what the agent does."
+                        },
+                        "display_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Human-readable display name shown in UI (e.g. \"Customer Support Agent\").\nFalls back to `name` when absent."
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "External identifier (agent_<32-hex>). Shown as \"id\" in API.\nClient-supplied or auto-generated.",
+                          "example": "agent_01933b5a000070008000000000000001"
+                        },
+                        "initial_files": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/InitialFile"
+                          },
+                          "description": "Starter files copied into each new session for this agent."
+                        },
+                        "max_iterations": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Maximum number of LLM iterations per turn for this agent.",
+                          "minimum": 0
+                        },
+                        "mcpServers": {
+                          "$ref": "#/components/schemas/BTreeMap",
+                          "description": "Remote MCP servers scoped to this agent and inherited by its sessions."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Name, unique per org (e.g. \"customer-support\")."
+                        },
+                        "network_access": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "$ref": "#/components/schemas/NetworkAccessList",
+                              "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
+                            }
+                          ]
+                        },
+                        "status": {
+                          "$ref": "#/components/schemas/AgentStatus",
+                          "description": "Current lifecycle status of the agent."
+                        },
+                        "system_prompt": {
+                          "type": "string",
+                          "description": "System prompt that defines the agent's behavior.\nSent as the first message in every conversation."
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Tags for organizing and filtering agents."
+                        },
+                        "tools": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ToolDefinition"
+                          },
+                          "description": "Client-side tools registered for this agent.\nThese tools are executed by the client, not the server."
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Timestamp when the agent was last updated."
+                        },
+                        "usage": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "$ref": "#/components/schemas/TokenUsage",
+                              "description": "Cumulative token usage across all sessions for this agent."
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "session_count",
+                        "app_count"
+                      ],
+                      "properties": {
+                        "app_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of non-deleted apps using this resource.",
+                          "minimum": 0
+                        },
+                        "session_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of sessions using this resource.",
+                          "minimum": 0
+                        }
+                      }
+                    }
+                  ],
+                  "description": "Wrapper that flattens lightweight relationship counts into resource responses."
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "self_url",
+                    "view_url",
+                    "ui_link"
+                  ],
+                  "properties": {
+                    "self_url": {
+                      "type": "string",
+                      "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
+                    },
+                    "view_url": {
+                      "type": "string",
+                      "description": "Full UI URL for viewing this resource."
+                    }
+                  }
+                }
+              ],
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
             },
             "description": "Array of items returned by the list operation."
           },
@@ -11680,6 +14588,7 @@
                     "id",
                     "organization_id",
                     "harness_id",
+                    "owner_principal_id",
                     "status",
                     "created_at",
                     "updated_at"
@@ -11731,6 +14640,17 @@
                       "type": "string",
                       "format": "date-time",
                       "description": "Timestamp when the session was created."
+                    },
+                    "effective_owner": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "$ref": "#/components/schemas/PrincipalSummary",
+                          "description": "Effective human owner summary."
+                        }
+                      ]
                     },
                     "features": {
                       "type": "array",
@@ -11797,6 +14717,10 @@
                       "description": "Maximum number of LLM iterations per turn for this session.",
                       "minimum": 0
                     },
+                    "mcpServers": {
+                      "$ref": "#/components/schemas/BTreeMap",
+                      "description": "Remote MCP servers scoped to this session only."
+                    },
                     "model_id": {
                       "type": [
                         "string",
@@ -11828,6 +14752,22 @@
                       ],
                       "description": "Preview text from the last assistant response (truncated)."
                     },
+                    "owner": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "$ref": "#/components/schemas/PrincipalSummary",
+                          "description": "Owning principal summary."
+                        }
+                      ]
+                    },
+                    "owner_principal_id": {
+                      "type": "string",
+                      "description": "Owning principal for this session.",
+                      "example": "principal_01933b5a000070008000000000000001"
+                    },
                     "parent_session_id": {
                       "type": [
                         "string",
@@ -11841,6 +14781,14 @@
                         "null"
                       ],
                       "description": "Preview text from the first user message (truncated)."
+                    },
+                    "resolved_owner_user_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid",
+                      "description": "Denormalized effective human owner of the owning principal lineage."
                     },
                     "started_at": {
                       "type": [
@@ -11929,12 +14877,17 @@
                   "type": "object",
                   "required": [
                     "self_url",
-                    "view_url"
+                    "view_url",
+                    "ui_link"
                   ],
                   "properties": {
                     "self_url": {
                       "type": "string",
                       "description": "Full API endpoint URL for this resource."
+                    },
+                    "ui_link": {
+                      "type": "string",
+                      "description": "Alias for `view_url`, used by command and MCP outputs."
                     },
                     "view_url": {
                       "type": "string",
@@ -11943,7 +14896,7 @@
                   }
                 }
               ],
-              "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+              "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
             },
             "description": "Array of items returned by the list operation."
           },
@@ -11991,6 +14944,10 @@
               }
             ]
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap",
+            "description": "Remote MCP servers scoped to the previewed agent."
+          },
           "system_prompt": {
             "type": "string",
             "description": "The base system prompt (before capability additions)",
@@ -12018,6 +14975,9 @@
               "$ref": "#/components/schemas/AgentCapabilityConfig"
             }
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap"
+          },
           "parent_harness_id": {
             "type": [
               "string",
@@ -12030,6 +14990,45 @@
             "example": "You are a research assistant."
           }
         }
+      },
+      "PrincipalKind": {
+        "type": "string",
+        "enum": [
+          "user",
+          "agent_identity",
+          "system"
+        ]
+      },
+      "PrincipalSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "principal_01933b5a000070008000000000000001"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PrincipalKind"
+          },
+          "metadata": {},
+          "subject_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "PromptCacheStrategy": {
+        "type": "string",
+        "description": "Strategy for prompt caching.",
+        "enum": [
+          "auto"
+        ]
       },
       "ReasonCompletedData": {
         "type": "object",
@@ -12269,6 +15268,108 @@
             "propertyNames": {
               "type": "string"
             }
+          }
+        }
+      },
+      "ResourceStatsResponse": {
+        "type": "object",
+        "required": [
+          "session_count",
+          "active_session_count",
+          "idle_session_count",
+          "started_session_count",
+          "waiting_for_tool_results_session_count",
+          "execution_count",
+          "total_session_duration_ms",
+          "total_input_tokens",
+          "total_output_tokens",
+          "total_cache_read_tokens",
+          "total_cache_creation_tokens"
+        ],
+        "properties": {
+          "active_session_count": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "avg_session_duration_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "execution_count": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "first_session_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "idle_session_count": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "last_execution_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last_session_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "session_count": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "started_session_count": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "total_cache_creation_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "total_cache_read_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "total_input_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "total_output_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "total_session_duration_ms": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "waiting_for_tool_results_session_count": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
           }
         }
       },
@@ -12609,6 +15710,7 @@
           "id",
           "organization_id",
           "harness_id",
+          "owner_principal_id",
           "status",
           "created_at",
           "updated_at"
@@ -12660,6 +15762,17 @@
             "type": "string",
             "format": "date-time",
             "description": "Timestamp when the session was created."
+          },
+          "effective_owner": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PrincipalSummary",
+                "description": "Effective human owner summary."
+              }
+            ]
           },
           "features": {
             "type": "array",
@@ -12726,6 +15839,10 @@
             "description": "Maximum number of LLM iterations per turn for this session.",
             "minimum": 0
           },
+          "mcpServers": {
+            "$ref": "#/components/schemas/BTreeMap",
+            "description": "Remote MCP servers scoped to this session only."
+          },
           "model_id": {
             "type": [
               "string",
@@ -12757,6 +15874,22 @@
             ],
             "description": "Preview text from the last assistant response (truncated)."
           },
+          "owner": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PrincipalSummary",
+                "description": "Owning principal summary."
+              }
+            ]
+          },
+          "owner_principal_id": {
+            "type": "string",
+            "description": "Owning principal for this session.",
+            "example": "principal_01933b5a000070008000000000000001"
+          },
           "parent_session_id": {
             "type": [
               "string",
@@ -12770,6 +15903,14 @@
               "null"
             ],
             "description": "Preview text from the first user message (truncated)."
+          },
+          "resolved_owner_user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Denormalized effective human owner of the owning principal lineage."
           },
           "started_at": {
             "type": [
@@ -12871,6 +16012,59 @@
             "type": "string",
             "description": "Turn ID that activated the session",
             "example": "turn_01933b5a00007000800000000000001"
+          }
+        }
+      },
+      "SessionContextReport": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "model",
+          "estimated_input_tokens",
+          "sections",
+          "contributions"
+        ],
+        "properties": {
+          "context_window_tokens": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "contributions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextReportContribution"
+            }
+          },
+          "cumulative_usage": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TokenUsage"
+              }
+            ]
+          },
+          "estimated_input_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "model": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextReportSection"
+            }
+          },
+          "session_id": {
+            "type": "string"
           }
         }
       },
@@ -13022,6 +16216,21 @@
           "completed",
           "failed",
           "released"
+        ]
+      },
+      "SessionSandboxAction": {
+        "type": "string",
+        "enum": [
+          "pause",
+          "resume",
+          "delete"
+        ]
+      },
+      "SessionSandboxStatusValue": {
+        "type": "string",
+        "enum": [
+          "running",
+          "paused"
         ]
       },
       "SessionStartedData": {
@@ -13801,6 +17010,13 @@
               "null"
             ],
             "description": "Tool requires API keys, credentials, or other secrets to function.\nUseful for UI to show connection prompts and for LLMs to anticipate\nauthentication failures."
+          },
+          "supports_background": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Tool supports detached background execution via `spawn_background`.\nWhen true, the tool may be executed asynchronously outside the current\nforeground tool call and report status back later."
           }
         }
       },
@@ -14030,6 +17246,13 @@
             ],
             "description": "Error code"
           },
+          "error_fields": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Structured interpolation fields for localized error rendering."
+          },
           "turn_id": {
             "type": "string",
             "description": "Turn identifier",
@@ -14135,6 +17358,17 @@
             ],
             "description": "Maximum number of LLM iterations per turn for this agent.",
             "minimum": 0
+          },
+          "mcpServers": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BTreeMap",
+                "description": "Remote MCP servers scoped to this agent."
+              }
+            ]
           },
           "name": {
             "type": [
@@ -14268,6 +17502,16 @@
               "$ref": "#/components/schemas/InitialFile"
             }
           },
+          "mcpServers": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BTreeMap"
+              }
+            ]
+          },
           "name": {
             "type": [
               "string",
@@ -14320,6 +17564,55 @@
           }
         }
       },
+      "UpdateKnowledgeBaseRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateKnowledgeEntryRequest": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tags": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "UpdateLlmModelRequest": {
         "type": "object",
         "description": "Request to update an LLM model. Only provided fields will be updated.",
@@ -14369,17 +17662,6 @@
             ],
             "description": "The model identifier used by the provider's API.",
             "example": "gpt-4o-mini"
-          },
-          "status": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/LlmModelStatus",
-                "description": "The status of the model. Set to \"inactive\" to disable."
-              }
-            ]
           }
         }
       },
@@ -14703,6 +17985,23 @@
           }
         }
       },
+      "UpdateVolumeRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "User": {
         "type": "object",
         "description": "User response for listing",
@@ -14757,6 +18056,75 @@
           "skill_md": {
             "type": "string",
             "description": "SKILL.md content to validate"
+          }
+        }
+      },
+      "VolumeResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "archived_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "example": "vol_01933b5a000070008000000000000001"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebhookInvocationResponse": {
+        "type": "object",
+        "required": [
+          "accepted",
+          "session_id",
+          "created_session"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "created_session": {
+            "type": "boolean"
+          },
+          "session_id": {
+            "type": "string"
           }
         }
       },
@@ -14844,6 +18212,10 @@
                 "description": "Maximum number of LLM iterations per turn for this agent.",
                 "minimum": 0
               },
+              "mcpServers": {
+                "$ref": "#/components/schemas/BTreeMap",
+                "description": "Remote MCP servers scoped to this agent and inherited by its sessions."
+              },
               "name": {
                 "type": "string",
                 "description": "Name, unique per org (e.g. \"customer-support\")."
@@ -14903,12 +18275,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -14917,7 +18294,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_CapabilityInfo": {
         "allOf": [
@@ -14931,12 +18308,26 @@
               "status"
             ],
             "properties": {
+              "agent_count": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of active agents referencing this capability in the org.",
+                "minimum": 0
+              },
               "category": {
                 "type": [
                   "string",
                   "null"
                 ],
                 "description": "Category for grouping in UI"
+              },
+              "config_schema": {
+                "type": "object",
+                "description": "JSON Schema for capability-specific per-agent config."
+              },
+              "config_ui_schema": {
+                "type": "object",
+                "description": "react-jsonschema-form uiSchema hints for rendering config_schema."
               },
               "dependencies": {
                 "type": "array",
@@ -14949,12 +18340,25 @@
                 "type": "string",
                 "description": "Description of what this capability provides"
               },
+              "docs_slug": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Slug under https://dev.everruns.com/capabilities/ when public docs exist."
+              },
               "features": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 },
                 "description": "UI feature strings this capability contributes to.\nMultiple capabilities can contribute the same feature."
+              },
+              "harness_count": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of active harnesses referencing this capability in the org.",
+                "minimum": 0
               },
               "icon": {
                 "type": [
@@ -15007,12 +18411,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15021,7 +18430,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_Harness": {
         "allOf": [
@@ -15103,6 +18512,10 @@
                 "type": "boolean",
                 "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
               },
+              "mcpServers": {
+                "$ref": "#/components/schemas/BTreeMap",
+                "description": "Remote MCP servers scoped to this harness and inherited by descendant layers."
+              },
               "name": {
                 "type": "string",
                 "description": "Name, unique per org (e.g. \"generic\")."
@@ -15152,12 +18565,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15166,7 +18584,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_LlmModel": {
         "allOf": [
@@ -15181,7 +18599,6 @@
               "capabilities",
               "is_favorite",
               "enabled",
-              "status",
               "source",
               "created_at",
               "updated_at"
@@ -15222,9 +18639,6 @@
                 "$ref": "#/components/schemas/LlmModelSource",
                 "description": "How the model was added to the system"
               },
-              "status": {
-                "$ref": "#/components/schemas/LlmModelStatus"
-              },
               "updated_at": {
                 "type": "string",
                 "format": "date-time"
@@ -15235,12 +18649,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15249,7 +18668,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_LlmModelWithProvider": {
         "allOf": [
@@ -15264,12 +18683,12 @@
               "capabilities",
               "is_favorite",
               "enabled",
-              "status",
               "source",
               "created_at",
               "updated_at",
               "provider_name",
-              "provider_type"
+              "provider_type",
+              "healthy"
             ],
             "properties": {
               "capabilities": {
@@ -15288,6 +18707,10 @@
               "enabled": {
                 "type": "boolean",
                 "description": "Whether this model is enabled (visible in UI model pickers)"
+              },
+              "healthy": {
+                "type": "boolean",
+                "description": "Derived: model is configured and ready for use. Currently means the\njoined provider is active and has an API key set; over time this may\nalso incorporate live reachability checks. Not persisted."
               },
               "id": {
                 "type": "string",
@@ -15324,9 +18747,6 @@
                 "$ref": "#/components/schemas/LlmModelSource",
                 "description": "How the model was added to the system"
               },
-              "status": {
-                "$ref": "#/components/schemas/LlmModelStatus"
-              },
               "updated_at": {
                 "type": "string",
                 "format": "date-time"
@@ -15337,12 +18757,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15351,7 +18776,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_LlmProvider": {
         "allOf": [
@@ -15413,12 +18838,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15427,7 +18857,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_McpServer": {
         "allOf": [
@@ -15533,12 +18963,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15547,7 +18982,381 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+      },
+      "WithUrls_ResourceWithCounts_Agent": {
+        "allOf": [
+          {
+            "allOf": [
+              {
+                "type": "object",
+                "description": "Agent configuration for agentic loop.\nAn agent defines the behavior and capabilities of an AI assistant.",
+                "required": [
+                  "id",
+                  "name",
+                  "system_prompt",
+                  "status",
+                  "created_at",
+                  "updated_at"
+                ],
+                "properties": {
+                  "archived_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Timestamp when the agent was archived."
+                  },
+                  "capabilities": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AgentCapabilityConfig"
+                    },
+                    "description": "Capabilities enabled for this agent with per-agent configuration.\nCapabilities add tools and system prompt modifications."
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp when the agent was created."
+                  },
+                  "default_model_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Default LLM model ID for this agent.\nCan be overridden at the session level.",
+                    "example": "model_01933b5a00007000800000000000001"
+                  },
+                  "deleted_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Timestamp when the agent was deleted."
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Human-readable description of what the agent does."
+                  },
+                  "display_name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Human-readable display name shown in UI (e.g. \"Customer Support Agent\").\nFalls back to `name` when absent."
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "External identifier (agent_<32-hex>). Shown as \"id\" in API.\nClient-supplied or auto-generated.",
+                    "example": "agent_01933b5a000070008000000000000001"
+                  },
+                  "initial_files": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/InitialFile"
+                    },
+                    "description": "Starter files copied into each new session for this agent."
+                  },
+                  "max_iterations": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Maximum number of LLM iterations per turn for this agent.",
+                    "minimum": 0
+                  },
+                  "mcpServers": {
+                    "$ref": "#/components/schemas/BTreeMap",
+                    "description": "Remote MCP servers scoped to this agent and inherited by its sessions."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Name, unique per org (e.g. \"customer-support\")."
+                  },
+                  "network_access": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NetworkAccessList",
+                        "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
+                      }
+                    ]
+                  },
+                  "status": {
+                    "$ref": "#/components/schemas/AgentStatus",
+                    "description": "Current lifecycle status of the agent."
+                  },
+                  "system_prompt": {
+                    "type": "string",
+                    "description": "System prompt that defines the agent's behavior.\nSent as the first message in every conversation."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Tags for organizing and filtering agents."
+                  },
+                  "tools": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ToolDefinition"
+                    },
+                    "description": "Client-side tools registered for this agent.\nThese tools are executed by the client, not the server."
+                  },
+                  "updated_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp when the agent was last updated."
+                  },
+                  "usage": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "$ref": "#/components/schemas/TokenUsage",
+                        "description": "Cumulative token usage across all sessions for this agent."
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "session_count",
+                  "app_count"
+                ],
+                "properties": {
+                  "app_count": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of non-deleted apps using this resource.",
+                    "minimum": 0
+                  },
+                  "session_count": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of sessions using this resource.",
+                    "minimum": 0
+                  }
+                }
+              }
+            ],
+            "description": "Wrapper that flattens lightweight relationship counts into resource responses."
+          },
+          {
+            "type": "object",
+            "required": [
+              "self_url",
+              "view_url",
+              "ui_link"
+            ],
+            "properties": {
+              "self_url": {
+                "type": "string",
+                "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
+              },
+              "view_url": {
+                "type": "string",
+                "description": "Full UI URL for viewing this resource."
+              }
+            }
+          }
+        ],
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+      },
+      "WithUrls_ResourceWithCounts_Harness": {
+        "allOf": [
+          {
+            "allOf": [
+              {
+                "type": "object",
+                "description": "Harness configuration for sessions.\nA harness defines the base behavior and capabilities that apply to all sessions.",
+                "required": [
+                  "id",
+                  "name",
+                  "system_prompt",
+                  "status",
+                  "created_at",
+                  "updated_at"
+                ],
+                "properties": {
+                  "archived_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Timestamp when the harness was archived."
+                  },
+                  "capabilities": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AgentCapabilityConfig"
+                    },
+                    "description": "Capabilities enabled for this harness with per-harness configuration."
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp when the harness was created."
+                  },
+                  "default_model_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Default LLM model ID for this harness.\nLowest priority in chain: controls > session > agent > harness.",
+                    "example": "model_01933b5a00007000800000000000001"
+                  },
+                  "deleted_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Timestamp when the harness was deleted."
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Human-readable description of what the harness does."
+                  },
+                  "display_name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Human-readable display name shown in UI."
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Unique identifier for the harness (format: harness_{32-hex}).",
+                    "example": "harness_01933b5a00007000800000000000001"
+                  },
+                  "initial_files": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/InitialFile"
+                    },
+                    "description": "Starter files copied into each new session for this harness."
+                  },
+                  "is_built_in": {
+                    "type": "boolean",
+                    "description": "Whether this harness is built-in (system-managed, readonly).\nBuilt-in harnesses are provisioned during org initialization and\ncannot be modified or deleted via the API. Users can copy them."
+                  },
+                  "mcpServers": {
+                    "$ref": "#/components/schemas/BTreeMap",
+                    "description": "Remote MCP servers scoped to this harness and inherited by descendant layers."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Name, unique per org (e.g. \"generic\")."
+                  },
+                  "network_access": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NetworkAccessList",
+                        "description": "Network access list controlling which hosts/URLs sessions can reach.\nMerged with agent and session layers (allowed: intersect, blocked: union)."
+                      }
+                    ]
+                  },
+                  "parent_harness_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Optional parent harness that this harness inherits from.",
+                    "example": "harness_01933b5a000070008000000000000602"
+                  },
+                  "status": {
+                    "$ref": "#/components/schemas/HarnessStatus",
+                    "description": "Current lifecycle status of the harness."
+                  },
+                  "system_prompt": {
+                    "type": "string",
+                    "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Tags for organizing and filtering harnesses."
+                  },
+                  "updated_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp when the harness was last updated."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "session_count",
+                  "app_count"
+                ],
+                "properties": {
+                  "app_count": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of non-deleted apps using this resource.",
+                    "minimum": 0
+                  },
+                  "session_count": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Number of sessions using this resource.",
+                    "minimum": 0
+                  }
+                }
+              }
+            ],
+            "description": "Wrapper that flattens lightweight relationship counts into resource responses."
+          },
+          {
+            "type": "object",
+            "required": [
+              "self_url",
+              "view_url",
+              "ui_link"
+            ],
+            "properties": {
+              "self_url": {
+                "type": "string",
+                "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
+              },
+              "view_url": {
+                "type": "string",
+                "description": "Full UI URL for viewing this resource."
+              }
+            }
+          }
+        ],
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_Session": {
         "allOf": [
@@ -15558,6 +19367,7 @@
               "id",
               "organization_id",
               "harness_id",
+              "owner_principal_id",
               "status",
               "created_at",
               "updated_at"
@@ -15609,6 +19419,17 @@
                 "type": "string",
                 "format": "date-time",
                 "description": "Timestamp when the session was created."
+              },
+              "effective_owner": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PrincipalSummary",
+                    "description": "Effective human owner summary."
+                  }
+                ]
               },
               "features": {
                 "type": "array",
@@ -15675,6 +19496,10 @@
                 "description": "Maximum number of LLM iterations per turn for this session.",
                 "minimum": 0
               },
+              "mcpServers": {
+                "$ref": "#/components/schemas/BTreeMap",
+                "description": "Remote MCP servers scoped to this session only."
+              },
               "model_id": {
                 "type": [
                   "string",
@@ -15706,6 +19531,22 @@
                 ],
                 "description": "Preview text from the last assistant response (truncated)."
               },
+              "owner": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PrincipalSummary",
+                    "description": "Owning principal summary."
+                  }
+                ]
+              },
+              "owner_principal_id": {
+                "type": "string",
+                "description": "Owning principal for this session.",
+                "example": "principal_01933b5a000070008000000000000001"
+              },
               "parent_session_id": {
                 "type": [
                   "string",
@@ -15719,6 +19560,14 @@
                   "null"
                 ],
                 "description": "Preview text from the first user message (truncated)."
+              },
+              "resolved_owner_user_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uuid",
+                "description": "Denormalized effective human owner of the owning principal lineage."
               },
               "started_at": {
                 "type": [
@@ -15807,12 +19656,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15821,7 +19675,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       },
       "WithUrls_Skill": {
         "allOf": [
@@ -15921,12 +19775,17 @@
             "type": "object",
             "required": [
               "self_url",
-              "view_url"
+              "view_url",
+              "ui_link"
             ],
             "properties": {
               "self_url": {
                 "type": "string",
                 "description": "Full API endpoint URL for this resource."
+              },
+              "ui_link": {
+                "type": "string",
+                "description": "Alias for `view_url`, used by command and MCP outputs."
               },
               "view_url": {
                 "type": "string",
@@ -15935,7 +19794,7 @@
             }
           }
         ],
-        "description": "Wrapper that adds `self_url` and `view_url` to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
+        "description": "Wrapper that adds API and UI links to a serialized resource.\n\nUses `self_url` (not `url`) for the API link to avoid collision with\nresources that already have a `url` field (e.g. McpServer)."
       }
     }
   },
@@ -15981,6 +19840,10 @@
       "description": "Session leased-resource visibility endpoints"
     },
     {
+      "name": "session-sandbox",
+      "description": "Managed session sandbox lifecycle endpoints"
+    },
+    {
       "name": "mcp-servers",
       "description": "MCP Server management endpoints"
     },
@@ -15991,6 +19854,18 @@
     {
       "name": "organizations",
       "description": "Organization management endpoints"
+    },
+    {
+      "name": "volumes",
+      "description": "Workspace volume management endpoints"
+    },
+    {
+      "name": "memory_stores",
+      "description": "Org-scoped persistent memory stores"
+    },
+    {
+      "name": "knowledge_bases",
+      "description": "Knowledge base and entry management endpoints"
     },
     {
       "name": "images",

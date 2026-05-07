@@ -184,7 +184,7 @@ impl CreateAgentRequest {
 /// Generate a random agent ID in the format `agent_<32-hex>`.
 pub fn generate_agent_id() -> String {
     let mut bytes = [0u8; 16];
-    getrandom::getrandom(&mut bytes).expect("failed to generate random bytes");
+    getrandom::fill(&mut bytes).expect("failed to generate random bytes");
     let hex: String = bytes.iter().map(|b| format!("{:02x}", b)).collect();
     format!("agent_{}", hex)
 }
@@ -192,7 +192,7 @@ pub fn generate_agent_id() -> String {
 /// Generate a random harness ID in the format `harness_<32-hex>`.
 pub fn generate_harness_id() -> String {
     let mut bytes = [0u8; 16];
-    getrandom::getrandom(&mut bytes).expect("failed to generate random bytes");
+    getrandom::fill(&mut bytes).expect("failed to generate random bytes");
     let hex: String = bytes.iter().map(|b| format!("{:02x}", b)).collect();
     format!("harness_{}", hex)
 }
@@ -252,6 +252,31 @@ pub struct TokenUsage {
     pub output_tokens: u64,
     #[serde(default)]
     pub cache_read_tokens: u64,
+}
+
+/// Aggregate usage statistics for an agent or harness.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ResourceStats {
+    pub session_count: u64,
+    pub active_session_count: u64,
+    pub idle_session_count: u64,
+    pub started_session_count: u64,
+    pub waiting_for_tool_results_session_count: u64,
+    pub execution_count: u64,
+    pub total_session_duration_ms: u64,
+    #[serde(default)]
+    pub avg_session_duration_ms: Option<u64>,
+    pub total_input_tokens: u64,
+    pub total_output_tokens: u64,
+    pub total_cache_read_tokens: u64,
+    pub total_cache_creation_tokens: u64,
+    #[serde(default)]
+    pub first_session_at: Option<String>,
+    #[serde(default)]
+    pub last_session_at: Option<String>,
+    #[serde(default)]
+    pub last_execution_at: Option<String>,
 }
 
 /// Starter file copied into a new session workspace

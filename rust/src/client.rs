@@ -345,6 +345,11 @@ impl<'a> AgentsClient<'a> {
         self.client.get(&format!("/agents/{}", id)).await
     }
 
+    /// Get aggregate usage stats for an agent.
+    pub async fn stats(&self, id: &str) -> Result<ResourceStats> {
+        self.client.get(&format!("/agents/{}/stats", id)).await
+    }
+
     /// Create a new agent with a server-assigned ID.
     ///
     /// `name` is the addressable slug (e.g. `"customer-support"`), validated

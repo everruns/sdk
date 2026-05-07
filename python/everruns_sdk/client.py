@@ -32,6 +32,7 @@ from everruns_sdk.models import (
     ListResponse,
     Message,
     MessageInput,
+    ResourceStats,
     ResumeSessionResponse,
     Session,
     SessionFile,
@@ -252,6 +253,11 @@ class AgentsClient:
         """Get an agent by ID."""
         resp = await self._client._get(f"/agents/{agent_id}")
         return Agent(**resp)
+
+    async def stats(self, agent_id: str) -> ResourceStats:
+        """Get aggregate usage stats for an agent."""
+        resp = await self._client._get(f"/agents/{agent_id}/stats")
+        return ResourceStats(**resp)
 
     async def create(
         self,

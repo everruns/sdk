@@ -103,6 +103,25 @@ export interface Session {
   isPinned?: boolean | null;
 }
 
+/** Aggregate usage statistics for an agent or harness. */
+export interface ResourceStats {
+  session_count: number;
+  active_session_count: number;
+  idle_session_count: number;
+  started_session_count: number;
+  waiting_for_tool_results_session_count: number;
+  execution_count: number;
+  total_session_duration_ms: number;
+  avg_session_duration_ms?: number | null;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_cache_read_tokens: number;
+  total_cache_creation_tokens: number;
+  first_session_at?: string | null;
+  last_session_at?: string | null;
+  last_execution_at?: string | null;
+}
+
 export interface InitialFile {
   path: string;
   content: string;

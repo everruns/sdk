@@ -25,6 +25,7 @@ import {
   type FileStat,
   type GrepResult,
   type Message,
+  type ResourceStats,
   type ResumeSessionResponse,
 } from "../src/models.js";
 
@@ -269,6 +270,42 @@ describe("Everruns", () => {
           "Content-Type": "text/plain",
         }),
       }),
+    );
+  });
+
+  it("should get agent stats", async () => {
+    const stats: ResourceStats = {
+      session_count: 4,
+      active_session_count: 1,
+      idle_session_count: 2,
+      started_session_count: 1,
+      waiting_for_tool_results_session_count: 0,
+      execution_count: 7,
+      total_session_duration_ms: 12345,
+      avg_session_duration_ms: 3086,
+      total_input_tokens: 100,
+      total_output_tokens: 50,
+      total_cache_read_tokens: 25,
+      total_cache_creation_tokens: 10,
+      first_session_at: "2026-05-01T00:00:00Z",
+      last_session_at: "2026-05-02T00:00:00Z",
+      last_execution_at: "2026-05-02T01:00:00Z",
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => stats,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.agents.stats("agent_123");
+
+    expect(response.session_count).toBe(4);
+    expect(response.execution_count).toBe(7);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/agents/agent_123/stats",
+      expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
 

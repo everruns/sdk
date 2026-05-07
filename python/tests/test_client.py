@@ -812,6 +812,45 @@ async def test_import_agent_from_example():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_agent_stats():
+    route = respx.get("https://custom.example.com/api/v1/agents/agent_123/stats").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "session_count": 4,
+                "active_session_count": 1,
+                "idle_session_count": 2,
+                "started_session_count": 1,
+                "waiting_for_tool_results_session_count": 0,
+                "execution_count": 7,
+                "total_session_duration_ms": 12345,
+                "avg_session_duration_ms": 3086,
+                "total_input_tokens": 100,
+                "total_output_tokens": 50,
+                "total_cache_read_tokens": 25,
+                "total_cache_creation_tokens": 10,
+                "first_session_at": "2026-05-01T00:00:00Z",
+                "last_session_at": "2026-05-02T00:00:00Z",
+                "last_execution_at": "2026-05-02T01:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        stats = await client.agents.stats("agent_123")
+    finally:
+        await client.close()
+
+    assert stats.session_count == 4
+    assert stats.execution_count == 7
+    assert stats.avg_session_duration_ms == 3086
+    assert stats.total_input_tokens == 100
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_capabilities_list_with_options():
     route = respx.get(
         "https://custom.example.com/api/v1/capabilities?search=web&offset=20&limit=10"

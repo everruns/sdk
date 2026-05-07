@@ -158,6 +158,26 @@ class TokenUsage(BaseModel):
     cache_read_tokens: int = 0
 
 
+class ResourceStats(BaseModel):
+    """Aggregate usage statistics for an agent or harness."""
+
+    session_count: int
+    active_session_count: int
+    idle_session_count: int
+    started_session_count: int
+    waiting_for_tool_results_session_count: int
+    execution_count: int
+    total_session_duration_ms: int
+    avg_session_duration_ms: Optional[int] = None
+    total_input_tokens: int
+    total_output_tokens: int
+    total_cache_read_tokens: int
+    total_cache_creation_tokens: int
+    first_session_at: Optional[str] = None
+    last_session_at: Optional[str] = None
+    last_execution_at: Optional[str] = None
+
+
 class InitialFile(BaseModel):
     """Starter file copied into a new session workspace."""
 
