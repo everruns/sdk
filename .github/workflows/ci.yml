@@ -152,7 +152,7 @@ jobs:
           key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
-        run: cargo install --git https://github.com/everruns/everruns everruns-server
+        run: cargo install --debug --git https://github.com/everruns/everruns everruns-server
 
       # Start server
       - name: Start everruns-server
@@ -243,7 +243,7 @@ jobs:
           key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
-        run: cargo install --git https://github.com/everruns/everruns everruns-server
+        run: cargo install --debug --git https://github.com/everruns/everruns everruns-server
 
       - name: Start everruns-server
         run: |
