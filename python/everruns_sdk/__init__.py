@@ -16,6 +16,7 @@ from everruns_sdk.errors import (
     EverrunsError,
     NotFoundError,
     RateLimitError,
+    ValidationError,
 )
 from everruns_sdk.models import (
     Agent,
@@ -61,6 +62,7 @@ __all__ = [
     "AuthenticationError",
     "NotFoundError",
     "RateLimitError",
+    "ValidationError",
     "Agent",
     "AgentCapabilityConfig",
     "Budget",

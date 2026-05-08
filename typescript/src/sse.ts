@@ -54,6 +54,7 @@ export interface DisconnectingData {
 export class EventStream implements AsyncIterable<Event> {
   private readonly baseUrl: string;
   private readonly authHeader: string;
+  private readonly orgId?: string;
   private readonly options: StreamOptions;
   private lastEventId?: string;
   private abortController?: AbortController;
@@ -63,9 +64,15 @@ export class EventStream implements AsyncIterable<Event> {
   private shouldReconnect: boolean = true;
   private gracefulDisconnect: boolean = false;
 
-  constructor(url: string, authHeader: string, options: StreamOptions = {}) {
+  constructor(
+    url: string,
+    authHeader: string,
+    options: StreamOptions = {},
+    orgId?: string,
+  ) {
     this.baseUrl = url;
     this.authHeader = authHeader;
+    this.orgId = orgId;
     this.options = options;
     this.lastEventId = options.sinceId;
   }
@@ -139,6 +146,10 @@ export class EventStream implements AsyncIterable<Event> {
   private resetBackoff(): void {
     this.currentBackoffMs = INITIAL_BACKOFF_MS;
     this.retryCount = 0;
+  }
+
+  private orgHeaders(): Record<string, string> {
+    return this.orgId === undefined ? {} : { "X-Org-Id": this.orgId };
   }
 
   private shouldRetry(): boolean {
@@ -233,6 +244,7 @@ export class EventStream implements AsyncIterable<Event> {
       const response = await fetch(url, {
         headers: {
           Authorization: this.authHeader,
+          ...this.orgHeaders(),
           Accept: "text/event-stream",
           "Cache-Control": "no-cache",
         },

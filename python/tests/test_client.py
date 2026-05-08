@@ -13,6 +13,7 @@ from everruns_sdk import (
     ContentPart,
     Everruns,
     InitialFile,
+    ValidationError,
 )
 
 
@@ -54,6 +55,12 @@ def test_client_creation():
     assert client._api_key.value == "evr_test_key"
 
 
+def test_client_creation_with_org_id():
+    """Test client creation with explicit org ID."""
+    client = Everruns(api_key="evr_test_key", org_id="org_123")
+    assert client._org_id == "org_123"
+
+
 def test_client_from_env():
     """Test client creation from environment variable."""
     os.environ["EVERRUNS_API_KEY"] = "evr_from_env"
@@ -62,6 +69,32 @@ def test_client_from_env():
         assert client._api_key.value == "evr_from_env"
     finally:
         del os.environ["EVERRUNS_API_KEY"]
+
+
+def test_client_from_env_reads_org_id(monkeypatch):
+    """Test client creation reads organization ID from environment."""
+    monkeypatch.setenv("EVERRUNS_API_KEY", "evr_from_env")
+    monkeypatch.setenv("EVERRUNS_ORG_ID", "org_from_env")
+
+    client = Everruns()
+
+    assert client._api_key.value == "evr_from_env"
+    assert client._org_id == "org_from_env"
+
+
+def test_client_explicit_org_id_precedes_env(monkeypatch):
+    """Test explicit org ID wins over environment."""
+    monkeypatch.setenv("EVERRUNS_ORG_ID", "org_from_env")
+
+    client = Everruns(api_key="evr_test_key", org_id="org_explicit")
+
+    assert client._org_id == "org_explicit"
+
+
+def test_client_rejects_invalid_org_id():
+    """Test invalid org ID header values fail at client creation."""
+    with pytest.raises(ValidationError):
+        Everruns(api_key="evr_test_key", org_id="bad\norg")
 
 
 def test_client_missing_api_key():
@@ -92,6 +125,23 @@ def test_url_path_construction():
     # The _url method should produce relative paths without leading slash
     assert client._url("/agents") == "v1/agents"
     assert client._url("/sessions/123") == "v1/sessions/123"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_client_sends_org_id_header():
+    route = respx.get("https://custom.example.com/api/v1/agents").mock(
+        return_value=httpx.Response(200, json={"data": [], "total": 0, "offset": 0, "limit": 0})
+    )
+
+    client = Everruns(api_key="evr_test_key", org_id="org_123")
+    try:
+        await client.agents.list()
+    finally:
+        await client.close()
+
+    assert route.called
+    assert route.calls[0].request.headers["X-Org-Id"] == "org_123"
 
 
 def test_capabilities_subclient():

@@ -27,6 +27,8 @@ npm install @everruns/sdk
 
 ```bash
 export EVERRUNS_API_KEY=evr_...
+# Optional for API keys with access to multiple organizations:
+export EVERRUNS_ORG_ID=org_...
 ```
 
 ### 2. Create Client
@@ -34,7 +36,7 @@ export EVERRUNS_API_KEY=evr_...
 ```python
 from everruns_sdk import Everruns
 
-client = Everruns(org="my-org")
+client = Everruns()
 ```
 
 ### 3. Create an Agent

@@ -38,17 +38,20 @@ import {
   AuthenticationError,
   NotFoundError,
   RateLimitError,
+  ValidationError,
 } from "./errors.js";
 import { EventStream } from "./sse.js";
 
 export interface EverrunsOptions {
   apiKey?: string | ApiKey;
   baseUrl?: string;
+  orgId?: string;
 }
 
 export class Everruns {
   private readonly apiKey: ApiKey;
   private readonly baseUrl: string;
+  private readonly orgId?: string;
 
   readonly agents: AgentsClient;
   readonly sessions: SessionsClient;
@@ -73,6 +76,11 @@ export class Everruns {
     //          "http://host/api" + "/v1/agents" = "http://host/api/v1/agents" (correct)
     const rawBaseUrl = options.baseUrl ?? "https://custom.example.com/api";
     this.baseUrl = rawBaseUrl.replace(/\/+$/, "");
+    const orgId =
+      options.orgId !== undefined
+        ? options.orgId
+        : process.env.EVERRUNS_ORG_ID || undefined;
+    this.orgId = validateOrgId(orgId);
 
     this.agents = new AgentsClient(this);
     this.sessions = new SessionsClient(this);
@@ -88,10 +96,12 @@ export class Everruns {
    * Create a client using environment variables.
    *
    * Reads `EVERRUNS_API_KEY` (required) and `EVERRUNS_API_URL` (optional).
+   * Reads `EVERRUNS_ORG_ID` when present.
    */
   static fromEnv(): Everruns {
     const baseUrl = process.env.EVERRUNS_API_URL;
-    return new Everruns({ baseUrl });
+    const orgId = process.env.EVERRUNS_ORG_ID || undefined;
+    return new Everruns({ baseUrl, orgId });
   }
 
   /**
@@ -109,8 +119,7 @@ export class Everruns {
     const response = await fetch(url, {
       ...options,
       headers: {
-        Authorization: this.apiKey.toHeader(),
-        "Content-Type": "application/json",
+        ...this.authHeaders("application/json"),
         ...options.headers,
       },
     });
@@ -150,7 +159,7 @@ export class Everruns {
     const response = await fetch(url, {
       ...options,
       headers: {
-        Authorization: this.apiKey.toHeader(),
+        ...this.authHeaders(),
         ...options.headers,
       },
     });
@@ -183,6 +192,37 @@ export class Everruns {
   getAuthHeader(): string {
     return this.apiKey.toHeader();
   }
+
+  getOrgId(): string | undefined {
+    return this.orgId;
+  }
+
+  private authHeaders(contentType?: string): Record<string, string> {
+    const headers: Record<string, string> = {
+      Authorization: this.apiKey.toHeader(),
+    };
+    if (contentType !== undefined) {
+      headers["Content-Type"] = contentType;
+    }
+    if (this.orgId !== undefined) {
+      headers["X-Org-Id"] = this.orgId;
+    }
+    return headers;
+  }
+}
+
+function validateOrgId(orgId: string | undefined): string | undefined {
+  if (orgId === undefined) return undefined;
+  if (orgId.length === 0) {
+    throw new ValidationError("orgId cannot be empty");
+  }
+  try {
+    new Headers({ "X-Org-Id": orgId });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new ValidationError(`Invalid orgId header: ${message}`);
+  }
+  return orgId;
 }
 
 class AgentsClient {
@@ -554,7 +594,12 @@ class EventsClient {
   stream(sessionId: string, options?: StreamOptions): EventStream {
     // Build base URL (without since_id - EventStream handles that for reconnection)
     const url = this.client.getStreamUrl(`/sessions/${sessionId}/sse`);
-    return new EventStream(url, this.client.getAuthHeader(), options);
+    return new EventStream(
+      url,
+      this.client.getAuthHeader(),
+      options,
+      this.client.getOrgId(),
+    );
   }
 }
 

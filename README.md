@@ -26,6 +26,11 @@ Set your API key:
 export EVERRUNS_API_KEY=evr_your_key_here
 ```
 
+For API keys with access to multiple organizations, also set:
+```bash
+export EVERRUNS_ORG_ID=org_your_org_id_here
+```
+
 ### Rust
 
 ```rust
@@ -157,21 +162,24 @@ main();
 
 ## Authentication
 
-All SDKs read from `EVERRUNS_API_KEY` environment variable by default, or accept an explicit key:
+All SDKs read from `EVERRUNS_API_KEY` by default. Multi-org API-key users can set `EVERRUNS_ORG_ID` or pass an explicit organization ID:
 
 ```rust
 // Rust
-let client = Everruns::new("evr_...");
+let client = Everruns::builder()
+    .api_key("evr_...")
+    .org_id("org_...")
+    .build()?;
 ```
 
 ```python
 # Python
-client = Everruns(api_key="evr_...")
+client = Everruns(api_key="evr_...", org_id="org_...")
 ```
 
 ```typescript
 // TypeScript
-const client = new Everruns({ apiKey: "evr_..." });
+const client = new Everruns({ apiKey: "evr_...", orgId: "org_..." });
 ```
 
 ## Error Handling

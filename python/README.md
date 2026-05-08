@@ -15,7 +15,7 @@ import asyncio
 from everruns_sdk import Everruns
 
 async def main():
-    # Uses EVERRUNS_API_KEY environment variable
+    # Uses EVERRUNS_API_KEY and optional EVERRUNS_ORG_ID environment variables
     client = Everruns()
     
     # Create an agent
@@ -67,6 +67,18 @@ session = await client.sessions.create(
 ```
 
 Runnable example: [`examples/initial_files.py`](examples/initial_files.py)
+
+## Authentication
+
+The SDK uses API key authentication. Set `EVERRUNS_API_KEY` or pass the key explicitly. For API keys with access to multiple organizations, set `EVERRUNS_ORG_ID` or pass `org_id` explicitly:
+
+```python
+# From environment
+client = Everruns()
+
+# Explicit key and organization
+client = Everruns(api_key="evr_...", org_id="org_...")
+```
 
 ## License
 

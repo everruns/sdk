@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiKey } from "../src/auth.js";
 import { Everruns } from "../src/client.js";
+import { ValidationError } from "../src/errors.js";
 import {
   generateAgentId,
   generateHarnessId,
@@ -31,6 +32,7 @@ import {
 } from "../src/models.js";
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -65,6 +67,44 @@ describe("Everruns", () => {
       apiKey,
     });
     expect(client).toBeDefined();
+  });
+
+  it("should create client with explicit org ID", () => {
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+      orgId: "org_123",
+    });
+    expect(client.getOrgId()).toBe("org_123");
+  });
+
+  it("should read org ID from environment", () => {
+    vi.stubEnv("EVERRUNS_API_KEY", "evr_from_env");
+    vi.stubEnv("EVERRUNS_ORG_ID", "org_from_env");
+
+    const client = Everruns.fromEnv();
+
+    expect(client.getOrgId()).toBe("org_from_env");
+  });
+
+  it("should prefer explicit org ID over environment", () => {
+    vi.stubEnv("EVERRUNS_ORG_ID", "org_from_env");
+
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+      orgId: "org_explicit",
+    });
+
+    expect(client.getOrgId()).toBe("org_explicit");
+  });
+
+  it("should reject invalid org ID header values", () => {
+    expect(
+      () =>
+        new Everruns({
+          apiKey: "evr_test_key",
+          orgId: "bad\norg",
+        }),
+    ).toThrow(ValidationError);
   });
 
   it("should use custom base URL", () => {
@@ -141,6 +181,37 @@ describe("Everruns", () => {
         headers: expect.objectContaining({
           Authorization: "evr_test_key",
           "Content-Type": "application/json",
+        }),
+      }),
+    );
+  });
+
+  it("should send org ID header on requests", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [],
+        total: 0,
+        offset: 0,
+        limit: 0,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+      orgId: "org_123",
+    });
+
+    await client.agents.list();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/agents",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: "evr_test_key",
+          "X-Org-Id": "org_123",
         }),
       }),
     );
