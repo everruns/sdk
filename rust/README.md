@@ -60,6 +60,28 @@ let session = client
 
 Runnable example: [`examples/initial_files.rs`](examples/initial_files.rs)
 
+## Agent Versions
+
+\`\`\`rust
+use everruns_sdk::{AgentVersionChangeKind, CreateAgentVersionRequest};
+
+let version = client
+    .agents()
+    .create_version(
+        "agent_...",
+        CreateAgentVersionRequest::new()
+            .change_kind(AgentVersionChangeKind::Manual)
+            .summary("Baseline"),
+    )
+    .await?;
+
+let versions = client.agents().list_versions("agent_...").await?;
+let diff = client
+    .agents()
+    .diff_versions("agent_...", "agentver_1", &version.id)
+    .await?;
+\`\`\`
+
 ## Authentication
 
 The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly. For API keys with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`org_id\` explicitly:

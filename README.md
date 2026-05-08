@@ -144,7 +144,7 @@ main();
 
 | Resource | Operations |
 |----------|------------|
-| Agents | Create, list, get, update, archive |
+| Agents | Create, list, get, update, archive, version, diff, fork, rollback |
 | Sessions | Create, list, get, update, delete, cancel |
 | Messages | Create, list |
 | Events | Poll, stream (SSE) |

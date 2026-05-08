@@ -120,6 +120,67 @@ class Agent(BaseModel):
     updated_at: str
 
 
+AgentVersionChangeKind = Literal["manual", "patch", "minor", "major", "import", "rollback", "fork"]
+
+
+class AgentVersion(BaseModel):
+    """Immutable snapshot of an agent configuration."""
+
+    id: str
+    agent_id: str
+    version_number: int
+    semver_major: int
+    semver_minor: int
+    semver_patch: int
+    version: str
+    change_kind: AgentVersionChangeKind
+    config_hash: str
+    authored_config: dict[str, Any]
+    resolved_config: dict[str, Any]
+    created_at: str
+    created_by_principal_id: Optional[str] = None
+    parent_version_id: Optional[str] = None
+    source_version_id: Optional[str] = None
+    summary: Optional[str] = None
+
+
+class AgentVersionDiffResponse(BaseModel):
+    """Diff between two saved agent versions."""
+
+    from_version_id: str
+    to_version_id: str
+    authored_diff: Any
+    resolved_diff: Any
+
+
+class CreateAgentVersionRequest(BaseModel):
+    """Request to save the current agent configuration as a version."""
+
+    change_kind: Optional[AgentVersionChangeKind] = None
+    summary: Optional[str] = None
+
+
+class SetDefaultAgentVersionRequest(BaseModel):
+    """Request to set the default version for an agent."""
+
+    version_id: str
+
+
+class ForkAgentVersionRequest(BaseModel):
+    """Request to create a new agent from a saved version."""
+
+    name: str
+    display_name: Optional[str] = None
+    description: Optional[str] = None
+
+
+class RollbackAgentVersionRequest(BaseModel):
+    """Request to restore an agent from a saved version."""
+
+    save_version: Optional[bool] = None
+    summary: Optional[str] = None
+
+
 class CreateAgentRequest(BaseModel):
     """Request to create an agent."""
 

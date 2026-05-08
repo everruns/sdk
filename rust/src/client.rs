@@ -443,6 +443,76 @@ impl<'a> AgentsClient<'a> {
         self.client.get(&format!("/agents/{}/stats", id)).await
     }
 
+    /// List saved versions for an agent.
+    pub async fn list_versions(&self, id: &str) -> Result<Vec<AgentVersion>> {
+        self.client.get(&format!("/agents/{}/versions", id)).await
+    }
+
+    /// Save the current agent configuration as a version.
+    pub async fn create_version(
+        &self,
+        id: &str,
+        req: CreateAgentVersionRequest,
+    ) -> Result<AgentVersion> {
+        self.client
+            .post(&format!("/agents/{}/versions", id), &req)
+            .await
+    }
+
+    /// Set the default version for an agent.
+    pub async fn set_default_version(&self, id: &str, version_id: &str) -> Result<Agent> {
+        let req = SetDefaultAgentVersionRequest::new(version_id);
+        self.client
+            .post(&format!("/agents/{}/versions/default", id), &req)
+            .await
+    }
+
+    /// Diff two saved agent versions.
+    pub async fn diff_versions(
+        &self,
+        id: &str,
+        from_version_id: &str,
+        to_version_id: &str,
+    ) -> Result<AgentVersionDiffResponse> {
+        self.client
+            .get(&format!(
+                "/agents/{}/versions/{}/diff/{}",
+                id, from_version_id, to_version_id
+            ))
+            .await
+    }
+
+    /// Create a new agent from a saved version.
+    pub async fn fork_version(
+        &self,
+        id: &str,
+        version_id: &str,
+        req: ForkAgentVersionRequest,
+    ) -> Result<Agent> {
+        validate_agent_name(&req.name)?;
+        self.client
+            .post(
+                &format!("/agents/{}/versions/{}/fork", id, version_id),
+                &req,
+            )
+            .await
+    }
+
+    /// Restore an agent from a saved version.
+    pub async fn rollback_version(
+        &self,
+        id: &str,
+        version_id: &str,
+        req: RollbackAgentVersionRequest,
+    ) -> Result<Agent> {
+        self.client
+            .post(
+                &format!("/agents/{}/versions/{}/rollback", id, version_id),
+                &req,
+            )
+            .await
+    }
+
     /// Create a new agent with a server-assigned ID.
     ///
     /// `name` is the addressable slug (e.g. `"customer-support"`), validated

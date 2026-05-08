@@ -158,6 +158,108 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/agents/{agent_id}/versions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/agents/{agent_id}/versions - List saved agent versions */
+    get: operations["list_agent_versions"];
+    put?: never;
+    /** POST /v1/agents/{agent_id}/versions - Save the current agent configuration as a version */
+    post: operations["create_agent_version"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/versions/default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/agents/{agent_id}/versions/default - Set the default version for an agent */
+    post: operations["set_default_agent_version"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/versions/{from_version_id}/diff/{to_version_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/agents/{agent_id}/versions/{from_version_id}/diff/{to_version_id} - Diff two agent versions */
+    get: operations["diff_agent_versions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/versions/{version_id}/fork": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/agents/{agent_id}/versions/{version_id}/fork - Create a new agent from a saved version */
+    post: operations["fork_agent_version"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/versions/{version_id}/rollback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/agents/{agent_id}/versions/{version_id}/rollback - Restore an agent from a saved version */
+    post: operations["rollback_agent_version"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/{agent_id}/voice/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["create_agent_voice_session"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/apps/{app_id}/a2a/{channel_id}": {
     parameters: {
       query?: never;
@@ -218,7 +320,78 @@ export interface paths {
     /** GET /v1/capabilities - List available capabilities with pagination */
     get: operations["list_capabilities"];
     put?: never;
+    /** POST /v1/capabilities - Create a persisted declarative capability. */
+    post: operations["create_declarative_capability"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/capabilities/declarative": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/capabilities/declarative - List persisted declarative resources. */
+    get: operations["list_declarative_capabilities"];
+    put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/capabilities/declarative/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/capabilities/declarative/config */
+    get: operations["declarative_capabilities_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/capabilities/declarative/{capability_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/capabilities/declarative/{capability_id} - Get a declarative resource. */
+    get: operations["get_declarative_capability"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/capabilities/declarative/{capability_id} - Archive a declarative resource. */
+    delete: operations["delete_declarative_capability"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/capabilities/declarative/{capability_id} - Update a declarative resource. */
+    patch: operations["update_declarative_capability"];
+    trace?: never;
+  };
+  "/v1/capabilities/declarative/{capability_id}/delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/capabilities/declarative/{capability_id}/delete - Permanently delete archived resource. */
+    post: operations["destroy_declarative_capability"];
     delete?: never;
     options?: never;
     head?: never;
@@ -926,6 +1099,86 @@ export interface paths {
     patch: operations["update_organization"];
     trace?: never;
   };
+  "/v1/payments/accounts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_payment_accounts"];
+    put?: never;
+    post: operations["create_payment_account"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/payments/accounts/{payment_account_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_payment_account"];
+    put?: never;
+    post?: never;
+    delete: operations["disable_payment_account"];
+    options?: never;
+    head?: never;
+    patch: operations["update_payment_account"];
+    trace?: never;
+  };
+  "/v1/payments/attempts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_payment_attempts"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/payments/policies": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["list_payment_policies"];
+    put?: never;
+    post: operations["create_payment_policy"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/payments/policies/{payment_policy_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_payment_policy"];
+    put?: never;
+    post?: never;
+    delete: operations["disable_payment_policy"];
+    options?: never;
+    head?: never;
+    patch: operations["update_payment_policy"];
+    trace?: never;
+  };
   "/v1/sessions": {
     parameters: {
       query?: never;
@@ -959,6 +1212,22 @@ export interface paths {
      *     Uses the Platform Chat harness and tags for per-user singleton management.
      */
     post: operations["get_or_create_chat_session"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/chat/voice": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["create_chat_voice_session"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1105,6 +1374,23 @@ export interface paths {
      *     - Without `limit`, all events are returned (backward compatible)
      */
     get: operations["list_events"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/events/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/{session_id}/events/summary - one-shot debug summary */
+    get: operations["events_summary"];
     put?: never;
     post?: never;
     delete?: never;
@@ -1539,6 +1825,70 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/sessions/{session_id}/voice/calls": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["create_call"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/voice/client-secret": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["create_client_secret"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/voice/{voice_connection_id}/attach": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["attach_call"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/voice/{voice_connection_id}/end": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["end_call"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/skills": {
     parameters: {
       query?: never;
@@ -1762,6 +2112,11 @@ export interface components {
        */
       default_model_id?: string | null;
       /**
+       * @description Default immutable version used by deployments that choose the default policy.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      default_version_id?: string | null;
+      /**
        * Format: date-time
        * @description Timestamp when the agent was deleted.
        */
@@ -1773,6 +2128,16 @@ export interface components {
        *     Falls back to `name` when absent.
        */
       display_name?: string | null;
+      /**
+       * @description Source agent for a forked agent.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      forked_from_agent_id?: string | null;
+      /**
+       * @description Source version for a forked agent.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      forked_from_version_id?: string | null;
       /**
        * @description External identifier (agent_<32-hex>). Shown as "id" in API.
        *     Client-supplied or auto-generated.
@@ -1788,6 +2153,11 @@ export interface components {
       /** @description Name, unique per org (e.g. "customer-support"). */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Root agent lineage identifier for grouping fork families.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      root_agent_id?: string | null;
       /** @description Current lifecycle status of the agent. */
       status: components["schemas"]["AgentStatus"];
       /**
@@ -1836,6 +2206,50 @@ export interface components {
      * @enum {string}
      */
     AgentStatus: "active" | "archived" | "deleted";
+    /** @description Immutable snapshot of an Agent's authored and resolved runtime config. */
+    AgentVersion: {
+      /** @example agent_01933b5a000070008000000000000001 */
+      agent_id: string;
+      authored_config: Record<string, never>;
+      change_kind: components["schemas"]["AgentVersionChangeKind"];
+      config_hash: string;
+      /** Format: date-time */
+      created_at: string;
+      created_by_principal_id?: string | null;
+      /** @example agentver_01933b5a000070008000000000000001 */
+      id: string;
+      parent_version_id?: string | null;
+      resolved_config: Record<string, never>;
+      /** Format: int32 */
+      semver_major: number;
+      /** Format: int32 */
+      semver_minor: number;
+      /** Format: int32 */
+      semver_patch: number;
+      source_version_id?: string | null;
+      summary?: string | null;
+      version: string;
+      /** Format: int32 */
+      version_number: number;
+    };
+    /**
+     * @description Reason a version was created. Stored as lower_snake_case text.
+     * @enum {string}
+     */
+    AgentVersionChangeKind:
+      | "manual"
+      | "patch"
+      | "minor"
+      | "major"
+      | "import"
+      | "rollback"
+      | "fork";
+    AgentVersionDiffResponse: {
+      authored_diff: unknown;
+      from_version_id: components["schemas"]["agentverId"];
+      resolved_diff: unknown;
+      to_version_id: components["schemas"]["agentverId"];
+    };
     BTreeMap: {
       [key: string]: {
         /** @description Authentication mode used when executing tools from this scoped server. */
@@ -2232,6 +2646,10 @@ export interface components {
        */
       tools?: components["schemas"]["ToolDefinition"][];
     };
+    CreateAgentVersionRequest: {
+      change_kind?: null | components["schemas"]["AgentVersionChangeKind"];
+      summary?: string | null;
+    };
     /** @description Request to create a branch */
     CreateBranchRequest: {
       /** @description Commit OID (hex) to point to */
@@ -2243,6 +2661,10 @@ export interface components {
     CreateDatabaseRequest: {
       /** @description Database name (alphanumeric + underscores, max 64 chars) */
       name: string;
+    };
+    CreateDeclarativeCapabilityRequest: {
+      /** @description Definition for the new declarative capability. `name` must be unique per org and becomes the canonical `declarative:<name>` capability ref. */
+      definition: Record<string, never>;
     };
     /** @description Request to create a file */
     CreateFileRequest: {
@@ -2430,6 +2852,32 @@ export interface components {
        */
       name: string;
     };
+    CreatePaymentAccountRequest: {
+      label: string;
+      metadata?: unknown;
+      owner_id: string;
+      owner_type: string;
+      private_key?: string | null;
+      public_address?: string | null;
+      rail: string;
+    };
+    CreatePaymentPolicyRequest: {
+      allowed_capabilities?: string[];
+      allowed_hosts?: string[];
+      /** Format: double */
+      max_amount_usd_per_day?: number | null;
+      /** Format: double */
+      max_amount_usd_per_request?: number | null;
+      /** Format: double */
+      max_amount_usd_per_turn?: number | null;
+      metadata?: unknown;
+      payment_account_id: string;
+      rail_preference?: string[];
+      /** Format: double */
+      require_approval_above_usd?: number | null;
+      subject_id: string;
+      subject_type: string;
+    };
     /** @description Create schedule request */
     CreateScheduleRequest: {
       /** @description Whether to catch up missed triggers (default: false) */
@@ -2570,6 +3018,48 @@ export interface components {
       page_count: number;
       /** Format: int64 */
       size_bytes: number;
+      updated_at: string;
+    };
+    DeclarativeCapability: {
+      /** Format: date-time */
+      archived_at?: string | null;
+      /**
+       * @description Runtime capability reference. Agents and harnesses may use this or the plain unique name.
+       * @example declarative:research_pack
+       */
+      capability_id: string;
+      /** Format: date-time */
+      created_at: string;
+      /** @description Declarative capability payload: system prompt, skills, starter files, MCP servers, and metadata. */
+      definition: Record<string, never>;
+      /** Format: date-time */
+      deleted_at?: string | null;
+      /**
+       * @description Short summary shown in pickers, search results, and API listings.
+       * @example Adds research instructions, starter files, and MCP tools.
+       */
+      description: string;
+      /**
+       * @description Human-facing label shown in the UI. Defaults to `name` when omitted.
+       * @example Research Pack
+       */
+      display_name?: string | null;
+      /**
+       * @description Public resource ID for this persisted declarative capability.
+       * @example cap_01933b5a000070008000000000000001
+       */
+      id: string;
+      /**
+       * @description Stable unique name used in capability refs. Lowercase letters, numbers, and underscores.
+       * @example research_pack
+       */
+      name: string;
+      /**
+       * @description Lifecycle state for the resource: active, disabled, archived, or deleted.
+       * @example active
+       */
+      status: string;
+      /** Format: date-time */
       updated_at: string;
     };
     /**
@@ -2738,7 +3228,49 @@ export interface components {
       | components["schemas"]["BudgetEventData"]
       | components["schemas"]["BudgetEventData"]
       | components["schemas"]["BudgetEventData"]
-      | components["schemas"]["BudgetEventData"];
+      | components["schemas"]["BudgetEventData"]
+      | components["schemas"]["VoiceSessionStartedData"]
+      | components["schemas"]["VoiceTranscriptData"]
+      | components["schemas"]["VoiceTranscriptData"]
+      | components["schemas"]["VoiceTranscriptData"]
+      | components["schemas"]["VoiceTranscriptData"]
+      | components["schemas"]["VoiceSessionEndedData"]
+      | components["schemas"]["VoiceSessionFailedData"];
+    EventTypeCountOut: {
+      /** Format: int64 */
+      count: number;
+      event_type: string;
+    };
+    EventsSummaryResult: {
+      /** @description Per-type count, sorted by event_type asc. */
+      by_type: components["schemas"]["EventTypeCountOut"][];
+      /**
+       * Format: int64
+       * @description Convenience: count of failure-shaped event types
+       *     (`turn.failed`, `tool.failed`, `*.error`, `subagent.failed`).
+       */
+      error_count: number;
+      /**
+       * Format: date-time
+       * @description Earliest event timestamp, if any.
+       */
+      first_ts?: string | null;
+      /**
+       * Format: date-time
+       * @description Latest event timestamp, if any.
+       */
+      last_ts?: string | null;
+      /**
+       * Format: int64
+       * @description Total event count across all types.
+       */
+      total: number;
+      /**
+       * Format: int64
+       * @description Convenience: count of `turn.started` events.
+       */
+      turn_count: number;
+    };
     /**
      * @description Execution phase for assistant messages in multi-step tool-calling flows.
      *
@@ -2818,6 +3350,11 @@ export interface components {
        * @description File size in bytes after write.
        */
       size_bytes: number;
+    };
+    ForkAgentVersionRequest: {
+      description?: string | null;
+      display_name?: string | null;
+      name: string;
     };
     GetOrCreateChatSessionRequest: {
       /** @description Browser locale for seeding the global chat session (BCP 47, e.g. `uk-UA`). */
@@ -3275,6 +3812,11 @@ export interface components {
          */
         default_model_id?: string | null;
         /**
+         * @description Default immutable version used by deployments that choose the default policy.
+         * @example agentver_01933b5a00007000800000000000001
+         */
+        default_version_id?: string | null;
+        /**
          * Format: date-time
          * @description Timestamp when the agent was deleted.
          */
@@ -3286,6 +3828,16 @@ export interface components {
          *     Falls back to `name` when absent.
          */
         display_name?: string | null;
+        /**
+         * @description Source agent for a forked agent.
+         * @example agent_01933b5a00007000800000000000001
+         */
+        forked_from_agent_id?: string | null;
+        /**
+         * @description Source version for a forked agent.
+         * @example agentver_01933b5a00007000800000000000001
+         */
+        forked_from_version_id?: string | null;
         /**
          * @description External identifier (agent_<32-hex>). Shown as "id" in API.
          *     Client-supplied or auto-generated.
@@ -3301,6 +3853,11 @@ export interface components {
         /** @description Name, unique per org (e.g. "customer-support"). */
         name: string;
         network_access?: null | components["schemas"]["NetworkAccessList"];
+        /**
+         * @description Root agent lineage identifier for grouping fork families.
+         * @example agent_01933b5a00007000800000000000001
+         */
+        root_agent_id?: string | null;
         /** @description Current lifecycle status of the agent. */
         status: components["schemas"]["AgentStatus"];
         /**
@@ -3840,6 +4397,62 @@ export interface components {
         /** Format: date-time */
         updated_at: string;
       }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_DeclarativeCapability: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /** Format: date-time */
+        archived_at?: string | null;
+        /**
+         * @description Runtime capability reference. Agents and harnesses may use this or the plain unique name.
+         * @example declarative:research_pack
+         */
+        capability_id: string;
+        /** Format: date-time */
+        created_at: string;
+        /** @description Declarative capability payload: system prompt, skills, starter files, MCP servers, and metadata. */
+        definition: Record<string, never>;
+        /** Format: date-time */
+        deleted_at?: string | null;
+        /**
+         * @description Short summary shown in pickers, search results, and API listings.
+         * @example Adds research instructions, starter files, and MCP tools.
+         */
+        description: string;
+        /**
+         * @description Human-facing label shown in the UI. Defaults to `name` when omitted.
+         * @example Research Pack
+         */
+        display_name?: string | null;
+        /**
+         * @description Public resource ID for this persisted declarative capability.
+         * @example cap_01933b5a000070008000000000000001
+         */
+        id: string;
+        /**
+         * @description Stable unique name used in capability refs. Lowercase letters, numbers, and underscores.
+         * @example research_pack
+         */
+        name: string;
+        /**
+         * @description Lifecycle state for the resource: active, disabled, archived, or deleted.
+         * @example active
+         */
+        status: string;
+        /** Format: date-time */
+        updated_at: string;
+      } & {
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
     };
     /**
      * @description Response wrapper for list endpoints.
@@ -4861,6 +5474,11 @@ export interface components {
          * @example identity_01933b5a00007000800000000000001
          */
         agent_identity_id?: string | null;
+        /**
+         * @description Immutable agent version captured when the session was created or rebound.
+         * @example agentver_01933b5a00007000800000000000001
+         */
+        agent_version_id?: string | null;
         /** @description Validated config passed by host at blueprint spawn time. */
         blueprint_config?: unknown;
         /**
@@ -5110,6 +5728,11 @@ export interface components {
          */
         default_model_id?: string | null;
         /**
+         * @description Default immutable version used by deployments that choose the default policy.
+         * @example agentver_01933b5a00007000800000000000001
+         */
+        default_version_id?: string | null;
+        /**
          * Format: date-time
          * @description Timestamp when the agent was deleted.
          */
@@ -5121,6 +5744,16 @@ export interface components {
          *     Falls back to `name` when absent.
          */
         display_name?: string | null;
+        /**
+         * @description Source agent for a forked agent.
+         * @example agent_01933b5a00007000800000000000001
+         */
+        forked_from_agent_id?: string | null;
+        /**
+         * @description Source version for a forked agent.
+         * @example agentver_01933b5a00007000800000000000001
+         */
+        forked_from_version_id?: string | null;
         /**
          * @description External identifier (agent_<32-hex>). Shown as "id" in API.
          *     Client-supplied or auto-generated.
@@ -5136,6 +5769,11 @@ export interface components {
         /** @description Name, unique per org (e.g. "customer-support"). */
         name: string;
         network_access?: null | components["schemas"]["NetworkAccessList"];
+        /**
+         * @description Root agent lineage identifier for grouping fork families.
+         * @example agent_01933b5a00007000800000000000001
+         */
+        root_agent_id?: string | null;
         /** @description Current lifecycle status of the agent. */
         status: components["schemas"]["AgentStatus"];
         /**
@@ -5214,6 +5852,11 @@ export interface components {
          * @example identity_01933b5a00007000800000000000001
          */
         agent_identity_id?: string | null;
+        /**
+         * @description Immutable agent version captured when the session was created or rebound.
+         * @example agentver_01933b5a00007000800000000000001
+         */
+        agent_version_id?: string | null;
         /** @description Validated config passed by host at blueprint spawn time. */
         blueprint_config?: unknown;
         /**
@@ -5362,6 +6005,84 @@ export interface components {
        */
       total: number;
     };
+    PaymentAccount: {
+      /** Format: date-time */
+      created_at: string;
+      id: components["schemas"]["payacctId"];
+      label: string;
+      metadata: unknown;
+      organization_id: string;
+      owner_id: string;
+      owner_type: components["schemas"]["PaymentOwnerType"];
+      public_address?: string | null;
+      rail: components["schemas"]["PaymentRail"];
+      status: components["schemas"]["PaymentStatus"];
+      /** Format: date-time */
+      updated_at: string;
+    };
+    PaymentAttempt: {
+      /** Format: double */
+      amount_usd: number;
+      capability: string;
+      /** Format: date-time */
+      created_at: string;
+      currency: string;
+      error_message?: string | null;
+      id: components["schemas"]["payattId"];
+      operation: string;
+      organization_id: string;
+      payment_account_id?: null | components["schemas"]["payacctId"];
+      rail?: null | components["schemas"]["PaymentRail"];
+      receipt: unknown;
+      request_hash?: string | null;
+      session_id?: string | null;
+      status: components["schemas"]["PaymentStatus"];
+      target_url: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /**
+     * @description Principal class that owns a payment account.
+     * @enum {string}
+     */
+    PaymentOwnerType: "user" | "agent_identity" | "organization";
+    PaymentPolicy: {
+      allowed_capabilities: string[];
+      allowed_hosts: string[];
+      /** Format: date-time */
+      created_at: string;
+      id: components["schemas"]["paypolId"];
+      /** Format: double */
+      max_amount_usd_per_day?: number | null;
+      /** Format: double */
+      max_amount_usd_per_request?: number | null;
+      /** Format: double */
+      max_amount_usd_per_turn?: number | null;
+      metadata: unknown;
+      organization_id: string;
+      payment_account_id: components["schemas"]["payacctId"];
+      rail_preference: components["schemas"]["PaymentRail"][];
+      /** Format: double */
+      require_approval_above_usd?: number | null;
+      status: components["schemas"]["PaymentStatus"];
+      subject_id: string;
+      subject_type: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    /**
+     * @description Payment rail used to settle a machine payment.
+     * @enum {string}
+     */
+    PaymentRail: "mpp_tempo" | "x402_base";
+    /** @enum {string} */
+    PaymentStatus:
+      | "active"
+      | "disabled"
+      | "pending"
+      | "succeeded"
+      | "failed"
+      | "released";
     /** @description Request to preview the final agent shape with capabilities applied */
     PreviewAgentRequest: {
       /**
@@ -5436,9 +6157,9 @@ export interface components {
     };
     /** @description Data for reason.started event */
     ReasonStartedData: {
-      agent_id?: null | components["schemas"]["TypedId"];
+      agent_id?: null | components["schemas"]["agentId"];
       /** @description Harness ID being used */
-      harness_id: components["schemas"]["TypedId"];
+      harness_id: components["schemas"]["harnessId"];
       metadata?: null | components["schemas"]["ModelMetadata"];
     };
     /**
@@ -5565,6 +6286,10 @@ export interface components {
      * @enum {string}
      */
     RiskLevel: "low" | "medium" | "high";
+    RollbackAgentVersionRequest: {
+      save_version?: boolean;
+      summary?: string | null;
+    };
     /** @description Schedule execution response */
     ScheduleExecutionResponse: {
       /** Format: date-time */
@@ -5688,6 +6413,11 @@ export interface components {
        * @example identity_01933b5a00007000800000000000001
        */
       agent_identity_id?: string | null;
+      /**
+       * @description Immutable agent version captured when the session was created or rebound.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      agent_version_id?: string | null;
       /** @description Validated config passed by host at blueprint spawn time. */
       blueprint_config?: unknown;
       /**
@@ -5932,6 +6662,9 @@ export interface components {
       | "idle"
       | "waitingfortoolresults"
       | "paused";
+    SetDefaultAgentVersionRequest: {
+      version_id: components["schemas"]["agentverId"];
+    };
     /** @description Skill entity (API response type) */
     Skill: {
       allowed_tools?: string | null;
@@ -6376,11 +7109,6 @@ export interface components {
        */
       turn_id: string;
     };
-    /**
-     * @description Prefixed identifier with 'agent' prefix
-     * @example agent_01933b5a00007000800000000000001
-     */
-    TypedId: string;
     /** @description Request to update an agent. Only provided fields will be updated. */
     UpdateAgentRequest: {
       /**
@@ -6442,6 +7170,15 @@ export interface components {
        *     Replaces existing tools if provided.
        */
       tools?: components["schemas"]["ToolDefinition"][] | null;
+    };
+    UpdateDeclarativeCapabilityRequest: {
+      /** @description Replacement declarative definition. Changing `name` updates the canonical capability ref after uniqueness validation. */
+      definition?: Record<string, never>;
+      /**
+       * @description Optional lifecycle state update. Use `disabled` to hide from runtime selection without archiving.
+       * @example disabled
+       */
+      status?: string | null;
     };
     /** @description Request to update a file */
     UpdateFileRequest: {
@@ -6593,6 +7330,28 @@ export interface components {
        */
       name?: string | null;
     };
+    UpdatePaymentAccountRequest: {
+      label?: string | null;
+      metadata?: unknown;
+      private_key?: string | null;
+      public_address?: string | null;
+      status?: string | null;
+    };
+    UpdatePaymentPolicyRequest: {
+      allowed_capabilities?: string[] | null;
+      allowed_hosts?: string[] | null;
+      /** Format: double */
+      max_amount_usd_per_day?: number | null;
+      /** Format: double */
+      max_amount_usd_per_request?: number | null;
+      /** Format: double */
+      max_amount_usd_per_turn?: number | null;
+      metadata?: unknown;
+      rail_preference?: string[] | null;
+      /** Format: double */
+      require_approval_above_usd?: number | null;
+      status?: string | null;
+    };
     /** @description Update schedule request */
     UpdateScheduleRequest: {
       /** @description Catch up missed triggers */
@@ -6670,6 +7429,100 @@ export interface components {
       /** @description SKILL.md content to validate */
       skill_md: string;
     };
+    VoiceAttachRequest: components["schemas"]["VoiceSessionOptions"] & {
+      provider_call_id: string;
+    };
+    VoiceAttachResponse: {
+      /** Format: date-time */
+      expires_at: string;
+      model: string;
+      provider: string;
+      provider_call_id: string;
+      reasoning_effort: string;
+      voice: string;
+      voice_connection_id: string;
+    };
+    VoiceCallRequest: components["schemas"]["VoiceSessionOptions"] & {
+      sdp: string;
+    };
+    VoiceCallResponse: {
+      answer_sdp: string;
+      /** Format: date-time */
+      expires_at: string;
+      model: string;
+      provider: string;
+      provider_call_id?: string | null;
+      reasoning_effort: string;
+      voice: string;
+      voice_connection_id: string;
+    };
+    VoiceClientSecretRequest: components["schemas"]["VoiceSessionOptions"];
+    VoiceClientSecretResponse: {
+      client_secret: unknown;
+      /** Format: date-time */
+      expires_at: string;
+      model: string;
+      provider: string;
+      reasoning_effort: string;
+      voice: string;
+      voice_connection_id: string;
+    };
+    VoiceEndRequest: {
+      reason?: string | null;
+    };
+    VoiceEndResponse: {
+      status: string;
+      voice_connection_id: string;
+    };
+    /** @description Data for voice.session.ended. */
+    VoiceSessionEndedData: {
+      /** Format: int64 */
+      duration_ms?: number | null;
+      reason?: string | null;
+      voice_connection_id: string;
+    };
+    /** @description Data for voice.session.failed. */
+    VoiceSessionFailedData: {
+      error: string;
+      voice_connection_id: string;
+    };
+    VoiceSessionOptions: {
+      instructions?: string | null;
+      model?: string | null;
+      reasoning_effort?: string | null;
+      voice?: string | null;
+    };
+    VoiceSessionResponse_VoiceCallResponse: {
+      session: components["schemas"]["Session"];
+      voice: {
+        answer_sdp: string;
+        /** Format: date-time */
+        expires_at: string;
+        model: string;
+        provider: string;
+        provider_call_id?: string | null;
+        reasoning_effort: string;
+        voice: string;
+        voice_connection_id: string;
+      };
+    };
+    /** @description Data for voice.session.started. */
+    VoiceSessionStartedData: {
+      model: string;
+      reasoning_effort: string;
+      transport: string;
+      voice: string;
+      voice_connection_id: string;
+    };
+    /** @description Data for voice transcript delta/completed events. */
+    VoiceTranscriptData: {
+      accumulated: string;
+      delta?: string;
+      item_id?: string | null;
+      phase?: string | null;
+      response_id?: string | null;
+      voice_connection_id: string;
+    };
     VolumeResponse: {
       /** Format: date-time */
       archived_at?: string | null;
@@ -6719,6 +7572,11 @@ export interface components {
        */
       default_model_id?: string | null;
       /**
+       * @description Default immutable version used by deployments that choose the default policy.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      default_version_id?: string | null;
+      /**
        * Format: date-time
        * @description Timestamp when the agent was deleted.
        */
@@ -6730,6 +7588,16 @@ export interface components {
        *     Falls back to `name` when absent.
        */
       display_name?: string | null;
+      /**
+       * @description Source agent for a forked agent.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      forked_from_agent_id?: string | null;
+      /**
+       * @description Source version for a forked agent.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      forked_from_version_id?: string | null;
       /**
        * @description External identifier (agent_<32-hex>). Shown as "id" in API.
        *     Client-supplied or auto-generated.
@@ -6745,6 +7613,11 @@ export interface components {
       /** @description Name, unique per org (e.g. "customer-support"). */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Root agent lineage identifier for grouping fork families.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      root_agent_id?: string | null;
       /** @description Current lifecycle status of the agent. */
       status: components["schemas"]["AgentStatus"];
       /**
@@ -6828,6 +7701,61 @@ export interface components {
       system_prompt?: string | null;
       /** @description Tool definitions provided by this capability */
       tool_definitions?: Record<string, never>[];
+    } & {
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer).
+     */
+    WithUrls_DeclarativeCapability: {
+      /** Format: date-time */
+      archived_at?: string | null;
+      /**
+       * @description Runtime capability reference. Agents and harnesses may use this or the plain unique name.
+       * @example declarative:research_pack
+       */
+      capability_id: string;
+      /** Format: date-time */
+      created_at: string;
+      /** @description Declarative capability payload: system prompt, skills, starter files, MCP servers, and metadata. */
+      definition: Record<string, never>;
+      /** Format: date-time */
+      deleted_at?: string | null;
+      /**
+       * @description Short summary shown in pickers, search results, and API listings.
+       * @example Adds research instructions, starter files, and MCP tools.
+       */
+      description: string;
+      /**
+       * @description Human-facing label shown in the UI. Defaults to `name` when omitted.
+       * @example Research Pack
+       */
+      display_name?: string | null;
+      /**
+       * @description Public resource ID for this persisted declarative capability.
+       * @example cap_01933b5a000070008000000000000001
+       */
+      id: string;
+      /**
+       * @description Stable unique name used in capability refs. Lowercase letters, numbers, and underscores.
+       * @example research_pack
+       */
+      name: string;
+      /**
+       * @description Lifecycle state for the resource: active, disabled, archived, or deleted.
+       * @example active
+       */
+      status: string;
+      /** Format: date-time */
+      updated_at: string;
     } & {
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
@@ -7122,6 +8050,11 @@ export interface components {
        */
       default_model_id?: string | null;
       /**
+       * @description Default immutable version used by deployments that choose the default policy.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      default_version_id?: string | null;
+      /**
        * Format: date-time
        * @description Timestamp when the agent was deleted.
        */
@@ -7133,6 +8066,16 @@ export interface components {
        *     Falls back to `name` when absent.
        */
       display_name?: string | null;
+      /**
+       * @description Source agent for a forked agent.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      forked_from_agent_id?: string | null;
+      /**
+       * @description Source version for a forked agent.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      forked_from_version_id?: string | null;
       /**
        * @description External identifier (agent_<32-hex>). Shown as "id" in API.
        *     Client-supplied or auto-generated.
@@ -7148,6 +8091,11 @@ export interface components {
       /** @description Name, unique per org (e.g. "customer-support"). */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
+      /**
+       * @description Root agent lineage identifier for grouping fork families.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      root_agent_id?: string | null;
       /** @description Current lifecycle status of the agent. */
       status: components["schemas"]["AgentStatus"];
       /**
@@ -7300,6 +8248,11 @@ export interface components {
        * @example identity_01933b5a00007000800000000000001
        */
       agent_identity_id?: string | null;
+      /**
+       * @description Immutable agent version captured when the session was created or rebound.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      agent_version_id?: string | null;
       /** @description Validated config passed by host at blueprint spawn time. */
       blueprint_config?: unknown;
       /**
@@ -7474,6 +8427,41 @@ export interface components {
       /** @description Full UI URL for viewing this resource. */
       view_url: string;
     };
+    /**
+     * @description Prefixed identifier with 'agent' prefix
+     * @example agent_01933b5a00007000800000000000001
+     */
+    agentId: string;
+    /**
+     * @description Prefixed identifier with 'agentver' prefix
+     * @example agentver_01933b5a00007000800000000000001
+     */
+    agentverId: string;
+    /**
+     * @description Prefixed identifier with 'event' prefix
+     * @example event_01933b5a00007000800000000000001
+     */
+    eventId: string;
+    /**
+     * @description Prefixed identifier with 'harness' prefix
+     * @example harness_01933b5a00007000800000000000001
+     */
+    harnessId: string;
+    /**
+     * @description Prefixed identifier with 'payacct' prefix
+     * @example payacct_01933b5a00007000800000000000001
+     */
+    payacctId: string;
+    /**
+     * @description Prefixed identifier with 'payatt' prefix
+     * @example payatt_01933b5a00007000800000000000001
+     */
+    payattId: string;
+    /**
+     * @description Prefixed identifier with 'paypol' prefix
+     * @example paypol_01933b5a00007000800000000000001
+     */
+    paypolId: string;
   };
   responses: never;
   parameters: never;
@@ -7998,6 +8986,282 @@ export interface operations {
       };
     };
   };
+  list_agent_versions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Saved agent versions */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AgentVersion"][];
+        };
+      };
+      /** @description Agent not found or agent_versions disabled */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  create_agent_version: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateAgentVersionRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent version created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AgentVersion"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Agent not found or agent_versions disabled */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  set_default_agent_version: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetDefaultAgentVersionRequest"];
+      };
+    };
+    responses: {
+      /** @description Default version updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Agent or version not found, or agent_versions disabled */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  diff_agent_versions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+        /** @description Base agent version ID */
+        from_version_id: components["schemas"]["agentverId"];
+        /** @description Comparison agent version ID */
+        to_version_id: components["schemas"]["agentverId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Agent version diff */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AgentVersionDiffResponse"];
+        };
+      };
+      /** @description Agent or version not found, or agent_versions disabled */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  fork_agent_version: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Source agent ID (prefixed) or name */
+        agent_id: string;
+        /** @description Agent version ID */
+        version_id: components["schemas"]["agentverId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ForkAgentVersionRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent fork created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Agent or version not found, or agent_versions disabled */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  rollback_agent_version: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Agent ID (prefixed) or name */
+        agent_id: string;
+        /** @description Agent version ID */
+        version_id: components["schemas"]["agentverId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RollbackAgentVersionRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent rolled back */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Agent"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Agent or version not found, or agent_versions disabled */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  create_agent_voice_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoiceCallRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent session and realtime call created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VoiceSessionResponse_VoiceCallResponse"];
+        };
+      };
+    };
+  };
   invoke_a2a: {
     parameters: {
       query?: never;
@@ -8016,7 +9280,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description JSON-RPC 2.0 response (success or A2A error envelope) */
+      /** @description JSON-RPC 2.0 response. For message/send and tasks/* the body is a single JSON envelope; for message/stream the body is text/event-stream of JSON-RPC envelopes. tasks/get and tasks/cancel surface -32001 Task not found for unknown task ids. */
       200: {
         headers: {
           [name: string]: unknown;
@@ -8043,6 +9307,15 @@ export interface operations {
       };
       /** @description App or channel not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description SSE connection limit reached for the org/session */
+      429: {
         headers: {
           [name: string]: unknown;
         };
@@ -8185,6 +9458,230 @@ export interface operations {
       };
       /** @description Internal server error */
       500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  create_declarative_capability: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateDeclarativeCapabilityRequest"];
+      };
+    };
+    responses: {
+      /** @description Declarative capability created. Response id uses cap_<32-hex>; capability_id uses declarative:<unique_name>. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_DeclarativeCapability"];
+        };
+      };
+      /** @description Invalid declarative capability definition, name, limits, file mount, skill, or MCP server configuration. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description A declarative capability with the same unique name already exists. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_declarative_capabilities: {
+    parameters: {
+      query?: {
+        /** @description Search by unique name, display name, or description */
+        search?: string;
+        /** @description Include archived declarative capabilities */
+        include_archived?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Persisted declarative capability resources */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_DeclarativeCapability"];
+        };
+      };
+    };
+  };
+  declarative_capabilities_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for declarative capabilities */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
+  get_declarative_capability: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Public declarative capability resource ID, e.g. cap_01933b5a000070008000000000000001 */
+        capability_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Declarative capability resource */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_DeclarativeCapability"];
+        };
+      };
+      /** @description Declarative capability not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_declarative_capability: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Public declarative capability resource ID */
+        capability_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Declarative capability archived */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Declarative capability not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_declarative_capability: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Public declarative capability resource ID */
+        capability_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateDeclarativeCapabilityRequest"];
+      };
+    };
+    responses: {
+      /** @description Declarative capability updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_DeclarativeCapability"];
+        };
+      };
+      /** @description Invalid update payload or declarative capability definition */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description A declarative capability with the same unique name already exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  destroy_declarative_capability: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Public declarative capability resource ID */
+        capability_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Archived declarative capability permanently deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Declarative capability not found or not archived */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -10799,6 +12296,356 @@ export interface operations {
       };
     };
   };
+  list_payment_accounts: {
+    parameters: {
+      query?: {
+        owner_type?: string | null;
+        owner_id?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List payment accounts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentAccount"][];
+        };
+      };
+    };
+  };
+  create_payment_account: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePaymentAccountRequest"];
+      };
+    };
+    responses: {
+      /** @description Payment account created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentAccount"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_payment_account: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Payment account ID */
+        payment_account_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Payment account */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentAccount"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  disable_payment_account: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Payment account ID */
+        payment_account_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Payment account disabled */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_payment_account: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Payment account ID */
+        payment_account_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePaymentAccountRequest"];
+      };
+    };
+    responses: {
+      /** @description Payment account updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentAccount"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_payment_attempts: {
+    parameters: {
+      query?: {
+        session_id?: string | null;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List payment attempts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentAttempt"][];
+        };
+      };
+    };
+  };
+  list_payment_policies: {
+    parameters: {
+      query?: {
+        payment_account_id?: string | null;
+        subject_type?: string | null;
+        subject_id?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List payment policies */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentPolicy"][];
+        };
+      };
+    };
+  };
+  create_payment_policy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePaymentPolicyRequest"];
+      };
+    };
+    responses: {
+      /** @description Payment policy created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentPolicy"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_payment_policy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Payment policy ID */
+        payment_policy_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Payment policy */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentPolicy"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  disable_payment_policy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Payment policy ID */
+        payment_policy_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Payment policy disabled */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_payment_policy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Payment policy ID */
+        payment_policy_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePaymentPolicyRequest"];
+      };
+    };
+    responses: {
+      /** @description Payment policy updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaymentPolicy"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   list_sessions: {
     parameters: {
       query?: {
@@ -10913,6 +12760,30 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  create_chat_voice_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoiceCallRequest"];
+      };
+    };
+    responses: {
+      /** @description Platform chat session and realtime call created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VoiceSessionResponse_VoiceCallResponse"];
+        };
       };
     };
   };
@@ -11314,27 +13185,45 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Filter events with ID greater than this event ID (prefixed format: event_{32-hex}) */
-        since_id?: null | components["schemas"]["TypedId"];
-        /**
-         * @description Positive type filter: only return events matching these types (can be specified multiple times).
-         *     When empty, all types are returned. Example: ?types=turn.started&types=turn.completed
-         */
+        since_id?: null | components["schemas"]["eventId"];
+        /** @description Positive type filter (repeat key). Empty = all types. */
         types?: string[];
-        /**
-         * @description Event types to exclude from the response (can be specified multiple times).
-         *     Applied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta
-         */
+        /** @description Event types to exclude (repeat key); applied after `types`. */
         exclude?: string[];
         /**
          * @description Max events to return (backward pagination). When set, returns the last N events
          *     (or last N before `before_sequence`). Results are ordered oldest→newest.
          */
         limit?: number | null;
-        /**
-         * @description Cursor for backward pagination: only return events with sequence < this value.
-         *     Used with `limit` to paginate backward through event history.
-         */
+        /** @description Cursor for backward pagination: only return events with sequence < this value. */
         before_sequence?: number | null;
+        /** @description Forward cursor: only return events with sequence > this value. */
+        after_sequence?: number | null;
+        /**
+         * @description Anchor event id: returns up to `window` events on each side (default 50, max 500).
+         *     Mutually exclusive with `since_id`, `after_sequence`, and `before_sequence` — 400 if combined.
+         */
+        around?: null | components["schemas"]["eventId"];
+        /** @description Window size for `around` (events on each side). Defaults to 50, max 500. */
+        window?: number | null;
+        /** @description Lower bound on `created_at` (RFC 3339, e.g. `2025-05-07T00:00:00Z`). */
+        from_ts?: string | null;
+        /** @description Upper bound on `created_at`. */
+        to_ts?: string | null;
+        /** @description Filter by `context.turn_id` (prefixed id, e.g. `turn_...`). */
+        turn_id?: string | null;
+        /** @description Filter by `context.exec_id` (prefixed id, e.g. `exec_...`). */
+        exec_id?: string | null;
+        /** @description Filter by `context.trace_id`. */
+        trace_id?: string | null;
+        /** @description Tag any-match against `events.tags` (repeat key for multiple values). */
+        tags?: string[];
+        /** @description Filter by `data.tool_name` — useful for narrowing `tool.*` events. */
+        tool_name?: string | null;
+        /** @description Full-text search (Postgres tsvector; substring fallback for in-memory mode). */
+        q?: string | null;
+        /** @description When true, return newest first; default oldest first. */
+        order_desc?: boolean;
       };
       header?: never;
       path: {
@@ -11357,6 +13246,50 @@ export interface operations {
         };
       };
       /** @description Invalid session ID or invalid event type filter */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  events_summary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID (prefixed, e.g., sess_...) */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Per-type counts and time span for the session */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventsSummaryResult"];
+        };
+      };
+      /** @description Invalid session ID */
       400: {
         headers: {
           [name: string]: unknown;
@@ -12406,7 +14339,7 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Filter events with ID greater than this event ID (prefixed format: event_{32-hex}) */
-        since_id?: null | components["schemas"]["TypedId"];
+        since_id?: null | components["schemas"]["eventId"];
         /**
          * @description Positive type filter: only return events matching these types (can be specified multiple times).
          *     When empty, all types are returned. Example: ?types=turn.started&types=turn.completed
@@ -12417,16 +14350,6 @@ export interface operations {
          *     Applied after `types` filter. Common delta events to exclude: output.message.delta, reason.thinking.delta
          */
         exclude?: string[];
-        /**
-         * @description Max events to return (backward pagination). When set, returns the last N events
-         *     (or last N before `before_sequence`). Results are ordered oldest→newest.
-         */
-        limit?: number | null;
-        /**
-         * @description Cursor for backward pagination: only return events with sequence < this value.
-         *     Used with `limit` to paginate backward through event history.
-         */
-        before_sequence?: number | null;
       };
       header?: never;
       path: {
@@ -12595,6 +14518,112 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  create_call: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoiceCallRequest"];
+      };
+    };
+    responses: {
+      /** @description Realtime WebRTC call created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VoiceCallResponse"];
+        };
+      };
+    };
+  };
+  create_client_secret: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoiceClientSecretRequest"];
+      };
+    };
+    responses: {
+      /** @description Realtime client secret created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VoiceClientSecretResponse"];
+        };
+      };
+    };
+  };
+  attach_call: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: string;
+        voice_connection_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoiceAttachRequest"];
+      };
+    };
+    responses: {
+      /** @description Realtime sideband attached */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VoiceAttachResponse"];
+        };
+      };
+    };
+  };
+  end_call: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: string;
+        voice_connection_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VoiceEndRequest"];
+      };
+    };
+    responses: {
+      /** @description Realtime voice connection ended */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VoiceEndResponse"];
+        };
       };
     };
   };

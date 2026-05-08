@@ -80,6 +80,29 @@ client = Everruns()
 client = Everruns(api_key="evr_...", org_id="org_...")
 ```
 
+## Agent Versions
+
+```python
+version = await client.agents.create_version(
+    "agent_...",
+    change_kind="manual",
+    summary="Baseline",
+)
+
+versions = await client.agents.list_versions("agent_...")
+diff = await client.agents.diff_versions("agent_...", "agentver_1", version.id)
+fork = await client.agents.fork_version(
+    "agent_...",
+    version.id,
+    name="forked-agent",
+)
+rollback = await client.agents.rollback_version(
+    "agent_...",
+    version.id,
+    save_version=True,
+)
+```
+
 ## License
 
 MIT

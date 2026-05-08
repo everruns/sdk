@@ -944,6 +944,122 @@ async def test_agent_stats():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_agent_versions_methods():
+    version_json = {
+        "id": "agentver_123",
+        "agent_id": "agent_123",
+        "version_number": 1,
+        "semver_major": 1,
+        "semver_minor": 0,
+        "semver_patch": 0,
+        "version": "1.0.0",
+        "change_kind": "manual",
+        "config_hash": "hash_123",
+        "authored_config": {"name": "assistant"},
+        "resolved_config": {"name": "assistant"},
+        "created_at": "2026-05-08T00:00:00Z",
+        "summary": "Initial version",
+    }
+    agent_json = {
+        "id": "agent_456",
+        "name": "forked-agent",
+        "description": "Forked",
+        "system_prompt": "Help.",
+        "default_model_id": None,
+        "tags": [],
+        "capabilities": [],
+        "tools": [],
+        "initial_files": [],
+        "status": "active",
+        "created_at": "2026-05-08T00:00:00Z",
+        "updated_at": "2026-05-08T00:00:00Z",
+    }
+    list_route = respx.get("https://custom.example.com/api/v1/agents/agent_123/versions").mock(
+        return_value=httpx.Response(200, json=[version_json])
+    )
+    create_route = respx.post("https://custom.example.com/api/v1/agents/agent_123/versions").mock(
+        return_value=httpx.Response(200, json=version_json)
+    )
+    default_route = respx.post(
+        "https://custom.example.com/api/v1/agents/agent_123/versions/default"
+    ).mock(return_value=httpx.Response(200, json=agent_json))
+    diff_route = respx.get(
+        "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/diff/agentver_2"
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "from_version_id": "agentver_1",
+                "to_version_id": "agentver_2",
+                "authored_diff": [{"op": "replace", "path": "/name"}],
+                "resolved_diff": [],
+            },
+        )
+    )
+    fork_route = respx.post(
+        "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/fork"
+    ).mock(return_value=httpx.Response(200, json=agent_json))
+    rollback_route = respx.post(
+        "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/rollback"
+    ).mock(return_value=httpx.Response(200, json=agent_json))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        versions = await client.agents.list_versions("agent_123")
+        created = await client.agents.create_version(
+            "agent_123",
+            change_kind="manual",
+            summary="Initial version",
+        )
+        default_agent = await client.agents.set_default_version("agent_123", "agentver_1")
+        diff = await client.agents.diff_versions("agent_123", "agentver_1", "agentver_2")
+        forked_agent = await client.agents.fork_version(
+            "agent_123",
+            "agentver_1",
+            name="forked-agent",
+            display_name="Forked Agent",
+            description="Forked",
+        )
+        rolled_back_agent = await client.agents.rollback_version(
+            "agent_123",
+            "agentver_1",
+            save_version=True,
+            summary="Revert",
+        )
+    finally:
+        await client.close()
+
+    assert versions[0].id == "agentver_123"
+    assert created.summary == "Initial version"
+    assert default_agent.id == "agent_456"
+    assert diff.to_version_id == "agentver_2"
+    assert forked_agent.name == "forked-agent"
+    assert rolled_back_agent.name == "forked-agent"
+    assert (
+        create_route.calls.last.request.content
+        == b'{"change_kind":"manual","summary":"Initial version"}'
+    )
+    assert default_route.calls.last.request.content == b'{"version_id":"agentver_1"}'
+    assert fork_route.calls.last.request.content == (
+        b'{"name":"forked-agent","display_name":"Forked Agent","description":"Forked"}'
+    )
+    assert rollback_route.calls.last.request.content == b'{"save_version":true,"summary":"Revert"}'
+    assert list_route.called
+    assert diff_route.called
+
+
+@pytest.mark.asyncio
+async def test_fork_agent_version_validates_agent_name():
+    client = Everruns(api_key="evr_test_key")
+    try:
+        with pytest.raises(ValueError):
+            await client.agents.fork_version("agent_123", "agentver_1", name="Invalid Name")
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_capabilities_list_with_options():
     route = respx.get(
         "https://custom.example.com/api/v1/capabilities?search=web&offset=20&limit=10"

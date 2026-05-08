@@ -68,6 +68,61 @@ export interface Agent {
   updatedAt: string;
 }
 
+export type AgentVersionChangeKind =
+  | "manual"
+  | "patch"
+  | "minor"
+  | "major"
+  | "import"
+  | "rollback"
+  | "fork";
+
+export interface AgentVersion {
+  id: string;
+  agent_id: string;
+  version_number: number;
+  semver_major: number;
+  semver_minor: number;
+  semver_patch: number;
+  version: string;
+  change_kind: AgentVersionChangeKind;
+  config_hash: string;
+  authored_config: Record<string, unknown>;
+  resolved_config: Record<string, unknown>;
+  created_at: string;
+  created_by_principal_id?: string | null;
+  parent_version_id?: string | null;
+  source_version_id?: string | null;
+  summary?: string | null;
+}
+
+export interface AgentVersionDiffResponse {
+  from_version_id: string;
+  to_version_id: string;
+  authored_diff: unknown;
+  resolved_diff: unknown;
+}
+
+export interface CreateAgentVersionRequest {
+  changeKind?: AgentVersionChangeKind | null;
+  summary?: string | null;
+}
+
+export interface SetDefaultAgentVersionRequest {
+  versionId: string;
+}
+
+export interface ForkAgentVersionRequest {
+  name: string;
+  displayName?: string | null;
+  description?: string | null;
+}
+
+export interface RollbackAgentVersionRequest {
+  saveVersion?: boolean;
+  summary?: string | null;
+}
+
 export interface CreateAgentRequest {
   /** Client-supplied agent ID (format: agent_{32-hex}). Auto-generated if omitted. */
   id?: string;
