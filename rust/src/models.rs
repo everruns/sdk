@@ -199,6 +199,153 @@ pub enum AgentStatus {
     Archived,
 }
 
+/// Reason a saved agent version was created.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AgentVersionChangeKind {
+    Manual,
+    Patch,
+    Minor,
+    Major,
+    Import,
+    Rollback,
+    Fork,
+}
+
+/// Immutable snapshot of an agent configuration.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct AgentVersion {
+    pub id: String,
+    pub agent_id: String,
+    pub version_number: i32,
+    pub semver_major: i32,
+    pub semver_minor: i32,
+    pub semver_patch: i32,
+    pub version: String,
+    pub change_kind: AgentVersionChangeKind,
+    pub config_hash: String,
+    pub authored_config: serde_json::Value,
+    pub resolved_config: serde_json::Value,
+    pub created_at: String,
+    #[serde(default)]
+    pub created_by_principal_id: Option<String>,
+    #[serde(default)]
+    pub parent_version_id: Option<String>,
+    #[serde(default)]
+    pub source_version_id: Option<String>,
+    #[serde(default)]
+    pub summary: Option<String>,
+}
+
+/// Diff between two saved agent versions.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct AgentVersionDiffResponse {
+    pub from_version_id: String,
+    pub to_version_id: String,
+    pub authored_diff: serde_json::Value,
+    pub resolved_diff: serde_json::Value,
+}
+
+/// Request to save the current agent configuration as a version.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct CreateAgentVersionRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change_kind: Option<AgentVersionChangeKind>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+}
+
+impl CreateAgentVersionRequest {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn change_kind(mut self, change_kind: AgentVersionChangeKind) -> Self {
+        self.change_kind = Some(change_kind);
+        self
+    }
+
+    pub fn summary(mut self, summary: impl Into<String>) -> Self {
+        self.summary = Some(summary.into());
+        self
+    }
+}
+
+/// Request to set the default version for an agent.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct SetDefaultAgentVersionRequest {
+    pub version_id: String,
+}
+
+impl SetDefaultAgentVersionRequest {
+    pub fn new(version_id: impl Into<String>) -> Self {
+        Self {
+            version_id: version_id.into(),
+        }
+    }
+}
+
+/// Request to create a new agent from a saved version.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct ForkAgentVersionRequest {
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+impl ForkAgentVersionRequest {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            display_name: None,
+            description: None,
+        }
+    }
+
+    pub fn display_name(mut self, display_name: impl Into<String>) -> Self {
+        self.display_name = Some(display_name.into());
+        self
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+}
+
+/// Request to restore an agent from a saved version.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct RollbackAgentVersionRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub save_version: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+}
+
+impl RollbackAgentVersionRequest {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn save_version(mut self, save_version: bool) -> Self {
+        self.save_version = Some(save_version);
+        self
+    }
+
+    pub fn summary(mut self, summary: impl Into<String>) -> Self {
+        self.summary = Some(summary.into());
+        self
+    }
+}
+
 /// Request to create an agent
 #[derive(Debug, Clone, Serialize)]
 #[non_exhaustive]

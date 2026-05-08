@@ -16,6 +16,12 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 - `GET /v1/agents/{id}/export` - Export agent as Markdown
 - `POST /v1/agents/{id}/copy` - Copy an agent
 - `GET /v1/agents/{id}/stats` - Get aggregate usage stats for an agent
+- `GET /v1/agents/{id}/versions` - List saved agent versions
+- `POST /v1/agents/{id}/versions` - Save the current agent configuration as a version
+- `POST /v1/agents/{id}/versions/default` - Set the default version for an agent
+- `GET /v1/agents/{id}/versions/{from_version_id}/diff/{to_version_id}` - Diff two agent versions
+- `POST /v1/agents/{id}/versions/{version_id}/fork` - Create a new agent from a saved version
+- `POST /v1/agents/{id}/versions/{version_id}/rollback` - Restore an agent from a saved version
 
 #### Agent Names
 
@@ -113,6 +119,39 @@ Server administration endpoints not exposed via SDK:
 
 ### Agents
 - `POST /v1/agents/preview` - Preview final agent shape
+- `POST /v1/agents/{id}/voice/sessions` - Create agent voice session
+
+### Capabilities
+- `POST /v1/capabilities` - Create persisted declarative capability
+- `GET /v1/capabilities/declarative` - List persisted declarative capabilities
+- `GET /v1/capabilities/declarative/config` - Get declarative capability config
+- `GET /v1/capabilities/declarative/{id}` - Get persisted declarative capability
+- `PATCH /v1/capabilities/declarative/{id}` - Update persisted declarative capability
+- `DELETE /v1/capabilities/declarative/{id}` - Archive persisted declarative capability
+- `POST /v1/capabilities/declarative/{id}/delete` - Permanently delete archived declarative capability
+
+### Events
+- `GET /v1/sessions/{id}/events/summary` - One-shot debug event summary
+
+### Payments
+- `GET /v1/payments/accounts` - List payment accounts
+- `POST /v1/payments/accounts` - Create payment account
+- `GET /v1/payments/accounts/{id}` - Get payment account
+- `PATCH /v1/payments/accounts/{id}` - Update payment account
+- `DELETE /v1/payments/accounts/{id}` - Disable payment account
+- `GET /v1/payments/attempts` - List payment attempts
+- `GET /v1/payments/policies` - List payment policies
+- `POST /v1/payments/policies` - Create payment policy
+- `GET /v1/payments/policies/{id}` - Get payment policy
+- `PATCH /v1/payments/policies/{id}` - Update payment policy
+- `DELETE /v1/payments/policies/{id}` - Disable payment policy
+
+### Voice Sessions
+- `POST /v1/sessions/chat/voice` - Create chat voice session
+- `POST /v1/sessions/{id}/voice/calls` - Create voice call
+- `POST /v1/sessions/{id}/voice/client-secret` - Create voice client secret
+- `POST /v1/sessions/{id}/voice/{connection_id}/attach` - Attach voice call
+- `POST /v1/sessions/{id}/voice/{connection_id}/end` - End voice call
 
 ### Organizations
 - `GET /v1/orgs` - List organizations

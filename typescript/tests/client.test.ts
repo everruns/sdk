@@ -10,6 +10,7 @@ import {
   extractToolCalls,
   toolResult,
   toolError,
+  type AgentVersion,
   type AgentCapabilityConfig,
   type Budget,
   type BudgetCheckResult,
@@ -379,6 +380,149 @@ describe("Everruns", () => {
       "https://custom.example.com/api/v1/agents/agent_123/stats",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
+  });
+
+  it("should call agent version endpoints", async () => {
+    const version: AgentVersion = {
+      id: "agentver_123",
+      agent_id: "agent_123",
+      version_number: 1,
+      semver_major: 1,
+      semver_minor: 0,
+      semver_patch: 0,
+      version: "1.0.0",
+      change_kind: "manual",
+      config_hash: "hash_123",
+      authored_config: { name: "assistant" },
+      resolved_config: { name: "assistant" },
+      created_at: "2026-05-08T00:00:00Z",
+      summary: "Initial version",
+    };
+    const agent = {
+      id: "agent_456",
+      name: "forked-agent",
+      system_prompt: "Help.",
+      status: "active",
+      created_at: "2026-05-08T00:00:00Z",
+      updated_at: "2026-05-08T00:00:00Z",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => ({
+        ok: true,
+        status: 200,
+        json: async () => {
+          if (url.endsWith("/versions") && init?.method !== "POST")
+            return [version];
+          if (url.includes("/diff/")) {
+            return {
+              from_version_id: "agentver_1",
+              to_version_id: "agentver_2",
+              authored_diff: [],
+              resolved_diff: [],
+            };
+          }
+          if (url.endsWith("/versions/default") || url.endsWith("/fork")) {
+            return agent;
+          }
+          if (url.endsWith("/rollback")) return agent;
+          return version;
+        },
+      }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const versions = await client.agents.listVersions("agent_123");
+    const created = await client.agents.createVersion("agent_123", {
+      changeKind: "manual",
+      summary: "Initial version",
+    });
+    const defaultAgent = await client.agents.setDefaultVersion("agent_123", {
+      versionId: "agentver_1",
+    });
+    const diff = await client.agents.diffVersions(
+      "agent_123",
+      "agentver_1",
+      "agentver_2",
+    );
+    const forkedAgent = await client.agents.forkVersion(
+      "agent_123",
+      "agentver_1",
+      {
+        name: "forked-agent",
+        displayName: "Forked Agent",
+        description: "Forked",
+      },
+    );
+    const rolledBackAgent = await client.agents.rollbackVersion(
+      "agent_123",
+      "agentver_1",
+      { saveVersion: true, summary: "Revert" },
+    );
+
+    expect(versions[0].id).toBe("agentver_123");
+    expect(created.summary).toBe("Initial version");
+    expect(defaultAgent.id).toBe("agent_456");
+    expect(diff.to_version_id).toBe("agentver_2");
+    expect(forkedAgent.name).toBe("forked-agent");
+    expect(rolledBackAgent.name).toBe("forked-agent");
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "https://custom.example.com/api/v1/agents/agent_123/versions",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "https://custom.example.com/api/v1/agents/agent_123/versions",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          change_kind: "manual",
+          summary: "Initial version",
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "https://custom.example.com/api/v1/agents/agent_123/versions/default",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ version_id: "agentver_1" }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      5,
+      "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/fork",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          name: "forked-agent",
+          display_name: "Forked Agent",
+          description: "Forked",
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      6,
+      "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/rollback",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ save_version: true, summary: "Revert" }),
+      }),
+    );
+  });
+
+  it("should validate forked agent version names", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    await expect(
+      client.agents.forkVersion("agent_123", "agentver_1", {
+        name: "Invalid Name",
+      }),
+    ).rejects.toThrow("agent_name must match pattern");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("should list capabilities with search and pagination", async () => {

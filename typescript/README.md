@@ -58,6 +58,24 @@ encoding: "text",
 Runnable example: [`examples/initial-files.ts`](examples/initial-files.ts)
 Run locally from this repo with `npx tsx examples/initial-files.ts`.
 
+## Agent Versions
+
+\`\`\`typescript
+const version = await client.agents.createVersion("agent_...", {
+changeKind: "manual",
+summary: "Baseline",
+});
+
+const versions = await client.agents.listVersions("agent_...");
+const diff = await client.agents.diffVersions("agent_...", "agentver_1", version.id);
+const fork = await client.agents.forkVersion("agent_...", version.id, {
+name: "forked-agent",
+});
+const rollback = await client.agents.rollbackVersion("agent_...", version.id, {
+saveVersion: true,
+});
+\`\`\`
+
 ## Authentication
 
 The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly. For API keys with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`orgId\` explicitly:

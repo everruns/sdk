@@ -4,18 +4,22 @@
 import { ApiKey } from "./auth.js";
 import {
   Agent,
+  AgentVersion,
+  AgentVersionDiffResponse,
   Budget,
   BudgetCheckResult,
   CapabilityInfo,
   Connection,
   ContentPart,
   CreateAgentRequest,
+  CreateAgentVersionRequest,
   CreateBudgetRequest,
   DeleteFileResponse,
   Session,
   CreateSessionRequest,
   FileInfo,
   FileStat,
+  ForkAgentVersionRequest,
   GrepResult,
   LedgerEntry,
   Message,
@@ -25,9 +29,11 @@ import {
   ListResponse,
   ResourceStats,
   ResumeSessionResponse,
+  RollbackAgentVersionRequest,
   SessionFile,
   SubmitToolResultsResponse,
   StreamOptions,
+  SetDefaultAgentVersionRequest,
   TopUpRequest,
   UpdateBudgetRequest,
   validateAgentName,
@@ -274,6 +280,72 @@ class AgentsClient {
   /** Get aggregate usage stats for an agent. */
   async stats(agentId: string): Promise<ResourceStats> {
     return this.client.fetch(`/agents/${agentId}/stats`);
+  }
+
+  /** List saved versions for an agent. */
+  async listVersions(agentId: string): Promise<AgentVersion[]> {
+    return this.client.fetch(`/agents/${agentId}/versions`);
+  }
+
+  /** Save the current agent configuration as a version. */
+  async createVersion(
+    agentId: string,
+    request: CreateAgentVersionRequest = {},
+  ): Promise<AgentVersion> {
+    return this.client.fetch(`/agents/${agentId}/versions`, {
+      method: "POST",
+      body: JSON.stringify(toCreateAgentVersionBody(request)),
+    });
+  }
+
+  /** Set the default version for an agent. */
+  async setDefaultVersion(
+    agentId: string,
+    request: SetDefaultAgentVersionRequest,
+  ): Promise<Agent> {
+    return this.client.fetch(`/agents/${agentId}/versions/default`, {
+      method: "POST",
+      body: JSON.stringify({ version_id: request.versionId }),
+    });
+  }
+
+  /** Diff two saved agent versions. */
+  async diffVersions(
+    agentId: string,
+    fromVersionId: string,
+    toVersionId: string,
+  ): Promise<AgentVersionDiffResponse> {
+    return this.client.fetch(
+      `/agents/${agentId}/versions/${fromVersionId}/diff/${toVersionId}`,
+    );
+  }
+
+  /** Create a new agent from a saved version. */
+  async forkVersion(
+    agentId: string,
+    versionId: string,
+    request: ForkAgentVersionRequest,
+  ): Promise<Agent> {
+    validateAgentName(request.name);
+    return this.client.fetch(`/agents/${agentId}/versions/${versionId}/fork`, {
+      method: "POST",
+      body: JSON.stringify(toForkAgentVersionBody(request)),
+    });
+  }
+
+  /** Restore an agent from a saved version. */
+  async rollbackVersion(
+    agentId: string,
+    versionId: string,
+    request: RollbackAgentVersionRequest = {},
+  ): Promise<Agent> {
+    return this.client.fetch(
+      `/agents/${agentId}/versions/${versionId}/rollback`,
+      {
+        method: "POST",
+        body: JSON.stringify(toRollbackAgentVersionBody(request)),
+      },
+    );
   }
 
   async list(options?: { search?: string }): Promise<Agent[]> {
@@ -905,6 +977,45 @@ function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
       encoding: file.encoding,
       is_readonly: file.isReadonly,
     }));
+  }
+  return body;
+}
+
+function toCreateAgentVersionBody(
+  request: CreateAgentVersionRequest,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (request.changeKind !== undefined) {
+    body.change_kind = request.changeKind;
+  }
+  if (request.summary !== undefined) {
+    body.summary = request.summary;
+  }
+  return body;
+}
+
+function toForkAgentVersionBody(
+  request: ForkAgentVersionRequest,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = { name: request.name };
+  if (request.displayName !== undefined) {
+    body.display_name = request.displayName;
+  }
+  if (request.description !== undefined) {
+    body.description = request.description;
+  }
+  return body;
+}
+
+function toRollbackAgentVersionBody(
+  request: RollbackAgentVersionRequest,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (request.saveVersion !== undefined) {
+    body.save_version = request.saveVersion;
+  }
+  if (request.summary !== undefined) {
+    body.summary = request.summary;
   }
   return body;
 }
