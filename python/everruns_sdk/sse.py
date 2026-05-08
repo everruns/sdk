@@ -157,6 +157,13 @@ class EventStream:
 
         return url
 
+    def _headers(self) -> dict[str, str]:
+        return {
+            **self._client._auth_headers(content_type=None),
+            "Accept": "text/event-stream",
+            "Cache-Control": "no-cache",
+        }
+
     def _get_retry_delay(self) -> float:
         """Get the retry delay in seconds."""
         if self._graceful_disconnect:
@@ -262,11 +269,7 @@ class EventStream:
             http,
             "GET",
             url,
-            headers={
-                "Authorization": self._client._api_key.value,
-                "Accept": "text/event-stream",
-                "Cache-Control": "no-cache",
-            },
+            headers=self._headers(),
         ) as event_source:
             async for sse in event_source.aiter_sse():
                 # Handle special lifecycle events

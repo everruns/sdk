@@ -62,3 +62,9 @@ class RateLimitError(ApiError):
     """Rate limit exceeded (429)."""
 
     pass
+
+
+class ValidationError(EverrunsError):
+    """Client-side validation failed."""
+
+    pass

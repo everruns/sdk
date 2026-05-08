@@ -4,10 +4,13 @@ use everruns_sdk::{
     ContentPart, CreateAgentRequest, CreateBudgetRequest, CreateSessionRequest, Everruns,
     InitialFile, TopUpRequest, UpdateBudgetRequest,
 };
+use std::sync::Mutex;
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
-    matchers::{body_json, method, path, query_param},
+    matchers::{body_json, header, method, path, query_param},
 };
+
+static ENV_LOCK: Mutex<()> = Mutex::new(());
 
 #[test]
 fn test_client_creation() {
@@ -17,10 +20,55 @@ fn test_client_creation() {
 
 #[test]
 fn test_client_from_env_missing() {
+    let _guard = ENV_LOCK.lock().unwrap();
     // Ensure env var is not set
     // SAFETY: This test runs single-threaded and only removes a test-specific env var
     unsafe { std::env::remove_var("EVERRUNS_API_KEY") };
     let result = Everruns::from_env();
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_client_builder_with_org_id() {
+    let client = Everruns::builder()
+        .api_key("evr_test_key")
+        .org_id("org_123")
+        .build()
+        .expect("client creation should succeed");
+
+    let debug_str = format!("{:?}", client);
+    assert!(debug_str.contains("org_123"));
+}
+
+#[test]
+fn test_client_from_env_reads_org_id() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    // SAFETY: This test serializes access to process env within this test file.
+    unsafe {
+        std::env::set_var("EVERRUNS_API_KEY", "evr_from_env");
+        std::env::set_var("EVERRUNS_ORG_ID", "org_from_env");
+    }
+
+    let result = Everruns::from_env();
+
+    // SAFETY: This test serializes access to process env within this test file.
+    unsafe {
+        std::env::remove_var("EVERRUNS_API_KEY");
+        std::env::remove_var("EVERRUNS_ORG_ID");
+    }
+
+    let client = result.expect("client creation should succeed");
+    let debug_str = format!("{:?}", client);
+    assert!(debug_str.contains("org_from_env"));
+}
+
+#[test]
+fn test_client_org_id_rejects_invalid_header_value() {
+    let result = Everruns::builder()
+        .api_key("evr_test_key")
+        .org_id("bad\norg")
+        .build();
+
     assert!(result.is_err());
 }
 
@@ -56,6 +104,28 @@ fn test_base_url_normalization_preserves_trailing_slash() {
         debug_str.contains("https://custom.example.com/api/"),
         "base URL with trailing slash should be preserved"
     );
+}
+
+#[tokio::test]
+async fn test_client_sends_org_id_header() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url_and_org_id("evr_test_key", &server.uri(), "org_123")
+        .expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/agents"))
+        .and(header("X-Org-Id", "org_123"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [],
+            "total": 0,
+            "offset": 0,
+            "limit": 0
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client.agents().list().await.expect("agents list");
+    assert_eq!(response.data.len(), 0);
 }
 
 #[tokio::test]

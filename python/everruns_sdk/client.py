@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 import httpx
 
 from everruns_sdk.auth import ApiKey
-from everruns_sdk.errors import ApiError
+from everruns_sdk.errors import ApiError, ValidationError
 from everruns_sdk.models import (
     Agent,
     AgentCapabilityConfig,
@@ -66,12 +66,23 @@ def _with_query(path: str, params: dict[str, Any]) -> str:
     return f"{path}?{query}"
 
 
+def _validate_org_id(org_id: Optional[str]) -> Optional[str]:
+    if org_id is None:
+        return None
+    if not org_id:
+        raise ValidationError("org_id cannot be empty")
+    if any(char in org_id for char in ("\r", "\n", "\0")):
+        raise ValidationError("org_id contains invalid header characters")
+    return org_id
+
+
 class Everruns:
     """Main client for interacting with the Everruns API.
 
     Args:
         api_key: API key (optional, defaults to EVERRUNS_API_KEY env var)
         base_url: Base URL for the API (optional)
+        org_id: Organization ID (optional, defaults to EVERRUNS_ORG_ID env var)
 
     Example:
         >>> client = Everruns()
@@ -82,6 +93,7 @@ class Everruns:
         self,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
+        org_id: Optional[str] = None,
     ):
         """Initialize Everruns client.
 
@@ -89,6 +101,8 @@ class Everruns:
             api_key: API key (falls back to EVERRUNS_API_KEY env var)
             base_url: API base URL (falls back to EVERRUNS_API_URL env var,
                       then DEFAULT_BASE_URL)
+            org_id: Organization ID sent as X-Org-Id (falls back to
+                    EVERRUNS_ORG_ID env var)
         """
         if api_key is None:
             api_key = os.environ.get("EVERRUNS_API_KEY")
@@ -99,8 +113,11 @@ class Everruns:
                 )
         if base_url is None:
             base_url = os.environ.get("EVERRUNS_API_URL", DEFAULT_BASE_URL)
+        if org_id is None:
+            org_id = os.environ.get("EVERRUNS_ORG_ID") or None
 
         self._api_key = ApiKey(api_key)
+        self._org_id = _validate_org_id(org_id)
         # Ensure base URL has trailing slash for correct URL joining.
         # httpx follows RFC 3986: without trailing slash, relative paths
         # replace the last path segment instead of appending.
@@ -109,10 +126,7 @@ class Everruns:
         self._base_url = base_url.rstrip("/") + "/"
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
-            headers={
-                "Authorization": self._api_key.value,
-                "Content-Type": "application/json",
-            },
+            headers=self._auth_headers(),
             timeout=30.0,
         )
 
@@ -162,6 +176,14 @@ class Everruns:
         path_without_slash = path.lstrip("/")
         return f"v1/{path_without_slash}"
 
+    def _auth_headers(self, *, content_type: Optional[str] = "application/json") -> dict[str, str]:
+        headers = {"Authorization": self._api_key.value}
+        if content_type is not None:
+            headers["Content-Type"] = content_type
+        if self._org_id is not None:
+            headers["X-Org-Id"] = self._org_id
+        return headers
+
     async def _get(self, path: str) -> Any:
         resp = await self._client.get(self._url(path))
         return await self._handle_response(resp)
@@ -181,7 +203,7 @@ class Everruns:
         resp = await self._client.post(
             self._url(path),
             content=content,
-            headers={"Content-Type": "text/plain"},
+            headers=self._auth_headers(content_type="text/plain"),
         )
         return await self._handle_response(resp)
 

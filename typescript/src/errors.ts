@@ -45,6 +45,13 @@ export class RateLimitError extends ApiError {
   }
 }
 
+export class ValidationError extends EverrunsError {
+  constructor(message: string) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
 export class ConnectionError extends EverrunsError {
   constructor(message: string = "Connection failed") {
     super(message);

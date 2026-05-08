@@ -14,36 +14,115 @@ pub struct Everruns {
     http: reqwest::Client,
     base_url: Url,
     api_key: ApiKey,
+    org_id: Option<HeaderValue>,
+}
+
+/// Builder for configuring an Everruns client.
+#[derive(Debug, Clone)]
+pub struct EverrunsBuilder {
+    api_key: Option<ApiKey>,
+    base_url: String,
+    org_id: Option<String>,
+}
+
+impl Default for EverrunsBuilder {
+    fn default() -> Self {
+        Self {
+            api_key: None,
+            base_url: DEFAULT_BASE_URL.to_string(),
+            org_id: std::env::var("EVERRUNS_ORG_ID")
+                .ok()
+                .filter(|org_id| !org_id.is_empty()),
+        }
+    }
+}
+
+impl EverrunsBuilder {
+    /// Set the API key.
+    pub fn api_key(mut self, api_key: impl Into<String>) -> Self {
+        self.api_key = Some(ApiKey::new(api_key));
+        self
+    }
+
+    /// Set the API base URL.
+    pub fn base_url(mut self, base_url: impl Into<String>) -> Self {
+        self.base_url = base_url.into();
+        self
+    }
+
+    /// Set the organization id sent as `X-Org-Id` on every request.
+    pub fn org_id(mut self, org_id: impl Into<String>) -> Self {
+        self.org_id = Some(org_id.into());
+        self
+    }
+
+    /// Build the client.
+    pub fn build(self) -> Result<Everruns> {
+        let api_key = match self.api_key {
+            Some(api_key) => api_key,
+            None => ApiKey::from_env()?,
+        };
+        Everruns::with_api_key_url_and_org_id(api_key, &self.base_url, self.org_id)
+    }
 }
 
 impl Everruns {
+    /// Create a new client builder.
+    pub fn builder() -> EverrunsBuilder {
+        EverrunsBuilder::default()
+    }
+
     /// Create a new client with explicit API key
     pub fn new(api_key: impl Into<String>) -> Result<Self> {
-        Self::with_base_url(api_key, DEFAULT_BASE_URL)
+        Self::builder().api_key(api_key).build()
     }
 
     /// Create a new client using environment variables.
     ///
     /// Reads `EVERRUNS_API_KEY` (required) and `EVERRUNS_API_URL` (optional).
     pub fn from_env() -> Result<Self> {
-        let api_key = ApiKey::from_env()?;
         let base_url =
             std::env::var("EVERRUNS_API_URL").unwrap_or_else(|_| DEFAULT_BASE_URL.to_string());
-        Self::with_api_key_and_url(api_key, &base_url)
+        Self::builder().base_url(base_url).build()
     }
 
     /// Create a new client with a custom base URL
     pub fn with_base_url(api_key: impl Into<String>, base_url: &str) -> Result<Self> {
-        let api_key = ApiKey::new(api_key);
-        Self::with_api_key_and_url(api_key, base_url)
+        Self::builder().api_key(api_key).base_url(base_url).build()
+    }
+
+    /// Create a new client with an organization id.
+    pub fn with_org_id(api_key: impl Into<String>, org_id: impl Into<String>) -> Result<Self> {
+        Self::builder().api_key(api_key).org_id(org_id).build()
+    }
+
+    /// Create a new client with a custom base URL and organization id.
+    pub fn with_base_url_and_org_id(
+        api_key: impl Into<String>,
+        base_url: &str,
+        org_id: impl Into<String>,
+    ) -> Result<Self> {
+        Self::builder()
+            .api_key(api_key)
+            .base_url(base_url)
+            .org_id(org_id)
+            .build()
     }
 
     /// Create a new client with an ApiKey instance
     pub fn with_api_key(api_key: ApiKey) -> Result<Self> {
-        Self::with_api_key_and_url(api_key, DEFAULT_BASE_URL)
+        Self::with_api_key_url_and_org_id(
+            api_key,
+            DEFAULT_BASE_URL,
+            EverrunsBuilder::default().org_id,
+        )
     }
 
-    fn with_api_key_and_url(api_key: ApiKey, base_url: &str) -> Result<Self> {
+    fn with_api_key_url_and_org_id(
+        api_key: ApiKey,
+        base_url: &str,
+        org_id: Option<String>,
+    ) -> Result<Self> {
         let http = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(30))
             .build()?;
@@ -59,11 +138,21 @@ impl Everruns {
             format!("{}/", base_url)
         };
         let base_url = Url::parse(&normalized)?;
+        let org_id = org_id
+            .map(|org_id| {
+                if org_id.is_empty() {
+                    return Err(Error::Validation("org_id cannot be empty".to_string()));
+                }
+                HeaderValue::from_str(&org_id)
+                    .map_err(|err| Error::Validation(format!("invalid org_id header: {err}")))
+            })
+            .transpose()?;
 
         Ok(Self {
             http,
             base_url,
             api_key,
+            org_id,
         })
     }
 
@@ -115,12 +204,20 @@ impl Everruns {
         self.base_url.join(&full_path).expect("valid URL")
     }
 
-    fn headers(&self) -> HeaderMap {
+    pub(crate) fn auth_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
         headers.insert(
             AUTHORIZATION,
             HeaderValue::from_str(self.api_key.expose()).expect("valid header"),
         );
+        if let Some(org_id) = &self.org_id {
+            headers.insert("X-Org-Id", org_id.clone());
+        }
+        headers
+    }
+
+    fn headers(&self) -> HeaderMap {
+        let mut headers = self.auth_headers();
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
         headers
     }
@@ -315,10 +412,6 @@ impl Everruns {
             url.query_pairs_mut().append_pair("exclude", e);
         }
         url
-    }
-
-    pub(crate) fn auth_header(&self) -> String {
-        self.api_key.expose().to_string()
     }
 }
 
@@ -1043,6 +1136,10 @@ impl std::fmt::Debug for Everruns {
         f.debug_struct("Everruns")
             .field("base_url", &self.base_url.as_str())
             .field("api_key", &self.api_key)
+            .field(
+                "org_id",
+                &self.org_id.as_ref().and_then(|v| v.to_str().ok()),
+            )
             .finish()
     }
 }
@@ -1063,6 +1160,17 @@ mod tests {
             url.as_str(),
             "https://api.example.com/v1/sessions/session_123/sse"
         );
+    }
+
+    #[test]
+    fn test_sse_auth_headers_include_org_id() {
+        let client =
+            Everruns::with_base_url_and_org_id("test_key", "https://api.example.com", "org_123")
+                .unwrap();
+        let headers = client.auth_headers();
+
+        assert_eq!(headers["Authorization"], "test_key");
+        assert_eq!(headers["X-Org-Id"], "org_123");
     }
 
     #[test]

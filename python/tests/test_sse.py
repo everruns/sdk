@@ -23,6 +23,15 @@ class MockClient:
 
     _base_url = "https://api.example.com"
     _api_key = MockApiKey()
+    _org_id = "org_123"
+
+    def _auth_headers(self, *, content_type="application/json"):
+        headers = {"Authorization": self._api_key.value}
+        if content_type is not None:
+            headers["Content-Type"] = content_type
+        if self._org_id is not None:
+            headers["X-Org-Id"] = self._org_id
+        return headers
 
 
 class TestStreamOptions:
@@ -75,6 +84,21 @@ class TestStreamOptions:
         assert opts.since_id == "event_abc"
         assert opts.max_retries == 5
         assert opts.idle_timeout == 60
+
+
+class TestEventStreamHeaders:
+    """Tests for EventStream headers."""
+
+    def test_headers_include_org_id(self):
+        """Test SSE headers include organization ID."""
+        stream = EventStream(MockClient(), "session_123", StreamOptions())
+
+        assert stream._headers() == {
+            "Authorization": "test_key",
+            "X-Org-Id": "org_123",
+            "Accept": "text/event-stream",
+            "Cache-Control": "no-cache",
+        }
 
 
 class TestDisconnectingData:

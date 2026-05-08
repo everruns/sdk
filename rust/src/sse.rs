@@ -258,7 +258,7 @@ impl EventStream {
 
             let mut es = http_client
                 .get(url.clone())
-                .header("Authorization", client.auth_header())
+                .headers(client.auth_headers())
                 .header("Accept", "text/event-stream")
                 .header("Cache-Control", "no-cache")
                 .eventsource()

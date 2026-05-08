@@ -15,7 +15,7 @@ use everruns_sdk::{CreateSessionRequest, Everruns};
 
 #[tokio::main]
 async fn main() -> Result<(), everruns_sdk::Error> {
-    // Uses EVERRUNS_API_KEY environment variable
+    // Uses EVERRUNS_API_KEY and optional EVERRUNS_ORG_ID environment variables
     let client = Everruns::from_env()?;
 
     // Create an agent
@@ -62,14 +62,17 @@ Runnable example: [`examples/initial_files.rs`](examples/initial_files.rs)
 
 ## Authentication
 
-The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly:
+The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly. For API keys with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`org_id\` explicitly:
 
 \`\`\`rust
 // From environment variable
 let client = Everruns::from_env()?;
 
-// Explicit key
-let client = Everruns::new("evr_...")?;
+// Explicit key and organization
+let client = Everruns::builder()
+    .api_key("evr_...")
+    .org_id("org_...")
+    .build()?;
 \`\`\`
 
 ## Streaming Events

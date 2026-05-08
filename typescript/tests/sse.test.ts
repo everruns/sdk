@@ -28,6 +28,16 @@ describe("EventStream", () => {
       });
       expect(stream.getLastEventId()).toBe("event_abc");
     });
+
+    it("should include org ID in headers", () => {
+      const stream = new EventStream(
+        "https://api.example.com/sse",
+        "auth",
+        {},
+        "org_123",
+      );
+      expect((stream as any).orgHeaders()).toEqual({ "X-Org-Id": "org_123" });
+    });
   });
 
   describe("abort", () => {

@@ -13,7 +13,7 @@ npm install @everruns/sdk
 \`\`\`typescript
 import { Everruns } from "@everruns/sdk";
 
-// Uses EVERRUNS_API_KEY environment variable
+// Uses EVERRUNS_API_KEY and optional EVERRUNS_ORG_ID environment variables
 const client = Everruns.fromEnv();
 
 // Create an agent
@@ -60,15 +60,16 @@ Run locally from this repo with `npx tsx examples/initial-files.ts`.
 
 ## Authentication
 
-The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly:
+The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly. For API keys with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`orgId\` explicitly:
 
 \`\`\`typescript
 // From environment variable
 const client = Everruns.fromEnv();
 
-// Explicit key
+// Explicit key and organization
 const client = new Everruns({
-apiKey: "evr\_..."
+apiKey: "evr\_...",
+orgId: "org\_..."
 });
 \`\`\`
 
