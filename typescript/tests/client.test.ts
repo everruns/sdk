@@ -128,6 +128,16 @@ describe("Everruns", () => {
     );
   });
 
+  it("should normalize base URL with multiple trailing slashes", () => {
+    const client = new Everruns({
+      apiKey: "evr_test_key",
+      baseUrl: "https://custom.api.com/api///",
+    });
+    expect(client.getStreamUrl("/agents")).toBe(
+      "https://custom.api.com/api/v1/agents",
+    );
+  });
+
   it("should create session with initial files", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
