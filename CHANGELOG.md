@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.9] - 2026-05-08
+
+### Highlights
+
+- Agent version APIs across Rust, Python, and TypeScript SDKs
+- First-class org context support via `X-Org-Id` and `EVERRUNS_ORG_ID`
+- Refreshed generated schemas, agent stats support, and maintenance updates
+
+### What's Changed
+
+* feat: adopt upstream agent versions ([#87](https://github.com/everruns/sdk/pull/87)) by @chaliy
+* feat: add org context support across SDKs ([#86](https://github.com/everruns/sdk/pull/86)) by @chaliy
+* chore(docs): add upstream adoption skill ([#85](https://github.com/everruns/sdk/pull/85)) by @chaliy
+* chore(docs): make agent skills canonical ([#84](https://github.com/everruns/sdk/pull/84)) by @chaliy
+* chore: periodic maintenance ([#83](https://github.com/everruns/sdk/pull/83)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.8...v0.1.9
+
 ## [0.1.8] - 2026-04-15
 
 ### Highlights
