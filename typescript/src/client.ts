@@ -81,7 +81,7 @@ export class Everruns {
     // Example: "http://host/api/" + "/v1/agents" = "http://host/api//v1/agents" (wrong)
     //          "http://host/api" + "/v1/agents" = "http://host/api/v1/agents" (correct)
     const rawBaseUrl = options.baseUrl ?? "https://custom.example.com/api";
-    this.baseUrl = rawBaseUrl.replace(/\/+$/, "");
+    this.baseUrl = trimTrailingSlashes(rawBaseUrl);
     const orgId =
       options.orgId !== undefined
         ? options.orgId
@@ -229,6 +229,14 @@ function validateOrgId(orgId: string | undefined): string | undefined {
     throw new ValidationError(`Invalid orgId header: ${message}`);
   }
   return orgId;
+}
+
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+  return value.slice(0, end);
 }
 
 class AgentsClient {
