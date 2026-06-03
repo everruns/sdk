@@ -860,16 +860,22 @@ describe("CreateAgentRequest with displayName", () => {
 
 describe("EventsClient URL building", () => {
   it("should pass all upstream event list filters", async () => {
+    const event = {
+      id: "event_001",
+      type: "turn.started",
+      data: {},
+      createdAt: "2026-06-01T00:00:00Z",
+    };
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ data: [] }),
+      json: async () => ({ data: [event], total: 1, offset: 0, limit: 25 }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
 
-    await client.events.list("sess_123", {
+    const events = await client.events.list("sess_123", {
       sinceId: "event_001",
       types: ["turn.started", "tool.completed"],
       exclude: ["output.message.delta"],
@@ -893,6 +899,7 @@ describe("EventsClient URL building", () => {
       "https://custom.example.com/api/v1/sessions/sess_123/events?since_id=event_001&types=turn.started&types=tool.completed&exclude=output.message.delta&limit=25&before_sequence=100&after_sequence=50&around=event_anchor&window=10&from_ts=2026-06-01T00%3A00%3A00Z&to_ts=2026-06-02T00%3A00%3A00Z&turn_id=turn_123&exec_id=exec_123&trace_id=trace_123&tags=alpha&tags=beta&tool_name=bash&q=failed+tool&order_desc=true",
       expect.any(Object),
     );
+    expect(events).toEqual([event]);
   });
 
   it("should expand exclude as repeated query keys for events list", () => {

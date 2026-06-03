@@ -660,10 +660,10 @@ class EventsClient {
     if (options?.orderDesc !== undefined)
       params.set("order_desc", String(options.orderDesc));
     const query = params.toString() ? `?${params}` : "";
-    const response = await this.client.fetch<{ events: Event[] }>(
+    const response = await this.client.fetch<ListResponse<Event>>(
       `/sessions/${sessionId}/events${query}`,
     );
-    return response.events;
+    return response.data;
   }
 
   /**
