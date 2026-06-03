@@ -78,8 +78,8 @@ Session create/update payloads support optional `title`, `locale`, `model_id`, `
 - `GET /v1/sessions/{id}/messages` - List messages
 
 ### Events
-- `GET /v1/sessions/{id}/events` - List events (polling, supports `limit`/`before_sequence` backward pagination)
-- `GET /v1/sessions/{id}/sse` - SSE stream (supports `limit`/`before_sequence` backward pagination)
+- `GET /v1/sessions/{id}/events` - List events (polling, supports filtering, backward/forward pagination, centered windows, and full-text search)
+- `GET /v1/sessions/{id}/sse` - SSE stream (supports `since_id`, `types`, and `exclude`)
 
 ### Images
 - `POST /v1/images` - Upload image

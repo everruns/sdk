@@ -51,7 +51,7 @@ Less code is better code. Simplify first, then re-run tests.
 Every shipped change must be analyzed for security vulnerabilities:
 
 - **OWASP Top 10** — injection, broken auth, sensitive data exposure, XXE, broken access control, misconfiguration, XSS, insecure dependencies, SSRF
-- **SDK-specific risks** — API key redaction (secrecy crate / no log leaks), TLS verification enabled by default, graceful handling of malformed server responses
+- **SDK-specific risks** — personal access token redaction (secrecy crate / no log leaks), TLS verification enabled by default, graceful handling of malformed server responses
 
 Fix vulnerabilities directly — do not just report them.
 

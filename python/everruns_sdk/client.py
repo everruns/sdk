@@ -775,34 +775,68 @@ class EventsClient:
         self,
         session_id: str,
         *,
+        since_id: Optional[str] = None,
         types: Optional[list[str]] = None,
         exclude: Optional[list[str]] = None,
         limit: Optional[int] = None,
         before_sequence: Optional[int] = None,
+        after_sequence: Optional[int] = None,
+        around: Optional[str] = None,
+        window: Optional[int] = None,
+        from_ts: Optional[str] = None,
+        to_ts: Optional[str] = None,
+        turn_id: Optional[str] = None,
+        exec_id: Optional[str] = None,
+        trace_id: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        tool_name: Optional[str] = None,
+        q: Optional[str] = None,
+        order_desc: Optional[bool] = None,
     ) -> list[Event]:
         """List events in a session.
 
         Args:
             session_id: Session ID.
+            since_id: Return events after this event ID.
             types: Positive type filter.
             exclude: Event types to exclude.
             limit: Max events to return (backward pagination).
             before_sequence: Cursor for backward pagination (sequence < value).
+            after_sequence: Forward cursor (sequence > value).
+            around: Anchor event ID for centered windows.
+            window: Events to return on each side of ``around``.
+            from_ts: Lower ``created_at`` bound (RFC 3339).
+            to_ts: Upper ``created_at`` bound (RFC 3339).
+            turn_id: Filter by turn ID.
+            exec_id: Filter by execution ID.
+            trace_id: Filter by trace ID.
+            tags: Tag any-match filter.
+            tool_name: Filter tool events by tool name.
+            q: Full-text search query.
+            order_desc: Return newest first when true.
         """
-        path = f"/sessions/{session_id}/events"
-        params: list[str] = []
-        if types:
-            for t in types:
-                params.append(f"types={t}")
-        if exclude:
-            for e in exclude:
-                params.append(f"exclude={e}")
-        if limit is not None:
-            params.append(f"limit={limit}")
-        if before_sequence is not None:
-            params.append(f"before_sequence={before_sequence}")
-        if params:
-            path += "?" + "&".join(params)
+        path = _with_query(
+            f"/sessions/{session_id}/events",
+            {
+                "since_id": since_id,
+                "types": types,
+                "exclude": exclude,
+                "limit": limit,
+                "before_sequence": before_sequence,
+                "after_sequence": after_sequence,
+                "around": around,
+                "window": window,
+                "from_ts": from_ts,
+                "to_ts": to_ts,
+                "turn_id": turn_id,
+                "exec_id": exec_id,
+                "trace_id": trace_id,
+                "tags": tags,
+                "tool_name": tool_name,
+                "q": q,
+                "order_desc": str(order_desc).lower() if order_desc is not None else None,
+            },
+        )
         resp = await self._client._get(path)
         return [Event(**e) for e in resp.get("data", [])]
 

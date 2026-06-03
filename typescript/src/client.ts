@@ -625,10 +625,7 @@ function sleep(ms: number): Promise<void> {
 class EventsClient {
   constructor(private readonly client: Everruns) {}
 
-  async list(
-    sessionId: string,
-    options?: StreamOptions & ListEventsOptions,
-  ): Promise<Event[]> {
+  async list(sessionId: string, options?: ListEventsOptions): Promise<Event[]> {
     const params = new URLSearchParams();
     if (options?.sinceId) params.set("since_id", options.sinceId);
     if (options?.types) {
@@ -644,6 +641,24 @@ class EventsClient {
     if (options?.limit != null) params.set("limit", String(options.limit));
     if (options?.beforeSequence != null)
       params.set("before_sequence", String(options.beforeSequence));
+    if (options?.afterSequence != null)
+      params.set("after_sequence", String(options.afterSequence));
+    if (options?.around) params.set("around", options.around);
+    if (options?.window != null) params.set("window", String(options.window));
+    if (options?.fromTs) params.set("from_ts", options.fromTs);
+    if (options?.toTs) params.set("to_ts", options.toTs);
+    if (options?.turnId) params.set("turn_id", options.turnId);
+    if (options?.execId) params.set("exec_id", options.execId);
+    if (options?.traceId) params.set("trace_id", options.traceId);
+    if (options?.tags) {
+      for (const tag of options.tags) {
+        params.append("tags", tag);
+      }
+    }
+    if (options?.toolName) params.set("tool_name", options.toolName);
+    if (options?.q) params.set("q", options.q);
+    if (options?.orderDesc !== undefined)
+      params.set("order_desc", String(options.orderDesc));
     const query = params.toString() ? `?${params}` : "";
     const response = await this.client.fetch<{ events: Event[] }>(
       `/sessions/${sessionId}/events${query}`,

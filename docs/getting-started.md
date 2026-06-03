@@ -23,11 +23,11 @@ npm install @everruns/sdk
 
 ## Quick Start
 
-### 1. Set API Key
+### 1. Set Personal Access Token
 
 ```bash
-export EVERRUNS_API_KEY=evr_...
-# Optional for API keys with access to multiple organizations:
+export EVERRUNS_API_KEY=evr_pat_...
+# Optional for personal access tokens with access to multiple organizations:
 export EVERRUNS_ORG_ID=org_...
 ```
 

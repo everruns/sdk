@@ -14,7 +14,7 @@
 ## HTTP Status Codes
 
 - `400` - Bad request (validation error)
-- `401` - Unauthorized (invalid/missing API key)
+- `401` - Unauthorized (invalid/missing personal access token)
 - `403` - Forbidden (insufficient permissions)
 - `404` - Not found
 - `422` - Unprocessable entity (business logic error)

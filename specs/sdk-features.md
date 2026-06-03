@@ -12,9 +12,9 @@ Everruns SDKs provide typed clients for the Everruns API. All language implement
 
 | Parameter | Env Variable | Description |
 |-----------|--------------|-------------|
-| `api_key` | `EVERRUNS_API_KEY` | API key |
+| `api_key` | `EVERRUNS_API_KEY` | personal access token |
 | `api_url` | `EVERRUNS_API_URL` | API base URL (optional, for testing/self-hosted) |
-| `org_id` | `EVERRUNS_ORG_ID` | Organization ID for multi-org API keys (optional) |
+| `org_id` | `EVERRUNS_ORG_ID` | Organization ID for multi-org personal access tokens (optional) |
 
 All parameters can be omitted if the corresponding environment variable is set.
 
@@ -24,11 +24,11 @@ All parameters can be omitted if the corresponding environment variable is set.
 # From environment (recommended) - api_key from env var
 client = Everruns()
 
-# Explicit API key
-client = Everruns(api_key="evr_...")
+# Explicit personal access token
+client = Everruns(api_key="evr_pat_...")
 
-# Explicit API key and organization
-client = Everruns(api_key="evr_...", org_id="org_...")
+# Explicit personal access token and organization
+client = Everruns(api_key="evr_pat_...", org_id="org_...")
 
 # Custom base URL
 client = Everruns(api_url="https://custom.example.com/api")
@@ -287,7 +287,7 @@ SDKs must properly close HTTP clients and SSE connections.
 
 ## API Key Security
 
-- Never log API keys
+- Never log personal access tokens
 - Mask keys in debug output (`evr_****...`)
 - Store internally with minimal exposure
 - Rust: Use `secrecy` crate or similar

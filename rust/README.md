@@ -84,15 +84,15 @@ let diff = client
 
 ## Authentication
 
-The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly. For API keys with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`org_id\` explicitly:
+The SDK uses personal access token authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the token explicitly. For personal access tokens with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`org_id\` explicitly:
 
 \`\`\`rust
 // From environment variable
 let client = Everruns::from_env()?;
 
-// Explicit key and organization
+// Explicit token and organization
 let client = Everruns::builder()
-    .api_key("evr_...")
+    .api_key("evr_pat_...")
     .org_id("org_...")
     .build()?;
 \`\`\`
@@ -135,7 +135,7 @@ use everruns_sdk::Error;
 
 match client.agents().get("invalid-id").await {
     Ok(agent) => println!("Agent: {:?}", agent),
-    Err(Error::Authentication(_)) => eprintln!("Invalid API key"),
+    Err(Error::Authentication(_)) => eprintln!("Invalid personal access token"),
     Err(Error::NotFound(_)) => eprintln!("Agent not found"),
     Err(Error::RateLimit { retry_after }) => {
         eprintln!("Rate limited, retry after {:?}", retry_after);

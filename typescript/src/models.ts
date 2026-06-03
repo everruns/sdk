@@ -406,12 +406,42 @@ export interface Event {
   createdAt: string;
 }
 
-/** Options for backward pagination on event list endpoints */
+/** Options for filtering and pagination on event list endpoints */
 export interface ListEventsOptions {
+  /** Return events after this event ID */
+  sinceId?: string;
+  /** Positive type filter */
+  types?: string[];
+  /** Event types to exclude */
+  exclude?: string[];
   /** Max events to return (backward pagination, 1-1000) */
   limit?: number;
   /** Cursor for backward pagination: only return events with sequence < this value */
   beforeSequence?: number;
+  /** Forward cursor: only return events with sequence > this value */
+  afterSequence?: number;
+  /** Anchor event ID for centered windows */
+  around?: string;
+  /** Events to return on each side of around */
+  window?: number;
+  /** Lower created_at bound, RFC 3339 */
+  fromTs?: string;
+  /** Upper created_at bound, RFC 3339 */
+  toTs?: string;
+  /** Filter by turn ID */
+  turnId?: string;
+  /** Filter by execution ID */
+  execId?: string;
+  /** Filter by trace ID */
+  traceId?: string;
+  /** Tag any-match filter */
+  tags?: string[];
+  /** Filter tool events by tool name */
+  toolName?: string;
+  /** Full-text search query */
+  q?: string;
+  /** Return newest first when true */
+  orderDesc?: boolean;
 }
 
 // --- Session Filesystem Models ---
