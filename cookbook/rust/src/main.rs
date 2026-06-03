@@ -5,6 +5,9 @@
 
 use everruns_sdk::Everruns;
 use futures::StreamExt;
+use tokio::time::{Duration, timeout};
+
+const EVENT_WAIT_SECS: u64 = 45;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -36,44 +39,54 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut stream = client
         .events()
         .stream_with_options(&session.id, StreamOptions::default().with_max_retries(3));
-    while let Some(event) = stream.next().await {
-        match event {
-            Ok(e) => {
-                if verbose {
-                    println!(
-                        "\n[EVENT] {}: {}",
-                        e.event_type,
-                        serde_json::to_string_pretty(&e.data)?
-                    );
-                }
-                match e.event_type.as_str() {
-                    "input.message" => {
-                        if let Some(text) = extract_text(&e.data) {
-                            println!("Input: {}", text);
-                        } else {
-                            println!("Input (raw): {}", serde_json::to_string_pretty(&e.data)?);
+    loop {
+        match timeout(Duration::from_secs(EVENT_WAIT_SECS), stream.next()).await {
+            Ok(Some(event)) => match event {
+                Ok(e) => {
+                    if verbose {
+                        println!(
+                            "\n[EVENT] {}: {}",
+                            e.event_type,
+                            serde_json::to_string_pretty(&e.data)?
+                        );
+                    }
+                    match e.event_type.as_str() {
+                        "input.message" => {
+                            if let Some(text) = extract_text(&e.data) {
+                                println!("Input: {}", text);
+                            } else {
+                                println!("Input (raw): {}", serde_json::to_string_pretty(&e.data)?);
+                            }
                         }
-                    }
-                    "output.message.completed" => {
-                        if let Some(text) = extract_text(&e.data) {
-                            println!("Output: {}", text);
-                        } else {
-                            println!("Output (raw): {}", serde_json::to_string_pretty(&e.data)?);
+                        "output.message.completed" => {
+                            if let Some(text) = extract_text(&e.data) {
+                                println!("Output: {}", text);
+                            } else {
+                                println!(
+                                    "Output (raw): {}",
+                                    serde_json::to_string_pretty(&e.data)?
+                                );
+                            }
                         }
+                        "turn.completed" => {
+                            println!("\n[Turn completed]");
+                            break;
+                        }
+                        "turn.failed" => {
+                            println!("\n[Turn failed]");
+                            break;
+                        }
+                        _ => {}
                     }
-                    "turn.completed" => {
-                        println!("\n[Turn completed]");
-                        break;
-                    }
-                    "turn.failed" => {
-                        println!("\n[Turn failed]");
-                        break;
-                    }
-                    _ => {}
                 }
-            }
-            Err(e) => {
-                eprintln!("Stream error: {}", e);
+                Err(e) => {
+                    eprintln!("Stream error: {}", e);
+                    break;
+                }
+            },
+            Ok(None) => break,
+            Err(_) => {
+                println!("Timed out waiting for turn events; ending demo.");
                 break;
             }
         }

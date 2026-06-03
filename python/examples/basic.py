@@ -4,6 +4,8 @@ import asyncio
 
 from everruns_sdk import AgentCapabilityConfig, Everruns
 
+EVENT_WAIT_SECS = 45
+
 
 async def main():
     # Initialize client from environment
@@ -42,11 +44,25 @@ async def main():
         )
         print(f"Sent message: {message.id}")
 
-        # Stream events
-        async for event in client.events.stream(session.id):
-            print(f"Event: {event.type}")
-            if event.type in {"output.message.completed", "turn.completed", "turn.failed"}:
-                break
+        # Stream events with a bounded wait so the demo exits if the model stalls.
+        stream = client.events.stream(session.id)
+        events = stream.__aiter__()
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(events.__anext__(), timeout=EVENT_WAIT_SECS)
+                except TimeoutError:
+                    print("Timed out waiting for turn events; ending demo.")
+                    break
+                except StopAsyncIteration:
+                    break
+
+                print(f"Event: {event.type}")
+                if event.type in {"output.message.completed", "turn.completed", "turn.failed"}:
+                    break
+        finally:
+            stream.stop()
+            await stream.aclose()
 
         # Clean up
         await client.sessions.delete(session.id)

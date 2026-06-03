@@ -7,6 +7,8 @@
 
 import { Everruns } from "@everruns/sdk";
 
+const EVENT_WAIT_MS = 45_000;
+
 async function main() {
   const verbose =
     process.argv.includes("--verbose") || process.argv.includes("-v");
@@ -30,45 +32,58 @@ async function main() {
 
   // Stream events (with retry limit for CI)
   const stream = client.events.stream(session.id, { maxRetries: 3 });
+  const events = stream[Symbol.asyncIterator]();
 
-  for await (const event of stream) {
-    if (verbose) {
-      console.log(
-        `\n[EVENT] ${event.type}: ${JSON.stringify(event.data, null, 2)}`,
-      );
-    }
+  try {
+    while (true) {
+      let next: Awaited<ReturnType<typeof events.next>>;
+      try {
+        next = await withTimeout(events.next(), EVENT_WAIT_MS);
+      } catch {
+        console.log("Timed out waiting for turn events; ending demo.");
+        return;
+      }
+      if (next.done) return;
 
-    switch (event.type) {
-      case "input.message": {
-        const text = extractText(event.data);
-        if (text) {
-          console.log(`Input: ${text}`);
-        } else {
-          console.log(`Input (raw): ${JSON.stringify(event.data, null, 2)}`);
-        }
-        break;
+      const event = next.value;
+      if (verbose) {
+        console.log(
+          `\n[EVENT] ${event.type}: ${JSON.stringify(event.data, null, 2)}`,
+        );
       }
 
-      case "output.message.completed": {
-        const text = extractText(event.data);
-        if (text) {
-          console.log(`Output: ${text}`);
-        } else {
-          console.log(`Output (raw): ${JSON.stringify(event.data, null, 2)}`);
+      switch (event.type) {
+        case "input.message": {
+          const text = extractText(event.data);
+          if (text) {
+            console.log(`Input: ${text}`);
+          } else {
+            console.log(`Input (raw): ${JSON.stringify(event.data, null, 2)}`);
+          }
+          break;
         }
-        break;
+
+        case "output.message.completed": {
+          const text = extractText(event.data);
+          if (text) {
+            console.log(`Output: ${text}`);
+          } else {
+            console.log(`Output (raw): ${JSON.stringify(event.data, null, 2)}`);
+          }
+          break;
+        }
+
+        case "turn.completed":
+          console.log("\n[Turn completed]");
+          return;
+
+        case "turn.failed":
+          console.log("\n[Turn failed]");
+          return;
       }
-
-      case "turn.completed":
-        console.log("\n[Turn completed]");
-        stream.abort();
-        return;
-
-      case "turn.failed":
-        console.log("\n[Turn failed]");
-        stream.abort();
-        return;
     }
+  } finally {
+    stream.abort();
   }
 }
 
@@ -94,6 +109,22 @@ function extractText(data: unknown): string | null {
     .map((part) => part.text ?? "");
 
   return texts.length > 0 ? texts.join("") : null;
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timeout")), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
 }
 
 function devClient(): Everruns {

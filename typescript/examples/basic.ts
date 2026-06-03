@@ -7,6 +7,8 @@
  */
 import { Everruns } from "../src/index.js";
 
+const EVENT_WAIT_MS = 45_000;
+
 async function main() {
   // Create client using EVERRUNS_API_KEY env var
   const client = Everruns.fromEnv();
@@ -48,20 +50,50 @@ async function main() {
     exclude: ["output.message.delta"],
   });
 
-  for await (const event of stream) {
-    console.log(`[${event.type}]`, JSON.stringify(event.data).slice(0, 100));
+  const events = stream[Symbol.asyncIterator]();
+  try {
+    while (true) {
+      let next: Awaited<ReturnType<typeof events.next>>;
+      try {
+        next = await withTimeout(events.next(), EVENT_WAIT_MS);
+      } catch {
+        console.log("Timed out waiting for turn events; ending demo.");
+        break;
+      }
+      if (next.done) break;
 
-    if (
-      event.type === "output.message.completed" ||
-      event.type === "turn.completed" ||
-      event.type === "turn.failed"
-    ) {
-      stream.abort();
-      break;
+      const event = next.value;
+      console.log(`[${event.type}]`, JSON.stringify(event.data).slice(0, 100));
+
+      if (
+        event.type === "output.message.completed" ||
+        event.type === "turn.completed" ||
+        event.type === "turn.failed"
+      ) {
+        break;
+      }
     }
+  } finally {
+    stream.abort();
   }
 
   console.log("Done!");
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("timeout")), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
 }
 
 main().catch(console.error);

@@ -4,6 +4,9 @@ use everruns_sdk::{
     AgentCapabilityConfig, CreateAgentRequest, CreateSessionRequest, Error, Everruns,
 };
 use futures::StreamExt;
+use tokio::time::{Duration, timeout};
+
+const EVENT_WAIT_SECS: u64 = 45;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -56,19 +59,26 @@ async fn main() -> Result<(), Error> {
 
     // Stream events
     let mut stream = client.events().stream(&session.id);
-    while let Some(event) = stream.next().await {
-        match event {
-            Ok(e) => {
-                println!("Event: {} - {}", e.event_type, e.id);
-                if matches!(
-                    e.event_type.as_str(),
-                    "output.message.completed" | "turn.completed" | "turn.failed"
-                ) {
+    loop {
+        match timeout(Duration::from_secs(EVENT_WAIT_SECS), stream.next()).await {
+            Ok(Some(event)) => match event {
+                Ok(e) => {
+                    println!("Event: {} - {}", e.event_type, e.id);
+                    if matches!(
+                        e.event_type.as_str(),
+                        "output.message.completed" | "turn.completed" | "turn.failed"
+                    ) {
+                        break;
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Error: {}", e);
                     break;
                 }
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
+            },
+            Ok(None) => break,
+            Err(_) => {
+                println!("Timed out waiting for turn events; ending demo.");
                 break;
             }
         }
