@@ -14,7 +14,7 @@ Cache-Control: no-cache
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `since_id` | string | Resume from event ID (UUIDv7, monotonically increasing) |
+| `since_id` | string | Resume from event ID (`event_{32-hex}` cursor format) |
 | `types` | string[] | Positive type filter: only return events matching these types |
 | `exclude` | string[] | Event types to exclude (applied after `types` filter) |
 
@@ -37,6 +37,7 @@ Reference: [everruns/everruns#575](https://github.com/everruns/everruns/pull/575
 
 ```
 event: <event_type>
+id: <event_id>
 data: {"id":"...","type":"<event_type>","ts":"...","session_id":"...","data":{...}}
 ```
 

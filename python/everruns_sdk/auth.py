@@ -4,26 +4,26 @@ import os
 
 
 class ApiKey:
-    """API key for authenticating with Everruns.
+    """Personal access token for authenticating with Everruns.
 
     Args:
-        key: The API key string (should start with 'evr_')
+        key: The token string (should start with 'evr_pat_')
     """
 
     def __init__(self, key: str):
         if not key:
-            raise ValueError("API key cannot be empty")
+            raise ValueError("personal access token cannot be empty")
         self._key = key
 
     @classmethod
     def from_env(cls, env_var: str = "EVERRUNS_API_KEY") -> "ApiKey":
-        """Create an API key from an environment variable.
+        """Create a personal access token from an environment variable.
 
         Args:
             env_var: Name of the environment variable
 
         Returns:
-            ApiKey instance
+            ApiKey instance wrapping a personal access token
 
         Raises:
             ValueError: If the environment variable is not set
@@ -35,7 +35,7 @@ class ApiKey:
 
     @property
     def value(self) -> str:
-        """Get the API key value."""
+        """Get the token value."""
         return self._key
 
     def __repr__(self) -> str:

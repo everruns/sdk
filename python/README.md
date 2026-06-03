@@ -70,14 +70,14 @@ Runnable example: [`examples/initial_files.py`](examples/initial_files.py)
 
 ## Authentication
 
-The SDK uses API key authentication. Set `EVERRUNS_API_KEY` or pass the key explicitly. For API keys with access to multiple organizations, set `EVERRUNS_ORG_ID` or pass `org_id` explicitly:
+The SDK uses personal access token authentication. Set `EVERRUNS_API_KEY` or pass the token explicitly. For personal access tokens with access to multiple organizations, set `EVERRUNS_ORG_ID` or pass `org_id` explicitly:
 
 ```python
 # From environment
 client = Everruns()
 
-# Explicit key and organization
-client = Everruns(api_key="evr_...", org_id="org_...")
+# Explicit token and organization
+client = Everruns(api_key="evr_pat_...", org_id="org_...")
 ```
 
 ## Agent Versions

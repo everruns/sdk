@@ -547,6 +547,78 @@ async fn test_capabilities_list_with_options() {
 }
 
 #[tokio::test]
+async fn test_events_list_with_upstream_filters() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/sessions/sess_123/events"))
+        .and(query_param("since_id", "event_001"))
+        .and(query_param("types", "turn.started"))
+        .and(query_param("types", "tool.completed"))
+        .and(query_param("exclude", "output.message.delta"))
+        .and(query_param("limit", "25"))
+        .and(query_param("before_sequence", "100"))
+        .and(query_param("after_sequence", "50"))
+        .and(query_param("around", "event_anchor"))
+        .and(query_param("window", "10"))
+        .and(query_param("from_ts", "2026-06-01T00:00:00Z"))
+        .and(query_param("to_ts", "2026-06-02T00:00:00Z"))
+        .and(query_param("turn_id", "turn_123"))
+        .and(query_param("exec_id", "exec_123"))
+        .and(query_param("trace_id", "trace_123"))
+        .and(query_param("tags", "alpha"))
+        .and(query_param("tags", "beta"))
+        .and(query_param("tool_name", "bash"))
+        .and(query_param("q", "failed tool"))
+        .and(query_param("order_desc", "true"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [{
+                "id": "event_001",
+                "type": "turn.started",
+                "ts": "2026-06-01T00:00:00Z",
+                "session_id": "sess_123",
+                "data": {}
+            }],
+            "total": 1,
+            "offset": 0,
+            "limit": 25
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client
+        .events()
+        .list_with_options(
+            "sess_123",
+            &everruns_sdk::client::ListEventsOptions {
+                since_id: Some("event_001".to_string()),
+                types: vec!["turn.started".to_string(), "tool.completed".to_string()],
+                exclude: vec!["output.message.delta".to_string()],
+                limit: Some(25),
+                before_sequence: Some(100),
+                after_sequence: Some(50),
+                around: Some("event_anchor".to_string()),
+                window: Some(10),
+                from_ts: Some("2026-06-01T00:00:00Z".to_string()),
+                to_ts: Some("2026-06-02T00:00:00Z".to_string()),
+                turn_id: Some("turn_123".to_string()),
+                exec_id: Some("exec_123".to_string()),
+                trace_id: Some("trace_123".to_string()),
+                tags: vec!["alpha".to_string(), "beta".to_string()],
+                tool_name: Some("bash".to_string()),
+                q: Some("failed tool".to_string()),
+                order_desc: Some(true),
+            },
+        )
+        .await
+        .expect("list events should succeed");
+
+    assert_eq!(response.data.len(), 1);
+    assert_eq!(response.data[0].id, "event_001");
+}
+
+#[tokio::test]
 async fn test_create_tool_results_uses_tool_results_endpoint() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");

@@ -40,12 +40,14 @@ afterEach(() => {
 
 describe("ApiKey", () => {
   it("should create from string", () => {
-    const key = new ApiKey("evr_test_key");
-    expect(key.toHeader()).toBe("evr_test_key");
+    const key = new ApiKey("evr_pat_test_key");
+    expect(key.toHeader()).toBe("evr_pat_test_key");
   });
 
   it("should throw on empty key", () => {
-    expect(() => new ApiKey("")).toThrow("API key cannot be empty");
+    expect(() => new ApiKey("")).toThrow(
+      "personal access token cannot be empty",
+    );
   });
 });
 
@@ -857,6 +859,49 @@ describe("CreateAgentRequest with displayName", () => {
 });
 
 describe("EventsClient URL building", () => {
+  it("should pass all upstream event list filters", async () => {
+    const event = {
+      id: "event_001",
+      type: "turn.started",
+      data: {},
+      createdAt: "2026-06-01T00:00:00Z",
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: [event], total: 1, offset: 0, limit: 25 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const events = await client.events.list("sess_123", {
+      sinceId: "event_001",
+      types: ["turn.started", "tool.completed"],
+      exclude: ["output.message.delta"],
+      limit: 25,
+      beforeSequence: 100,
+      afterSequence: 50,
+      around: "event_anchor",
+      window: 10,
+      fromTs: "2026-06-01T00:00:00Z",
+      toTs: "2026-06-02T00:00:00Z",
+      turnId: "turn_123",
+      execId: "exec_123",
+      traceId: "trace_123",
+      tags: ["alpha", "beta"],
+      toolName: "bash",
+      q: "failed tool",
+      orderDesc: true,
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/sessions/sess_123/events?since_id=event_001&types=turn.started&types=tool.completed&exclude=output.message.delta&limit=25&before_sequence=100&after_sequence=50&around=event_anchor&window=10&from_ts=2026-06-01T00%3A00%3A00Z&to_ts=2026-06-02T00%3A00%3A00Z&turn_id=turn_123&exec_id=exec_123&trace_id=trace_123&tags=alpha&tags=beta&tool_name=bash&q=failed+tool&order_desc=true",
+      expect.any(Object),
+    );
+    expect(events).toEqual([event]);
+  });
+
   it("should expand exclude as repeated query keys for events list", () => {
     // Verify the URLSearchParams approach used by EventsClient.list()
     // produces repeated keys, not comma-separated values

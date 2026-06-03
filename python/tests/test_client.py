@@ -18,15 +18,15 @@ from everruns_sdk import (
 
 
 def test_api_key_creation():
-    """Test API key creation."""
-    key = ApiKey("evr_test_key")
-    assert key.value == "evr_test_key"
+    """Test personal access token creation."""
+    key = ApiKey("evr_pat_test_key")
+    assert key.value == "evr_pat_test_key"
 
 
 def test_api_key_repr():
-    """Test API key representation hides the key."""
-    key = ApiKey("evr_test_key_12345")
-    assert "evr_test" in repr(key)
+    """Test personal access token representation hides the token."""
+    key = ApiKey("evr_pat_test_key_12345")
+    assert "evr_pat_" in repr(key)
     assert "12345" not in repr(key)
 
 
@@ -1095,6 +1095,66 @@ async def test_capabilities_list_with_options():
     assert len(items) == 1
     assert items[0].id == "web_search"
     assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_events_list_with_upstream_filters():
+    route = respx.get(
+        "https://custom.example.com/api/v1/sessions/sess_123/events"
+        "?since_id=event_001&types=turn.started&types=tool.completed"
+        "&exclude=output.message.delta&limit=25&before_sequence=100"
+        "&after_sequence=50&around=event_anchor&window=10"
+        "&from_ts=2026-06-01T00%3A00%3A00Z&to_ts=2026-06-02T00%3A00%3A00Z"
+        "&turn_id=turn_123&exec_id=exec_123&trace_id=trace_123"
+        "&tags=alpha&tags=beta&tool_name=bash&q=failed+tool&order_desc=true"
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "data": [
+                    {
+                        "id": "event_001",
+                        "type": "turn.started",
+                        "ts": "2026-06-01T00:00:00Z",
+                        "session_id": "sess_123",
+                        "data": {},
+                    }
+                ],
+                "total": 1,
+                "offset": 0,
+                "limit": 25,
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        events = await client.events.list(
+            "sess_123",
+            since_id="event_001",
+            types=["turn.started", "tool.completed"],
+            exclude=["output.message.delta"],
+            limit=25,
+            before_sequence=100,
+            after_sequence=50,
+            around="event_anchor",
+            window=10,
+            from_ts="2026-06-01T00:00:00Z",
+            to_ts="2026-06-02T00:00:00Z",
+            turn_id="turn_123",
+            exec_id="exec_123",
+            trace_id="trace_123",
+            tags=["alpha", "beta"],
+            tool_name="bash",
+            q="failed tool",
+            order_desc=True,
+        )
+    finally:
+        await client.close()
+
+    assert route.called
+    assert events[0].id == "event_001"
 
 
 @pytest.mark.asyncio

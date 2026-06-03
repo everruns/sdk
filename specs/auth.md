@@ -1,8 +1,8 @@
 # Authentication
 
-## API Key And Organization Context
+## Personal Access Token And Organization Context
 
-All SDKs use `EVERRUNS_API_KEY` as the default API key source. Multi-org API-key users can set organization context with `EVERRUNS_ORG_ID` or an explicit client option. Explicit client options take precedence over the environment.
+All SDKs use `EVERRUNS_API_KEY` as the default personal access token source. Multi-org token users can set organization context with `EVERRUNS_ORG_ID` or an explicit client option. Explicit client options take precedence over the environment.
 
 ### Rust
 
@@ -14,7 +14,7 @@ let client = Everruns::from_env()?;
 
 // Explicit
 let client = Everruns::builder()
-    .api_key("evr_...")
+    .api_key("evr_pat_...")
     .org_id("org_...")
     .build()?;
 ```
@@ -28,7 +28,7 @@ from everruns_sdk import Everruns
 client = Everruns()
 
 # Explicit
-client = Everruns(api_key="evr_...", org_id="org_...")
+client = Everruns(api_key="evr_pat_...", org_id="org_...")
 ```
 
 ### TypeScript
@@ -40,14 +40,14 @@ import { Everruns } from "@everruns/sdk";
 const client = Everruns.fromEnv();
 
 // Explicit
-const client = new Everruns({ apiKey: "evr_...", orgId: "org_..." });
+const client = new Everruns({ apiKey: "evr_pat_...", orgId: "org_..." });
 ```
 
 ## Auth Header Format
 
 ```
-Authorization: <api_key>
+Authorization: <personal_access_token>
 X-Org-Id: <org_id>
 ```
 
-No Bearer prefix for API keys. Keys start with `evr_` prefix. `X-Org-Id` is optional for single-org accounts and required by the API when an API key has access to multiple organizations.
+No Bearer prefix. Personal access tokens start with the `evr_pat_` prefix. `X-Org-Id` is optional for single-org accounts and required by the API when a token has access to multiple organizations.

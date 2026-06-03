@@ -78,15 +78,15 @@ saveVersion: true,
 
 ## Authentication
 
-The SDK uses API key authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the key explicitly. For API keys with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`orgId\` explicitly:
+The SDK uses personal access token authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the token explicitly. For personal access tokens with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`orgId\` explicitly:
 
 \`\`\`typescript
 // From environment variable
 const client = Everruns.fromEnv();
 
-// Explicit key and organization
+// Explicit token and organization
 const client = new Everruns({
-apiKey: "evr\_...",
+apiKey: "evr\_pat\_...",
 orgId: "org\_..."
 });
 \`\`\`
@@ -126,7 +126,7 @@ try {
 await client.agents.get("invalid-id");
 } catch (error) {
 if (error instanceof AuthenticationError) {
-console.error("Invalid API key");
+console.error("Invalid personal access token");
 } else if (error instanceof RateLimitError) {
 console.log(\`Retry after \${error.retryAfter} seconds\`);
 } else if (error instanceof ApiError) {

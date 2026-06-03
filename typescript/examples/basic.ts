@@ -7,6 +7,8 @@
  */
 import { Everruns } from "../src/index.js";
 
+const EVENT_WAIT_MS = 45_000;
+
 async function main() {
   // Create client using EVERRUNS_API_KEY env var
   const client = Everruns.fromEnv();
@@ -48,20 +50,33 @@ async function main() {
     exclude: ["output.message.delta"],
   });
 
-  for await (const event of stream) {
-    console.log(`[${event.type}]`, JSON.stringify(event.data).slice(0, 100));
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    console.log("Timed out waiting for turn events; ending demo.");
+    stream.abort();
+  }, EVENT_WAIT_MS);
 
-    if (
-      event.type === "output.message.completed" ||
-      event.type === "turn.completed" ||
-      event.type === "turn.failed"
-    ) {
-      stream.abort();
-      break;
+  try {
+    for await (const event of stream) {
+      console.log(`[${event.type}]`, JSON.stringify(event.data).slice(0, 100));
+
+      if (
+        event.type === "output.message.completed" ||
+        event.type === "turn.completed" ||
+        event.type === "turn.failed"
+      ) {
+        stream.abort();
+        break;
+      }
     }
+  } finally {
+    clearTimeout(timeoutId);
   }
 
-  console.log("Done!");
+  if (!timedOut) {
+    console.log("Done!");
+  }
 }
 
 main().catch(console.error);

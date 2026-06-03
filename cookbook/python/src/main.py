@@ -12,6 +12,8 @@ import sys
 from everruns_sdk import Everruns
 from everruns_sdk.sse import EventStream, StreamOptions
 
+EVENT_WAIT_SECS = 45
+
 
 async def main():
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
@@ -38,31 +40,44 @@ async def main():
         # Stream events (with retry limit for CI)
         options = StreamOptions(max_retries=3)
         stream = EventStream(client, session.id, options)
-        async for event in stream:
-            if verbose:
-                print(f"\n[EVENT] {event.type}: {json.dumps(event.data, indent=2)}")
+        events = stream.__aiter__()
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(events.__anext__(), timeout=EVENT_WAIT_SECS)
+                except TimeoutError:
+                    print("Timed out waiting for turn events; ending demo.")
+                    break
+                except StopAsyncIteration:
+                    break
 
-            if event.type == "input.message":
-                text = extract_text(event.data)
-                if text:
-                    print(f"Input: {text}")
-                else:
-                    print(f"Input (raw): {json.dumps(event.data, indent=2)}")
+                if verbose:
+                    print(f"\n[EVENT] {event.type}: {json.dumps(event.data, indent=2)}")
 
-            elif event.type == "output.message.completed":
-                text = extract_text(event.data)
-                if text:
-                    print(f"Output: {text}")
-                else:
-                    print(f"Output (raw): {json.dumps(event.data, indent=2)}")
+                if event.type == "input.message":
+                    text = extract_text(event.data)
+                    if text:
+                        print(f"Input: {text}")
+                    else:
+                        print(f"Input (raw): {json.dumps(event.data, indent=2)}")
 
-            elif event.type == "turn.completed":
-                print("\n[Turn completed]")
-                break
+                elif event.type == "output.message.completed":
+                    text = extract_text(event.data)
+                    if text:
+                        print(f"Output: {text}")
+                    else:
+                        print(f"Output (raw): {json.dumps(event.data, indent=2)}")
 
-            elif event.type == "turn.failed":
-                print("\n[Turn failed]")
-                break
+                elif event.type == "turn.completed":
+                    print("\n[Turn completed]")
+                    break
+
+                elif event.type == "turn.failed":
+                    print("\n[Turn failed]")
+                    break
+        finally:
+            stream.stop()
+            await stream.aclose()
 
     finally:
         await client.close()

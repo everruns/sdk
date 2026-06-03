@@ -7,6 +7,8 @@
 
 import { Everruns } from "@everruns/sdk";
 
+const EVENT_WAIT_MS = 45_000;
+
 async function main() {
   const verbose =
     process.argv.includes("--verbose") || process.argv.includes("-v");
@@ -30,45 +32,59 @@ async function main() {
 
   // Stream events (with retry limit for CI)
   const stream = client.events.stream(session.id, { maxRetries: 3 });
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    console.log("Timed out waiting for turn events; ending demo.");
+    stream.abort();
+  }, EVENT_WAIT_MS);
 
-  for await (const event of stream) {
-    if (verbose) {
-      console.log(
-        `\n[EVENT] ${event.type}: ${JSON.stringify(event.data, null, 2)}`,
-      );
-    }
-
-    switch (event.type) {
-      case "input.message": {
-        const text = extractText(event.data);
-        if (text) {
-          console.log(`Input: ${text}`);
-        } else {
-          console.log(`Input (raw): ${JSON.stringify(event.data, null, 2)}`);
-        }
-        break;
+  try {
+    for await (const event of stream) {
+      if (verbose) {
+        console.log(
+          `\n[EVENT] ${event.type}: ${JSON.stringify(event.data, null, 2)}`,
+        );
       }
 
-      case "output.message.completed": {
-        const text = extractText(event.data);
-        if (text) {
-          console.log(`Output: ${text}`);
-        } else {
-          console.log(`Output (raw): ${JSON.stringify(event.data, null, 2)}`);
+      switch (event.type) {
+        case "input.message": {
+          const text = extractText(event.data);
+          if (text) {
+            console.log(`Input: ${text}`);
+          } else {
+            console.log(`Input (raw): ${JSON.stringify(event.data, null, 2)}`);
+          }
+          break;
         }
-        break;
+
+        case "output.message.completed": {
+          const text = extractText(event.data);
+          if (text) {
+            console.log(`Output: ${text}`);
+          } else {
+            console.log(`Output (raw): ${JSON.stringify(event.data, null, 2)}`);
+          }
+          break;
+        }
+
+        case "turn.completed":
+          console.log("\n[Turn completed]");
+          stream.abort();
+          return;
+
+        case "turn.failed":
+          console.log("\n[Turn failed]");
+          stream.abort();
+          return;
       }
-
-      case "turn.completed":
-        console.log("\n[Turn completed]");
-        stream.abort();
-        return;
-
-      case "turn.failed":
-        console.log("\n[Turn failed]");
-        stream.abort();
-        return;
     }
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (!timedOut) {
+    console.log("\n[Stream ended]");
   }
 }
 

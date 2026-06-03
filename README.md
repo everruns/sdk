@@ -21,12 +21,12 @@ npm install @everruns/sdk
 
 ## Quick Start
 
-Set your API key:
+Set your personal access token:
 ```bash
-export EVERRUNS_API_KEY=evr_your_key_here
+export EVERRUNS_API_KEY=evr_pat_your_token_here
 ```
 
-For API keys with access to multiple organizations, also set:
+For personal access tokens with access to multiple organizations, also set:
 ```bash
 export EVERRUNS_ORG_ID=org_your_org_id_here
 ```
@@ -162,24 +162,24 @@ main();
 
 ## Authentication
 
-All SDKs read from `EVERRUNS_API_KEY` by default. Multi-org API-key users can set `EVERRUNS_ORG_ID` or pass an explicit organization ID:
+All SDKs read the personal access token from `EVERRUNS_API_KEY` by default. Multi-org token users can set `EVERRUNS_ORG_ID` or pass an explicit organization ID:
 
 ```rust
 // Rust
 let client = Everruns::builder()
-    .api_key("evr_...")
+    .api_key("evr_pat_...")
     .org_id("org_...")
     .build()?;
 ```
 
 ```python
 # Python
-client = Everruns(api_key="evr_...", org_id="org_...")
+client = Everruns(api_key="evr_pat_...", org_id="org_...")
 ```
 
 ```typescript
 // TypeScript
-const client = new Everruns({ apiKey: "evr_...", orgId: "org_..." });
+const client = new Everruns({ apiKey: "evr_pat_...", orgId: "org_..." });
 ```
 
 ## Error Handling
@@ -188,7 +188,7 @@ Consistent error types across all SDKs:
 
 | Error | Description |
 |-------|-------------|
-| `AuthenticationError` | Invalid or missing API key |
+| `AuthenticationError` | Invalid or missing personal access token |
 | `NotFoundError` | Resource not found (404) |
 | `RateLimitError` | Rate limited (429), includes `retry_after` |
 | `ApiError` | General API errors |

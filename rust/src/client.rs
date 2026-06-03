@@ -794,9 +794,11 @@ pub struct EventsClient<'a> {
     client: &'a Everruns,
 }
 
-/// Options for listing events with backward pagination
+/// Options for listing events with filtering and pagination
 #[derive(Debug, Clone, Default)]
 pub struct ListEventsOptions {
+    /// Return events after this event ID
+    pub since_id: Option<String>,
     /// Positive type filter
     pub types: Vec<String>,
     /// Event types to exclude
@@ -805,6 +807,30 @@ pub struct ListEventsOptions {
     pub limit: Option<u32>,
     /// Cursor for backward pagination: only return events with sequence < this value
     pub before_sequence: Option<i32>,
+    /// Forward cursor: only return events with sequence > this value
+    pub after_sequence: Option<i32>,
+    /// Anchor event ID for centered windows
+    pub around: Option<String>,
+    /// Events to return on each side of around
+    pub window: Option<u32>,
+    /// Lower created_at bound (RFC 3339)
+    pub from_ts: Option<String>,
+    /// Upper created_at bound (RFC 3339)
+    pub to_ts: Option<String>,
+    /// Filter by turn ID
+    pub turn_id: Option<String>,
+    /// Filter by execution ID
+    pub exec_id: Option<String>,
+    /// Filter by trace ID
+    pub trace_id: Option<String>,
+    /// Tag any-match filter
+    pub tags: Vec<String>,
+    /// Filter tool events by tool name
+    pub tool_name: Option<String>,
+    /// Full-text search query
+    pub q: Option<String>,
+    /// Return newest first when true
+    pub order_desc: Option<bool>,
 }
 
 impl<'a> EventsClient<'a> {
@@ -822,6 +848,9 @@ impl<'a> EventsClient<'a> {
         options: &ListEventsOptions,
     ) -> Result<ListResponse<Event>> {
         let mut url = self.client.url(&format!("/sessions/{}/events", session_id));
+        if let Some(since_id) = &options.since_id {
+            url.query_pairs_mut().append_pair("since_id", since_id);
+        }
         for t in &options.types {
             url.query_pairs_mut().append_pair("types", t);
         }
@@ -835,6 +864,45 @@ impl<'a> EventsClient<'a> {
         if let Some(seq) = options.before_sequence {
             url.query_pairs_mut()
                 .append_pair("before_sequence", &seq.to_string());
+        }
+        if let Some(seq) = options.after_sequence {
+            url.query_pairs_mut()
+                .append_pair("after_sequence", &seq.to_string());
+        }
+        if let Some(around) = &options.around {
+            url.query_pairs_mut().append_pair("around", around);
+        }
+        if let Some(window) = options.window {
+            url.query_pairs_mut()
+                .append_pair("window", &window.to_string());
+        }
+        if let Some(from_ts) = &options.from_ts {
+            url.query_pairs_mut().append_pair("from_ts", from_ts);
+        }
+        if let Some(to_ts) = &options.to_ts {
+            url.query_pairs_mut().append_pair("to_ts", to_ts);
+        }
+        if let Some(turn_id) = &options.turn_id {
+            url.query_pairs_mut().append_pair("turn_id", turn_id);
+        }
+        if let Some(exec_id) = &options.exec_id {
+            url.query_pairs_mut().append_pair("exec_id", exec_id);
+        }
+        if let Some(trace_id) = &options.trace_id {
+            url.query_pairs_mut().append_pair("trace_id", trace_id);
+        }
+        for tag in &options.tags {
+            url.query_pairs_mut().append_pair("tags", tag);
+        }
+        if let Some(tool_name) = &options.tool_name {
+            url.query_pairs_mut().append_pair("tool_name", tool_name);
+        }
+        if let Some(q) = &options.q {
+            url.query_pairs_mut().append_pair("q", q);
+        }
+        if let Some(order_desc) = options.order_desc {
+            url.query_pairs_mut()
+                .append_pair("order_desc", &order_desc.to_string());
         }
         self.client.get_url(url).await
     }

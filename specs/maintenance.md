@@ -212,7 +212,7 @@ If outdated, open a PR against `everruns/everruns` repo.
 ## 10. Security
 
 - [ ] No known vulnerabilities in dependencies (`cargo audit`, `pip audit`, `npm audit`)
-- [ ] API keys not committed in code or config
+- [ ] personal access tokens not committed in code or config
 - [ ] `secrecy` crate usage correct in Rust SDK
 
 ## Running Maintenance

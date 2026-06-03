@@ -22,6 +22,44 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/agents/check-name": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/agents/check-name
+     * @description Returns whether an agent name is available for use. Optionally excludes
+     *     a specific agent ID (for edit forms where the agent's own name is valid).
+     */
+    get: operations["check_agent_name"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/agents/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/agents/config */
+    get: operations["agent_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/agents/import": {
     parameters: {
       query?: never;
@@ -253,7 +291,96 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description Create a voice session for a specific agent. Returns connection details for the realtime audio channel. */
     post: operations["create_agent_voice_session"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/apps - List all non-archived apps */
+    get: operations["list_apps"];
+    put?: never;
+    /** POST /v1/apps - Create a new app */
+    post: operations["create_app"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/apps/config */
+    get: operations["app_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/apps/{app_id} - Get app by ID */
+    get: operations["get_app"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/apps/{app_id} - Archive app */
+    delete: operations["delete_app"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/apps/{app_id} - Update app */
+    patch: operations["update_app"];
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/a2a-channels": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/apps/{app_id}/a2a-channels - Add an A2A channel (returns plaintext key once). */
+    post: operations["add_a2a_channel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/a2a-channels/{channel_id}/regenerate-key": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Regenerate an A2A channel API key. Returns the new plaintext key exactly once and invalidates the previous key. */
+    post: operations["regenerate_a2a_key"];
     delete?: never;
     options?: never;
     head?: never;
@@ -294,6 +421,79 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/apps/{app_id}/fcp": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * `GET /v1/apps/{app_id}/fcp` — handshake. Always returns the same
+     *     generic 404 body for unknown apps so the endpoint cannot be used to
+     *     probe which app ids are real.
+     */
+    get: operations["handshake"];
+    put?: never;
+    /** `POST /v1/apps/{app_id}/fcp` — text-in, text-out. */
+    post: operations["message"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/publish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/apps/{app_id}/publish - Publish app (start accepting requests) */
+    post: operations["publish_app"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/apps/{app_id}/runs - Recent app invocation runs */
+    get: operations["list_app_runs"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/apps/{app_id}/unpublish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/apps/{app_id}/unpublish - Unpublish app (stop accepting requests) */
+    post: operations["unpublish_app"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/apps/{app_id}/webhooks/{channel_id}": {
     parameters: {
       query?: never;
@@ -303,6 +503,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description Invoke a webhook channel for a published App. The body is forwarded to the agent as a message. */
     post: operations["invoke_webhook"];
     delete?: never;
     options?: never;
@@ -415,6 +616,75 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/durable/circuit-breakers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/circuit-breakers - List circuit breakers */
+    get: operations["list_circuit_breakers"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/circuit-breakers/{key}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/circuit-breakers/:key - Get a single circuit breaker */
+    get: operations["get_circuit_breaker"];
+    put?: never;
+    post?: never;
+    /** DELETE /v1/durable/circuit-breakers/:key - Delete/reset a circuit breaker */
+    delete: operations["delete_circuit_breaker"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/circuit-breakers/{key}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/circuit-breakers/:key/close - Force close a circuit breaker */
+    post: operations["force_close_circuit_breaker"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/circuit-breakers/{key}/open": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/circuit-breakers/:key/open - Force open a circuit breaker */
+    post: operations["force_open_circuit_breaker"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/durable/config": {
     parameters: {
       query?: never;
@@ -432,6 +702,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/durable/dlq": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/dlq - List dead letter queue entries */
+    get: operations["list_dlq"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/dlq/{dlq_id}/retry": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/dlq/:dlq_id/retry - Retry a DLQ entry */
+    post: operations["retry_dlq"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/durable/executions/{execution_id}": {
     parameters: {
       query?: never;
@@ -441,6 +745,40 @@ export interface paths {
     };
     /** GET /v1/durable/executions/:execution_id - Get execution details */
     get: operations["get_execution"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/health - Get system health */
+    get: operations["get_health"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/metrics/timeseries": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/metrics/timeseries - Get metrics time series */
+    get: operations["get_metrics_timeseries"];
     put?: never;
     post?: never;
     delete?: never;
@@ -571,6 +909,235 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/durable/sse": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/durable/sse - Stream global durable state (SSE)
+     * @description Establishes a Server-Sent Events (SSE) connection for real-time durable system monitoring.
+     *
+     *     ## Connection Lifecycle Events
+     *
+     *     - **connected**: Sent immediately when the stream is established.
+     *     - **snapshot**: Sent when system state changes (health, workers, workflows, tasks, DLQ, circuit breakers).
+     *     - **disconnecting**: Sent before the server closes the connection for graceful cycling.
+     *       Data: `{"reason":"connection_cycle","retry_ms":1000}`
+     *
+     *     ## Connection Cycling
+     *
+     *     Connections are automatically cycled every 10 minutes. Before closing, the server sends
+     *     a `disconnecting` event so clients can reconnect seamlessly.
+     *
+     *     ## Retry Hints
+     *
+     *     Each SSE event includes a `retry:` field (in milliseconds) that hints reconnection timing:
+     *     - During active updates: 1000ms
+     *     - During idle periods: increases with backoff up to 20000ms
+     *     - After `disconnecting` event: 1000ms
+     */
+    get: operations["stream_durable_sse"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/tasks - List tasks */
+    get: operations["list_tasks"];
+    put?: never;
+    /** POST /v1/durable/tasks - Enqueue a standalone task (generic queue) */
+    post: operations["enqueue_task"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/workers - List workers */
+    get: operations["list_workers"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workers/{worker_id}/drain": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/workers/:worker_id/drain - Drain a worker */
+    post: operations["drain_worker"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workers/{worker_id}/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/workers/:worker_id/resume - Resume a draining worker */
+    post: operations["resume_worker"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workflows": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/workflows - List workflows */
+    get: operations["list_workflows"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workflows/{workflow_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/workflows/:workflow_id - Get workflow details */
+    get: operations["get_workflow"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workflows/{workflow_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/workflows/:workflow_id/cancel - Cancel a workflow */
+    post: operations["cancel_workflow"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workflows/{workflow_id}/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/durable/workflows/:workflow_id/events - Get workflow events */
+    get: operations["get_workflow_events"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workflows/{workflow_id}/signal": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/durable/workflows/:workflow_id/signal - Send signal to workflow */
+    post: operations["send_signal"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/durable/workflows/{workflow_id}/sse": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/durable/workflows/:workflow_id/sse - Stream workflow state (SSE)
+     * @description Establishes a Server-Sent Events (SSE) connection for real-time workflow monitoring.
+     *
+     *     ## Connection Lifecycle Events
+     *
+     *     - **connected**: Sent immediately when the stream is established.
+     *     - **snapshot**: Sent when workflow state or events change.
+     *     - **disconnecting**: Sent before the server closes the connection for graceful cycling.
+     *       Data: `{"reason":"connection_cycle","retry_ms":1000}`
+     *
+     *     ## Connection Cycling
+     *
+     *     Connections are automatically cycled every 10 minutes. Before closing, the server sends
+     *     a `disconnecting` event so clients can reconnect seamlessly.
+     *
+     *     ## Retry Hints
+     *
+     *     Each SSE event includes a `retry:` field (in milliseconds) that hints reconnection timing.
+     */
+    get: operations["stream_workflow_sse"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/harness-examples": {
     parameters: {
       query?: never;
@@ -600,6 +1167,27 @@ export interface paths {
     put?: never;
     /** POST /v1/harnesses */
     post: operations["create_harness"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/harnesses/check-name": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/harnesses/check-name
+     * @description Returns whether a harness name is available for use. Optionally excludes
+     *     a specific harness ID (for edit forms where the harness's own name is valid).
+     */
+    get: operations["check_harness_name"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -793,8 +1381,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List knowledge bases. */
     get: operations["list_kbs"];
     put?: never;
+    /** @description Create a new knowledge base. */
     post: operations["create_kb"];
     delete?: never;
     options?: never;
@@ -809,12 +1399,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description Get a knowledge base by ID. */
     get: operations["get_kb"];
     put?: never;
     post?: never;
+    /** @description Delete a knowledge base. */
     delete: operations["delete_kb"];
     options?: never;
     head?: never;
+    /** @description Update a knowledge base. Only provided fields are modified. */
     patch: operations["update_kb"];
     trace?: never;
   };
@@ -825,8 +1418,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List knowledge base entries. */
     get: operations["list_entries"];
     put?: never;
+    /** @description Create a new knowledge base entry. */
     post: operations["create_entry"];
     delete?: never;
     options?: never;
@@ -841,12 +1436,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description Get a knowledge base entry by ID. */
     get: operations["get_entry"];
     put?: never;
     post?: never;
+    /** @description Delete a knowledge base entry. */
     delete: operations["delete_entry"];
     options?: never;
     head?: never;
+    /** @description Update a knowledge base entry. Only provided fields are modified. */
     patch: operations["update_entry"];
     trace?: never;
   };
@@ -859,6 +1457,23 @@ export interface paths {
     };
     /** List all models across all providers */
     get: operations["list_all_models"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/llm-models/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/llm-models/config */
+    get: operations["llm_model_config"];
     put?: never;
     post?: never;
     delete?: never;
@@ -898,6 +1513,23 @@ export interface paths {
     put?: never;
     /** Create a new LLM provider */
     post: operations["create_provider"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/llm-providers/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/llm-providers/config */
+    get: operations["llm_provider_config"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -980,6 +1612,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/mcp-servers/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/mcp-servers/config
+     * @description Returns which MCP server policies the caller satisfies.
+     */
+    get: operations["mcp_server_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/mcp-servers/{server_id}": {
     parameters: {
       query?: never;
@@ -1006,8 +1658,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List memory stores. */
     get: operations["list_memory_stores"];
     put?: never;
+    /** @description Create a new memory store. */
     post: operations["create_memory_store"];
     delete?: never;
     options?: never;
@@ -1022,13 +1676,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description Get a memory store by ID. */
     get: operations["get_memory_store"];
     put?: never;
     post?: never;
     delete?: never;
     options?: never;
     head?: never;
-    patch?: never;
+    /** @description Update a memory store. Only provided fields are modified. */
+    patch: operations["update_memory_store"];
     trace?: never;
   };
   "/v1/memory-stores/{store_id}/memories": {
@@ -1038,6 +1694,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List memories. */
     get: operations["list_memories"];
     put?: never;
     post?: never;
@@ -1057,6 +1714,7 @@ export interface paths {
     get?: never;
     put?: never;
     post?: never;
+    /** @description Forget a memory. */
     delete: operations["forget_memory"];
     options?: never;
     head?: never;
@@ -1106,8 +1764,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List payment accounts. */
     get: operations["list_payment_accounts"];
     put?: never;
+    /** @description Create a new payment account. */
     post: operations["create_payment_account"];
     delete?: never;
     options?: never;
@@ -1122,12 +1782,15 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description Get a payment account by ID. */
     get: operations["get_payment_account"];
     put?: never;
     post?: never;
+    /** @description Disable a payment account without deleting it. */
     delete: operations["disable_payment_account"];
     options?: never;
     head?: never;
+    /** @description Update a payment account. Only provided fields are modified. */
     patch: operations["update_payment_account"];
     trace?: never;
   };
@@ -1138,6 +1801,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List recent payment attempts (operator audit view). */
     get: operations["list_payment_attempts"];
     put?: never;
     post?: never;
@@ -1154,8 +1818,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List payment policies. */
     get: operations["list_payment_policies"];
     put?: never;
+    /** @description Create a new payment policy. */
     post: operations["create_payment_policy"];
     delete?: never;
     options?: never;
@@ -1170,13 +1836,213 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description Get a payment policy by ID. */
     get: operations["get_payment_policy"];
     put?: never;
     post?: never;
+    /** @description Disable a payment policy without deleting it. */
     delete: operations["disable_payment_policy"];
     options?: never;
     head?: never;
+    /** @description Update a payment policy. Only provided fields are modified. */
     patch: operations["update_payment_policy"];
+    trace?: never;
+  };
+  "/v1/reports/admin/backfill": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run a reporting projector to refresh derived data (operator action). */
+    post: operations["backfill_reporting"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/admin/diagnostics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Return diagnostics for the reporting subsystem (operator view). */
+    get: operations["get_diagnostics"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/catalog": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Return the available reporting datasets and their schemas. */
+    get: operations["get_catalog"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/projector/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run a reporting projector to refresh derived data (operator action). */
+    post: operations["run_projector"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/query": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run an ad-hoc reporting query against a registered dataset. */
+    post: operations["run_query"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/query/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run an ad-hoc reporting query and stream the result as CSV. */
+    post: operations["export_query"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/saved": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description List saved reports. */
+    get: operations["list_saved_reports"];
+    put?: never;
+    /** @description Create a new saved report. */
+    post: operations["create_saved_report"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/saved/{report_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Get a saved report by ID. */
+    get: operations["get_saved_report"];
+    put?: never;
+    post?: never;
+    /** @description Delete a saved report. */
+    delete: operations["delete_saved_report"];
+    options?: never;
+    head?: never;
+    /** @description Update a saved report. Only provided fields are modified. */
+    patch: operations["update_saved_report"];
+    trace?: never;
+  };
+  "/v1/reports/saved/{report_id}/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run a previously saved reporting query and stream the result as CSV. */
+    post: operations["export_saved_report"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/reports/saved/{report_id}/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run a previously saved reporting query and return the result. */
+    post: operations["run_saved_report"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/resolve-org": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/resolve-org — resolve the owning org for a resource id.
+     * @description Returns the owning organization only when it is one the authenticated
+     *     caller already belongs to. For every other case (unknown id, unknown
+     *     prefix, resource belongs to a non-member org) the endpoint returns 404 —
+     *     this preserves the org-enumeration guarantee: callers cannot use this
+     *     endpoint to probe for the existence of resources outside their own orgs.
+     */
+    get: operations["resolve_org"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/v1/sessions": {
@@ -1227,7 +2093,25 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description Create a voice session for the user's global chat. Returns connection details for the realtime audio channel. */
     post: operations["create_chat_voice_session"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/sessions/stats - Get session counts by status */
+    get: operations["get_session_stats"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1705,8 +2589,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description Get the current session sandbox status (lease, runtime image, network access). */
     get: operations["get_sandbox"];
     put?: never;
+    /** @description Manage the session sandbox lifecycle (start, stop, reset). */
     post: operations["manage_sandbox"];
     delete?: never;
     options?: never;
@@ -1796,7 +2682,12 @@ export interface paths {
     };
     /** GET /v1/sessions/{session_id}/storage/secrets - List all secrets (names only) */
     get: operations["list_secrets"];
-    put?: never;
+    /**
+     * PUT /v1/sessions/{session_id}/storage/secrets - Batch set secrets
+     * @description Encrypts and stores multiple secrets in a single request.
+     *     Existing secrets with the same name are overwritten.
+     */
+    put: operations["batch_set_secrets"];
     post?: never;
     delete?: never;
     options?: never;
@@ -1834,6 +2725,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description Create a voice call attached to the session. */
     post: operations["create_call"];
     delete?: never;
     options?: never;
@@ -1850,6 +2742,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description Create an ephemeral client secret for the voice channel. */
     post: operations["create_client_secret"];
     delete?: never;
     options?: never;
@@ -1866,6 +2759,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description Attach an external voice call to the session. */
     post: operations["attach_call"];
     delete?: never;
     options?: never;
@@ -1882,6 +2776,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description End the in-flight voice call. */
     post: operations["end_call"];
     delete?: never;
     options?: never;
@@ -1907,6 +2802,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/skills/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/skills/config */
+    get: operations["skill_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/skills/upload": {
     parameters: {
       query?: never;
@@ -1918,6 +2830,23 @@ export interface paths {
     put?: never;
     /** POST /v1/skills/upload - Create skill from ZIP archive */
     post: operations["upload_skill"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/skills/usage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/skills/usage - Count agents/harnesses referencing each skill */
+    get: operations["list_skills_usage"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1998,6 +2927,48 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/users/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * DELETE /v1/users/me - Delete current user's account
+     * @description Hard-deletes the user and all associated data (API keys, memberships, tokens).
+     *     This action is irreversible.
+     */
+    delete: operations["delete_account"];
+    options?: never;
+    head?: never;
+    /** PATCH /v1/users/me - Update current user's profile */
+    patch: operations["update_profile"];
+    trace?: never;
+  };
+  "/v1/users/me/export": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * GET /v1/users/me/export - Export current user's data
+     * @description Returns all user-owned data in a structured JSON format for GDPR compliance.
+     */
+    get: operations["export_user_data"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/users/me/switch-org": {
     parameters: {
       query?: never;
@@ -2027,8 +2998,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description List workspace volumes. */
     get: operations["list_volumes"];
     put?: never;
+    /** @description Create a new workspace volume. */
     post: operations["create_volume"];
     delete?: never;
     options?: never;
@@ -2043,13 +3016,33 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description Get a workspace volume by ID. */
     get: operations["get_volume"];
     put?: never;
     post?: never;
+    /** @description Delete a workspace volume. */
     delete: operations["delete_volume"];
     options?: never;
     head?: never;
+    /** @description Update a workspace volume. Only provided fields are modified. */
     patch: operations["update_volume"];
+    trace?: never;
+  };
+  "/v1/volumes/{volume_id}/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Trigger a synchronous sync of a volume now. */
+    post: operations["sync_volume_now"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
 }
@@ -2085,6 +3078,42 @@ export interface components {
       /** @description Tool calls to be executed */
       tool_calls: components["schemas"]["ToolCallSummary"][];
     };
+    /** @description Request body for the `add_a2a_channel_http` operation. */
+    AddA2aChannelHttpRequest: {
+      /**
+       * @description Public agent card description advertised by the A2A endpoint. Defaults to the app description when omitted.
+       * @example Triages incoming support tickets and routes to the right team
+       */
+      agent_card_description?: string | null;
+      /**
+       * @description Public agent card name advertised by the A2A endpoint. Defaults to the app name when omitted.
+       * @example Support Triage Agent
+       */
+      agent_card_name?: string | null;
+      auth?: null | components["schemas"]["AppEndpointAuthConfig"];
+      /**
+       * @description Whether this resource is enabled.
+       * @example true
+       */
+      enabled?: boolean | null;
+      /**
+       * @description First user message sent to the agent on each invocation; can reference incoming A2A payload via templating.
+       * @example Process incoming A2A request and return a structured response.
+       */
+      message: string;
+      /** @description How invocations route into sessions (e.g. `shared_session` to reuse one durable session, or per-invocation modes). Example shape is defined on `InvocationSessionMode`. */
+      session_mode?: components["schemas"]["InvocationSessionMode"];
+    };
+    /**
+     * @description Output of [`AddA2aChannelCmd`] — includes the plaintext API key (returned
+     *     **once**, never persisted) plus the resulting [`AppChannel`].
+     */
+    AddA2aChannelOutput: {
+      /** @description Plaintext API key. Persist this — it cannot be recovered later. */
+      api_key: string;
+      /** @description The created A2A channel. */
+      channel: components["schemas"]["AppChannel"];
+    };
     /**
      * @description Agent configuration for agentic loop.
      *     An agent defines the behavior and capabilities of an AI assistant.
@@ -2093,6 +3122,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was archived.
+       * @example 2026-05-26T00:00:00Z
        */
       archived_at?: string | null;
       /**
@@ -2103,6 +3133,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was created.
+       * @example 2026-04-01T10:00:00Z
        */
       created_at: string;
       /**
@@ -2119,13 +3150,18 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was deleted.
+       * @example 2026-05-26T00:00:00Z
        */
       deleted_at?: string | null;
-      /** @description Human-readable description of what the agent does. */
+      /**
+       * @description Human-readable description of what the agent does.
+       * @example Handles refund and shipping questions; escalates billing disputes.
+       */
       description?: string | null;
       /**
        * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
        *     Falls back to `name` when absent.
+       * @example Customer Support Agent
        */
       display_name?: string | null;
       /**
@@ -2146,11 +3182,17 @@ export interface components {
       id: string;
       /** @description Starter files copied into each new session for this agent. */
       initial_files?: components["schemas"]["InitialFile"][];
-      /** @description Maximum number of LLM iterations per turn for this agent. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this agent.
+       * @example 50
+       */
       max_iterations?: number | null;
       /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
       mcpServers?: components["schemas"]["BTreeMap"];
-      /** @description Name, unique per org (e.g. "customer-support"). */
+      /**
+       * @description Name, unique per org (e.g. "customer-support").
+       * @example customer-support
+       */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
       /**
@@ -2163,9 +3205,16 @@ export interface components {
       /**
        * @description System prompt that defines the agent's behavior.
        *     Sent as the first message in every conversation.
+       * @example You are a friendly customer support agent for Acme Corp. Verify orders before issuing refunds. Escalate any billing disputes to a human.
        */
       system_prompt: string;
-      /** @description Tags for organizing and filtering agents. */
+      /**
+       * @description Tags for organizing and filtering agents.
+       * @example [
+       *       "support",
+       *       "production"
+       *     ]
+       */
       tags?: string[];
       /**
        * @description Client-side tools registered for this agent.
@@ -2175,6 +3224,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was last updated.
+       * @example 2026-05-20T14:00:00Z
        */
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
@@ -2203,40 +3253,93 @@ export interface components {
      *     - `active`: Agent is available for use
      *     - `archived`: Agent is hidden from listings and cannot be modified or assigned
      *     - `deleted`: Agent is a tombstone kept only for historical references
+     * @example active
      * @enum {string}
      */
     AgentStatus: "active" | "archived" | "deleted";
     /** @description Immutable snapshot of an Agent's authored and resolved runtime config. */
     AgentVersion: {
-      /** @example agent_01933b5a000070008000000000000001 */
+      /**
+       * @description Owning agent's prefixed public identifier.
+       * @example agent_01933b5a000070008000000000000001
+       */
       agent_id: string;
+      /** @description User-authored agent configuration JSON, exactly as submitted. Capabilities, MCP refs, model selection live here. */
       authored_config: Record<string, never>;
+      /** @description Classification of why this version was created (manual publish, automatic draft, rollback, fork, etc.). */
       change_kind: components["schemas"]["AgentVersionChangeKind"];
+      /**
+       * @description Stable hash of `resolved_config` used to deduplicate adjacent identical snapshots.
+       * @example blake3:9f1e2a4c3d5b6e8a0b2c4d6e8f0a1b3c5d7e9f0a1b2c4d6e8f0a1b2c4d6e8f0a
+       */
       config_hash: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this version was created (RFC 3339).
+       * @example 2026-04-20T14:22:00Z
+       */
       created_at: string;
+      /** @description Identity of the principal (user or agent identity) that created this version. `None` for system-generated snapshots. */
       created_by_principal_id?: string | null;
-      /** @example agentver_01933b5a000070008000000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example agentver_01933b5a000070008000000000000001
+       */
       id: string;
+      /**
+       * @description Whether this version was explicitly published by a user. Published versions are user-controlled semver releases; unpublished rows are automatic draft snapshots kept for audit and rollback.
+       * @example true
+       */
+      is_published: boolean;
+      /** @description Version this one was forked or branched from, if any. */
       parent_version_id?: string | null;
+      /** @description Resolved configuration after applying harness, capability, and platform layers. This is what the runtime executes against. */
       resolved_config: Record<string, never>;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Semantic version major component.
+       * @example 1
+       */
       semver_major: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Semantic version minor component.
+       * @example 4
+       */
       semver_minor: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Semantic version patch component.
+       * @example 2
+       */
       semver_patch: number;
+      /** @description When this version is a copy of another version (e.g. a manual rollback), the original source. `None` for ordinary snapshots. */
       source_version_id?: string | null;
+      /**
+       * @description Human-readable summary of changes in this version (release notes). `None` if not provided.
+       * @example Switched default model to claude-sonnet-4-6; added refund-runbook capability.
+       */
       summary?: string | null;
+      /**
+       * @description Combined semver string for display (e.g. `1.4.2`).
+       * @example 1.4.2
+       */
       version: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Monotonic per-agent version sequence number (1, 2, 3, ...). Increments on every snapshot.
+       * @example 7
+       */
       version_number: number;
     };
     /**
      * @description Reason a version was created. Stored as lower_snake_case text.
+     *     One of `auto`, `manual`, `patch`, `minor`, `major`, `import`, `rollback`, `fork`.
+     * @example manual
      * @enum {string}
      */
     AgentVersionChangeKind:
+      | "auto"
       | "manual"
       | "patch"
       | "minor"
@@ -2244,12 +3347,333 @@ export interface components {
       | "import"
       | "rollback"
       | "fork";
+    /** @description Response body for agent version diff. */
     AgentVersionDiffResponse: {
       authored_diff: unknown;
       from_version_id: components["schemas"]["agentverId"];
       resolved_diff: unknown;
       to_version_id: components["schemas"]["agentverId"];
     };
+    /**
+     * @description How an App resolves the Agent version it runs.
+     * @example pinned
+     * @enum {string}
+     */
+    AgentVersionPolicy: "default" | "latest" | "pinned";
+    /**
+     * @description Agent-actionable link describing a follow-up the caller can take. Used in
+     *     two contexts:
+     *
+     *     * **Error recovery** — `ErrorResponse.allowed_actions` carries `rel`s like
+     *       `retry`, `retry-later`, `unarchive`, `get-existing` so the agent knows
+     *       the right next call after a 4xx/429.
+     *     * **Entity hypermedia** — `WithUrls<T>.allowed_actions` carries state-aware
+     *       `rel`s like `cancel`, `events`, `self`, `update` on the entity itself
+     *       so the agent can follow links instead of reconstructing routes from
+     *       prose.
+     *
+     *     The shape is intentionally identical across both contexts; the closed
+     *     `rel` vocabulary documented in `specs/api-conventions.md` distinguishes
+     *     them.
+     */
+    AllowedAction: {
+      /**
+       * @description Short, agent-readable hint (e.g. "Shorten 'name' to <= 200 chars.",
+       *     "Cancel the active turn for this session.").
+       */
+      hint?: string | null;
+      /**
+       * @description Absolute (preferred) or relative URL the caller may invoke
+       *     directly. **Always present on entity hypermedia actions**
+       *     (`WithUrls<T>.allowed_actions`); **optional on error-recovery
+       *     actions** (`ErrorResponse.allowed_actions`) where the matching
+       *     `operation_id` is enough and the URI is implicit from the failed
+       *     call.
+       */
+      href?: string | null;
+      /**
+       * @description HTTP method to use against `href`. Required for entity hypermedia
+       *     actions; usually omitted on error-recovery actions where the same
+       *     operation is retried with its original method.
+       * @example POST
+       */
+      method?: string | null;
+      /**
+       * @description OpenAPI `operationId` the caller should invoke. Lets an MCP client
+       *     resolve the call without parsing `href`.
+       */
+      operation_id?: string | null;
+      /**
+       * @description Link relation describing the action. Closed vocabulary documented
+       *     in `specs/api-conventions.md` — examples: `self`, `cancel`, `pause`,
+       *     `resume`, `events`, `retry`, `retry-later`, `unarchive`,
+       *     `get-existing`, `delete`, `update`.
+       */
+      rel: string;
+      /**
+       * @description OpenAPI `$ref` to the request-body schema, when the action takes one
+       *     (e.g. `#/components/schemas/UpdateSessionRequest`). Lets a tool-calling
+       *     agent fetch the input shape without scanning the whole spec.
+       */
+      schema_ref?: string | null;
+    };
+    /**
+     * @description App configuration for deploying agents to channels.
+     *     An app binds a harness and optional agent to distribution channels with a
+     *     publish lifecycle.
+     */
+    App: {
+      /**
+       * @description Optional ID of the agent to use (format: agent_{32-hex}).
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /**
+       * @description Optional virtual identity that represents the app in unattended/channel execution.
+       * @example identity_01933b5a00007000800000000000001
+       */
+      agent_identity_id?: string | null;
+      /**
+       * @description Pinned agent version. Required when policy is `pinned`.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      agent_version_id?: string | null;
+      /** @description Version resolution policy for the optional agent. */
+      agent_version_policy?: components["schemas"]["AgentVersionPolicy"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was archived.
+       */
+      archived_at?: string | null;
+      /** @description Distribution channels attached to this app. */
+      channels?: components["schemas"]["AppChannel"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was created.
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the app does. */
+      description?: string | null;
+      effective_owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description ID of the harness to use (format: harness_{32-hex}).
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id: string;
+      /**
+       * @description External identifier (app_<32-hex>). Shown as "id" in API.
+       * @example app_01933b5a000070008000000000000001
+       */
+      id: string;
+      /** @description Display name of the app. */
+      name: string;
+      owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description Owning principal for this app.
+       * @example principal_01933b5a000070008000000000000001
+       */
+      owner_principal_id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was last published.
+       */
+      published_at?: string | null;
+      /**
+       * Format: uuid
+       * @description Denormalized effective human owner of the owning principal lineage.
+       */
+      resolved_owner_user_id?: string | null;
+      /** @description Current lifecycle status. */
+      status: components["schemas"]["AppStatus"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was last updated.
+       */
+      updated_at: string;
+    };
+    /**
+     * @description A single distribution channel attached to an App.
+     *     Each channel has its own type, config, and lifecycle status.
+     */
+    AppChannel: {
+      /** @description Channel-specific configuration (validated per channel type). */
+      channel_config?: unknown;
+      /** @description Channel type (e.g. slack). */
+      channel_type: components["schemas"]["ChannelType"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this channel was created.
+       */
+      created_at: string;
+      /** @description Whether this channel is enabled. */
+      enabled?: boolean;
+      /**
+       * @description External identifier (appchan_<32-hex>). Shown as "id" in API.
+       * @example appchan_01933b5a000070008000000000000001
+       */
+      id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when this channel was last updated.
+       */
+      updated_at: string;
+    };
+    /**
+     * @description Inline auth config for one App endpoint/channel.
+     * @example {
+     *       "mode": "api_key",
+     *       "requirements": {
+     *         "audiences": [
+     *           "everruns-api"
+     *         ],
+     *         "scopes": [
+     *           "app:invoke"
+     *         ]
+     *       }
+     *     }
+     */
+    AppEndpointAuthConfig: {
+      mode: components["schemas"]["AppEndpointAuthMode"];
+      provider?: null | components["schemas"]["AppEndpointAuthProviderConfig"];
+      requirements?: components["schemas"]["AppEndpointAuthRequirements"];
+    };
+    /**
+     * @description App-published endpoint authentication mode.
+     *
+     *     Stored inline on `app_channels.channel_config.auth` so users can protect a
+     *     single App/channel without first creating org-level identity-provider state.
+     * @enum {string}
+     */
+    AppEndpointAuthMode:
+      | "anonymous"
+      | "shared_secret"
+      | "api_key"
+      | "google_oidc"
+      | "oidc"
+      | "o_auth2_introspection"
+      | "http_basic"
+      | "mtls";
+    /** @description OIDC/OAuth/basic/mTLS provider details for one App endpoint. */
+    AppEndpointAuthProviderConfig:
+      | {
+          allowed_domains?: string[];
+          client_id: string;
+          /** @enum {string} */
+          type: "google_oidc";
+        }
+      | {
+          issuer: string;
+          jwks_url?: string | null;
+          /** @enum {string} */
+          type: "oidc";
+        }
+      | {
+          client_id?: string | null;
+          client_secret?: string | null;
+          introspection_url: string;
+          /** @enum {string} */
+          type: "o_auth2_introspection";
+        }
+      | {
+          password?: string | null;
+          password_hash?: string | null;
+          /** @enum {string} */
+          type: "http_basic";
+          username: string;
+        }
+      | {
+          allowed_values?: string[];
+          header_name: string;
+          /** @enum {string} */
+          type: "mtls";
+        };
+    /** @description Claim and credential requirements common to App endpoint auth providers. */
+    AppEndpointAuthRequirements: {
+      /** @description JWT `aud` values to require on inbound tokens. Empty list disables audience checking. */
+      audiences?: string[];
+      /** @description Arbitrary claim equality predicates. Empty map disables claim filtering. */
+      claims?: {
+        [key: string]: unknown;
+      };
+      /** @description Allowlist of email/identifier domains. Empty list disables domain filtering. */
+      domains?: string[];
+      /** @description Allowlist of group memberships (from `groups` claim). Empty list disables group filtering. */
+      groups?: string[];
+      /** @description OAuth scope strings to require (space-delimited per scope entry). Empty list disables scope checking. */
+      scopes?: string[];
+      /** @description Allowlist of `sub` claim values. Empty list disables subject filtering. */
+      subjects?: string[];
+    };
+    /** @description One bucket of the run-history histogram (per-hour aggregate). */
+    AppRunBucket: {
+      /**
+       * Format: int32
+       * @description Count of runs that failed in this bucket.
+       */
+      err: number;
+      /**
+       * Format: date-time
+       * @description Bucket start (top of the hour, RFC 3339).
+       */
+      hour: string;
+      /**
+       * Format: int32
+       * @description Count of runs that completed successfully in this bucket.
+       */
+      ok: number;
+      /**
+       * Format: int32
+       * @description Count of runs still running when the bucket was queried.
+       */
+      running?: number | null;
+    };
+    /** @description Single app-channel invocation record (one run = one channel-side event). */
+    AppRunEvent: {
+      /** @description App that received the invocation. */
+      app_id: string;
+      /** @description Channel that originated the invocation. */
+      channel_id: string;
+      /** @description Human-readable channel name when set. */
+      channel_name?: string | null;
+      /** @description Channel kind (slack, ag_ui, webhook, a2a, fcp). */
+      channel_type: components["schemas"]["ChannelType"];
+      /**
+       * Format: date-time
+       * @description Timestamp the run finished, if any (RFC 3339).
+       */
+      completed_at?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp the run started (RFC 3339).
+       */
+      created_at: string;
+      /** @description Prefixed public identifier of this run event. */
+      id: string;
+      /** @description Terminal status (`ok`, `err`, `running`). */
+      status: string;
+    };
+    /** @description Paged response for the app run history endpoint, optionally including a per-hour histogram. */
+    AppRunListResponse: {
+      /** @description Per-hour aggregate buckets when the caller asked for them. */
+      buckets?: components["schemas"]["AppRunBucket"][] | null;
+      /** @description Page of run events ordered newest first. */
+      data: components["schemas"]["AppRunEvent"][];
+    };
+    /**
+     * @description App lifecycle status.
+     *     - `draft`: App is configured but not accepting requests
+     *     - `published`: App is live, accepting incoming requests
+     *     - `archived`: App is hidden from listings and cannot be modified or assigned
+     *     - `deleted`: App is a tombstone kept only for historical references
+     * @example published
+     * @enum {string}
+     */
+    AppStatus: "draft" | "published" | "archived" | "deleted";
     BTreeMap: {
       [key: string]: {
         /** @description Authentication mode used when executing tools from this scoped server. */
@@ -2267,6 +3691,22 @@ export interface components {
         /** @description URL of the remote MCP server endpoint. */
         url: string;
       };
+    };
+    /** @description Batch secret set request */
+    BatchSetSecretsRequest: {
+      /**
+       * @description Map of secret names to values. Names are case-sensitive; values are stored encrypted
+       *     and never returned by list/read endpoints. Existing keys are overwritten.
+       *     Example: `{"OPENAI_API_KEY": "sk-...", "GITHUB_TOKEN": "ghp_..."}`.
+       */
+      secrets: {
+        [key: string]: string;
+      };
+    };
+    /** @description Batch secret set response */
+    BatchSetSecretsResponse: {
+      /** @description Number of secrets stored */
+      count: number;
     };
     /** @description Data for budget lifecycle events (warning, paused, exhausted, resumed). */
     BudgetEventData: {
@@ -2341,9 +3781,13 @@ export interface components {
       /**
        * Format: int64
        * @description Number of active agents referencing this capability in the org.
+       * @example 42
        */
       agent_count?: number;
-      /** @description Category for grouping in UI */
+      /**
+       * @description Category for grouping in UI
+       * @example filesystem
+       */
       category?: string | null;
       /** @description JSON Schema for capability-specific per-agent config. */
       config_schema?: Record<string, never>;
@@ -2352,40 +3796,197 @@ export interface components {
       /**
        * @description IDs of capabilities that this capability depends on.
        *     When this capability is selected, its dependencies are automatically included.
+       * @example [
+       *       "approval"
+       *     ]
        */
       dependencies?: string[];
-      /** @description Description of what this capability provides */
+      /**
+       * @description Description of what this capability provides
+       * @example Read, write, edit, list, grep, delete, and stat files in the session workspace.
+       */
       description: string;
-      /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+      /**
+       * @description Slug under https://dev.everruns.com/capabilities/ when public docs exist.
+       * @example session_file_system
+       */
       docs_slug?: string | null;
       /**
        * @description UI feature strings this capability contributes to.
        *     Multiple capabilities can contribute the same feature.
+       * @example [
+       *       "file_browser"
+       *     ]
        */
       features?: string[];
       /**
        * Format: int64
        * @description Number of active harnesses referencing this capability in the org.
+       * @example 7
        */
       harness_count?: number;
-      /** @description Icon name (for UI rendering) */
+      /**
+       * @description Icon name (for UI rendering)
+       * @example Folder
+       */
       icon?: string | null;
-      /** @description Unique capability identifier */
+      /**
+       * @description Unique capability identifier
+       * @example session_file_system
+       */
       id: string;
-      /** @description Whether this is an MCP server capability (for UI badge) */
+      /**
+       * @description Whether this is an MCP server capability (for UI badge)
+       * @example false
+       */
       is_mcp?: boolean;
-      /** @description Whether this is an Agent Skill capability (for UI badge) */
+      /**
+       * @description Whether this is an Agent Skill capability (for UI badge)
+       * @example false
+       */
       is_skill?: boolean;
-      /** @description Display name */
+      /**
+       * @description Display name
+       * @example Session File System
+       */
       name: string;
       /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
       risk_level?: components["schemas"]["RiskLevel"];
-      /** @description Current status */
+      /**
+       * @description Current status
+       * @example active
+       */
       status: string;
-      /** @description System prompt addition contributed by this capability */
+      /**
+       * @description System prompt addition contributed by this capability
+       * @example You can read and write files in /workspace via the session_file_system tools.
+       */
       system_prompt?: string | null;
-      /** @description Tool definitions provided by this capability */
+      /**
+       * @description Tool definitions provided by this capability
+       * @example [
+       *       {
+       *         "description": "Read a file from the session workspace.",
+       *         "name": "read_file"
+       *       },
+       *       {
+       *         "description": "Write or overwrite a file in the session workspace.",
+       *         "name": "write_file"
+       *       }
+       *     ]
+       */
       tool_definitions?: Record<string, never>[];
+    };
+    /** @description Data for capability.usage events. */
+    CapabilityUsageData: {
+      records: components["schemas"]["CapabilityUsageRecord"][];
+    };
+    /**
+     * @description Reporting-only capability usage kinds.
+     * @enum {string}
+     */
+    CapabilityUsageKind:
+      | "configured"
+      | "resolved"
+      | "exposed"
+      | "invoked"
+      | "effect_ran";
+    /**
+     * @description Single capability usage record. This intentionally carries only stable IDs
+     *     and small snapshots; prompts, messages, tool arguments, and results are not
+     *     allowed in reporting facts.
+     */
+    CapabilityUsageRecord: {
+      /** @description Capability id (prefixed or namespaced) attributing this usage. */
+      capability_id: string;
+      /** @description Capability display name for UI. `None` when the capability is unnamed. */
+      capability_name?: string | null;
+      /**
+       * Format: int64
+       * @description Total wall-clock duration of the usage in milliseconds (duration-style records). `None` for count-style records.
+       */
+      duration_ms?: number | null;
+      /** @description Concrete tool name when `usage_kind` is `tool_call`. `None` for non-tool usage kinds. */
+      tool_name?: string | null;
+      /**
+       * Format: int64
+       * @description Number of distinct usages recorded in this record (count-style records). `None` for duration-style records.
+       */
+      usage_count?: number | null;
+      /** @description Discriminator for the kind of usage being recorded (e.g. `tool_call`, `subagent_spawn`). */
+      usage_kind: components["schemas"]["CapabilityUsageKind"];
+    };
+    /**
+     * @description Supported channel types for app distribution.
+     * @example webhook
+     * @enum {string}
+     */
+    ChannelType: "slack" | "ag_ui" | "schedule" | "webhook" | "a2a" | "fcp";
+    /** @description Response for agent name availability check. */
+    CheckAgentNameResponse: {
+      /** @description Whether the name is available for use. */
+      available: boolean;
+    };
+    /** @description Response for name availability check. */
+    CheckNameResponse: {
+      /** @description Whether the name is available for use. */
+      available: boolean;
+    };
+    /** @description Circuit breaker response */
+    CircuitBreakerResponse: {
+      /**
+       * Format: int32
+       * @description Count of consecutive failures observed within the current rolling window.
+       * @example 12
+       */
+      failure_count: number;
+      /**
+       * Format: date-time
+       * @description Timestamp the breaker is eligible to transition to `half_open` and probe again (RFC 3339).
+       * @example 2026-05-27T15:30:01Z
+       */
+      half_open_at?: string | null;
+      /**
+       * @description Stable key identifying the dependency the breaker guards (e.g. provider URL or activity type).
+       * @example anthropic_api
+       */
+      key: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent failure recorded against this breaker (RFC 3339).
+       * @example 2026-05-27T15:25:00Z
+       */
+      last_failure_at?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp the breaker last transitioned to `open` (RFC 3339).
+       * @example 2026-05-27T15:25:01Z
+       */
+      opened_at?: string | null;
+      /**
+       * @description Current breaker state (`closed`, `open`, or `half_open`).
+       * @example open
+       */
+      state: string;
+      /**
+       * Format: int32
+       * @description Count of consecutive successes observed within the current rolling window.
+       * @example 0
+       */
+      success_count: number;
+      /**
+       * Format: date-time
+       * @description Timestamp when this breaker state was last updated (RFC 3339).
+       * @example 2026-05-27T15:25:01Z
+       */
+      updated_at: string;
+    };
+    /** @description Circuit breakers list response */
+    CircuitBreakersListResponse: {
+      /** @description Page of items returned by this query. */
+      data: components["schemas"]["CircuitBreakerResponse"][];
+      /** @description Total number of items matching the query, across all pages. */
+      total: number;
     };
     /**
      * @description Client-side tool - executed by the client, not the server
@@ -2409,22 +4010,43 @@ export interface components {
     };
     /** @description A single tool result from the client */
     ClientToolResult: {
-      /** @description Error message if the tool failed */
+      /**
+       * @description Error message if the tool failed
+       * @example Refund failed: order is outside refund window
+       */
       error?: string | null;
-      /** @description Result value (JSON). Null if the tool failed. */
+      /**
+       * @description Result value (any JSON — object, array, string, number, etc.). Null if the tool failed.
+       *     Example: `{"url": "https://example.com/orders/42"}`.
+       */
       result?: unknown;
-      /** @description Tool call ID (correlates with the tool call from tool.call_requested event) */
+      /**
+       * @description Tool call ID (correlates with the tool call from tool.call_requested event)
+       * @example toolu_01933b5a00007000800000000000001
+       */
       tool_call_id: string;
     };
     /** @description Request to create a commit */
     CommitRequest: {
-      /** @description Author email (defaults to "agent@everruns.local") */
+      /**
+       * @description Author email (defaults to "agent@everruns.local")
+       * @example support-agent@example.com
+       */
       author_email?: string | null;
-      /** @description Author name (defaults to "Agent") */
+      /**
+       * @description Author name (defaults to "Agent")
+       * @example Support Agent
+       */
       author_name?: string | null;
-      /** @description Branch name (defaults to "refs/heads/main"); short names like "main" are normalized */
+      /**
+       * @description Branch name (defaults to "refs/heads/main"); short names like "main" are normalized
+       * @example main
+       */
       branch?: string | null;
-      /** @description Commit message */
+      /**
+       * @description Commit message
+       * @example feat: draft migration plan
+       */
       message: string;
     };
     /** @description Result of a commit operation */
@@ -2502,19 +4124,42 @@ export interface components {
       /** @description Strategy requested (may differ from strategy_used in the completed event). */
       strategy: string;
     };
+    /**
+     * @description Single-source token contribution within a `ContextReportSection` — the
+     *     per-tool / per-capability / per-message attribution that lets operators
+     *     see which source is eating the context window.
+     */
     ContextReportContribution: {
+      /** @description Human-readable label suitable for UI display. */
       label: string;
+      /** @description Section this contribution rolls up into; matches `ContextReportSection.key`. */
       section_key: string;
+      /** @description Stable id of the contributing source (capability id, tool name, message id, etc.). */
       source_id: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Tokens this single source contributes to the assembled context.
+       */
       tokens: number;
     };
+    /**
+     * @description One logical section of the assembled LLM context (system prompt, tool
+     *     definitions, message history, etc.) with its rolled-up token budget.
+     */
     ContextReportSection: {
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Number of items this section comprises (messages, tool defs, etc.).
+       */
       items: number;
+      /** @description Stable section key (e.g. `system_prompt`, `tools`, `history`). Used as a join key for contributions. */
       key: string;
+      /** @description Human-readable section label suitable for UI display. */
       label: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Total tokens this section contributes to the assembled context.
+       */
       tokens: number;
     };
     /** @description Runtime controls for message processing */
@@ -2542,9 +4187,15 @@ export interface components {
     };
     /** @description Request to copy a file */
     CopyFileRequest: {
-      /** @description Destination path */
+      /**
+       * @description Destination path (relative to the session workspace root).
+       * @example docs/runbooks/refund-30-days.md
+       */
       dst_path: string;
-      /** @description Source path */
+      /**
+       * @description Source path (relative to the session workspace root).
+       * @example templates/runbook.md
+       */
       src_path: string;
     };
     /**
@@ -2613,9 +4264,20 @@ export interface components {
        * @example agent_01933b5a00007000800000000000001
        */
       id?: string | null;
-      /** @description Starter files copied into each new session for this agent. */
+      /**
+       * @description Starter files copied into each new session for this agent.
+       * @example [
+       *       {
+       *         "content": "Always respond in formal English.\n",
+       *         "path": "INSTRUCTIONS.md"
+       *       }
+       *     ]
+       */
       initial_files?: components["schemas"]["InitialFile"][];
-      /** @description Maximum number of LLM iterations per turn for this agent. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this agent.
+       * @example 20
+       */
       max_iterations?: number | null;
       /** @description Remote MCP servers scoped to this agent. */
       mcpServers?: components["schemas"]["BTreeMap"];
@@ -2643,38 +4305,127 @@ export interface components {
       /**
        * @description Client-side tools for this agent.
        *     These tools are sent to the LLM but executed by the client, not the server.
+       * @example [
+       *       {
+       *         "description": "Open URL in the user's browser",
+       *         "name": "open_url",
+       *         "parameters": {
+       *           "properties": {
+       *             "url": {
+       *               "type": "string"
+       *             }
+       *           },
+       *           "required": [
+       *             "url"
+       *           ],
+       *           "type": "object"
+       *         },
+       *         "type": "client_side"
+       *       }
+       *     ]
        */
       tools?: components["schemas"]["ToolDefinition"][];
     };
+    /** @description Request body for the `create_agent_version` operation. */
     CreateAgentVersionRequest: {
       change_kind?: null | components["schemas"]["AgentVersionChangeKind"];
+      /**
+       * @description Free-text summary of what changed in this version. Shown in the version timeline.
+       * @example Tightened the refund-window check and added a regression test.
+       */
       summary?: string | null;
+    };
+    /** @description Request to create a new app */
+    CreateAppRequest: {
+      /**
+       * @description Optional ID of the agent to use.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /**
+       * @description Optional resident agent identity for unattended/channel execution.
+       * @example identity_01933b5a00007000800000000000001
+       */
+      agent_identity_id?: string | null;
+      /** @example agentver_01933b5a00007000800000000000001 */
+      agent_version_id?: string | null;
+      /**
+       * @description How an App resolves the Agent version it runs.
+       *     Example shape is defined on `AgentVersionPolicy`.
+       */
+      agent_version_policy?: components["schemas"]["AgentVersionPolicy"];
+      /**
+       * @description Initial channel configuration. Shape depends on `channel_type`. Examples:
+       *     `{"token": "whk_redacted", "message": "Run support triage"}` for `webhook`,
+       *     `{"cron_expression": "0 9 * * *", "message": "Daily standup"}` for `schedule`.
+       */
+      channel_config?: Record<string, never> | null;
+      channel_type?: null | components["schemas"]["ChannelType"];
+      /**
+       * @description Description of what the app does.
+       * @example Customer support bot connected to Slack
+       */
+      description?: string | null;
+      /**
+       * @description ID of the harness to use.
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id: string;
+      /**
+       * @description Display name of the app.
+       * @example Support Bot
+       */
+      name: string;
     };
     /** @description Request to create a branch */
     CreateBranchRequest: {
-      /** @description Commit OID (hex) to point to */
+      /**
+       * @description Commit OID (hex) to point to
+       * @example a1b2c3d4e5f60718293a4b5c6d7e8f9012345678
+       */
       commit_oid: string;
-      /** @description Branch name (e.g., "feature-xyz") */
+      /**
+       * @description Branch name (e.g., "feature-xyz")
+       * @example feature/refund-flow
+       */
       name: string;
     };
     /** @description Request body for creating a database. */
     CreateDatabaseRequest: {
-      /** @description Database name (alphanumeric + underscores, max 64 chars) */
+      /**
+       * @description Database name (alphanumeric + underscores, max 64 chars).
+       * @example refund_history
+       */
       name: string;
     };
+    /** @description Request body for the `create_declarative_capability` operation. */
     CreateDeclarativeCapabilityRequest: {
       /** @description Definition for the new declarative capability. `name` must be unique per org and becomes the canonical `declarative:<name>` capability ref. */
       definition: Record<string, never>;
     };
     /** @description Request to create a file */
     CreateFileRequest: {
-      /** @description File content (text or base64-encoded) */
+      /**
+       * @description File content (text or base64-encoded). Must match `encoding`.
+       * @example # Project notes
+       *
+       *     Draft outline of the migration plan.
+       */
       content?: string | null;
-      /** @description Content encoding: "text" or "base64" */
+      /**
+       * @description Content encoding: "text" or "base64". Defaults to text.
+       * @example text
+       */
       encoding?: string | null;
-      /** @description Whether to create a directory instead of a file */
+      /**
+       * @description Whether to create a directory instead of a file (ignores `content`/`encoding`).
+       * @example false
+       */
       is_directory?: boolean | null;
-      /** @description Whether file is read-only */
+      /**
+       * @description Whether file is read-only
+       * @example false
+       */
       is_readonly?: boolean | null;
     };
     /** @description Request to create a new harness */
@@ -2737,14 +4488,44 @@ export interface components {
        */
       tags?: string[];
     };
+    /** @description Request body for the `create_knowledge_base` operation. */
     CreateKnowledgeBaseRequest: {
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Runbooks for the support team
+       */
       description?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example support-runbooks
+       */
       name: string;
     };
+    /** @description Request body for the `create_knowledge_entry` operation. */
     CreateKnowledgeEntryRequest: {
+      /**
+       * @description Entry body. Markdown is rendered when displayed.
+       * @example Use the `/v1/payments/{id}/refund` endpoint with `reason: "past_window"`. Only the on-call billing engineer can authorize this.
+       */
       body: string;
+      /**
+       * @description Discriminator selecting the variant of this resource. One of `note`,
+       *     `table`, `business`, `query`, `runbook`.
+       * @example runbook
+       */
       kind?: string | null;
+      /**
+       * @description Free-form tags attached to this resource.
+       * @example [
+       *       "billing",
+       *       "refunds"
+       *     ]
+       */
       tags?: string[] | null;
+      /**
+       * @description Human-readable title. Safe to render in user-facing messages.
+       * @example Refund a payment past 30 days
+       */
       title: string;
     };
     /** @description Request to create a new LLM model for a provider */
@@ -2802,7 +4583,10 @@ export interface components {
     };
     /** @description Request to create a new MCP server */
     CreateMcpServerRequest: {
-      /** @description API key for authentication (optional). */
+      /**
+       * @description API key for authentication (optional). Sent with each request; never echoed in responses.
+       * @example sk-mcp-redacted-1234567890abcdef
+       */
       api_key?: string | null;
       auth_mode?: null | components["schemas"]["McpServerAuthMode"];
       /**
@@ -2810,7 +4594,12 @@ export interface components {
        * @example Atlassian MCP Server for Jira and Confluence
        */
       description?: string | null;
-      /** @description Additional HTTP headers for authentication. */
+      /**
+       * @description Additional HTTP headers for authentication.
+       * @example {
+       *       "X-Atlassian-Cloud-Id": "00000000-0000-0000-0000-000000000000"
+       *     }
+       */
       headers?: {
         [key: string]: string;
       } | null;
@@ -2819,7 +4608,10 @@ export interface components {
        * @example atlassian-mcp-server
        */
       name: string;
-      /** @description Transport type. Currently only "http" is supported. */
+      /**
+       * @description Transport type. Currently only "http" is supported.
+       *     Example shape is defined on `McpServerTransportType`.
+       */
       transport_type?: components["schemas"]["McpServerTransportType"];
       /**
        * @description The URL of the MCP server endpoint.
@@ -2827,21 +4619,43 @@ export interface components {
        */
       url: string;
     };
+    /** @description Request body for the `create_memory_store` operation. */
     CreateMemoryStoreRequest: {
+      /**
+       * @description When `true`, sets this store as the org's default for newly-created memories.
+       * @example false
+       */
       is_default?: boolean;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example customer-preferences
+       */
       name: string;
     };
     /** @description Request to create a message */
     CreateMessageRequest: {
       controls?: null | components["schemas"]["Controls"];
       external_actor?: null | components["schemas"]["ExternalActor"];
-      /** @description The message to create */
+      /** @description The message to create. Example shape is defined on `InputMessage`. */
       message: components["schemas"]["InputMessage"];
-      /** @description Request-level metadata */
+      /**
+       * @description Request-level metadata. Arbitrary key/value pairs persisted with the message
+       *     for downstream filtering and analytics. Not interpreted by the agent.
+       * @example {
+       *       "source": "slack",
+       *       "thread_ts": "1715000000.123456"
+       *     }
+       */
       metadata?: {
         [key: string]: unknown;
       } | null;
-      /** @description Tags for the message */
+      /**
+       * @description Tags for the message. Free-form labels used for grouping and filtering.
+       * @example [
+       *       "bug-report",
+       *       "from-slack"
+       *     ]
+       */
       tags?: string[] | null;
     };
     /** @description Request to create a new organization */
@@ -2852,59 +4666,192 @@ export interface components {
        */
       name: string;
     };
+    /** @description Request body for the `create_payment_account` operation. */
     CreatePaymentAccountRequest: {
+      /**
+       * @description Human-readable label. Safe to render in user-facing messages.
+       * @example Refund agent · USDC on Base
+       */
       label: string;
+      /**
+       * @description Free-form metadata attached to this account (caller-defined; opaque to the platform).
+       *     Example: `{"team": "support", "cost_center": "ops"}`.
+       */
       metadata?: unknown;
+      /**
+       * @description Prefixed identifier of the owning principal. Must use the prefix that matches `owner_type`
+       *     (see above). Example below pairs with `owner_type = "agent_identity"`.
+       * @example identity_01933b5a00007000800000000000001
+       */
       owner_id: string;
+      /**
+       * @description Principal class that owns the account. One of: `user`, `agent_identity`, `organization`.
+       *     The prefix on `owner_id` must match this: `user` → `user_…`, `agent_identity` → `identity_…`,
+       *     `organization` → `org_…`.
+       * @example agent_identity
+       */
       owner_type: string;
+      /**
+       * @description Private key material for the rail. Stored encrypted; never returned in responses.
+       *     Example shown as an obvious placeholder — supply a real 32-byte hex value at create time.
+       * @example 0x<your-32-byte-hex-private-key>
+       */
       private_key?: string | null;
+      /**
+       * @description Public address on the rail (chain address, account number, etc.). Optional; can be filled in later.
+       * @example 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+       */
       public_address?: string | null;
+      /**
+       * @description Settlement rail this account operates on. One of: `mpp_tempo`, `x402_base`.
+       * @example x402_base
+       */
       rail: string;
     };
+    /** @description Request body for the `create_payment_policy` operation. */
     CreatePaymentPolicyRequest: {
+      /**
+       * @description Capability IDs this policy permits paid calls for. Empty list means no capability gating.
+       * @example [
+       *       "weather.lookup",
+       *       "shipping.quote"
+       *     ]
+       */
       allowed_capabilities?: string[];
+      /**
+       * @description HTTP host allowlist for paid outbound calls. Empty list means no host gating.
+       * @example [
+       *       "api.shippo.com",
+       *       "api.openweathermap.org"
+       *     ]
+       */
       allowed_hosts?: string[];
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Maximum cumulative amount (USD) per UTC day. **Advisory only — not yet enforced.** Stored for forward compatibility; the authority currently checks only `max_amount_usd_per_request`. `None` means no per-day cap.
+       * @example 100
+       */
       max_amount_usd_per_day?: number | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Maximum amount (USD) any single paid request may settle for. **Enforced** by the payment authority at policy selection. `None` means no per-request cap.
+       * @example 5
+       */
       max_amount_usd_per_request?: number | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Maximum cumulative amount (USD) per agent turn. **Advisory only — not yet enforced.** Stored for forward compatibility; the authority currently checks only `max_amount_usd_per_request`. `None` means no per-turn cap.
+       * @example 20
+       */
       max_amount_usd_per_turn?: number | null;
+      /**
+       * @description Free-form metadata attached to this policy.
+       *     Example: `{"owner_team": "ops", "ticket": "OPS-1248"}`.
+       */
       metadata?: unknown;
+      /**
+       * @description Payment account this policy authorizes spending from. Accepts a prefixed `payacct_…`
+       *     identifier or a bare UUID.
+       * @example payacct_01933b5a00007000800000000000001
+       */
       payment_account_id: string;
+      /**
+       * @description Preferred settlement rails in priority order; the authority picks the first available.
+       * @example [
+       *       "x402_base",
+       *       "mpp_tempo"
+       *     ]
+       */
       rail_preference?: string[];
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Threshold (USD) above which a request would require explicit human approval. **Advisory only — not yet enforced.** Stored for forward compatibility; no approval gate is wired up yet. `None` disables the (future) gate.
+       * @example 10
+       */
       require_approval_above_usd?: number | null;
+      /**
+       * @description Prefixed identifier of the bound subject. Must use the prefix matching `subject_type`
+       *     (see above). Example below pairs with `subject_type = "agent_identity"`.
+       * @example identity_01933b5a00007000800000000000001
+       */
       subject_id: string;
+      /**
+       * @description Class of subject this policy binds to. One of: `user`, `agent_identity`, `agent`, `app`, `session`, `org`.
+       *     The prefix on `subject_id` must match: `user`→`user_…`, `agent_identity`→`identity_…`,
+       *     `agent`→`agent_…`, `app`→`app_…`, `session`→`session_…`, `org`→`org_…`.
+       * @example agent_identity
+       */
       subject_type: string;
+    };
+    /** @description Request body for the `create_saved_report` operation. */
+    CreateSavedReportRequest: {
+      dashboard?: null | components["schemas"]["SavedReportDashboardMetadata"];
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Rolling 30-day count of agents with at least one session per day, grouped by org.
+       */
+      description?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example Weekly active agents — last 30 days
+       */
+      name: string;
+      /**
+       * @description The query this report executes when run or exported. See `ReportQuery`
+       *     for the full field breakdown.
+       */
+      query: components["schemas"]["ReportQuery"];
     };
     /** @description Create schedule request */
     CreateScheduleRequest: {
-      /** @description Whether to catch up missed triggers (default: false) */
+      /**
+       * @description Whether to catch up missed triggers (default: false)
+       * @example false
+       */
       catch_up_missed?: boolean;
-      /** @description Cron expression (5-field or 7-field) */
+      /**
+       * @description Cron expression (5-field or 7-field). Standard `min hour day-of-month month day-of-week` form.
+       * @example 0 2 * * *
+       */
       cron_expression: string;
-      /** @description Optional description */
+      /**
+       * @description Optional description
+       * @example Fires the support-triage agent every night at 02:00 UTC
+       */
       description?: string | null;
-      /** @description Whether schedule is enabled (default: true) */
+      /**
+       * @description Whether schedule is enabled (default: true)
+       * @example true
+       */
       enabled?: boolean;
       /**
        * Format: int32
-       * @description Max catch-up executions
+       * @description Max catch-up executions when `catch_up_missed` is true. Older missed fires are dropped.
+       * @example 3
        */
       max_catch_up?: number | null;
       /**
        * Format: int32
-       * @description Max concurrent executions
+       * @description Max concurrent executions. Omit for no limit beyond the worker pool's concurrency.
+       * @example 1
        */
       max_concurrent?: number | null;
-      /** @description Unique name for the schedule */
+      /**
+       * @description Unique name for the schedule
+       * @example nightly-triage
+       */
       name: string;
-      /** @description Retry policy for failed executions */
+      /**
+       * @description Retry policy for failed executions (provider-specific JSON; see the durable engine's `RetryPolicy`).
+       *     Example: `{"max_attempts": 3, "initial_backoff_secs": 30, "backoff_multiplier": 2.0}`.
+       */
       retry_policy?: unknown;
-      /** @description Target to trigger */
+      /** @description Target to trigger. Variant shape is defined on `ScheduleTarget`. */
       target: components["schemas"]["ScheduleTarget"];
-      /** @description Timezone (default: UTC) */
+      /**
+       * @description Timezone (default: UTC). IANA name (e.g. `UTC`, `America/New_York`).
+       * @example UTC
+       */
       timezone?: string;
     };
     /** @description Request to create a session */
@@ -2922,6 +4869,16 @@ export interface components {
       /**
        * @description Session-level capabilities (additive to agent capabilities).
        *     Applied after agent capabilities when building RuntimeAgent.
+       * @example [
+       *       {
+       *         "config": {},
+       *         "ref": "current_time"
+       *       },
+       *       {
+       *         "config": {},
+       *         "ref": "web_fetch"
+       *       }
+       *     ]
        */
       capabilities?: components["schemas"]["AgentCapabilityConfig"][];
       /**
@@ -2942,13 +4899,23 @@ export interface components {
        * @description Session-level client hints — arbitrary key-value pairs that tell the
        *     server what the client can handle. These are defaults for every turn;
        *     per-message `controls.hints` override these key-by-key (shallow merge).
-       *
-       *     Examples: `{"setup_connection": true, "rich_media": true}`
+       * @example {
+       *       "rich_media": true,
+       *       "setup_connection": true
+       *     }
        */
-      hints?: Record<string, never> | null;
+      hints?: {
+        [key: string]: unknown;
+      } | null;
       /**
        * @description Session-level initial files (additive to agent initial_files).
        *     Files with matching paths override agent/harness files; new paths are appended.
+       * @example [
+       *       {
+       *         "content": "# Project notes\n",
+       *         "path": "README.md"
+       *       }
+       *     ]
        */
       initial_files?: components["schemas"]["InitialFile"][];
       /**
@@ -2956,7 +4923,10 @@ export interface components {
        * @example uk-UA
        */
       locale?: string | null;
-      /** @description Maximum number of LLM iterations per turn for this session. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this session.
+       * @example 20
+       */
       max_iterations?: number | null;
       /** @description Remote MCP servers scoped to this session only. */
       mcpServers?: components["schemas"]["BTreeMap"];
@@ -2970,6 +4940,7 @@ export interface components {
       /**
        * @description Optional session-level system prompt override.
        *     Prepended to the agent's system prompt when building RuntimeAgent.
+       * @example You are debugging a production incident. Be concise and cite log lines verbatim.
        */
       system_prompt?: string | null;
       /**
@@ -2988,6 +4959,24 @@ export interface components {
       /**
        * @description Client-side tools for this session (additive to agent tools).
        *     These tools are sent to the LLM but executed by the client.
+       * @example [
+       *       {
+       *         "description": "Open URL in the user's browser",
+       *         "name": "open_url",
+       *         "parameters": {
+       *           "properties": {
+       *             "url": {
+       *               "type": "string"
+       *             }
+       *           },
+       *           "required": [
+       *             "url"
+       *           ],
+       *           "type": "object"
+       *         },
+       *         "type": "client_side"
+       *       }
+       *     ]
        */
       tools?: components["schemas"]["ToolDefinition"][];
     };
@@ -3006,33 +4995,122 @@ export interface components {
        */
       skill_md: string;
     };
+    /** @description Request body for the `create_volume` operation. */
     CreateVolumeRequest: {
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Living design documents synced from GitHub
+       */
       description?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example design-docs
+       */
       name: string;
+      source?: null | components["schemas"]["CreateVolumeSourceRequest"];
     };
+    /**
+     * @description Request body for the `create_volume_source` operation.
+     * @example {
+     *       "branch": "main",
+     *       "repository": "acme/design-docs",
+     *       "root_folder": "docs/",
+     *       "type": "github"
+     *     }
+     */
+    CreateVolumeSourceRequest:
+      | (components["schemas"]["GitHubVolumeSourceRequest"] & {
+          /** @enum {string} */
+          type: "github";
+        })
+      | (components["schemas"]["GitVolumeSourceRequest"] & {
+          /** @enum {string} */
+          type: "git";
+        });
     /** @description Database info response. */
     DatabaseInfoResponse: {
+      /** @description Timestamp when this resource was created (RFC 3339). */
       created_at: string;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
       name: string;
       /** Format: int32 */
       page_count: number;
       /** Format: int64 */
       size_bytes: number;
+      /** @description Timestamp when this resource was last updated (RFC 3339). */
       updated_at: string;
     };
+    /**
+     * @description Listing of every dataset the reporting layer can answer queries over.
+     *     Returned from `GET /v1/reports/catalog`.
+     */
+    DatasetCatalog: {
+      /** @description All datasets the caller has access to, in stable alphabetical order. */
+      datasets: components["schemas"]["DatasetCatalogEntry"][];
+    };
+    /**
+     * @description A single dataset entry in the reporting catalog — the set of dimensions,
+     *     measures, and filter fields the dataset exposes to query authors.
+     */
+    DatasetCatalogEntry: {
+      /** @description Dimensions available to group by. */
+      dimensions: string[];
+      /** @description Fields valid as the `field` of a `ReportFilter`. */
+      filter_fields: string[];
+      /** @description Measures available to aggregate. */
+      measures: string[];
+      /** @description Dataset identifier as passed to `ReportQuery.dataset`. */
+      name: string;
+    };
+    /**
+     * @description Per-dataset projector freshness telemetry. One entry per active dataset
+     *     the reporting projector is materializing.
+     */
+    DatasetProjectorLag: {
+      /** @description Dataset name (matches `ReportQuery.dataset`). */
+      dataset: string;
+      /**
+       * Format: int64
+       * @description Gap between `latest_projected_at` and the diagnostic's
+       *     `generated_at`, in milliseconds. `None` when freshness can't be
+       *     determined.
+       */
+      freshness_lag_ms?: number | null;
+      /**
+       * Format: date-time
+       * @description Wall-clock timestamp of the newest fact the projector has
+       *     materialized for this dataset (RFC 3339). `None` if the projector
+       *     hasn't produced any rows yet.
+       */
+      latest_projected_at?: string | null;
+    };
+    /**
+     * @description Persisted, org-scoped declarative capability — a YAML/JSON-defined
+     *     bundle of skills, files, and tool defs that an agent or harness can
+     *     reference by `capability_id` or name.
+     */
     DeclarativeCapability: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was archived, if any (RFC 3339).
+       */
       archived_at?: string | null;
       /**
        * @description Runtime capability reference. Agents and harnesses may use this or the plain unique name.
        * @example declarative:research_pack
        */
       capability_id: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
       /** @description Declarative capability payload: system prompt, skills, starter files, MCP servers, and metadata. */
       definition: Record<string, never>;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+       */
       deleted_at?: string | null;
       /**
        * @description Short summary shown in pickers, search results, and API listings.
@@ -3059,7 +5137,10 @@ export interface components {
        * @example active
        */
       status: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       */
       updated_at: string;
     };
     /**
@@ -3072,6 +5153,10 @@ export interface components {
      * @enum {string}
      */
     DeferrablePolicy: "never" | "automatic" | "always";
+    /** @description Response for account deletion */
+    DeleteAccountResponse: {
+      deleted: boolean;
+    };
     /** @description Query parameters for DELETE requests */
     DeleteQuery: {
       /** @description Whether to delete recursively */
@@ -3083,15 +5168,171 @@ export interface components {
     };
     /** @description Query for diff endpoint */
     DiffQuery: {
-      /** @description Base commit OID (optional, defaults to parent) */
+      /**
+       * @description Base commit OID (optional, defaults to parent)
+       * @example 9876543210fedcba9876543210fedcba98765432
+       */
       base?: string | null;
-      /** @description Commit OID to diff (required) */
+      /**
+       * @description Commit OID to diff (required). 40-char hex SHA-1.
+       * @example a1b2c3d4e5f60718293a4b5c6d7e8f9012345678
+       */
       oid: string;
     };
-    /** @description Standard error response for API endpoints. */
+    /** @description DLQ entry response */
+    DlqEntryResponse: {
+      /**
+       * @description Per-workflow activity ID of the failed task.
+       * @example tool_call_0042
+       */
+      activity_id: string;
+      /**
+       * @description Activity type name of the failed task.
+       * @example tool_call
+       */
+      activity_type: string;
+      /**
+       * Format: int32
+       * @description Number of attempts made before the task was sent to the DLQ.
+       * @example 5
+       */
+      attempts: number;
+      /**
+       * Format: date-time
+       * @description Timestamp when the task was moved to the DLQ (RFC 3339).
+       * @example 2026-05-27T15:26:11Z
+       */
+      dead_at: string;
+      /**
+       * @description Full ordered history of error messages, one per attempt.
+       * @example [
+       *       "connection reset",
+       *       "503 Service Unavailable",
+       *       "upstream gateway timeout",
+       *       "upstream gateway timeout",
+       *       "upstream gateway timeout"
+       *     ]
+       */
+      error_history: string[];
+      /**
+       * Format: uuid
+       * @description UUID of the DLQ entry.
+       * @example dead0000-0000-0000-0000-000000000001
+       */
+      id: string;
+      /** @description Task input payload at the time of failure (used for inspection and replay). */
+      input: Record<string, never>;
+      /**
+       * @description Most recent error message (the one that pushed the task to the DLQ).
+       * @example upstream gateway timeout
+       */
+      last_error: string;
+      /**
+       * Format: uuid
+       * @description Task ID that was originally retried and ultimately failed (matches the `tasks` record before its move to the DLQ).
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      original_task_id: string;
+      /**
+       * Format: uuid
+       * @description Owning workflow's identifier, if the task was part of one.
+       * @example 9a1b2c3d-4e5f-6789-abcd-ef0123456789
+       */
+      workflow_id?: string | null;
+    };
+    /** @description DLQ list response */
+    DlqListResponse: {
+      /** @description Page of items returned by this query. */
+      data: components["schemas"]["DlqEntryResponse"][];
+      /** @description Total number of items matching the query, across all pages. */
+      total: number;
+    };
+    /** @description Options for enqueuing a standalone task */
+    EnqueueTaskOptions: {
+      /**
+       * Format: int32
+       * @description Maximum retry attempts (default: 3)
+       * @example 3
+       */
+      max_attempts?: number | null;
+      /**
+       * Format: int32
+       * @description Priority (higher = claimed first, default: 0)
+       * @example 10
+       */
+      priority?: number | null;
+    };
+    /** @description Request body for enqueuing a standalone task (generic queue) */
+    EnqueueTaskRequest: {
+      /**
+       * @description Activity type (determines which worker handles this task)
+       * @example session.run
+       */
+      activity_type: string;
+      /**
+       * @description Task input payload (activity-specific JSON; any shape — object, array, string, etc.).
+       *     Example for `session.run`: `{"session_id": "session_01933b5a00007000800000000000001"}`.
+       */
+      input: unknown;
+      options?: null | components["schemas"]["EnqueueTaskOptions"];
+    };
+    /** @description Response for enqueued task */
+    EnqueueTaskResponse: {
+      /**
+       * Format: uuid
+       * @description Durable task's identifier.
+       */
+      task_id: string;
+    };
+    /**
+     * @description Standard error response.
+     *
+     *     Wire shape is [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457):
+     *     every error response includes `title` and `status`, and may include
+     *     `detail`, `code`, `allowed_actions`, `retry_after_seconds`, `instance`,
+     *     and `type`. The content type is rewritten to `application/problem+json`
+     *     by [`problem_json_content_type`].
+     */
     ErrorResponse: {
-      /** @description Error message describing what went wrong. */
-      error: string;
+      /** @description Recovery actions the caller can take next. */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
+      /**
+       * @description Stable, machine-readable error code (snake_case).
+       * @example session_not_found
+       */
+      code?: string | null;
+      /**
+       * @description Human-readable explanation specific to this occurrence.
+       * @example Session session_01933b5a000070008000000000000001 not found in org org_01933b5a000070008000000000000001.
+       */
+      detail?: string | null;
+      /**
+       * @description Request URI for this occurrence.
+       * @example /v1/sessions/session_01933b5a000070008000000000000001
+       */
+      instance?: string | null;
+      /**
+       * Format: int32
+       * @description Seconds the caller should wait before retrying (429 / transient 503).
+       * @example 30
+       */
+      retry_after_seconds?: number | null;
+      /**
+       * Format: int32
+       * @description HTTP status code; mirrors the response status line.
+       * @example 404
+       */
+      status: number;
+      /**
+       * @description Short, human-readable summary of the problem (e.g. "Not Found").
+       * @example Session not found
+       */
+      title: string;
+      /**
+       * @description RFC 9457 problem type URI. Optional; identifies the problem class.
+       * @example https://docs.everruns.com/errors/session_not_found
+       */
+      type?: string | null;
     };
     /**
      * @description Standard event following the Everruns event protocol.
@@ -3203,6 +5444,7 @@ export interface components {
       | components["schemas"]["TurnFailedData"]
       | components["schemas"]["ReasonStartedData"]
       | components["schemas"]["ReasonCompletedData"]
+      | components["schemas"]["CapabilityUsageData"]
       | components["schemas"]["ActStartedData"]
       | components["schemas"]["ActCompletedData"]
       | components["schemas"]["ToolStartedData"]
@@ -3212,6 +5454,7 @@ export interface components {
       | components["schemas"]["ToolCallRequestedData"]
       | components["schemas"]["LlmGenerationData"]
       | components["schemas"]["ReasonThinkingDeltaData"]
+      | components["schemas"]["ReasonItemData"]
       | components["schemas"]["ReasonThinkingStartedData"]
       | components["schemas"]["ReasonThinkingCompletedData"]
       | components["schemas"]["TurnCancelledData"]
@@ -3236,11 +5479,23 @@ export interface components {
       | components["schemas"]["VoiceTranscriptData"]
       | components["schemas"]["VoiceSessionEndedData"]
       | components["schemas"]["VoiceSessionFailedData"];
+    /**
+     * @description One row of `EventsSummaryResult.by_type` — the per-event-type count
+     *     produced by the events summary query.
+     */
     EventTypeCountOut: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Count of items matching the query.
+       */
       count: number;
+      /** @description Event-type discriminator (e.g. `turn.started`, `tool.completed`). */
       event_type: string;
     };
+    /**
+     * @description Aggregate result of the events summary query — total count, per-type
+     *     breakdown, and a few convenience rollups (turn count, failure count).
+     */
     EventsSummaryResult: {
       /** @description Per-type count, sorted by event_type asc. */
       by_type: components["schemas"]["EventTypeCountOut"][];
@@ -3287,6 +5542,149 @@ export interface components {
      * @enum {string}
      */
     ExecutionPhase: "Commentary" | "FinalAnswer";
+    /** @description Request body for the `export_report_query` operation. */
+    ExportReportQueryRequest: {
+      /** @description Export format. Defaults to `csv` when omitted. */
+      format?: components["schemas"]["ReportExportFormat"];
+      /**
+       * @description Ad-hoc query to materialize and export. Same shape as the body of
+       *     `POST /v1/reports/query` — see `ReportQuery` for the field breakdown.
+       */
+      query: components["schemas"]["ReportQuery"];
+    };
+    /** @description Request body for the `export_saved_report` operation. */
+    ExportSavedReportRequest: {
+      /** @description Export format. Defaults to `csv` when omitted. */
+      format?: components["schemas"]["ReportExportFormat"];
+    };
+    /** @description Full user data export response (GDPR compliance) */
+    ExportUserDataResponse: {
+      /**
+       * Format: date-time
+       * @description Timestamp the export was generated (RFC 3339).
+       * @example 2026-05-25T12:00:00Z
+       */
+      exported_at: string;
+      /** @description All organizations the user is a member of, plus their role in each. */
+      organizations: components["schemas"]["ExportedOrganization"][];
+      /** @description Personal access tokens owned by the user (no sensitive secrets — just metadata). */
+      personal_access_tokens: components["schemas"]["ExportedPersonalAccessToken"][];
+      /** @description Profile data for the exporting user. */
+      user: components["schemas"]["ExportedUserProfile"];
+    };
+    /** @description Exported organization membership */
+    ExportedOrganization: {
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example Acme Corp
+       */
+      name: string;
+      /**
+       * Format: int64
+       * @description Owning organization's internal numeric id (not part of the public identifier surface).
+       * @example 42
+       */
+      org_id: number;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example org_01933b5a000070008000000000000001
+       */
+      public_id: string;
+      /**
+       * @description User's role within this organization (`owner`, `admin`, `member`).
+       * @example owner
+       */
+      role: string;
+    };
+    /** @description Exported personal access token metadata (no sensitive data) */
+    ExportedPersonalAccessToken: {
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       * @example 2026-01-15T10:30:00Z
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Expiry timestamp (RFC 3339). `None` for non-expiring tokens.
+       * @example 2027-01-01T00:00:00Z
+       */
+      expires_at?: string | null;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example 019e8957539a7aa0bb92e0d2b49427b1
+       */
+      id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of the token's most recent successful use (RFC 3339). `None` if never used.
+       * @example 2026-05-25T09:14:00Z
+       */
+      last_used_at?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example CI/CD deploy token
+       */
+      name: string;
+      /**
+       * @description Granted scopes as a JSON array of strings.
+       * @example [
+       *       "sessions:read",
+       *       "sessions:write"
+       *     ]
+       */
+      scopes: string[];
+      /**
+       * @description First few characters of the token, safe to display for identification.
+       * @example evr_pat_x4z2...
+       */
+      token_prefix: string;
+    };
+    /** @description Exported user profile data */
+    ExportedUserProfile: {
+      /**
+       * @description Auth provider that issued this identity (`google`, `github`, `password`, etc.).
+       * @example google
+       */
+      auth_provider?: string | null;
+      /**
+       * @description URL to the user's avatar image. `None` when the user hasn't set one.
+       * @example https://cdn.example.com/avatars/alex.png
+       */
+      avatar_url?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       * @example 2026-01-15T10:30:00Z
+       */
+      created_at: string;
+      /**
+       * @description Email address associated with the user account.
+       * @example alex@example.com
+       */
+      email: string;
+      /**
+       * @description Whether the user's email address has been verified via the auth provider.
+       * @example true
+       */
+      email_verified: boolean;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example user_01933b5a000070008000000000000001
+       */
+      id: string;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example Alex Rivera
+       */
+      name: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       * @example 2026-04-20T14:22:00Z
+       */
+      updated_at: string;
+    };
     /**
      * @description External actor identity for messages originating from external channels
      *     (Slack, Discord, Teams, etc.).
@@ -3307,34 +5705,116 @@ export interface components {
       /** @description Source channel identifier (e.g. "slack", "discord") */
       source: string;
     };
+    /**
+     * @description One failed reporting-outbox row, surfaced in
+     *     `ReportingOutboxDiagnostics.failed_rows` so operators can triage
+     *     projector failures without dropping to SQL.
+     */
+    FailedReportingOutboxRow: {
+      /**
+       * Format: int32
+       * @description Number of processing attempts made before this row was marked failed.
+       */
+      attempts: number;
+      /**
+       * Format: uuid
+       * @description Outbox row UUID.
+       */
+      id: string;
+      /** @description Most recent error message from a processing attempt. */
+      last_error?: string | null;
+      /**
+       * Format: int64
+       * @description Owning organization's internal numeric id.
+       */
+      org_id: number;
+      /** @description Source-specific row identifier (event id, session id, etc.). */
+      source_id: string;
+      /** @description Discriminator for the outbox source (`event`, `session`, `llm_generation`, `usage_ledger`). */
+      source_type: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when this row was last updated (RFC 3339).
+       */
+      updated_at: string;
+    };
     /** @description File metadata without content */
     FileInfo: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this entry was created (RFC 3339).
+       * @example 2026-05-25T10:14:00Z
+       */
       created_at: string;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description Internal database UUID for this file entry.
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
       id: string;
+      /**
+       * @description `true` when this entry represents a directory; `false` for a regular file.
+       * @example false
+       */
       is_directory: boolean;
+      /**
+       * @description Whether the entry was marked read-only at creation. Read-only entries cannot be edited or deleted by the session.
+       * @example false
+       */
       is_readonly: boolean;
+      /**
+       * @description File or directory name (the last segment of `path`).
+       * @example notes.md
+       */
       name: string;
+      /**
+       * @description Absolute path within the session workspace (e.g. `/notes.md`).
+       * @example /notes.md
+       */
       path: string;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description UUID of the owning session.
+       * @example 01933b5a-0000-7000-8000-000000000001
+       */
       session_id: string;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description File size in bytes. `0` for directories.
+       * @example 4096
+       */
       size_bytes: number;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this entry was last updated (RFC 3339).
+       * @example 2026-05-25T10:15:30Z
+       */
       updated_at: string;
     };
     /** @description File stat information */
     FileStat: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this entry was created (RFC 3339).
+       */
       created_at: string;
+      /** @description `true` when this entry represents a directory. */
       is_directory: boolean;
+      /** @description Whether the entry is read-only. */
       is_readonly: boolean;
+      /** @description File or directory name (last segment of `path`). */
       name: string;
+      /** @description Absolute path within the session workspace. */
       path: string;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description File size in bytes. `0` for directories.
+       */
       size_bytes: number;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this entry was last updated (RFC 3339).
+       */
       updated_at: string;
     };
     /** @description Data for file.written events emitted when files are written to the session filesystem. */
@@ -3351,11 +5831,25 @@ export interface components {
        */
       size_bytes: number;
     };
+    /** @description Request body for the `fork_agent_version` operation. */
     ForkAgentVersionRequest: {
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Fork to test new refund-flow capabilities before promoting
+       */
       description?: string | null;
+      /**
+       * @description Human-readable display name. Safe to render in user-facing messages.
+       * @example Support Agent (Experimental)
+       */
       display_name?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example support-agent-experimental
+       */
       name: string;
     };
+    /** @description Request body for the `get_or_create_chat_session` operation. */
     GetOrCreateChatSessionRequest: {
       /** @description Browser locale for seeding the global chat session (BCP 47, e.g. `uk-UA`). */
       locale?: string | null;
@@ -3369,55 +5863,176 @@ export interface components {
     GetResponse:
       | components["schemas"]["SessionFile"]
       | components["schemas"]["ListResponse_FileInfo"];
+    /** @description Response body for the `get_session_sandbox` operation. */
     GetSessionSandboxResponse: {
+      /** @description Whether the session's harness opts in to a managed sandbox at all. */
       configured: boolean;
+      /** @description Timestamp when this sandbox record was created (RFC 3339). */
       created_at?: string | null;
+      /** @description Human-readable sandbox label. Safe to render in user-facing messages. */
       display_name?: string | null;
+      /** @description Whether a sandbox instance currently exists for this session (within its lease). */
       exists: boolean;
+      /** @description Provider-side sandbox identifier (workspace ID, container ID, etc.). */
       external_id?: string | null;
+      /** @description Timestamp when sandbox initialization finished (RFC 3339); absent while still starting. */
       init_completed_at?: string | null;
+      /** @description Most recent initialization error message; cleared on successful re-init. */
       last_init_error?: string | null;
+      /** @description Provider-specific metadata (URLs, ports, credentials envelopes). */
       metadata?: Record<string, never>;
+      /** @description Sandbox provider (`daytona`, `e2b`, `docker`, etc.) when one is configured. */
       provider?: string | null;
       session_status?:
         | null
         | components["schemas"]["SessionSandboxStatusValue"];
+      /** @description Timestamp when this sandbox record was last updated (RFC 3339). */
       updated_at?: string | null;
+      /** @description Absolute path of the sandbox workspace root (used to scope file operations). */
       workspace_path?: string | null;
     };
     /** @description A commit entry in the log */
     GitCommitInfo: {
+      /** @description Author email from the commit. */
       author_email: string;
+      /** @description Author display name from the commit. */
       author_name: string;
+      /** @description Commit message as authored. */
       message: string;
+      /** @description Full git object identifier (40-char hex SHA-1). */
       oid: string;
+      /** @description Parent commit object identifiers. Length 0 for the initial commit, 1 for ordinary commits, 2+ for merge commits. */
       parent_oids: string[];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Commit timestamp (RFC 3339, normalised to UTC).
+       */
       timestamp: string;
     };
     /** @description A diff with full patch output */
     GitDiff: {
+      /** @description Per-file change records. Empty when the two trees are identical. */
       entries: components["schemas"]["GitDiffEntry"][];
+      /**
+       * @description Unified-diff patch text covering all `entries`, truncated to ~64 KiB
+       *     (with a trailing `... (truncated)` marker when the cap is hit).
+       *     `None` when the diff produced no patch text — typically because the
+       *     two trees are identical.
+       */
       patch?: string | null;
+      /** @description Aggregate line/file counts across `entries`. */
       stats: components["schemas"]["GitDiffStats"];
     };
     /** @description A diff entry between two commits */
     GitDiffEntry: {
+      /**
+       * @description Pre-change path. Only set when `status == "renamed"`; otherwise
+       *     `None` (including for `added`/`deleted`/`modified`).
+       */
       old_path?: string | null;
+      /**
+       * @description File path on the "new" side of the diff (the post-change path). For
+       *     a rename, the pre-rename path is in `old_path`. Repo-root-relative,
+       *     forward-slash separated.
+       */
       path: string;
+      /** @description Current lifecycle status. */
       status: string;
     };
     /** @description Diff statistics */
     GitDiffStats: {
+      /**
+       * @description Total removed lines summed across all files (the `-` count in a
+       *     unified diff).
+       */
       deletions: number;
+      /**
+       * @description Number of files with at least one changed line (matches the length
+       *     of `GitDiff.entries`).
+       */
       files_changed: number;
+      /**
+       * @description Total added lines summed across all files (the `+` count in a
+       *     unified diff).
+       */
       insertions: number;
+    };
+    /** @description Request body for GitHub volume source. */
+    GitHubVolumeSourceRequest: {
+      /**
+       * @description Branch to sync. Defaults to the repository's default branch when omitted.
+       * @example main
+       */
+      branch?: string | null;
+      /**
+       * @description GitHub repository in `owner/repo` form.
+       * @example acme/design-docs
+       */
+      repository: string;
+      /**
+       * @description Sub-directory within the repository to sync. Empty / omitted = whole tree.
+       * @example docs/
+       */
+      root_folder?: string | null;
+      /**
+       * Format: int32
+       * @description Automatic resync interval in seconds. Omit or set 0 for manual-only; scheduled sync accepts 300 through 604800.
+       * @example 3600
+       */
+      sync_interval_secs?: number | null;
+    };
+    /** @description Response body for GitHub volume source. */
+    GitHubVolumeSourceResponse: {
+      branch: string;
+      repository: string;
+      root_folder?: string | null;
+      /**
+       * Format: int32
+       * @description Automatic resync interval in seconds. Omit or set 0 for manual-only; scheduled sync accepts 300 through 604800.
+       */
+      sync_interval_secs?: number | null;
     };
     /** @description A git ref (branch pointer) */
     GitRefInfo: {
       is_symbolic: boolean;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
       name: string;
       target: string;
+    };
+    /** @description Request body for git volume source. */
+    GitVolumeSourceRequest: {
+      /**
+       * @description Branch to sync. Defaults to the repository's default branch when omitted.
+       * @example main
+       */
+      branch?: string | null;
+      /**
+       * @description Sub-directory within the repository to sync. Empty / omitted = whole tree.
+       * @example docs/
+       */
+      root_folder?: string | null;
+      /**
+       * Format: int32
+       * @description Automatic resync interval in seconds. Omit or set 0 for manual-only; scheduled sync accepts 300 through 604800.
+       * @example 3600
+       */
+      sync_interval_secs?: number | null;
+      /**
+       * @description Clonable git URL (SSH or HTTPS).
+       * @example https://github.com/acme/design-docs.git
+       */
+      url: string;
+    };
+    /** @description Response body for git volume source. */
+    GitVolumeSourceResponse: {
+      branch: string;
+      root_folder?: string | null;
+      /**
+       * Format: int32
+       * @description Automatic resync interval in seconds. Omit or set 0 for manual-only; scheduled sync accepts 300 through 604800.
+       */
+      sync_interval_secs?: number | null;
+      url: string;
     };
     /** @description Grep match result */
     GrepMatch: {
@@ -3427,9 +6042,15 @@ export interface components {
     };
     /** @description Request to search files */
     GrepRequest: {
-      /** @description Optional path pattern to filter files */
+      /**
+       * @description Optional path glob to filter files (`**\/*.rs`, `docs/*.md`).
+       * @example **\/*.rs
+       */
       path_pattern?: string | null;
-      /** @description Regex pattern to search for */
+      /**
+       * @description Regex pattern to search for. Standard PCRE-ish (Rust `regex` crate) syntax.
+       * @example TODO\(perf\)
+       */
       pattern: string;
     };
     /** @description Grep result for a file */
@@ -3445,6 +6066,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the harness was archived.
+       * @example 2026-05-26T00:00:00Z
        */
       archived_at?: string | null;
       /** @description Capabilities enabled for this harness with per-harness configuration. */
@@ -3452,6 +6074,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the harness was created.
+       * @example 2026-04-01T10:00:00Z
        */
       created_at: string;
       /**
@@ -3463,11 +6086,18 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the harness was deleted.
+       * @example 2026-05-26T00:00:00Z
        */
       deleted_at?: string | null;
-      /** @description Human-readable description of what the harness does. */
+      /**
+       * @description Human-readable description of what the harness does.
+       * @example Default harness with file-system + secrets capabilities; safe baseline for new agents.
+       */
       description?: string | null;
-      /** @description Human-readable display name shown in UI. */
+      /**
+       * @description Human-readable display name shown in UI.
+       * @example Generic Harness
+       */
       display_name?: string | null;
       /**
        * @description Unique identifier for the harness (format: harness_{32-hex}).
@@ -3480,11 +6110,15 @@ export interface components {
        * @description Whether this harness is built-in (system-managed, readonly).
        *     Built-in harnesses are provisioned during org initialization and
        *     cannot be modified or deleted via the API. Users can copy them.
+       * @example false
        */
       is_built_in?: boolean;
       /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
       mcpServers?: components["schemas"]["BTreeMap"];
-      /** @description Name, unique per org (e.g. "generic"). */
+      /**
+       * @description Name, unique per org (e.g. "generic").
+       * @example generic
+       */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
       /**
@@ -3497,13 +6131,21 @@ export interface components {
       /**
        * @description System prompt that defines the harness's base behavior.
        *     Forms the foundation of the prompt stack.
+       * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
        */
       system_prompt: string;
-      /** @description Tags for organizing and filtering harnesses. */
+      /**
+       * @description Tags for organizing and filtering harnesses.
+       * @example [
+       *       "baseline",
+       *       "production"
+       *     ]
+       */
       tags?: string[];
       /**
        * Format: date-time
        * @description Timestamp when the harness was last updated.
+       * @example 2026-05-20T14:00:00Z
        */
       updated_at: string;
     };
@@ -3538,9 +6180,109 @@ export interface components {
      *     - `active`: Harness is available for use
      *     - `archived`: Harness is hidden from listings and cannot be modified or assigned
      *     - `deleted`: Harness is a tombstone kept only for historical references
+     * @example active
      * @enum {string}
      */
     HarnessStatus: "active" | "archived" | "deleted";
+    /** @description System health response */
+    HealthResponse: {
+      /**
+       * @description Number of workers in the `running` state, ready to claim tasks.
+       * @example 4
+       */
+      active_workers: number;
+      /**
+       * @description Tasks currently claimed by a worker (gauge).
+       * @example 7
+       */
+      claimed_tasks: number;
+      /**
+       * @description Cumulative count of tasks that completed successfully (monotonic counter).
+       * @example 12041
+       */
+      completed_tasks: number;
+      /**
+       * @description Cumulative count of workflows that completed successfully (monotonic counter).
+       * @example 4128
+       */
+      completed_workflows: number;
+      /**
+       * @description Total tasks currently in flight across all workers.
+       * @example 7
+       */
+      current_load: number;
+      /**
+       * @description Size of the dead-letter queue (gauge). High values indicate stuck activities.
+       * @example 0
+       */
+      dlq_size: number;
+      /**
+       * @description Event-delivery backend in use: `nats` for distributed deployments, `in_memory` for single-instance. `None` if the field was omitted by an older server.
+       * @example nats
+       */
+      event_delivery?: string | null;
+      /**
+       * @description Cumulative count of tasks that failed terminally or were sent to the DLQ (monotonic counter).
+       * @example 34
+       */
+      failed_tasks: number;
+      /**
+       * @description Cumulative count of workflows that ended in failure (monotonic counter).
+       * @example 12
+       */
+      failed_workflows: number;
+      /**
+       * Format: double
+       * @description `current_load / total_capacity * 100`. 0.0 when no workers are registered.
+       * @example 21.875
+       */
+      load_percentage: number;
+      /**
+       * @description Tasks waiting to be claimed (gauge).
+       * @example 2
+       */
+      pending_tasks: number;
+      /**
+       * @description Workflows waiting to be claimed (gauge).
+       * @example 1
+       */
+      pending_workflows: number;
+      /**
+       * @description Workflows currently executing (gauge).
+       * @example 3
+       */
+      running_workflows: number;
+      /**
+       * @description Cumulative count of tasks claimed at least once (monotonic counter).
+       * @example 12082
+       */
+      started_tasks: number;
+      /**
+       * @description Cumulative count of workflows that started (monotonic counter).
+       * @example 4144
+       */
+      started_workflows: number;
+      /**
+       * @description Aggregate system status: `healthy`, `degraded`, or `unhealthy`. Derived from worker availability, load, and queue depths.
+       * @example healthy
+       */
+      status: string;
+      /**
+       * @description Sum of `max_concurrency` across all workers (the upper bound on concurrent task execution).
+       * @example 32
+       */
+      total_capacity: number;
+      /**
+       * @description Total number of workers registered (heartbeating in the last window).
+       * @example 4
+       */
+      total_workers: number;
+      /**
+       * @description Number of workers currently accepting new task assignments (subset of `active_workers`; drains/backpressure excluded).
+       * @example 4
+       */
+      workers_accepting: number;
+    };
     /** @description Image content part (base64 or URL) */
     ImageContentPart: {
       base64?: string | null;
@@ -3566,11 +6308,18 @@ export interface components {
     /** @description Image metadata (without binary data) */
     ImageInfo: {
       content_type: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
       filename: string;
-      /** @example img_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example img_01933b5a00007000800000000000001
+       */
       id: string;
+      /** @description Free-form metadata attached to this resource. */
       metadata: unknown;
       /** Format: int64 */
       size_bytes: number;
@@ -3578,10 +6327,16 @@ export interface components {
     /** @description Image upload response */
     ImageUploadResponse: {
       content_type: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
       filename: string;
-      /** @example img_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example img_01933b5a00007000800000000000001
+       */
       id: string;
       /** Format: int64 */
       size_bytes: number;
@@ -3621,6 +6376,15 @@ export interface components {
      *
      *     Only user messages can be created via the API.
      *     Agent messages are created internally by the workflow.
+     * @example {
+     *       "content": [
+     *         {
+     *           "text": "Why is the build failing on main?",
+     *           "type": "text"
+     *         }
+     *       ],
+     *       "role": "user"
+     *     }
      */
     InputMessage: {
       /** @description Array of content parts (text and image only) */
@@ -3633,6 +6397,12 @@ export interface components {
       /** @description The user message */
       message: components["schemas"]["Message"];
     };
+    /**
+     * @description How app-triggered invocations route into sessions.
+     * @example shared_session
+     * @enum {string}
+     */
+    InvocationSessionMode: "shared_session" | "session_per_invocation";
     /** @description Key-value entry info (key and timestamps, no value) */
     KeyValueInfo: {
       /** @description When the key was created */
@@ -3644,33 +6414,68 @@ export interface components {
       /** @description The stored value */
       value: string;
     };
+    /** @description Response body for knowledge base. */
     KnowledgeBaseResponse: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was archived, if any (RFC 3339).
+       */
       archived_at?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+       */
       deleted_at?: string | null;
+      /** @description Human-readable description. Safe to render in user-facing messages. */
       description?: string | null;
-      /** @example kb_01933b5a000070008000000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example kb_01933b5a000070008000000000000001
+       */
       id: string;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
       name: string;
+      /** @description Current lifecycle status. */
       status: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       */
       updated_at: string;
     };
+    /** @description Response body for knowledge entry. */
     KnowledgeEntryResponse: {
       body: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
-      /** @example kbe_01933b5a000070008000000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example kbe_01933b5a000070008000000000000001
+       */
       id: string;
-      /** @example kb_01933b5a000070008000000000000001 */
+      /**
+       * @description Knowledge base's prefixed public identifier.
+       * @example kb_01933b5a000070008000000000000001
+       */
       kb_id: string;
+      /** @description Discriminator selecting the variant of this resource. */
       kind: string;
+      /** @description Free-form tags attached to this resource. */
       tags: string[];
+      /** @description Human-readable title. Safe to render in user-facing messages. */
       title: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       */
       updated_at: string;
     };
     /** @description A lifecycle-managed external resource owned by a session-capable workflow. */
@@ -3678,61 +6483,89 @@ export interface components {
       /**
        * Format: int32
        * @description Number of cleanup attempts so far.
+       * @example 0
        */
       cleanup_attempts: number;
       /**
        * Format: date-time
        * @description Cleanup completion time for released resources.
+       * @example 2026-05-25T10:30:04Z
        */
       cleanup_completed_at?: string | null;
       /**
        * Format: date-time
        * @description Cleanup attempt start time when the resource is currently claimed.
+       * @example 2026-05-25T10:30:00Z
        */
       cleanup_started_at?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this leased resource was created (RFC 3339).
+       * @example 2026-05-25T10:00:00Z
+       */
       created_at: string;
-      /** @description Optional user-facing label. */
+      /**
+       * @description Optional user-facing label.
+       * @example Customer 42 — Q3 brief
+       */
       display_name?: string | null;
-      /** @description Stable provider identifier for cleanup calls. */
+      /**
+       * @description Stable provider identifier for cleanup calls.
+       * @example sbx_a3f1c9d2e8
+       */
       external_id: string;
       /**
        * @description Unique identifier (format: resource_{32-hex}).
        * @example resource_01933b5a00007000800000000000001
        */
       id: string;
-      /** @description Last cleanup error message, if any. */
+      /**
+       * @description Last cleanup error message, if any.
+       * @example daytona.api.timeout: provider call exceeded 10s
+       */
       last_cleanup_error?: string | null;
       /**
        * Format: date-time
        * @description Last successful touch from tool activity.
+       * @example 2026-05-25T10:14:00Z
        */
       last_touched_at: string;
       /**
        * Format: int32
        * @description Lease duration used when refreshing the lease.
+       * @example 900
        */
       lease_duration_seconds: number;
       /**
        * Format: date-time
        * @description Absolute deadline after which cleanup becomes due.
+       * @example 2026-05-25T10:29:00Z
        */
       lease_expires_at: string;
       /**
-       * @description Provider-specific non-secret metadata for UI/debugging.
+       * @description Provider-specific non-secret metadata for UI/debugging. Free-form JSON
+       *     object — shape is provider-defined.
+       *     Example: `{"region": "us-west-2", "snapshot_id": "snap_42"}`.
        *     THREAT[TM-API-015]: This field is returned by the session resources API
        *     and rendered in the UI, so providers must never persist bearer tokens or
        *     other secrets here.
        */
-      metadata?: unknown;
+      metadata?: Record<string, never>;
       /**
        * Format: uuid
        * @description User connection owner used for provider cleanup, if known.
+       * @example 550e8400-e29b-41d4-a716-446655440000
        */
       owner_user_id?: string | null;
-      /** @description External provider responsible for the resource (e.g. "daytona"). */
+      /**
+       * @description External provider responsible for the resource (e.g. "daytona").
+       * @example daytona
+       */
       provider: string;
-      /** @description Provider-specific resource type (e.g. "sandbox", "browser_session"). */
+      /**
+       * @description Provider-specific resource type (e.g. "sandbox", "browser_session").
+       * @example sandbox
+       */
       resource_type: string;
       /**
        * @description Session that currently owns the resource, if still attached.
@@ -3741,7 +6574,11 @@ export interface components {
       session_id?: string | null;
       /** @description Current lifecycle status. */
       status: components["schemas"]["LeasedResourceStatus"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this leased resource was last updated (RFC 3339).
+       * @example 2026-05-25T10:14:00Z
+       */
       updated_at: string;
     };
     /**
@@ -3749,38 +6586,115 @@ export interface components {
      * @enum {string}
      */
     LeasedResourceStatus: "active" | "cleaning" | "released" | "cleanup_failed";
+    /**
+     * @description Query parameters for listing recent app invocation runs — a relative
+     *     time window and an optional bucketing hint for the dashboard.
+     */
+    ListAppRunsQuery: {
+      /** @description Optional grouping. Currently only `hour` is supported. */
+      groupBy?: string | null;
+      /** @description Time window to include, such as 24h, 60m, or 7d. */
+      window?: string | null;
+    };
+    /**
+     * @description Query parameters for listing executions of a schedule — optional status
+     *     filter plus offset/limit paging.
+     */
     ListExecutionsQuery: {
       /**
        * Format: int32
        * @description Pagination limit (default: 20, max: 100)
+       * @example 20
        */
       limit?: number | null;
       /**
        * Format: int32
        * @description Pagination offset
+       * @example 0
        */
       offset?: number | null;
-      /** @description Filter by execution status */
+      /**
+       * @description Filter by execution status
+       * @example completed
+       */
       status?: string | null;
     };
+    /**
+     * @description Query parameters for `GET /v1/knowledge-bases` — optional name/desc
+     *     search plus a flag to include archived knowledge bases.
+     */
     ListKnowledgeBasesQuery: {
+      /**
+       * @description When `true`, also returns archived knowledge bases.
+       * @example false
+       */
       include_archived?: boolean | null;
+      /**
+       * @description Substring filter applied to knowledge-base name and description.
+       * @example runbook
+       */
       search?: string | null;
     };
+    /**
+     * @description Query parameters for listing entries inside a knowledge base — optional
+     *     text search and tag filter.
+     */
     ListKnowledgeEntriesQuery: {
+      /**
+       * @description Discriminator selecting the variant of this resource. One of `note`,
+       *     `table`, `business`, `query`, `runbook`.
+       * @example runbook
+       */
       kind?: string | null;
+      /**
+       * @description Substring filter applied to entry title and body.
+       * @example refund
+       */
       search?: string | null;
     };
+    /**
+     * @description Query parameters for listing memories within a store — optional content
+     *     search and kind filter.
+     */
     ListMemoriesQuery: {
+      /**
+       * @description When `true`, also returns inactive (deactivated) memories.
+       * @example false
+       */
       include_inactive?: boolean | null;
+      /**
+       * @description Discriminator selecting the variant of this resource. One of `fact`,
+       *     `preference`, `correction`, `procedure`, `context`.
+       * @example preference
+       */
       kind?: string | null;
+      /**
+       * @description Maximum number of items returned in this page.
+       * @example 50
+       */
       limit?: number | null;
+      /**
+       * @description Substring filter applied to memory content.
+       * @example preferred timezone
+       */
       query?: string | null;
+      /**
+       * @description Filter to memories tagged with at least one of these labels.
+       * @example [
+       *       "onboarding",
+       *       "billing"
+       *     ]
+       */
       tag?: string[] | null;
     };
+    /** @description Response body for the `list_memories` operation. */
     ListMemoriesResponse: {
+      /** @description Page of items returned by this query. */
       data: components["schemas"]["MemoryResponse"][];
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total number of items matching the query, across all pages.
+       */
       total: number;
     };
     /**
@@ -3793,6 +6707,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was archived.
+         * @example 2026-05-26T00:00:00Z
          */
         archived_at?: string | null;
         /**
@@ -3803,6 +6718,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was created.
+         * @example 2026-04-01T10:00:00Z
          */
         created_at: string;
         /**
@@ -3819,13 +6735,18 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was deleted.
+         * @example 2026-05-26T00:00:00Z
          */
         deleted_at?: string | null;
-        /** @description Human-readable description of what the agent does. */
+        /**
+         * @description Human-readable description of what the agent does.
+         * @example Handles refund and shipping questions; escalates billing disputes.
+         */
         description?: string | null;
         /**
          * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
          *     Falls back to `name` when absent.
+         * @example Customer Support Agent
          */
         display_name?: string | null;
         /**
@@ -3846,11 +6767,17 @@ export interface components {
         id: string;
         /** @description Starter files copied into each new session for this agent. */
         initial_files?: components["schemas"]["InitialFile"][];
-        /** @description Maximum number of LLM iterations per turn for this agent. */
+        /**
+         * @description Maximum number of LLM iterations per turn for this agent.
+         * @example 50
+         */
         max_iterations?: number | null;
         /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
         mcpServers?: components["schemas"]["BTreeMap"];
-        /** @description Name, unique per org (e.g. "customer-support"). */
+        /**
+         * @description Name, unique per org (e.g. "customer-support").
+         * @example customer-support
+         */
         name: string;
         network_access?: null | components["schemas"]["NetworkAccessList"];
         /**
@@ -3863,9 +6790,16 @@ export interface components {
         /**
          * @description System prompt that defines the agent's behavior.
          *     Sent as the first message in every conversation.
+         * @example You are a friendly customer support agent for Acme Corp. Verify orders before issuing refunds. Escalate any billing disputes to a human.
          */
         system_prompt: string;
-        /** @description Tags for organizing and filtering agents. */
+        /**
+         * @description Tags for organizing and filtering agents.
+         * @example [
+         *       "support",
+         *       "production"
+         *     ]
+         */
         tags?: string[];
         /**
          * @description Client-side tools registered for this agent.
@@ -3875,6 +6809,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was last updated.
+         * @example 2026-05-20T14:00:00Z
          */
         updated_at: string;
         usage?: null | components["schemas"]["TokenUsage"];
@@ -3890,9 +6825,13 @@ export interface components {
         /**
          * Format: int64
          * @description Number of active agents referencing this capability in the org.
+         * @example 42
          */
         agent_count?: number;
-        /** @description Category for grouping in UI */
+        /**
+         * @description Category for grouping in UI
+         * @example filesystem
+         */
         category?: string | null;
         /** @description JSON Schema for capability-specific per-agent config. */
         config_schema?: Record<string, never>;
@@ -3901,39 +6840,85 @@ export interface components {
         /**
          * @description IDs of capabilities that this capability depends on.
          *     When this capability is selected, its dependencies are automatically included.
+         * @example [
+         *       "approval"
+         *     ]
          */
         dependencies?: string[];
-        /** @description Description of what this capability provides */
+        /**
+         * @description Description of what this capability provides
+         * @example Read, write, edit, list, grep, delete, and stat files in the session workspace.
+         */
         description: string;
-        /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+        /**
+         * @description Slug under https://dev.everruns.com/capabilities/ when public docs exist.
+         * @example session_file_system
+         */
         docs_slug?: string | null;
         /**
          * @description UI feature strings this capability contributes to.
          *     Multiple capabilities can contribute the same feature.
+         * @example [
+         *       "file_browser"
+         *     ]
          */
         features?: string[];
         /**
          * Format: int64
          * @description Number of active harnesses referencing this capability in the org.
+         * @example 7
          */
         harness_count?: number;
-        /** @description Icon name (for UI rendering) */
+        /**
+         * @description Icon name (for UI rendering)
+         * @example Folder
+         */
         icon?: string | null;
-        /** @description Unique capability identifier */
+        /**
+         * @description Unique capability identifier
+         * @example session_file_system
+         */
         id: string;
-        /** @description Whether this is an MCP server capability (for UI badge) */
+        /**
+         * @description Whether this is an MCP server capability (for UI badge)
+         * @example false
+         */
         is_mcp?: boolean;
-        /** @description Whether this is an Agent Skill capability (for UI badge) */
+        /**
+         * @description Whether this is an Agent Skill capability (for UI badge)
+         * @example false
+         */
         is_skill?: boolean;
-        /** @description Display name */
+        /**
+         * @description Display name
+         * @example Session File System
+         */
         name: string;
         /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
         risk_level?: components["schemas"]["RiskLevel"];
-        /** @description Current status */
+        /**
+         * @description Current status
+         * @example active
+         */
         status: string;
-        /** @description System prompt addition contributed by this capability */
+        /**
+         * @description System prompt addition contributed by this capability
+         * @example You can read and write files in /workspace via the session_file_system tools.
+         */
         system_prompt?: string | null;
-        /** @description Tool definitions provided by this capability */
+        /**
+         * @description Tool definitions provided by this capability
+         * @example [
+         *       {
+         *         "description": "Read a file from the session workspace.",
+         *         "name": "read_file"
+         *       },
+         *       {
+         *         "description": "Write or overwrite a file in the session workspace.",
+         *         "name": "write_file"
+         *       }
+         *     ]
+         */
         tool_definitions?: Record<string, never>[];
       }[];
     };
@@ -3944,12 +6929,15 @@ export interface components {
     ListResponse_DatabaseInfoResponse: {
       /** @description Array of items returned by the list operation. */
       data: {
+        /** @description Timestamp when this resource was created (RFC 3339). */
         created_at: string;
+        /** @description Human-readable name. Safe to render in user-facing messages. */
         name: string;
         /** Format: int32 */
         page_count: number;
         /** Format: int64 */
         size_bytes: number;
+        /** @description Timestamp when this resource was last updated (RFC 3339). */
         updated_at: string;
       }[];
     };
@@ -4002,19 +6990,55 @@ export interface components {
     ListResponse_FileInfo: {
       /** @description Array of items returned by the list operation. */
       data: {
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this entry was created (RFC 3339).
+         * @example 2026-05-25T10:14:00Z
+         */
         created_at: string;
-        /** Format: uuid */
+        /**
+         * Format: uuid
+         * @description Internal database UUID for this file entry.
+         * @example 550e8400-e29b-41d4-a716-446655440000
+         */
         id: string;
+        /**
+         * @description `true` when this entry represents a directory; `false` for a regular file.
+         * @example false
+         */
         is_directory: boolean;
+        /**
+         * @description Whether the entry was marked read-only at creation. Read-only entries cannot be edited or deleted by the session.
+         * @example false
+         */
         is_readonly: boolean;
+        /**
+         * @description File or directory name (the last segment of `path`).
+         * @example notes.md
+         */
         name: string;
+        /**
+         * @description Absolute path within the session workspace (e.g. `/notes.md`).
+         * @example /notes.md
+         */
         path: string;
-        /** Format: uuid */
+        /**
+         * Format: uuid
+         * @description UUID of the owning session.
+         * @example 01933b5a-0000-7000-8000-000000000001
+         */
         session_id: string;
-        /** Format: int64 */
+        /**
+         * Format: int64
+         * @description File size in bytes. `0` for directories.
+         * @example 4096
+         */
         size_bytes: number;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this entry was last updated (RFC 3339).
+         * @example 2026-05-25T10:15:30Z
+         */
         updated_at: string;
       }[];
     };
@@ -4039,6 +7063,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the harness was archived.
+         * @example 2026-05-26T00:00:00Z
          */
         archived_at?: string | null;
         /** @description Capabilities enabled for this harness with per-harness configuration. */
@@ -4046,6 +7071,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the harness was created.
+         * @example 2026-04-01T10:00:00Z
          */
         created_at: string;
         /**
@@ -4057,11 +7083,18 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the harness was deleted.
+         * @example 2026-05-26T00:00:00Z
          */
         deleted_at?: string | null;
-        /** @description Human-readable description of what the harness does. */
+        /**
+         * @description Human-readable description of what the harness does.
+         * @example Default harness with file-system + secrets capabilities; safe baseline for new agents.
+         */
         description?: string | null;
-        /** @description Human-readable display name shown in UI. */
+        /**
+         * @description Human-readable display name shown in UI.
+         * @example Generic Harness
+         */
         display_name?: string | null;
         /**
          * @description Unique identifier for the harness (format: harness_{32-hex}).
@@ -4074,11 +7107,15 @@ export interface components {
          * @description Whether this harness is built-in (system-managed, readonly).
          *     Built-in harnesses are provisioned during org initialization and
          *     cannot be modified or deleted via the API. Users can copy them.
+         * @example false
          */
         is_built_in?: boolean;
         /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
         mcpServers?: components["schemas"]["BTreeMap"];
-        /** @description Name, unique per org (e.g. "generic"). */
+        /**
+         * @description Name, unique per org (e.g. "generic").
+         * @example generic
+         */
         name: string;
         network_access?: null | components["schemas"]["NetworkAccessList"];
         /**
@@ -4091,13 +7128,21 @@ export interface components {
         /**
          * @description System prompt that defines the harness's base behavior.
          *     Forms the foundation of the prompt stack.
+         * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
          */
         system_prompt: string;
-        /** @description Tags for organizing and filtering harnesses. */
+        /**
+         * @description Tags for organizing and filtering harnesses.
+         * @example [
+         *       "baseline",
+         *       "production"
+         *     ]
+         */
         tags?: string[];
         /**
          * Format: date-time
          * @description Timestamp when the harness was last updated.
+         * @example 2026-05-20T14:00:00Z
          */
         updated_at: string;
       }[];
@@ -4126,18 +7171,36 @@ export interface components {
     ListResponse_KnowledgeBaseResponse: {
       /** @description Array of items returned by the list operation. */
       data: {
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was archived, if any (RFC 3339).
+         */
         archived_at?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         */
         created_at: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+         */
         deleted_at?: string | null;
+        /** @description Human-readable description. Safe to render in user-facing messages. */
         description?: string | null;
-        /** @example kb_01933b5a000070008000000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example kb_01933b5a000070008000000000000001
+         */
         id: string;
+        /** @description Human-readable name. Safe to render in user-facing messages. */
         name: string;
+        /** @description Current lifecycle status. */
         status: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was last updated (RFC 3339).
+         */
         updated_at: string;
       }[];
     };
@@ -4149,16 +7212,31 @@ export interface components {
       /** @description Array of items returned by the list operation. */
       data: {
         body: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         */
         created_at: string;
-        /** @example kbe_01933b5a000070008000000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example kbe_01933b5a000070008000000000000001
+         */
         id: string;
-        /** @example kb_01933b5a000070008000000000000001 */
+        /**
+         * @description Knowledge base's prefixed public identifier.
+         * @example kb_01933b5a000070008000000000000001
+         */
         kb_id: string;
+        /** @description Discriminator selecting the variant of this resource. */
         kind: string;
+        /** @description Free-form tags attached to this resource. */
         tags: string[];
+        /** @description Human-readable title. Safe to render in user-facing messages. */
         title: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was last updated (RFC 3339).
+         */
         updated_at: string;
       }[];
     };
@@ -4237,13 +7315,23 @@ export interface components {
       data: {
         /** Format: int64 */
         active_memory_count: number;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         */
         created_at: string;
-        /** @example mst_01933b5a000070008000000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example mst_01933b5a000070008000000000000001
+         */
         id: string;
         is_default: boolean;
+        /** @description Human-readable name. Safe to render in user-facing messages. */
         name: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was last updated (RFC 3339).
+         */
         updated_at: string;
       }[];
     };
@@ -4257,7 +7345,10 @@ export interface components {
         /** @description Array of content parts */
         content: components["schemas"]["ContentPart"][];
         controls?: null | components["schemas"]["Controls"];
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         */
         created_at: string;
         external_actor?: null | components["schemas"]["ExternalActor"];
         /**
@@ -4312,6 +7403,43 @@ export interface components {
      * @description Response wrapper for list endpoints.
      *     All list endpoints return responses wrapped in a `data` field.
      */
+    ListResponse_SavedReport: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         */
+        created_at: string;
+        dashboard?:
+          | null
+          | components["schemas"]["SavedReportDashboardMetadata"];
+        /** @description Human-readable description. Safe to render in user-facing messages. */
+        description?: string | null;
+        /**
+         * Format: uuid
+         * @description UUID of the saved report.
+         */
+        id: string;
+        /** @description Human-readable name. Safe to render in user-facing messages. */
+        name: string;
+        /**
+         * @description The query this report executes when run or exported. Same shape as the
+         *     `body` of `POST /v1/reports/query` — see `ReportQuery` for the field
+         *     breakdown.
+         */
+        query: components["schemas"]["ReportQuery"];
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was last updated (RFC 3339).
+         */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
     ListResponse_SecretInfo: {
       /** @description Array of items returned by the list operation. */
       data: {
@@ -4330,32 +7458,60 @@ export interface components {
     ListResponse_Skill: {
       /** @description Array of items returned by the list operation. */
       data: {
+        /** @description Comma-separated list of tool patterns this skill may invoke. `None` means inherit from the harness. */
         allowed_tools?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was archived, if any (RFC 3339). Archived skills are hidden from default list views.
+         */
         archived_at?: string | null;
+        /** @description Compatibility marker describing host-runtime requirements declared by the skill (e.g. min platform version). Informational. */
         compatibility?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was created (RFC 3339).
+         */
         created_at: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was hard-deleted, if any (RFC 3339).
+         */
         deleted_at?: string | null;
-        /** @example Extract text and tables from PDF files. */
+        /**
+         * @description Short, agent- and user-readable summary of what the skill does and when to use it.
+         * @example Extract text and tables from PDF files.
+         */
         description: string;
-        /** @description Whether the model is prevented from auto-invoking this skill */
+        /** @description When `true`, the LLM is prevented from auto-invoking this skill; only the user can trigger it explicitly. */
         disable_model_invocation?: boolean;
-        /** @example skill_01933b5a00007000800000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example skill_01933b5a00007000800000000000001
+         */
         id: string;
+        /** @description License string as declared by the skill author (e.g. `MIT`, `Apache-2.0`). Informational; not enforced. */
         license?: string | null;
+        /** @description Free-form metadata declared by the skill author. */
         metadata?: {
           [key: string]: unknown;
         };
-        /** @example pdf-processing */
+        /**
+         * @description Stable kebab-case slug used to invoke the skill (e.g. `/pdf-processing` in chat). Safe to render in user-facing messages.
+         * @example pdf-processing
+         */
         name: string;
+        /** @description How the skill content is sourced (filesystem, URL, embedded). Determines reload semantics. */
         source_type: components["schemas"]["SkillSourceType"];
+        /** @description Current lifecycle status (`active`, `archived`, `deleted`). */
         status: components["schemas"]["SkillStatus"];
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was last updated (RFC 3339).
+         */
         updated_at: string;
-        /** @description Whether this skill appears as a /slash command for users */
+        /** @description Whether this skill appears as a `/`-prefixed slash command for end users in chat UIs. */
         user_invocable?: boolean;
+        /** @description Semver string declared by the skill author. Free-form; sorted lexicographically when comparing. */
         version: string;
       }[];
     };
@@ -4368,10 +7524,15 @@ export interface components {
       data: {
         auth_provider?: string | null;
         avatar_url?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         */
         created_at: string;
         email: string;
+        /** @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
         id: string;
+        /** @description Human-readable name. Safe to render in user-facing messages. */
         name: string;
         roles: string[];
       }[];
@@ -4383,20 +7544,174 @@ export interface components {
     ListResponse_VolumeResponse: {
       /** @description Array of items returned by the list operation. */
       data: {
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was archived, if any (RFC 3339).
+         * @example 2026-05-26T00:00:00Z
+         */
         archived_at?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         * @example 2026-04-01T10:00:00Z
+         */
         created_at: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+         * @example 2026-05-26T00:00:00Z
+         */
         deleted_at?: string | null;
+        /**
+         * @description Human-readable description. Safe to render in user-facing messages.
+         * @example Living design documents synced from GitHub
+         */
         description?: string | null;
-        /** @example vol_01933b5a000070008000000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example vol_01933b5a000070008000000000000001
+         */
         id: string;
+        /**
+         * @description Whether the volume is mounted read-only into sessions. Read-only volumes accept no writes from the session sandbox.
+         * @example false
+         */
+        is_readonly: boolean;
+        /**
+         * @description Most recent sync error message; cleared on the next successful sync.
+         * @example ssh: connect to host github.com port 22: Connection timed out
+         */
+        last_sync_error?: string | null;
+        /**
+         * Format: date-time
+         * @description Timestamp of the most recent successful sync (RFC 3339). `None` if never synced.
+         * @example 2026-05-25T08:00:00Z
+         */
+        last_synced_at?: string | null;
+        /**
+         * @description Human-readable name. Safe to render in user-facing messages.
+         * @example design-docs
+         */
         name: string;
+        /** @description Source-specific configuration (git remote, github repo, manual upload). */
+        source: components["schemas"]["VolumeSourceResponse"];
+        /**
+         * @description Source kind discriminator (`manual`, `git`, `github`). Determines which `source` variant is populated.
+         * @example github
+         */
+        source_type: string;
+        /**
+         * @description Current lifecycle status.
+         * @example active
+         */
         status: string;
-        /** Format: date-time */
+        /**
+         * @description Current sync status (`idle`, `syncing`, `succeeded`, `failed`). Only meaningful when `source_type` is `git` or `github`.
+         * @example succeeded
+         */
+        sync_status: string;
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was last updated (RFC 3339).
+         * @example 2026-05-25T08:00:00Z
+         */
         updated_at: string;
       }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_App: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /**
+         * @description Optional ID of the agent to use (format: agent_{32-hex}).
+         * @example agent_01933b5a00007000800000000000001
+         */
+        agent_id?: string | null;
+        /**
+         * @description Optional virtual identity that represents the app in unattended/channel execution.
+         * @example identity_01933b5a00007000800000000000001
+         */
+        agent_identity_id?: string | null;
+        /**
+         * @description Pinned agent version. Required when policy is `pinned`.
+         * @example agentver_01933b5a00007000800000000000001
+         */
+        agent_version_id?: string | null;
+        /** @description Version resolution policy for the optional agent. */
+        agent_version_policy?: components["schemas"]["AgentVersionPolicy"];
+        /**
+         * Format: date-time
+         * @description Timestamp when the app was archived.
+         */
+        archived_at?: string | null;
+        /** @description Distribution channels attached to this app. */
+        channels?: components["schemas"]["AppChannel"][];
+        /**
+         * Format: date-time
+         * @description Timestamp when the app was created.
+         */
+        created_at: string;
+        /**
+         * Format: date-time
+         * @description Timestamp when the app was deleted.
+         */
+        deleted_at?: string | null;
+        /** @description Human-readable description of what the app does. */
+        description?: string | null;
+        effective_owner?: null | components["schemas"]["PrincipalSummary"];
+        /**
+         * @description ID of the harness to use (format: harness_{32-hex}).
+         * @example harness_01933b5a00007000800000000000001
+         */
+        harness_id: string;
+        /**
+         * @description External identifier (app_<32-hex>). Shown as "id" in API.
+         * @example app_01933b5a000070008000000000000001
+         */
+        id: string;
+        /** @description Display name of the app. */
+        name: string;
+        owner?: null | components["schemas"]["PrincipalSummary"];
+        /**
+         * @description Owning principal for this app.
+         * @example principal_01933b5a000070008000000000000001
+         */
+        owner_principal_id: string;
+        /**
+         * Format: date-time
+         * @description Timestamp when the app was last published.
+         */
+        published_at?: string | null;
+        /**
+         * Format: uuid
+         * @description Denormalized effective human owner of the owning principal lineage.
+         */
+        resolved_owner_user_id?: string | null;
+        /** @description Current lifecycle status. */
+        status: components["schemas"]["AppStatus"];
+        /**
+         * Format: date-time
+         * @description Timestamp when the app was last updated.
+         */
+        updated_at: string;
+      } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
     };
     /**
      * @description Response wrapper for list endpoints.
@@ -4405,18 +7720,27 @@ export interface components {
     ListResponse_WithUrls_DeclarativeCapability: {
       /** @description Array of items returned by the list operation. */
       data: ({
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was archived, if any (RFC 3339).
+         */
         archived_at?: string | null;
         /**
          * @description Runtime capability reference. Agents and harnesses may use this or the plain unique name.
          * @example declarative:research_pack
          */
         capability_id: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was created (RFC 3339).
+         */
         created_at: string;
         /** @description Declarative capability payload: system prompt, skills, starter files, MCP servers, and metadata. */
         definition: Record<string, never>;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+         */
         deleted_at?: string | null;
         /**
          * @description Short summary shown in pickers, search results, and API listings.
@@ -4443,9 +7767,19 @@ export interface components {
          * @example active
          */
         status: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was last updated (RFC 3339).
+         */
         updated_at: string;
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -4461,26 +7795,46 @@ export interface components {
     ListResponse_WithUrls_LlmModel: {
       /** @description Array of items returned by the list operation. */
       data: ({
+        /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
         capabilities: string[];
-        /** Format: date-time */
-        created_at: string;
-        display_name: string;
         /**
-         * @description Whether this model is enabled (visible in UI model pickers).
-         *     All models are available via API regardless of this flag.
+         * Format: date-time
+         * @description Timestamp when this model was created (RFC 3339).
          */
+        created_at: string;
+        /** @description Human-readable display name. Safe to render in user-facing messages. */
+        display_name: string;
+        /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
         enabled: boolean;
-        /** @example model_01933b5a00007000800000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example model_01933b5a00007000800000000000001
+         */
         id: string;
+        /** @description Whether this model is starred in the UI for quick access. */
         is_favorite: boolean;
+        /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
         model_id: string;
-        /** @example provider_01933b5a00007000800000000000001 */
+        /**
+         * @description Owning provider's prefixed public identifier.
+         * @example provider_01933b5a00007000800000000000001
+         */
         provider_id: string;
-        /** @description How the model was added to the system */
+        /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
         source: components["schemas"]["LlmModelSource"];
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this model was last updated (RFC 3339).
+         */
         updated_at: string;
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -4496,32 +7850,83 @@ export interface components {
     ListResponse_WithUrls_LlmModelWithProvider: {
       /** @description Array of items returned by the list operation. */
       data: ({
+        /**
+         * @description Capability tags supported by this model.
+         * @example [
+         *       "text",
+         *       "tools",
+         *       "vision",
+         *       "thinking"
+         *     ]
+         */
         capabilities: string[];
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this model was created (RFC 3339).
+         * @example 2026-01-04T11:23:00Z
+         */
         created_at: string;
+        /**
+         * @description Human-readable display name.
+         * @example Claude Sonnet 4.5
+         */
         display_name: string;
-        /** @description Whether this model is enabled (visible in UI model pickers) */
+        /**
+         * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
+         * @example true
+         */
         enabled: boolean;
         /**
          * @description Derived: model is configured and ready for use. Currently means the
          *     joined provider is active and has an API key set; over time this may
          *     also incorporate live reachability checks. Not persisted.
+         * @example true
          */
         healthy: boolean;
-        /** @example model_01933b5a00007000800000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example model_01933b5a00007000800000000000001
+         */
         id: string;
+        /**
+         * @description Whether this model is starred in the UI for quick access.
+         * @example true
+         */
         is_favorite: boolean;
+        /**
+         * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
+         * @example claude-sonnet-4-5
+         */
         model_id: string;
         profile?: null | components["schemas"]["LlmModelProfile"];
-        /** @example provider_01933b5a00007000800000000000001 */
+        /**
+         * @description Owning provider's prefixed public identifier.
+         * @example provider_01933b5a00007000800000000000001
+         */
         provider_id: string;
+        /**
+         * @description Joined provider display name.
+         * @example Anthropic
+         */
         provider_name: string;
+        /** @description Joined provider implementation type. */
         provider_type: components["schemas"]["LlmProviderType"];
-        /** @description How the model was added to the system */
+        /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
         source: components["schemas"]["LlmModelSource"];
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this model was last updated (RFC 3339).
+         * @example 2026-05-27T15:24:00Z
+         */
         updated_at: string;
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -4537,24 +7942,44 @@ export interface components {
     ListResponse_WithUrls_LlmProvider: {
       /** @description Array of items returned by the list operation. */
       data: ({
-        /** @description Whether an API key is configured (key is never returned) */
+        /** @description Whether an API key is configured. The key itself is never returned. */
         api_key_set: boolean;
+        /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
         base_url?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this provider was created (RFC 3339).
+         */
         created_at: string;
-        /** @example provider_01933b5a00007000800000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example provider_01933b5a00007000800000000000001
+         */
         id: string;
         /**
          * Format: date-time
-         * @description When models were last synced from provider API
+         * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
          */
         last_synced_at?: string | null;
+        /** @description Human-readable provider name. Safe to render in user-facing messages. */
         name: string;
+        /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
         provider_type: components["schemas"]["LlmProviderType"];
+        /** @description Current lifecycle status of this provider. */
         status: components["schemas"]["LlmProviderStatus"];
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this provider was last updated (RFC 3339).
+         */
         updated_at: string;
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -4628,6 +8053,13 @@ export interface components {
          */
         url: string;
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -4646,6 +8078,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the harness was archived.
+         * @example 2026-05-26T00:00:00Z
          */
         archived_at?: string | null;
         /** @description Capabilities enabled for this harness with per-harness configuration. */
@@ -4653,6 +8086,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the harness was created.
+         * @example 2026-04-01T10:00:00Z
          */
         created_at: string;
         /**
@@ -4664,11 +8098,18 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the harness was deleted.
+         * @example 2026-05-26T00:00:00Z
          */
         deleted_at?: string | null;
-        /** @description Human-readable description of what the harness does. */
+        /**
+         * @description Human-readable description of what the harness does.
+         * @example Default harness with file-system + secrets capabilities; safe baseline for new agents.
+         */
         description?: string | null;
-        /** @description Human-readable display name shown in UI. */
+        /**
+         * @description Human-readable display name shown in UI.
+         * @example Generic Harness
+         */
         display_name?: string | null;
         /**
          * @description Unique identifier for the harness (format: harness_{32-hex}).
@@ -4681,11 +8122,15 @@ export interface components {
          * @description Whether this harness is built-in (system-managed, readonly).
          *     Built-in harnesses are provisioned during org initialization and
          *     cannot be modified or deleted via the API. Users can copy them.
+         * @example false
          */
         is_built_in?: boolean;
         /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
         mcpServers?: components["schemas"]["BTreeMap"];
-        /** @description Name, unique per org (e.g. "generic"). */
+        /**
+         * @description Name, unique per org (e.g. "generic").
+         * @example generic
+         */
         name: string;
         network_access?: null | components["schemas"]["NetworkAccessList"];
         /**
@@ -4698,13 +8143,21 @@ export interface components {
         /**
          * @description System prompt that defines the harness's base behavior.
          *     Forms the foundation of the prompt stack.
+         * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
          */
         system_prompt: string;
-        /** @description Tags for organizing and filtering harnesses. */
+        /**
+         * @description Tags for organizing and filtering harnesses.
+         * @example [
+         *       "baseline",
+         *       "production"
+         *     ]
+         */
         tags?: string[];
         /**
          * Format: date-time
          * @description Timestamp when the harness was last updated.
+         * @example 2026-05-20T14:00:00Z
          */
         updated_at: string;
       } & {
@@ -4719,6 +8172,13 @@ export interface components {
          */
         session_count: number;
       }) & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -4734,34 +8194,69 @@ export interface components {
     ListResponse_WithUrls_Skill: {
       /** @description Array of items returned by the list operation. */
       data: ({
+        /** @description Comma-separated list of tool patterns this skill may invoke. `None` means inherit from the harness. */
         allowed_tools?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was archived, if any (RFC 3339). Archived skills are hidden from default list views.
+         */
         archived_at?: string | null;
+        /** @description Compatibility marker describing host-runtime requirements declared by the skill (e.g. min platform version). Informational. */
         compatibility?: string | null;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was created (RFC 3339).
+         */
         created_at: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was hard-deleted, if any (RFC 3339).
+         */
         deleted_at?: string | null;
-        /** @example Extract text and tables from PDF files. */
+        /**
+         * @description Short, agent- and user-readable summary of what the skill does and when to use it.
+         * @example Extract text and tables from PDF files.
+         */
         description: string;
-        /** @description Whether the model is prevented from auto-invoking this skill */
+        /** @description When `true`, the LLM is prevented from auto-invoking this skill; only the user can trigger it explicitly. */
         disable_model_invocation?: boolean;
-        /** @example skill_01933b5a00007000800000000000001 */
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example skill_01933b5a00007000800000000000001
+         */
         id: string;
+        /** @description License string as declared by the skill author (e.g. `MIT`, `Apache-2.0`). Informational; not enforced. */
         license?: string | null;
+        /** @description Free-form metadata declared by the skill author. */
         metadata?: {
           [key: string]: unknown;
         };
-        /** @example pdf-processing */
+        /**
+         * @description Stable kebab-case slug used to invoke the skill (e.g. `/pdf-processing` in chat). Safe to render in user-facing messages.
+         * @example pdf-processing
+         */
         name: string;
+        /** @description How the skill content is sourced (filesystem, URL, embedded). Determines reload semantics. */
         source_type: components["schemas"]["SkillSourceType"];
+        /** @description Current lifecycle status (`active`, `archived`, `deleted`). */
         status: components["schemas"]["SkillStatus"];
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when this skill was last updated (RFC 3339).
+         */
         updated_at: string;
-        /** @description Whether this skill appears as a /slash command for users */
+        /** @description Whether this skill appears as a `/`-prefixed slash command for end users in chat UIs. */
         user_invocable?: boolean;
+        /** @description Semver string declared by the skill author. Free-form; sorted lexicographically when comparing. */
         version: string;
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -4770,20 +8265,32 @@ export interface components {
         view_url: string;
       })[];
     };
+    /**
+     * @description Query parameters for `GET /v1/schedules` — optional enabled/target-type
+     *     filters plus standard offset/limit paging.
+     */
     ListSchedulesQuery: {
-      /** @description Filter by enabled status */
+      /**
+       * @description Filter by enabled status
+       * @example true
+       */
       enabled?: boolean | null;
       /**
        * Format: int32
        * @description Pagination limit (default: 20, max: 100)
+       * @example 20
        */
       limit?: number | null;
       /**
        * Format: int32
        * @description Pagination offset
+       * @example 0
        */
       offset?: number | null;
-      /** @description Filter by target type ("workflow" or "activity") */
+      /**
+       * @description Filter by target type ("workflow" or "activity")
+       * @example workflow
+       */
       target_type?: string | null;
     };
     /** @description Query parameters for listing users */
@@ -4791,6 +8298,10 @@ export interface components {
       /** @description Search query to filter by name or email */
       search?: string | null;
     };
+    /**
+     * @description Query parameters for `GET /v1/volumes` — optional name search and a
+     *     flag to include archived volumes in the listing.
+     */
     ListVolumesQuery: {
       include_archived?: boolean | null;
       search?: string | null;
@@ -4842,31 +8353,49 @@ export interface components {
       /**
        * Format: int64
        * @description Duration of the generation in milliseconds
+       * @example 1842
        */
       duration_ms?: number | null;
-      /** @description Error message if generation failed */
+      /**
+       * @description Error message if generation failed
+       * @example provider returned 503
+       */
       error?: string | null;
       /**
        * @description Finish reasons from the LLM (e.g., ["stop"], ["tool_calls"])
        *     Required for gen-ai semantic conventions
+       * @example [
+       *       "tool_calls"
+       *     ]
        */
       finish_reasons?: string[] | null;
-      /** @description Model identifier used for generation */
+      /**
+       * @description Model identifier used for generation
+       * @example claude-sonnet-4-5
+       */
       model: string;
-      /** @description Provider type (openai, anthropic, etc.) */
+      /**
+       * @description Provider type (openai, anthropic, etc.)
+       * @example anthropic
+       */
       provider?: string | null;
       request_options?: null | components["schemas"]["LlmRequestOptions"];
       /**
        * @description Unique response identifier from the LLM provider
        *     Required for gen-ai semantic conventions
+       * @example msg_01ABCDef0123456789
        */
       response_id?: string | null;
       retry?: null | components["schemas"]["LlmRetryInfo"];
-      /** @description Whether the generation was successful */
+      /**
+       * @description Whether the generation was successful
+       * @example true
+       */
       success: boolean;
       /**
        * Format: int64
        * @description Time to first token in milliseconds (streaming latency)
+       * @example 312
        */
       time_to_first_token_ms?: number | null;
       usage?: null | components["schemas"]["TokenUsage"];
@@ -4880,24 +8409,37 @@ export interface components {
     };
     /** @description LLM Model entity */
     LlmModel: {
+      /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
       capabilities: string[];
-      /** Format: date-time */
-      created_at: string;
-      display_name: string;
       /**
-       * @description Whether this model is enabled (visible in UI model pickers).
-       *     All models are available via API regardless of this flag.
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
        */
+      created_at: string;
+      /** @description Human-readable display name. Safe to render in user-facing messages. */
+      display_name: string;
+      /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
       enabled: boolean;
-      /** @example model_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
       id: string;
+      /** @description Whether this model is starred in the UI for quick access. */
       is_favorite: boolean;
+      /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
       model_id: string;
-      /** @example provider_01933b5a00007000800000000000001 */
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
       provider_id: string;
-      /** @description How the model was added to the system */
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
       source: components["schemas"]["LlmModelSource"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       */
       updated_at: string;
     };
     /** @description Cost information for the model (per million tokens) */
@@ -5008,35 +8550,80 @@ export interface components {
     };
     /**
      * @description How the model was added to the system
+     * @example predefined
      * @enum {string}
      */
     LlmModelSource: "manual" | "discovered" | "predefined";
     /** @description LLM Model with provider info */
     LlmModelWithProvider: {
+      /**
+       * @description Capability tags supported by this model.
+       * @example [
+       *       "text",
+       *       "tools",
+       *       "vision",
+       *       "thinking"
+       *     ]
+       */
       capabilities: string[];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
+       * @example 2026-01-04T11:23:00Z
+       */
       created_at: string;
+      /**
+       * @description Human-readable display name.
+       * @example Claude Sonnet 4.5
+       */
       display_name: string;
-      /** @description Whether this model is enabled (visible in UI model pickers) */
+      /**
+       * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
+       * @example true
+       */
       enabled: boolean;
       /**
        * @description Derived: model is configured and ready for use. Currently means the
        *     joined provider is active and has an API key set; over time this may
        *     also incorporate live reachability checks. Not persisted.
+       * @example true
        */
       healthy: boolean;
-      /** @example model_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
       id: string;
+      /**
+       * @description Whether this model is starred in the UI for quick access.
+       * @example true
+       */
       is_favorite: boolean;
+      /**
+       * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
+       * @example claude-sonnet-4-5
+       */
       model_id: string;
       profile?: null | components["schemas"]["LlmModelProfile"];
-      /** @example provider_01933b5a00007000800000000000001 */
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
       provider_id: string;
+      /**
+       * @description Joined provider display name.
+       * @example Anthropic
+       */
       provider_name: string;
+      /** @description Joined provider implementation type. */
       provider_type: components["schemas"]["LlmProviderType"];
-      /** @description How the model was added to the system */
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
       source: components["schemas"]["LlmModelSource"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       * @example 2026-05-27T15:24:00Z
+       */
       updated_at: string;
     };
     /** @description Request-side prompt cache settings for an LLM generation. */
@@ -5053,22 +8640,35 @@ export interface components {
      *     Note: This is the entity struct, separate from the LlmProvider trait in llm.rs
      */
     LlmProvider: {
-      /** @description Whether an API key is configured (key is never returned) */
+      /** @description Whether an API key is configured. The key itself is never returned. */
       api_key_set: boolean;
+      /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
       base_url?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was created (RFC 3339).
+       */
       created_at: string;
-      /** @example provider_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example provider_01933b5a00007000800000000000001
+       */
       id: string;
       /**
        * Format: date-time
-       * @description When models were last synced from provider API
+       * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
        */
       last_synced_at?: string | null;
+      /** @description Human-readable provider name. Safe to render in user-facing messages. */
       name: string;
+      /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
       provider_type: components["schemas"]["LlmProviderType"];
+      /** @description Current lifecycle status of this provider. */
       status: components["schemas"]["LlmProviderStatus"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was last updated (RFC 3339).
+       */
       updated_at: string;
     };
     /**
@@ -5078,6 +8678,7 @@ export interface components {
     LlmProviderStatus: "active" | "disabled";
     /**
      * @description LLM provider type
+     * @example anthropic
      * @enum {string}
      */
     LlmProviderType:
@@ -5123,25 +8724,119 @@ export interface components {
     };
     /** @description Query for log endpoint */
     LogQuery: {
-      /** @description Max commits to return (default: 50) */
+      /**
+       * @description Max commits to return (default: 50)
+       * @example 50
+       */
       limit?: number | null;
-      /** @description Ref to start from (default: HEAD) */
+      /**
+       * @description Ref to start from (default: HEAD)
+       * @example HEAD
+       */
       ref?: string | null;
     };
+    /** @description Request body for the `manage_session_sandbox` operation. */
     ManageSessionSandboxRequest: {
+      /** @description Action to take on the sandbox (`reset`, `delete`, etc.). */
       action: components["schemas"]["SessionSandboxAction"];
     };
+    /** @description Response body for the `manage_session_sandbox` operation. */
     ManageSessionSandboxResponse: {
+      /** @description Action that was taken. */
       action: components["schemas"]["SessionSandboxAction"];
+      /** @description Whether the action deleted the sandbox (`true` after a successful `delete`). */
       deleted: boolean;
+      /** @description Human-readable sandbox label. */
       display_name?: string | null;
+      /** @description Whether a sandbox instance still exists after the action. */
       exists: boolean;
+      /** @description Provider-side sandbox identifier. */
       external_id?: string | null;
+      /** @description Sandbox provider (`daytona`, `e2b`, `docker`, etc.). */
       provider?: string | null;
       session_status?:
         | null
         | components["schemas"]["SessionSandboxStatusValue"];
+      /** @description Absolute path of the sandbox workspace root. */
       workspace_path?: string | null;
+    };
+    /** @description Response body for manual volume source. */
+    ManualVolumeSourceResponse: Record<string, never>;
+    /**
+     * @description Broad-strokes routing hint sitting alongside the precise [`McpErrorCode`].
+     *     The categories are stable enough that an LLM can pick a recovery
+     *     strategy from this field alone (e.g. retry transients with backoff,
+     *     surface validation errors to the user, escalate auth failures).
+     * @enum {string}
+     */
+    McpErrorCategory:
+      | "transient"
+      | "permanent"
+      | "validation"
+      | "auth"
+      | "unknown";
+    /**
+     * @description Closed vocabulary of error codes for Everruns' own MCP `tools/call`
+     *     execute path. Surfaces in [`McpExecuteError::code`] so LLM toolcallers
+     *     can branch on a machine-readable value instead of regexing prose.
+     *
+     *     New variants are a spec change. SDKs should treat any value they don't
+     *     recognise as `unknown` (forward-compat) — serde's `#[serde(other)]`
+     *     catch-all enables that on the deserialize side.
+     * @enum {string}
+     */
+    McpErrorCode:
+      | "tool_not_found"
+      | "tool_timeout"
+      | "tool_panicked"
+      | "invalid_arguments"
+      | "permission_denied"
+      | "quota_exceeded"
+      | "network_blocked"
+      | "mcp_server_unreachable"
+      | "internal"
+      | "unknown";
+    /**
+     * @description Typed structured-error envelope returned by Everruns' MCP `tools/call`
+     *     execute path. Serialized into the MCP `structuredContent` field on
+     *     error responses so the legacy `content[0].text` channel stays
+     *     backward-compatible; new SDKs prefer the typed envelope.
+     *
+     *     See `specs/mcp.md` for the error contract.
+     */
+    McpExecuteError: {
+      /** @description Broad-strokes recovery category. */
+      category: components["schemas"]["McpErrorCategory"];
+      /**
+       * @description Chain of upstream error messages, oldest cause first. Useful for
+       *     debugging; SDKs should not treat this as machine-readable.
+       */
+      cause_chain?: string[];
+      /**
+       * @description Machine-readable error code. Closed vocabulary; SDKs that see an
+       *     unrecognised value should map it to `unknown`.
+       */
+      code: components["schemas"]["McpErrorCode"];
+      /** @description Short, agent-readable recovery hint. Free-form; one or two sentences. */
+      hint?: string | null;
+      /**
+       * @description Human-readable error message. Mirrors the legacy
+       *     `content[0].text` string for backward compat.
+       */
+      message: string;
+      /**
+       * Format: int32
+       * @description Seconds the caller should wait before retrying. Set on
+       *     `tool_timeout`, `quota_exceeded`, and upstream-unreachable cases
+       *     when the server has a concrete back-off hint.
+       */
+      retry_after_seconds?: number | null;
+      /**
+       * @description `true` when the same call is worth retrying. Distinct from
+       *     `category == "transient"` because a server may know about a
+       *     non-transient retry path (e.g. a transient `Internal`).
+       */
+      retryable: boolean;
     };
     /**
      * @description MCP Server configuration.
@@ -5208,6 +8903,7 @@ export interface components {
     };
     /**
      * @description MCP server authentication mode.
+     * @example api_key
      * @enum {string}
      */
     McpServerAuthMode: "none" | "api_key" | "o_auth";
@@ -5217,12 +8913,14 @@ export interface components {
      *     - `disabled`: Server is disabled and not used
      *     - `archived`: Server is hidden from listings and cannot be modified or assigned
      *     - `deleted`: Server is a tombstone kept only for historical references
+     * @example active
      * @enum {string}
      */
     McpServerStatus: "active" | "disabled" | "archived" | "deleted";
     /**
      * @description MCP Server transport type.
      *     Currently only HTTP is supported.
+     * @example http
      * @enum {string}
      */
     McpServerTransportType: "http";
@@ -5236,33 +8934,56 @@ export interface components {
       openWorldHint?: boolean | null;
       readOnlyHint?: boolean | null;
     };
+    /** @description Response body for memory. */
     MemoryResponse: {
       active: boolean;
       content: string;
       content_parts: unknown;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
-      /** @example mem_01933b5a000070008000000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example mem_01933b5a000070008000000000000001
+       */
       id: string;
       /** Format: int32 */
       importance: number;
+      /** @description Discriminator selecting the variant of this resource. */
       kind: string;
       /** @example mst_01933b5a000070008000000000000001 */
       store_id: string;
+      /** @description Free-form tags attached to this resource. */
       tags: string[];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       */
       updated_at: string;
     };
+    /** @description Response body for memory store. */
     MemoryStoreResponse: {
       /** Format: int64 */
       active_memory_count: number;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
-      /** @example mst_01933b5a000070008000000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example mst_01933b5a000070008000000000000001
+       */
       id: string;
       is_default: boolean;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
       name: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       */
       updated_at: string;
     };
     /** @description A message in the conversation */
@@ -5303,6 +9024,105 @@ export interface components {
      * @enum {string}
      */
     MessageRole: "system" | "user" | "agent" | "tool_result";
+    /** @description Single metrics data point */
+    MetricsPoint: {
+      /**
+       * @description Number of workers actively heartbeating (gauge).
+       * @example 4
+       */
+      active_workers: number;
+      /**
+       * @description Number of tasks currently claimed by a worker (gauge).
+       * @example 28
+       */
+      claimed_tasks: number;
+      /**
+       * @description Size of the dead-letter queue (gauge).
+       * @example 3
+       */
+      dlq_size: number;
+      /**
+       * Format: double
+       * @description Aggregate worker load as a percentage of total `max_concurrency` (0.0-100.0).
+       * @example 62.5
+       */
+      load_percentage: number;
+      /**
+       * @description Number of tasks waiting to be claimed by a worker (gauge).
+       * @example 12
+       */
+      pending_tasks: number;
+      /**
+       * @description Number of workflows waiting to be claimed by a worker (gauge).
+       * @example 7
+       */
+      pending_workflows: number;
+      /**
+       * @description Number of workflows currently executing (gauge).
+       * @example 42
+       */
+      running_workflows: number;
+      /**
+       * Format: int64
+       * @description Cumulative count of tasks completed successfully since process start (monotonic counter).
+       * @example 12843
+       */
+      tasks_completed_total: number;
+      /**
+       * Format: int64
+       * @description Cumulative count of tasks that failed or were sent to the DLQ (monotonic counter).
+       * @example 17
+       */
+      tasks_failed_total: number;
+      /**
+       * Format: int64
+       * @description Cumulative count of tasks claimed at least once (monotonic counter).
+       * @example 12873
+       */
+      tasks_started_total: number;
+      /**
+       * Format: date-time
+       * @description Sampling timestamp for this data point (RFC 3339).
+       * @example 2026-05-27T15:30:00Z
+       */
+      timestamp: string;
+      /**
+       * Format: int64
+       * @description Cumulative count of workflows that completed successfully (monotonic counter).
+       * @example 982
+       */
+      workflows_completed_total: number;
+      /**
+       * Format: int64
+       * @description Cumulative count of workflows that ended in failure (monotonic counter).
+       * @example 3
+       */
+      workflows_failed_total: number;
+      /**
+       * Format: int64
+       * @description Cumulative count of workflows that started (monotonic counter).
+       * @example 1024
+       */
+      workflows_started_total: number;
+    };
+    /**
+     * @description Metrics time series response.
+     *
+     *     In multi-instance deployments, each instance maintains its own metrics
+     *     ring buffer. The `instance_count` field indicates how many instances
+     *     are expected so consumers can aggregate or label appropriately.
+     */
+    MetricsTimeSeriesResponse: {
+      /**
+       * Format: int32
+       * @description Number of expected control-plane instances (from EXPECTED_INSTANCES env).
+       *     When >1, these metrics represent only this instance's view.
+       */
+      instance_count?: number;
+      points: components["schemas"]["MetricsPoint"][];
+      /** Format: int64 */
+      resolution_seconds: number;
+    };
     /**
      * @description Modality type (text, image, audio, video)
      * @enum {string}
@@ -5325,9 +9145,15 @@ export interface components {
     };
     /** @description Request to move/rename a file */
     MoveFileRequest: {
-      /** @description Destination path */
+      /**
+       * @description Destination path (relative to the session workspace root).
+       * @example docs/migration-plan.md
+       */
       dst_path: string;
-      /** @description Source path */
+      /**
+       * @description Source path (relative to the session workspace root).
+       * @example drafts/migration-plan.md
+       */
       src_path: string;
     };
     /**
@@ -5340,6 +9166,15 @@ export interface components {
      *     - `example.com` — exact domain match (any port, any path)
      *     - `*.example.com` — domain and all subdomains
      *     - `https://example.com/api/` — exact URL prefix (scheme + host + path)
+     * @example {
+     *       "allowed": [
+     *         "*.example.com",
+     *         "https://api.acme.com/"
+     *       ],
+     *       "blocked": [
+     *         "169.254.169.254"
+     *       ]
+     *     }
      */
     NetworkAccessList: {
       /**
@@ -5454,6 +9289,10 @@ export interface components {
     /**
      * @description Response wrapper for paginated list endpoints.
      *     Includes pagination metadata along with the data array.
+     *
+     *     `next_url` and `prev_url` are populated by the [`decorate_pagination_links`]
+     *     middleware after the handler returns, so handlers don't need to thread the
+     *     request URL into every construction site.
      */
     PaginatedResponse_Session: {
       /** @description Array of items returned by the list operation. */
@@ -5462,6 +9301,7 @@ export interface components {
          * Format: int32
          * @description Number of active (enabled) schedules for this session.
          *     Populated when the session is fetched for API responses.
+         * @example 2
          */
         active_schedule_count?: number | null;
         /**
@@ -5479,11 +9319,15 @@ export interface components {
          * @example agentver_01933b5a00007000800000000000001
          */
         agent_version_id?: string | null;
-        /** @description Validated config passed by host at blueprint spawn time. */
-        blueprint_config?: unknown;
+        /**
+         * @description Validated config passed by host at blueprint spawn time.
+         *     Example: `{"target_repo": "acme/everruns"}`.
+         */
+        blueprint_config?: Record<string, never> | null;
         /**
          * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
          *     from the blueprint definition instead of from harness_id/agent_id.
+         * @example blueprint_research_pack
          */
         blueprint_id?: string | null;
         /**
@@ -5494,6 +9338,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the session was created.
+         * @example 2026-05-25T10:00:00Z
          */
         created_at: string;
         effective_owner?: null | components["schemas"]["PrincipalSummary"];
@@ -5502,11 +9347,16 @@ export interface components {
          *     Computed at read time from the capability registry.
          *     Known features: "file_system", "schedules", "secrets", "key_value",
          *     "sql_database", "leased_resources".
+         * @example [
+         *       "file_system",
+         *       "secrets"
+         *     ]
          */
         features?: string[];
         /**
          * Format: date-time
          * @description Timestamp when the session finished (completed or failed).
+         * @example 2026-05-25T10:14:32Z
          */
         finished_at?: string | null;
         /**
@@ -5537,11 +9387,18 @@ export interface components {
         /**
          * @description Whether this session is pinned by the current user.
          *     Only populated when the request has an authenticated user context.
+         * @example false
          */
         is_pinned?: boolean | null;
-        /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+        /**
+         * @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`).
+         * @example en-US
+         */
         locale?: string | null;
-        /** @description Maximum number of LLM iterations per turn for this session. */
+        /**
+         * @description Maximum number of LLM iterations per turn for this session.
+         * @example 50
+         */
         max_iterations?: number | null;
         /** @description Remote MCP servers scoped to this session only. */
         mcpServers?: components["schemas"]["BTreeMap"];
@@ -5557,7 +9414,10 @@ export interface components {
          * @example org_00000000000000000000000000000001
          */
         organization_id: string;
-        /** @description Preview text from the last assistant response (truncated). */
+        /**
+         * @description Preview text from the last assistant response (truncated).
+         * @example Here is a Q3 plan covering the three pillars we discussed...
+         */
         output_preview?: string | null;
         owner?: null | components["schemas"]["PrincipalSummary"];
         /**
@@ -5567,39 +9427,61 @@ export interface components {
         owner_principal_id: string;
         /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
         parent_session_id?: string | null;
-        /** @description Preview text from the first user message (truncated). */
+        /**
+         * @description Preview text from the first user message (truncated).
+         * @example Help me draft the Q3 marketing plan
+         */
         preview?: string | null;
         /**
          * Format: uuid
          * @description Denormalized effective human owner of the owning principal lineage.
+         * @example 550e8400-e29b-41d4-a716-446655440000
          */
         resolved_owner_user_id?: string | null;
         /**
          * Format: date-time
          * @description Timestamp when the session started executing.
+         * @example 2026-05-25T10:00:01Z
          */
         started_at?: string | null;
         /** @description Current execution status of the session. */
         status: components["schemas"]["SessionStatus"];
-        /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+        /**
+         * @description Human-readable subagent name ("Test Runner"), unique per parent.
+         * @example Test Runner
+         */
         subagent_name?: string | null;
         subagent_status?: null | components["schemas"]["SubagentStatus"];
-        /** @description Original task description given to this subagent. */
+        /**
+         * @description Original task description given to this subagent.
+         * @example Run the integration test suite and report failures.
+         */
         subagent_task?: string | null;
         /**
          * @description Session-level system prompt override.
          *     Prepended to the agent's system prompt when building RuntimeAgent.
          */
         system_prompt?: string | null;
-        /** @description Tags for organizing and filtering sessions. */
+        /**
+         * @description Tags for organizing and filtering sessions.
+         * @example [
+         *       "marketing",
+         *       "q3",
+         *       "draft"
+         *     ]
+         */
         tags?: string[];
-        /** @description Human-readable title for the session. */
+        /**
+         * @description Human-readable title for the session.
+         * @example Q3 marketing brief
+         */
         title?: string | null;
         /** @description Client-side tools for this session (additive to agent tools). */
         tools?: components["schemas"]["ToolDefinition"][];
         /**
          * Format: date-time
          * @description Timestamp when the session was last updated.
+         * @example 2026-05-25T10:14:32Z
          */
         updated_at: string;
         usage?: null | components["schemas"]["TokenUsage"];
@@ -5609,11 +9491,15 @@ export interface components {
        * @description Maximum number of items per page.
        */
       limit: number;
+      /** @description Absolute URL for the next page, with `offset` advanced by `limit`. Omitted from the response (field absent) when this is the last page. */
+      next_url?: string | null;
       /**
        * Format: int32
        * @description Current offset (starting position).
        */
       offset: number;
+      /** @description Absolute URL for the previous page, with `offset` rolled back by `limit`. Omitted from the response (field absent) when this is the first page. */
+      prev_url?: string | null;
       /**
        * Format: int32
        * @description Total number of items matching the query (across all pages).
@@ -5623,6 +9509,10 @@ export interface components {
     /**
      * @description Response wrapper for paginated list endpoints.
      *     Includes pagination metadata along with the data array.
+     *
+     *     `next_url` and `prev_url` are populated by the [`decorate_pagination_links`]
+     *     middleware after the handler returns, so handlers don't need to thread the
+     *     request URL into every construction site.
      */
     PaginatedResponse_WithUrls_CapabilityInfo: {
       /** @description Array of items returned by the list operation. */
@@ -5630,9 +9520,13 @@ export interface components {
         /**
          * Format: int64
          * @description Number of active agents referencing this capability in the org.
+         * @example 42
          */
         agent_count?: number;
-        /** @description Category for grouping in UI */
+        /**
+         * @description Category for grouping in UI
+         * @example filesystem
+         */
         category?: string | null;
         /** @description JSON Schema for capability-specific per-agent config. */
         config_schema?: Record<string, never>;
@@ -5641,41 +9535,94 @@ export interface components {
         /**
          * @description IDs of capabilities that this capability depends on.
          *     When this capability is selected, its dependencies are automatically included.
+         * @example [
+         *       "approval"
+         *     ]
          */
         dependencies?: string[];
-        /** @description Description of what this capability provides */
+        /**
+         * @description Description of what this capability provides
+         * @example Read, write, edit, list, grep, delete, and stat files in the session workspace.
+         */
         description: string;
-        /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+        /**
+         * @description Slug under https://dev.everruns.com/capabilities/ when public docs exist.
+         * @example session_file_system
+         */
         docs_slug?: string | null;
         /**
          * @description UI feature strings this capability contributes to.
          *     Multiple capabilities can contribute the same feature.
+         * @example [
+         *       "file_browser"
+         *     ]
          */
         features?: string[];
         /**
          * Format: int64
          * @description Number of active harnesses referencing this capability in the org.
+         * @example 7
          */
         harness_count?: number;
-        /** @description Icon name (for UI rendering) */
+        /**
+         * @description Icon name (for UI rendering)
+         * @example Folder
+         */
         icon?: string | null;
-        /** @description Unique capability identifier */
+        /**
+         * @description Unique capability identifier
+         * @example session_file_system
+         */
         id: string;
-        /** @description Whether this is an MCP server capability (for UI badge) */
+        /**
+         * @description Whether this is an MCP server capability (for UI badge)
+         * @example false
+         */
         is_mcp?: boolean;
-        /** @description Whether this is an Agent Skill capability (for UI badge) */
+        /**
+         * @description Whether this is an Agent Skill capability (for UI badge)
+         * @example false
+         */
         is_skill?: boolean;
-        /** @description Display name */
+        /**
+         * @description Display name
+         * @example Session File System
+         */
         name: string;
         /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
         risk_level?: components["schemas"]["RiskLevel"];
-        /** @description Current status */
+        /**
+         * @description Current status
+         * @example active
+         */
         status: string;
-        /** @description System prompt addition contributed by this capability */
+        /**
+         * @description System prompt addition contributed by this capability
+         * @example You can read and write files in /workspace via the session_file_system tools.
+         */
         system_prompt?: string | null;
-        /** @description Tool definitions provided by this capability */
+        /**
+         * @description Tool definitions provided by this capability
+         * @example [
+         *       {
+         *         "description": "Read a file from the session workspace.",
+         *         "name": "read_file"
+         *       },
+         *       {
+         *         "description": "Write or overwrite a file in the session workspace.",
+         *         "name": "write_file"
+         *       }
+         *     ]
+         */
         tool_definitions?: Record<string, never>[];
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -5688,11 +9635,15 @@ export interface components {
        * @description Maximum number of items per page.
        */
       limit: number;
+      /** @description Absolute URL for the next page, with `offset` advanced by `limit`. Omitted from the response (field absent) when this is the last page. */
+      next_url?: string | null;
       /**
        * Format: int32
        * @description Current offset (starting position).
        */
       offset: number;
+      /** @description Absolute URL for the previous page, with `offset` rolled back by `limit`. Omitted from the response (field absent) when this is the first page. */
+      prev_url?: string | null;
       /**
        * Format: int32
        * @description Total number of items matching the query (across all pages).
@@ -5702,6 +9653,10 @@ export interface components {
     /**
      * @description Response wrapper for paginated list endpoints.
      *     Includes pagination metadata along with the data array.
+     *
+     *     `next_url` and `prev_url` are populated by the [`decorate_pagination_links`]
+     *     middleware after the handler returns, so handlers don't need to thread the
+     *     request URL into every construction site.
      */
     PaginatedResponse_WithUrls_ResourceWithCounts_Agent: {
       /** @description Array of items returned by the list operation. */
@@ -5709,6 +9664,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was archived.
+         * @example 2026-05-26T00:00:00Z
          */
         archived_at?: string | null;
         /**
@@ -5719,6 +9675,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was created.
+         * @example 2026-04-01T10:00:00Z
          */
         created_at: string;
         /**
@@ -5735,13 +9692,18 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was deleted.
+         * @example 2026-05-26T00:00:00Z
          */
         deleted_at?: string | null;
-        /** @description Human-readable description of what the agent does. */
+        /**
+         * @description Human-readable description of what the agent does.
+         * @example Handles refund and shipping questions; escalates billing disputes.
+         */
         description?: string | null;
         /**
          * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
          *     Falls back to `name` when absent.
+         * @example Customer Support Agent
          */
         display_name?: string | null;
         /**
@@ -5762,11 +9724,17 @@ export interface components {
         id: string;
         /** @description Starter files copied into each new session for this agent. */
         initial_files?: components["schemas"]["InitialFile"][];
-        /** @description Maximum number of LLM iterations per turn for this agent. */
+        /**
+         * @description Maximum number of LLM iterations per turn for this agent.
+         * @example 50
+         */
         max_iterations?: number | null;
         /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
         mcpServers?: components["schemas"]["BTreeMap"];
-        /** @description Name, unique per org (e.g. "customer-support"). */
+        /**
+         * @description Name, unique per org (e.g. "customer-support").
+         * @example customer-support
+         */
         name: string;
         network_access?: null | components["schemas"]["NetworkAccessList"];
         /**
@@ -5779,9 +9747,16 @@ export interface components {
         /**
          * @description System prompt that defines the agent's behavior.
          *     Sent as the first message in every conversation.
+         * @example You are a friendly customer support agent for Acme Corp. Verify orders before issuing refunds. Escalate any billing disputes to a human.
          */
         system_prompt: string;
-        /** @description Tags for organizing and filtering agents. */
+        /**
+         * @description Tags for organizing and filtering agents.
+         * @example [
+         *       "support",
+         *       "production"
+         *     ]
+         */
         tags?: string[];
         /**
          * @description Client-side tools registered for this agent.
@@ -5791,6 +9766,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the agent was last updated.
+         * @example 2026-05-20T14:00:00Z
          */
         updated_at: string;
         usage?: null | components["schemas"]["TokenUsage"];
@@ -5806,6 +9782,13 @@ export interface components {
          */
         session_count: number;
       }) & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -5818,11 +9801,15 @@ export interface components {
        * @description Maximum number of items per page.
        */
       limit: number;
+      /** @description Absolute URL for the next page, with `offset` advanced by `limit`. Omitted from the response (field absent) when this is the last page. */
+      next_url?: string | null;
       /**
        * Format: int32
        * @description Current offset (starting position).
        */
       offset: number;
+      /** @description Absolute URL for the previous page, with `offset` rolled back by `limit`. Omitted from the response (field absent) when this is the first page. */
+      prev_url?: string | null;
       /**
        * Format: int32
        * @description Total number of items matching the query (across all pages).
@@ -5832,6 +9819,10 @@ export interface components {
     /**
      * @description Response wrapper for paginated list endpoints.
      *     Includes pagination metadata along with the data array.
+     *
+     *     `next_url` and `prev_url` are populated by the [`decorate_pagination_links`]
+     *     middleware after the handler returns, so handlers don't need to thread the
+     *     request URL into every construction site.
      */
     PaginatedResponse_WithUrls_Session: {
       /** @description Array of items returned by the list operation. */
@@ -5840,6 +9831,7 @@ export interface components {
          * Format: int32
          * @description Number of active (enabled) schedules for this session.
          *     Populated when the session is fetched for API responses.
+         * @example 2
          */
         active_schedule_count?: number | null;
         /**
@@ -5857,11 +9849,15 @@ export interface components {
          * @example agentver_01933b5a00007000800000000000001
          */
         agent_version_id?: string | null;
-        /** @description Validated config passed by host at blueprint spawn time. */
-        blueprint_config?: unknown;
+        /**
+         * @description Validated config passed by host at blueprint spawn time.
+         *     Example: `{"target_repo": "acme/everruns"}`.
+         */
+        blueprint_config?: Record<string, never> | null;
         /**
          * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
          *     from the blueprint definition instead of from harness_id/agent_id.
+         * @example blueprint_research_pack
          */
         blueprint_id?: string | null;
         /**
@@ -5872,6 +9868,7 @@ export interface components {
         /**
          * Format: date-time
          * @description Timestamp when the session was created.
+         * @example 2026-05-25T10:00:00Z
          */
         created_at: string;
         effective_owner?: null | components["schemas"]["PrincipalSummary"];
@@ -5880,11 +9877,16 @@ export interface components {
          *     Computed at read time from the capability registry.
          *     Known features: "file_system", "schedules", "secrets", "key_value",
          *     "sql_database", "leased_resources".
+         * @example [
+         *       "file_system",
+         *       "secrets"
+         *     ]
          */
         features?: string[];
         /**
          * Format: date-time
          * @description Timestamp when the session finished (completed or failed).
+         * @example 2026-05-25T10:14:32Z
          */
         finished_at?: string | null;
         /**
@@ -5915,11 +9917,18 @@ export interface components {
         /**
          * @description Whether this session is pinned by the current user.
          *     Only populated when the request has an authenticated user context.
+         * @example false
          */
         is_pinned?: boolean | null;
-        /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+        /**
+         * @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`).
+         * @example en-US
+         */
         locale?: string | null;
-        /** @description Maximum number of LLM iterations per turn for this session. */
+        /**
+         * @description Maximum number of LLM iterations per turn for this session.
+         * @example 50
+         */
         max_iterations?: number | null;
         /** @description Remote MCP servers scoped to this session only. */
         mcpServers?: components["schemas"]["BTreeMap"];
@@ -5935,7 +9944,10 @@ export interface components {
          * @example org_00000000000000000000000000000001
          */
         organization_id: string;
-        /** @description Preview text from the last assistant response (truncated). */
+        /**
+         * @description Preview text from the last assistant response (truncated).
+         * @example Here is a Q3 plan covering the three pillars we discussed...
+         */
         output_preview?: string | null;
         owner?: null | components["schemas"]["PrincipalSummary"];
         /**
@@ -5945,43 +9957,72 @@ export interface components {
         owner_principal_id: string;
         /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
         parent_session_id?: string | null;
-        /** @description Preview text from the first user message (truncated). */
+        /**
+         * @description Preview text from the first user message (truncated).
+         * @example Help me draft the Q3 marketing plan
+         */
         preview?: string | null;
         /**
          * Format: uuid
          * @description Denormalized effective human owner of the owning principal lineage.
+         * @example 550e8400-e29b-41d4-a716-446655440000
          */
         resolved_owner_user_id?: string | null;
         /**
          * Format: date-time
          * @description Timestamp when the session started executing.
+         * @example 2026-05-25T10:00:01Z
          */
         started_at?: string | null;
         /** @description Current execution status of the session. */
         status: components["schemas"]["SessionStatus"];
-        /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+        /**
+         * @description Human-readable subagent name ("Test Runner"), unique per parent.
+         * @example Test Runner
+         */
         subagent_name?: string | null;
         subagent_status?: null | components["schemas"]["SubagentStatus"];
-        /** @description Original task description given to this subagent. */
+        /**
+         * @description Original task description given to this subagent.
+         * @example Run the integration test suite and report failures.
+         */
         subagent_task?: string | null;
         /**
          * @description Session-level system prompt override.
          *     Prepended to the agent's system prompt when building RuntimeAgent.
          */
         system_prompt?: string | null;
-        /** @description Tags for organizing and filtering sessions. */
+        /**
+         * @description Tags for organizing and filtering sessions.
+         * @example [
+         *       "marketing",
+         *       "q3",
+         *       "draft"
+         *     ]
+         */
         tags?: string[];
-        /** @description Human-readable title for the session. */
+        /**
+         * @description Human-readable title for the session.
+         * @example Q3 marketing brief
+         */
         title?: string | null;
         /** @description Client-side tools for this session (additive to agent tools). */
         tools?: components["schemas"]["ToolDefinition"][];
         /**
          * Format: date-time
          * @description Timestamp when the session was last updated.
+         * @example 2026-05-25T10:14:32Z
          */
         updated_at: string;
         usage?: null | components["schemas"]["TokenUsage"];
       } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
         /** @description Full API endpoint URL for this resource. */
         self_url: string;
         /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -5994,51 +10035,141 @@ export interface components {
        * @description Maximum number of items per page.
        */
       limit: number;
+      /** @description Absolute URL for the next page, with `offset` advanced by `limit`. Omitted from the response (field absent) when this is the last page. */
+      next_url?: string | null;
       /**
        * Format: int32
        * @description Current offset (starting position).
        */
       offset: number;
+      /** @description Absolute URL for the previous page, with `offset` rolled back by `limit`. Omitted from the response (field absent) when this is the first page. */
+      prev_url?: string | null;
       /**
        * Format: int32
        * @description Total number of items matching the query (across all pages).
        */
       total: number;
     };
+    /**
+     * @description A payment account — the org-scoped source of funds for paid agent calls.
+     *     Each account binds an owning principal (user, agent identity, or org)
+     *     to one settlement rail and tracks its provisioning lifecycle.
+     */
     PaymentAccount: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this account was created (RFC 3339).
+       * @example 2026-04-01T10:00:00Z
+       */
       created_at: string;
+      /** @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
       id: components["schemas"]["payacctId"];
+      /**
+       * @description Human-readable label for this account. Safe to render in user-facing messages.
+       * @example Production USDC ops wallet
+       */
       label: string;
+      /** @description Free-form metadata attached to this account (caller-defined; opaque to the platform). */
       metadata: unknown;
+      /**
+       * @description Owning organization's prefixed public identifier.
+       * @example org_01933b5a000070008000000000000001
+       */
       organization_id: string;
+      /**
+       * @description Prefixed identifier of the owning principal (e.g. `user_…`, `agent_…`, `org_…`).
+       * @example agent_01933b5a000070008000000000000001
+       */
       owner_id: string;
+      /** @description Principal class that owns this account (user, agent identity, or organization). */
       owner_type: components["schemas"]["PaymentOwnerType"];
+      /**
+       * @description Public address on the rail (chain address, account number, etc.). Optional; `None` until provisioning completes.
+       * @example 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+       */
       public_address?: string | null;
+      /** @description Settlement rail this account operates on. */
       rail: components["schemas"]["PaymentRail"];
+      /** @description Current lifecycle status of this account. */
       status: components["schemas"]["PaymentStatus"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this account was last updated (RFC 3339).
+       * @example 2026-05-20T14:00:00Z
+       */
       updated_at: string;
     };
+    /**
+     * @description A single paid-call settlement attempt — the durable record of one
+     *     authorization+settlement cycle issued through the payment authority.
+     *     Persisted regardless of outcome so failed attempts remain auditable.
+     */
     PaymentAttempt: {
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Amount actually charged (USD).
+       * @example 0.014
+       */
       amount_usd: number;
+      /**
+       * @description Capability ID that originated this paid call.
+       * @example paid_search
+       */
       capability: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this attempt was created (RFC 3339).
+       * @example 2026-05-25T10:14:00Z
+       */
       created_at: string;
+      /**
+       * @description ISO 4217 currency code for the charge (typically `USD`).
+       * @example USD
+       */
       currency: string;
+      /**
+       * @description Human-readable error message when `status` is `failed`; `None` otherwise.
+       * @example rail.insufficient_funds: settled balance below minimum
+       */
       error_message?: string | null;
+      /** @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
       id: components["schemas"]["payattId"];
+      /**
+       * @description Capability-specific operation name that originated this paid call.
+       * @example search.query
+       */
       operation: string;
+      /**
+       * @description Owning organization's prefixed public identifier.
+       * @example org_01933b5a000070008000000000000001
+       */
       organization_id: string;
       payment_account_id?: null | components["schemas"]["payacctId"];
       rail?: null | components["schemas"]["PaymentRail"];
+      /** @description Rail-specific receipt payload (transaction id, block reference, signature, etc.). */
       receipt: unknown;
+      /**
+       * @description Stable hash of the outbound request used to detect replays. `None` when not applicable.
+       * @example sha256:9f1e2a4c3d5b6e8a0b2c4d6e8f0a1b3c5d7e9f0a1b2c4d6e8f0a1b2c4d6e8f0a
+       */
       request_hash?: string | null;
+      /**
+       * @description Session that initiated the paid call, if any.
+       * @example session_01933b5a000070008000000000000001
+       */
       session_id?: string | null;
+      /** @description Current lifecycle status of this attempt. */
       status: components["schemas"]["PaymentStatus"];
+      /**
+       * @description Destination URL of the paid outbound call.
+       * @example https://api.example.com/v1/search
+       */
       target_url: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this attempt was last updated (RFC 3339).
+       * @example 2026-05-25T10:14:02Z
+       */
       updated_at: string;
     };
     /**
@@ -6046,28 +10177,88 @@ export interface components {
      * @enum {string}
      */
     PaymentOwnerType: "user" | "agent_identity" | "organization";
+    /**
+     * @description A payment policy — the binding between a paying account and a subject
+     *     (agent identity, session) that controls which paid calls are
+     *     authorized and at what spend caps.
+     */
     PaymentPolicy: {
+      /**
+       * @description Capability IDs this policy permits paid calls for. Empty list means no capability gating.
+       * @example [
+       *       "paid_search",
+       *       "paid_image_gen"
+       *     ]
+       */
       allowed_capabilities: string[];
+      /**
+       * @description HTTP host allowlist for paid outbound calls. Empty list means no host gating.
+       * @example [
+       *       "api.openai.com",
+       *       "api.anthropic.com"
+       *     ]
+       */
       allowed_hosts: string[];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this policy was created (RFC 3339).
+       * @example 2026-04-01T10:00:00Z
+       */
       created_at: string;
+      /** @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
       id: components["schemas"]["paypolId"];
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Maximum cumulative amount (USD) per UTC day. **Advisory only — not yet enforced.** Stored on the policy for forward compatibility; the payment authority currently checks only `max_amount_usd_per_request`. `None` means no per-day cap.
+       * @example 50
+       */
       max_amount_usd_per_day?: number | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Maximum amount (USD) any single paid request may settle for. **Enforced** by the payment authority at policy selection. `None` means no per-request cap.
+       * @example 2.5
+       */
       max_amount_usd_per_request?: number | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Maximum cumulative amount (USD) per agent turn. **Advisory only — not yet enforced.** Stored on the policy for forward compatibility; the payment authority currently checks only `max_amount_usd_per_request`. `None` means no per-turn cap.
+       * @example 5
+       */
       max_amount_usd_per_turn?: number | null;
+      /** @description Free-form metadata attached to this policy. */
       metadata: unknown;
+      /**
+       * @description Owning organization's prefixed public identifier.
+       * @example org_01933b5a000070008000000000000001
+       */
       organization_id: string;
+      /** @description Payment account this policy authorizes spending from. */
       payment_account_id: components["schemas"]["payacctId"];
+      /** @description Preferred settlement rails in priority order; the authority picks the first available. */
       rail_preference: components["schemas"]["PaymentRail"][];
-      /** Format: double */
+      /**
+       * Format: double
+       * @description Threshold (USD) above which a request would require explicit human approval. **Advisory only — not yet enforced.** Stored on the policy for forward compatibility; no approval gate is wired up yet. `None` disables the (future) gate.
+       * @example 10
+       */
       require_approval_above_usd?: number | null;
+      /** @description Current lifecycle status of this policy. */
       status: components["schemas"]["PaymentStatus"];
+      /**
+       * @description Prefixed identifier of the bound subject.
+       * @example identity_01933b5a000070008000000000000001
+       */
       subject_id: string;
+      /**
+       * @description Class of subject this policy binds to (e.g. `agent_identity`, `session`).
+       * @example agent_identity
+       */
       subject_type: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this policy was last updated (RFC 3339).
+       * @example 2026-05-20T14:00:00Z
+       */
       updated_at: string;
     };
     /**
@@ -6075,7 +10266,12 @@ export interface components {
      * @enum {string}
      */
     PaymentRail: "mpp_tempo" | "x402_base";
-    /** @enum {string} */
+    /**
+     * @description Lifecycle state of a payment account, policy, or attempt. The shared
+     *     vocabulary keeps account/policy admin and attempt settlement on the
+     *     same status taxonomy.
+     * @enum {string}
+     */
     PaymentStatus:
       | "active"
       | "disabled"
@@ -6111,15 +10307,51 @@ export interface components {
     };
     /** @description Request to preview harness shape with capabilities applied */
     PreviewHarnessRequest: {
+      /**
+       * @description Capability configurations to layer onto the preview. Empty list means none.
+       * @example [
+       *       {
+       *         "config": {},
+       *         "ref": "web.search"
+       *       },
+       *       {
+       *         "config": {
+       *           "root": "/workspace"
+       *         },
+       *         "ref": "filesystem.read"
+       *       }
+       *     ]
+       */
       capabilities?: components["schemas"]["AgentCapabilityConfig"][];
+      /**
+       * @description MCP servers scoped to this preview, keyed by scope (`shared` / per-agent / etc.).
+       *     Use the camelCase key `mcpServers` (preferred) or the snake_case alias `mcp_servers`. Empty by default.
+       */
       mcpServers?: components["schemas"]["BTreeMap"];
-      /** @example harness_01933b5a000070008000000000000602 */
+      /**
+       * @description Parent harness to extend. When set, its prompt, capabilities, and MCP servers are
+       *     merged with the fields in this request before rendering.
+       * @example harness_01933b5a000070008000000000000602
+       */
       parent_harness_id?: string | null;
-      /** @example You are a research assistant. */
+      /**
+       * @description System prompt to render as the base prompt for the preview.
+       * @example You are a research assistant.
+       */
       system_prompt: string;
     };
-    /** @enum {string} */
+    /**
+     * @description Class of principal that can hold permissions or own resources. `system`
+     *     is reserved for platform-internal callers and is never minted via the
+     *     public API.
+     * @enum {string}
+     */
     PrincipalKind: "user" | "agent_identity" | "system";
+    /**
+     * @description Compact view of a principal — id + kind + the subject-id pointer back
+     *     into the user/agent-identity row. Used wherever a full `Principal`
+     *     would be redundant (e.g. as a sub-field of a session or audit record).
+     */
     PrincipalSummary: {
       /** @example principal_01933b5a000070008000000000000001 */
       id: string;
@@ -6127,6 +10359,39 @@ export interface components {
       metadata?: unknown;
       /** Format: uuid */
       subject_id?: string | null;
+    };
+    /** @description Response from profile update */
+    ProfileResponse: {
+      avatar_url?: string | null;
+      email: string;
+      /** @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
+      id: string;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
+      name: string;
+    };
+    /**
+     * @description Query parameters for a manual `POST /v1/reports/projector/run` invocation —
+     *     the cap on how many outbox rows one run is allowed to claim.
+     */
+    ProjectorRunQuery: {
+      /**
+       * Format: int64
+       * @description Maximum number of items returned in this page.
+       */
+      limit?: number;
+    };
+    /**
+     * @description Outcome of one projector run — how many outbox rows it claimed,
+     *     completed, and failed. Returned by manual `POST /v1/reports/projector/run`
+     *     calls and useful for backfill scripting.
+     */
+    ProjectorRunResult: {
+      /** @description Number of outbox rows claimed by this run. */
+      claimed: number;
+      /** @description Number of claimed rows that completed successfully. */
+      completed: number;
+      /** @description Number of claimed rows that failed and will be retried (or moved to `failed` after retry limit). */
+      failed: number;
     };
     /**
      * @description Strategy for prompt caching.
@@ -6154,6 +10419,40 @@ export interface components {
        */
       tool_call_count: number;
       usage?: null | components["schemas"]["TokenUsage"];
+    };
+    /**
+     * @description Data for `reason.item` event.
+     *
+     *     Durable record of an opaque assistant reasoning response item (e.g., OpenAI
+     *     Responses API reasoning items). Carries provider-supplied opaque artifacts
+     *     and curated summary text only. Plaintext hidden chain-of-thought is never
+     *     persisted in this event — emitters must strip any plaintext reasoning
+     *     content before constructing it.
+     */
+    ReasonItemData: {
+      /** @description Provider-encrypted reasoning context, if supplied. Opaque to consumers. */
+      encrypted_content?: string | null;
+      /** @description Provider-assigned identifier for the reasoning item. */
+      item_id: string;
+      /** @description Model identifier reported by the provider, if known. */
+      model?: string | null;
+      /** @description Provider that produced the reasoning item (e.g., "openai"). */
+      provider: string;
+      /**
+       * @description Safe summary text segments curated by the provider. Never includes
+       *     plaintext reasoning content.
+       */
+      summary?: string[];
+      /**
+       * Format: int32
+       * @description Per-item reasoning token count, when the provider reports one.
+       */
+      token_count?: number | null;
+      /**
+       * @description Turn ID this reasoning item belongs to.
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
     };
     /** @description Data for reason.started event */
     ReasonStartedData: {
@@ -6236,6 +10535,317 @@ export interface components {
       value: components["schemas"]["ReasoningEffort"];
     };
     /**
+     * @description Output of [`RegenerateA2aApiKeyCmd`] — includes the newly generated
+     *     plaintext API key (returned **once**, never persisted) plus the updated
+     *     [`AppChannel`].
+     */
+    RegenerateA2aApiKeyOutput: {
+      /**
+       * @description New plaintext API key. Persist this — it cannot be recovered later.
+       *     The previous key is invalidated immediately.
+       */
+      api_key: string;
+      /** @description The updated A2A channel. */
+      channel: components["schemas"]["AppChannel"];
+    };
+    /**
+     * @description One column header in a `ReportResult`. The ordered `columns` list
+     *     declares the key set of each row in `rows`.
+     */
+    ReportColumn: {
+      /**
+       * @description Whether this column is a grouping `dimension` or an aggregate
+       *     `measure` — the same distinction made on `ReportQuery`.
+       */
+      kind: components["schemas"]["ReportColumnKind"];
+      /**
+       * @description Column name as it appears in `rows`.
+       * @example session_count
+       */
+      name: string;
+    };
+    /**
+     * @description Whether a `ReportColumn` is a grouping dimension or an aggregate measure.
+     * @enum {string}
+     */
+    ReportColumnKind: "dimension" | "measure";
+    /**
+     * @description Serialized export of a report's data, ready to stream to a caller as a
+     *     download. Carries the rendered payload plus the MIME/filename metadata
+     *     a client needs to save it.
+     */
+    ReportExport: {
+      /**
+       * Format: date-time
+       * @description Timestamp the underlying data was materialized (RFC 3339). Useful for "as of" footers.
+       */
+      as_of: string;
+      /** @description Serialized payload as a UTF-8 string. Caller streams this to the client. */
+      content: string;
+      /** @description MIME type matching `format` (`text/csv` for CSV exports). */
+      content_type: string;
+      /** @description Suggested filename for the download (includes the extension matching `format`). */
+      filename: string;
+      /** @description Export format (currently `csv`). */
+      format: components["schemas"]["ReportExportFormat"];
+      /**
+       * Format: int64
+       * @description How stale the data is relative to `now()`, in milliseconds. `None` when freshness can't be determined.
+       */
+      freshness_lag_ms?: number | null;
+    };
+    /**
+     * @description Output format for a report export. `Csv` emits a header row plus one
+     *     row per result; `Json` emits an envelope with the same shape as
+     *     `ReportResult`.
+     * @enum {string}
+     */
+    ReportExportFormat: "csv" | "json";
+    /**
+     * @description One predicate filter applied to the dataset before aggregation.
+     *     Combined with other filters via logical AND.
+     */
+    ReportFilter: {
+      /**
+       * @description Field to filter on. Must be a filter field exposed by the dataset (see `filter_fields` in the catalog).
+       * @example status
+       */
+      field: string;
+      /**
+       * @description Comparison operator. Determines the expected shape of `value`
+       *     (scalar for `eq`/`neq`/`gt`/`gte`/`lt`/`lte`, array for `in`).
+       */
+      op: components["schemas"]["ReportFilterOp"];
+      /**
+       * @description Comparison value. Type depends on `op`: a scalar for `eq`/`neq`/`gt`/`gte`/`lt`/`lte`,
+       *     an array for `in`. Example for `op = in`: `["completed", "failed"]`.
+       */
+      value: unknown;
+    };
+    /**
+     * @description Comparison operator used in a `ReportFilter`. The `In` variant takes a
+     *     JSON array as its value; all others take a scalar.
+     * @enum {string}
+     */
+    ReportFilterOp: "eq" | "neq" | "in" | "gt" | "gte" | "lt" | "lte";
+    /**
+     * @description One sort clause applied to the aggregated result. Either `dimension`
+     *     OR `measure` is set (mutually exclusive), never both.
+     */
+    ReportOrderBy: {
+      /**
+       * @description Dimension name to sort by. Mutually exclusive with `measure`.
+       * @example org_id
+       */
+      dimension?: string | null;
+      /** @description Sort direction (`asc` or `desc`). Defaults to `asc`. */
+      direction?: components["schemas"]["ReportOrderDirection"];
+      /**
+       * @description Measure name to sort by. Mutually exclusive with `dimension`.
+       * @example session_count
+       */
+      measure?: string | null;
+    };
+    /**
+     * @description Sort direction for a `ReportOrderBy` clause.
+     * @enum {string}
+     */
+    ReportOrderDirection: "asc" | "desc";
+    /**
+     * @description Semantic query a caller submits to the reporting layer. The backend
+     *     compiles this to its native query language, scopes it to the calling
+     *     org, and returns a `ReportResult`.
+     */
+    ReportQuery: {
+      /**
+       * @description Dataset name to query (see `GET /v1/reports/catalog` for the list of available datasets).
+       * @example sessions
+       */
+      dataset: string;
+      /**
+       * @description Columns to group by. Empty list returns one aggregate row.
+       * @example [
+       *       "status"
+       *     ]
+       */
+      dimensions?: string[];
+      /** @description Predicate filters applied before aggregation. */
+      filters?: components["schemas"]["ReportFilter"][];
+      /**
+       * Format: int32
+       * @description Maximum number of rows to return (defaults to 100).
+       * @example 100
+       */
+      limit?: number;
+      /**
+       * @description Aggregations to compute (count, sum, avg, etc.). Empty list returns row counts only.
+       * @example [
+       *       "session_count",
+       *       "avg_duration_ms"
+       *     ]
+       */
+      measures?: string[];
+      /** @description Sort spec applied after aggregation. Empty list yields unspecified order. */
+      order_by?: components["schemas"]["ReportOrderBy"][];
+      /** @description Time window for the query. The dataset selects which timestamp column the range applies to. */
+      time_range: components["schemas"]["ReportTimeRange"];
+    };
+    /**
+     * @description Materialized result of a report query — column metadata, rows, and the
+     *     freshness of the underlying data.
+     */
+    ReportResult: {
+      /**
+       * Format: date-time
+       * @description Timestamp the underlying data was materialized (RFC 3339). Useful as
+       *     an "as of" footer when rendering — distinct from when the query ran.
+       */
+      as_of: string;
+      /**
+       * @description Column metadata in the same order as the entries of each row in
+       *     `rows`. Use the `kind` field to tell dimensions from measures.
+       */
+      columns: components["schemas"]["ReportColumn"][];
+      /**
+       * Format: int64
+       * @description How stale the data is relative to the server's wall clock at query
+       *     time, in milliseconds. `None` when freshness can't be determined
+       *     (e.g. backends that don't track projector lag).
+       */
+      freshness_lag_ms?: number | null;
+      /**
+       * @description Result rows. Each row is a JSON object keyed by column name; cell
+       *     types match the underlying dataset (numbers for measures, strings
+       *     or numbers for dimensions). Length is capped by `ReportQuery.limit`.
+       */
+      rows: unknown[];
+    };
+    /**
+     * @description Half-open time window applied to the dataset's primary timestamp column
+     *     during a report query. `from` is inclusive, `to` is exclusive.
+     */
+    ReportTimeRange: {
+      /**
+       * Format: date-time
+       * @description Start of the window (RFC 3339, inclusive).
+       * @example 2026-04-24T00:00:00Z
+       */
+      from: string;
+      /**
+       * Format: date-time
+       * @description End of the window (RFC 3339, exclusive).
+       * @example 2026-05-24T00:00:00Z
+       */
+      to: string;
+    };
+    /**
+     * @description Request body for the `reporting_backfill` operation — enqueues source
+     *     rows into the reporting outbox for the projector to re-materialize.
+     */
+    ReportingBackfillRequest: {
+      /**
+       * Format: int64
+       * @description Maximum number of outbox rows to enqueue across all source types. Defaults to 1000.
+       * @example 5000
+       */
+      limit?: number;
+    };
+    /**
+     * @description Result of a `reporting_backfill` call — per-source counts of outbox rows
+     *     enqueued for re-projection.
+     */
+    ReportingBackfillResult: {
+      /**
+       * Format: int64
+       * @description Total number of outbox rows enqueued across all source types.
+       */
+      enqueued: number;
+      /**
+       * Format: int64
+       * @description Number of `event` outbox rows enqueued.
+       */
+      events: number;
+      /**
+       * Format: int64
+       * @description Number of `llm_generation` outbox rows enqueued.
+       */
+      llm_generations: number;
+      /**
+       * Format: int64
+       * @description Number of `session` outbox rows enqueued.
+       */
+      sessions: number;
+      /**
+       * Format: int64
+       * @description Number of `usage_ledger` outbox rows enqueued.
+       */
+      usage_ledger: number;
+    };
+    /**
+     * @description Point-in-time health snapshot of the reporting layer — projector
+     *     freshness plus outbox processing health. Returned from
+     *     `GET /v1/reports/admin/diagnostics`.
+     */
+    ReportingDiagnostics: {
+      /**
+       * Format: date-time
+       * @description Server-side wall-clock timestamp when this snapshot was assembled
+       *     (RFC 3339). Use as the "as-of" for any displayed lag metrics.
+       */
+      generated_at: string;
+      /**
+       * @description Reporting outbox health — counts of pending/processing/failed/
+       *     completed rows plus a sample of the most recent failures.
+       */
+      outbox: components["schemas"]["ReportingOutboxDiagnostics"];
+      /**
+       * @description Per-dataset projector freshness. One entry per active reporting
+       *     dataset; missing datasets mean the projector hasn't produced any
+       *     rows yet.
+       */
+      projector_lag: components["schemas"]["DatasetProjectorLag"][];
+    };
+    /**
+     * @description Aggregate health of the reporting outbox — the queue of source rows
+     *     waiting to be projected into fact tables.
+     */
+    ReportingOutboxDiagnostics: {
+      /**
+       * Format: int64
+       * @description Outbox rows that have completed processing successfully.
+       */
+      completed: number;
+      /**
+       * Format: int64
+       * @description Outbox rows that have failed (exceeded retry limit).
+       */
+      failed: number;
+      /** @description Sample of the most recent failed rows for operator inspection. */
+      failed_rows: components["schemas"]["FailedReportingOutboxRow"][];
+      /**
+       * Format: date-time
+       * @description Timestamp of the oldest `pending` row (RFC 3339). `None` if no rows are pending.
+       */
+      oldest_pending_at?: string | null;
+      /**
+       * Format: int64
+       * @description Outbox rows waiting to be claimed by a projector.
+       */
+      pending: number;
+      /**
+       * Format: int64
+       * @description Outbox rows currently being processed.
+       */
+      processing: number;
+    };
+    /** @description Response body for the `resolve_org` operation. */
+    ResolveOrgResponse: {
+      /** @description Public ID of the organization that owns the resource. */
+      org_id: string;
+      /** @description Organization name (for UX messaging). */
+      org_name: string;
+    };
+    /**
      * @description Response type for per-resource config endpoints.
      *
      *     Every resource exposes `GET /v1/{resource}/config` returning this type.
@@ -6247,135 +10857,428 @@ export interface components {
         [key: string]: boolean;
       };
     };
+    /** @description Response body for resource stats. */
     ResourceStatsResponse: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Sessions in a running state right now.
+       * @example 7
+       */
       active_session_count: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Average session duration in milliseconds. `None` when `session_count` is 0.
+       * @example 20858
+       */
       avg_session_duration_ms?: number | null;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total number of agent executions (turns) recorded across all sessions for this resource.
+       * @example 14206
+       */
       execution_count: number;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp of the first session for this resource (RFC 3339). `None` if no sessions exist.
+       * @example 2026-01-04T11:23:00Z
+       */
       first_session_at?: string | null;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Sessions in an idle state right now (created but no recent activity).
+       * @example 23
+       */
       idle_session_count: number;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent execution (turn) for this resource (RFC 3339). `None` if no executions exist.
+       * @example 2026-05-27T15:24:42Z
+       */
       last_execution_at?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent session for this resource (RFC 3339). `None` if no sessions exist.
+       * @example 2026-05-27T15:24:00Z
+       */
       last_session_at?: string | null;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total number of sessions ever created for this resource.
+       * @example 1842
+       */
       session_count: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Sessions that have started at least one turn.
+       * @example 1810
+       */
       started_session_count: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Cumulative cache-write tokens across all sessions (charged when first writing a cache entry).
+       * @example 412005
+       */
       total_cache_creation_tokens: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Cumulative cache-read tokens across all sessions (where the provider supports prompt caching).
+       * @example 5234122
+       */
       total_cache_read_tokens: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Cumulative LLM input tokens billed across all sessions.
+       * @example 18457321
+       */
       total_input_tokens: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Cumulative LLM output tokens billed across all sessions.
+       * @example 2184109
+       */
       total_output_tokens: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Cumulative session wall-clock duration in milliseconds across all sessions.
+       * @example 38421500
+       */
       total_session_duration_ms: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Sessions currently paused waiting for client-side tool results.
+       * @example 2
+       */
       waiting_for_tool_results_session_count: number;
     };
     /**
      * @description Risk classification for capabilities (TM-AGENT-005).
      *
      *     Used to enforce approval requirements when assigning capabilities.
+     * @example low
      * @enum {string}
      */
     RiskLevel: "low" | "medium" | "high";
+    /** @description Request body for the `rollback_agent_version` operation. */
     RollbackAgentVersionRequest: {
+      /**
+       * @description When true, snapshot the current agent state as a new version before rolling back.
+       *     Use this to preserve the in-flight work alongside the recovery point.
+       * @example true
+       */
       save_version?: boolean;
+      /**
+       * @description Free-text summary attached to the rollback. Shown in the version timeline.
+       * @example Reverting refund-window change — false positives in production.
+       */
       summary?: string | null;
+    };
+    /**
+     * @description A user-saved report definition — a named, persistable wrapper around a
+     *     `ReportQuery` with optional dashboard placement metadata.
+     */
+    SavedReport: {
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
+      created_at: string;
+      dashboard?: null | components["schemas"]["SavedReportDashboardMetadata"];
+      /** @description Human-readable description. Safe to render in user-facing messages. */
+      description?: string | null;
+      /**
+       * Format: uuid
+       * @description UUID of the saved report.
+       */
+      id: string;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
+      name: string;
+      /**
+       * @description The query this report executes when run or exported. Same shape as the
+       *     `body` of `POST /v1/reports/query` — see `ReportQuery` for the field
+       *     breakdown.
+       */
+      query: components["schemas"]["ReportQuery"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       */
+      updated_at: string;
+    };
+    /**
+     * @description Dashboard placement metadata attached to a `SavedReport`. Captures how
+     *     and where to render the report in the operator dashboard UI.
+     */
+    SavedReportDashboardMetadata: {
+      /**
+       * @description Rendering hint for the UI (e.g. `"line"`, `"bar"`, `"table"`,
+       *     `"big_number"`). Free-form string — the server doesn't enforce a
+       *     closed set so new chart types can roll out client-side first.
+       */
+      chart_type?: string | null;
+      /**
+       * Format: int32
+       * @description Sort key within `section`. Lower values render first. `None` means
+       *     "place at the end".
+       */
+      position?: number | null;
+      /**
+       * @description Dashboard section/group this report belongs to (free-form bucket name
+       *     like `"Operations"` or `"Finance"`). Used to cluster related reports
+       *     in the UI.
+       */
+      section?: string | null;
+      /** @description Human-readable title. Safe to render in user-facing messages. */
+      title?: string | null;
     };
     /** @description Schedule execution response */
     ScheduleExecutionResponse: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource completed, if any (RFC 3339).
+       * @example 2026-05-25T02:00:12Z
+       */
       completed_at?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       * @example 2026-05-25T02:00:00Z
+       */
       created_at: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Total execution duration in milliseconds (`completed_at - started_at`). `None` while still running.
+       * @example 11000
+       */
       duration_ms?: number | null;
+      /**
+       * @description Human-readable error message, populated when this resource is in a failed state.
+       * @example workflow.exec.timeout: activity exceeded 30s budget
+       */
       error?: string | null;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description UUID of the schedule execution.
+       * @example 01933b5b-0000-7000-8000-000000000001
+       */
       id: string;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description UUID of the owning schedule.
+       * @example 01933b5a-0000-7000-8000-000000000001
+       */
       schedule_id: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource is scheduled to run (RFC 3339).
+       * @example 2026-05-25T02:00:00Z
+       */
       scheduled_at: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource started, if any (RFC 3339).
+       * @example 2026-05-25T02:00:01Z
+       */
       started_at: string;
+      /**
+       * @description Current lifecycle status (`pending`, `running`, `completed`, `failed`, `skipped`).
+       * @example completed
+       */
       status: string;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description Durable task's identifier.
+       * @example 01933b5d-0000-7000-8000-000000000001
+       */
       task_id?: string | null;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description Durable workflow's identifier.
+       * @example 01933b5c-0000-7000-8000-000000000001
+       */
       workflow_id?: string | null;
     };
     /** @description Schedule executions list response */
     ScheduleExecutionsListResponse: {
+      /** @description Page of items returned by this query. */
       data: components["schemas"]["ScheduleExecutionResponse"][];
+      /**
+       * @description Total number of items matching the query, across all pages.
+       * @example 142
+       */
       total: number;
     };
     /** @description Schedule response */
     ScheduleResponse: {
+      /**
+       * @description When `true`, missed fires (while the scheduler was down, paused, or unreachable) are queued and run after recovery, subject to `max_catch_up`.
+       * @example false
+       */
       catch_up_missed: boolean;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       * @example 2026-05-01T12:00:00Z
+       */
       created_at: string;
+      /**
+       * @description Cron expression in the standard `min hour day-of-month month day-of-week` form (6 fields with seconds optional). Evaluated in `timezone`.
+       * @example 0 2 * * *
+       */
       cron_expression: string;
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Fires the support-triage agent every night at 02:00 UTC
+       */
       description?: string | null;
+      /**
+       * @description When `false`, the schedule is paused — kept in storage but never fires until re-enabled.
+       * @example true
+       */
       enabled: boolean;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description UUID of the schedule.
+       * @example 01933b5a-0000-7000-8000-000000000001
+       */
       id: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent fire (RFC 3339). `None` if never triggered.
+       * @example 2026-05-25T02:00:00Z
+       */
       last_triggered_at?: string | null;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Maximum number of missed fires to replay when `catch_up_missed` is `true`. Older missed fires are dropped. `None` means no cap.
+       * @example 3
+       */
       max_catch_up?: number | null;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Maximum number of overlapping executions allowed. `None` means no limit beyond the worker pool's concurrency.
+       * @example 1
+       */
       max_concurrent?: number | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example nightly-triage
+       */
       name: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp of the next scheduled fire (RFC 3339). `None` when the schedule is disabled or the cron expression has no upcoming match.
+       * @example 2026-05-26T02:00:00Z
+       */
       next_trigger_at?: string | null;
+      /**
+       * @description Optional retry policy for failed runs (provider-specific JSON; see the durable engine's `RetryPolicy`).
+       *     Example: `{"max_attempts": 3, "initial_backoff_secs": 30, "backoff_multiplier": 2.0}`.
+       */
       retry_policy?: unknown;
+      /** @description What the schedule invokes when it fires (a session, an agent, an app channel, etc.). */
       target: components["schemas"]["ScheduleTargetResponse"];
+      /**
+       * @description IANA timezone name used to interpret `cron_expression` (e.g. `UTC`, `America/New_York`).
+       * @example UTC
+       */
       timezone: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       * @example 2026-05-20T12:00:00Z
+       */
       updated_at: string;
     };
     /** @description Schedule stats response */
     ScheduleStatsResponse: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Average execution duration in milliseconds across `total_executions`. `None` when no executions exist yet.
+       * @example 8421
+       */
       avg_duration_ms?: number | null;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Count of executions that ended in failure (after exhausting retries).
+       * @example 3
+       */
       failed_executions: number;
+      /**
+       * @description Status of the most recent execution (one of the `ScheduleExecutionResponse.status` values:
+       *     `pending`, `running`, `completed`, `failed`, `skipped`). `None` if the schedule has never fired.
+       * @example completed
+       */
       last_execution_status?: string | null;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Count of fires that were intentionally skipped (e.g. blocked by `max_concurrent` or disabled mid-fire).
+       * @example 2
+       */
       skipped_executions: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Count of executions that completed successfully.
+       * @example 137
+       */
       successful_executions: number;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total number of executions recorded for this schedule (sum of successful + failed + skipped).
+       * @example 142
+       */
       total_executions: number;
     };
-    /** @description Target for a schedule - either a workflow or activity */
+    /**
+     * @description Target for a schedule - either a workflow or activity
+     * @example {
+     *       "input": {
+     *         "session_id": "session_01933b5a00007000800000000000001"
+     *       },
+     *       "name": "session.run",
+     *       "type": "workflow"
+     *     }
+     */
     ScheduleTarget: {
       /** @description Input JSON for the workflow/activity */
       input?: unknown;
-      /** @description Workflow type name or activity type name */
+      /**
+       * @description Workflow type name or activity type name
+       * @example session.run
+       */
       name: string;
-      /** @description Target type: "workflow" or "activity" */
+      /**
+       * @description Target type: "workflow" or "activity"
+       * @example workflow
+       */
       type: string;
     };
     /** @description Schedule target response */
     ScheduleTargetResponse: {
-      input: unknown;
+      /**
+       * @description Input JSON payload passed to the workflow/activity on each fire.
+       *     Example: `{"session_id": "session_01933b5a000070008000000000000001"}`.
+       */
+      input: Record<string, never>;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example session.run
+       */
       name: string;
+      /**
+       * @description Target type discriminator (`workflow` or `activity`).
+       * @example workflow
+       */
       type: string;
     };
     /** @description Schedules list response */
     SchedulesListResponse: {
+      /** @description Page of items returned by this query. */
       data: components["schemas"]["ScheduleResponse"][];
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total number of items matching the query, across all pages.
+       * @example 17
+       */
       total: number;
     };
     /** @description Schema response for a database. */
@@ -6392,6 +11295,19 @@ export interface components {
       /** @description When the secret was last updated */
       updated_at: string;
     };
+    /** @description Request to send a signal to a workflow */
+    SendSignalRequest: {
+      /**
+       * @description Signal payload (workflow-specific JSON, any shape; defaults to `null` when omitted).
+       *     Example: `{"approved": true, "approver": "user_01933b5a00007000800000000000001"}`.
+       */
+      payload?: unknown;
+      /**
+       * @description Signal name. Must match a signal the running workflow listens for.
+       * @example user_response_received
+       */
+      signal_type: string;
+    };
     /**
      * @description Session - instance of agentic loop execution.
      *     A session represents a single conversation with an agent.
@@ -6401,6 +11317,7 @@ export interface components {
        * Format: int32
        * @description Number of active (enabled) schedules for this session.
        *     Populated when the session is fetched for API responses.
+       * @example 2
        */
       active_schedule_count?: number | null;
       /**
@@ -6418,11 +11335,15 @@ export interface components {
        * @example agentver_01933b5a00007000800000000000001
        */
       agent_version_id?: string | null;
-      /** @description Validated config passed by host at blueprint spawn time. */
-      blueprint_config?: unknown;
+      /**
+       * @description Validated config passed by host at blueprint spawn time.
+       *     Example: `{"target_repo": "acme/everruns"}`.
+       */
+      blueprint_config?: Record<string, never> | null;
       /**
        * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
        *     from the blueprint definition instead of from harness_id/agent_id.
+       * @example blueprint_research_pack
        */
       blueprint_id?: string | null;
       /**
@@ -6433,6 +11354,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the session was created.
+       * @example 2026-05-25T10:00:00Z
        */
       created_at: string;
       effective_owner?: null | components["schemas"]["PrincipalSummary"];
@@ -6441,11 +11363,16 @@ export interface components {
        *     Computed at read time from the capability registry.
        *     Known features: "file_system", "schedules", "secrets", "key_value",
        *     "sql_database", "leased_resources".
+       * @example [
+       *       "file_system",
+       *       "secrets"
+       *     ]
        */
       features?: string[];
       /**
        * Format: date-time
        * @description Timestamp when the session finished (completed or failed).
+       * @example 2026-05-25T10:14:32Z
        */
       finished_at?: string | null;
       /**
@@ -6476,11 +11403,18 @@ export interface components {
       /**
        * @description Whether this session is pinned by the current user.
        *     Only populated when the request has an authenticated user context.
+       * @example false
        */
       is_pinned?: boolean | null;
-      /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+      /**
+       * @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`).
+       * @example en-US
+       */
       locale?: string | null;
-      /** @description Maximum number of LLM iterations per turn for this session. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this session.
+       * @example 50
+       */
       max_iterations?: number | null;
       /** @description Remote MCP servers scoped to this session only. */
       mcpServers?: components["schemas"]["BTreeMap"];
@@ -6496,7 +11430,10 @@ export interface components {
        * @example org_00000000000000000000000000000001
        */
       organization_id: string;
-      /** @description Preview text from the last assistant response (truncated). */
+      /**
+       * @description Preview text from the last assistant response (truncated).
+       * @example Here is a Q3 plan covering the three pillars we discussed...
+       */
       output_preview?: string | null;
       owner?: null | components["schemas"]["PrincipalSummary"];
       /**
@@ -6506,39 +11443,61 @@ export interface components {
       owner_principal_id: string;
       /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
       parent_session_id?: string | null;
-      /** @description Preview text from the first user message (truncated). */
+      /**
+       * @description Preview text from the first user message (truncated).
+       * @example Help me draft the Q3 marketing plan
+       */
       preview?: string | null;
       /**
        * Format: uuid
        * @description Denormalized effective human owner of the owning principal lineage.
+       * @example 550e8400-e29b-41d4-a716-446655440000
        */
       resolved_owner_user_id?: string | null;
       /**
        * Format: date-time
        * @description Timestamp when the session started executing.
+       * @example 2026-05-25T10:00:01Z
        */
       started_at?: string | null;
       /** @description Current execution status of the session. */
       status: components["schemas"]["SessionStatus"];
-      /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+      /**
+       * @description Human-readable subagent name ("Test Runner"), unique per parent.
+       * @example Test Runner
+       */
       subagent_name?: string | null;
       subagent_status?: null | components["schemas"]["SubagentStatus"];
-      /** @description Original task description given to this subagent. */
+      /**
+       * @description Original task description given to this subagent.
+       * @example Run the integration test suite and report failures.
+       */
       subagent_task?: string | null;
       /**
        * @description Session-level system prompt override.
        *     Prepended to the agent's system prompt when building RuntimeAgent.
        */
       system_prompt?: string | null;
-      /** @description Tags for organizing and filtering sessions. */
+      /**
+       * @description Tags for organizing and filtering sessions.
+       * @example [
+       *       "marketing",
+       *       "q3",
+       *       "draft"
+       *     ]
+       */
       tags?: string[];
-      /** @description Human-readable title for the session. */
+      /**
+       * @description Human-readable title for the session.
+       * @example Q3 marketing brief
+       */
       title?: string | null;
       /** @description Client-side tools for this session (additive to agent tools). */
       tools?: components["schemas"]["ToolDefinition"][];
       /**
        * Format: date-time
        * @description Timestamp when the session was last updated.
+       * @example 2026-05-25T10:14:32Z
        */
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
@@ -6556,36 +11515,71 @@ export interface components {
        */
       turn_id: string;
     };
+    /**
+     * @description Token-budget report for a session — a model-aware breakdown of the
+     *     context window into named sections plus per-source contributions, so
+     *     callers can answer "what's filling the context?" without reverse-
+     *     engineering the prompt assembly.
+     */
     SessionContextReport: {
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Total context window size in tokens for `model`. `None` if the model's profile lacks limits data.
+       */
       context_window_tokens?: number | null;
+      /** @description Per-source token contributions (per-tool, per-capability, per-message) for attribution. */
       contributions: components["schemas"]["ContextReportContribution"][];
       cumulative_usage?: null | components["schemas"]["TokenUsage"];
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description Estimated number of input tokens consumed by the next generation given the current context.
+       */
       estimated_input_tokens: number;
+      /** @description Model identifier the report's token estimates target (used to scope context-window math). */
       model: string;
+      /** @description Logical sections of the assembled context (system prompt, tool defs, message history, etc.) for inspection. */
       sections: components["schemas"]["ContextReportSection"][];
+      /** @description Prefixed session identifier this report describes. */
       session_id: string;
     };
     /** @description Complete file with content */
     SessionFile: {
-      /** @description Base64-encoded content for binary files, plain text for text files */
+      /** @description File content. Encoding is controlled by the `encoding` field: plain UTF-8 text for `text`, base64-encoded bytes for `base64`. `None` for directories and when this is a metadata-only listing. */
       content?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this entry was created (RFC 3339).
+       */
       created_at: string;
-      /** @description Content encoding: "text" or "base64" */
+      /** @description Content encoding for the `content` field: `text` (UTF-8) or `base64` (binary). */
       encoding?: string;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description Internal database UUID for this file entry.
+       */
       id: string;
+      /** @description `true` when this entry represents a directory; `false` for a regular file. */
       is_directory: boolean;
+      /** @description Whether the entry was marked read-only at creation. Read-only entries cannot be edited or deleted by the session. */
       is_readonly: boolean;
+      /** @description File or directory name (the last segment of `path`). */
       name: string;
+      /** @description Absolute path within the session workspace (e.g. `/notes.md`). */
       path: string;
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description UUID of the owning session.
+       */
       session_id: string;
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description File size in bytes. `0` for directories.
+       */
       size_bytes: number;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this entry was last updated (RFC 3339).
+       */
       updated_at: string;
     };
     /** @description Data for session.idled event (turn completed, session now idle) */
@@ -6626,9 +11620,18 @@ export interface components {
      * @enum {string}
      */
     SessionResourceStatus: "active" | "completed" | "failed" | "released";
-    /** @enum {string} */
+    /**
+     * @description Operator action to take against a session's managed sandbox. `Pause`
+     *     suspends the instance, `Resume` restarts it, `Delete` releases the
+     *     lease.
+     * @enum {string}
+     */
     SessionSandboxAction: "pause" | "resume" | "delete";
-    /** @enum {string} */
+    /**
+     * @description Wire-facing status of a session sandbox. Mirrors
+     *     `everruns_core::SessionSandboxStatus` for the public API.
+     * @enum {string}
+     */
     SessionSandboxStatusValue: "running" | "paused";
     /** @description Data for session.started event */
     SessionStartedData: {
@@ -6648,6 +11651,34 @@ export interface components {
        */
       model_id?: string | null;
     };
+    /** @description Response for session statistics endpoint */
+    SessionStatsResponse: {
+      /**
+       * Format: int32
+       * @description Sessions with a turn currently running
+       */
+      active: number;
+      /**
+       * Format: int32
+       * @description Sessions waiting for next input
+       */
+      idle: number;
+      /**
+       * Format: int32
+       * @description Sessions just created, no turn executed yet
+       */
+      started: number;
+      /**
+       * Format: int32
+       * @description Total number of sessions across all statuses
+       */
+      total: number;
+      /**
+       * Format: int32
+       * @description Sessions waiting for client-side tool results
+       */
+      waiting_for_tool_results: number;
+    };
     /**
      * @description Session execution status.
      *     - `started`: Session just created, no turn executed yet
@@ -6662,37 +11693,70 @@ export interface components {
       | "idle"
       | "waitingfortoolresults"
       | "paused";
+    /** @description Request body for the `set_default_agent_version` operation. */
     SetDefaultAgentVersionRequest: {
-      version_id: components["schemas"]["agentverId"];
+      /**
+       * @description Agent version's prefixed public identifier.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      version_id: string;
     };
     /** @description Skill entity (API response type) */
     Skill: {
+      /** @description Comma-separated list of tool patterns this skill may invoke. `None` means inherit from the harness. */
       allowed_tools?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was archived, if any (RFC 3339). Archived skills are hidden from default list views.
+       */
       archived_at?: string | null;
+      /** @description Compatibility marker describing host-runtime requirements declared by the skill (e.g. min platform version). Informational. */
       compatibility?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was created (RFC 3339).
+       */
       created_at: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was hard-deleted, if any (RFC 3339).
+       */
       deleted_at?: string | null;
-      /** @example Extract text and tables from PDF files. */
+      /**
+       * @description Short, agent- and user-readable summary of what the skill does and when to use it.
+       * @example Extract text and tables from PDF files.
+       */
       description: string;
-      /** @description Whether the model is prevented from auto-invoking this skill */
+      /** @description When `true`, the LLM is prevented from auto-invoking this skill; only the user can trigger it explicitly. */
       disable_model_invocation?: boolean;
-      /** @example skill_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example skill_01933b5a00007000800000000000001
+       */
       id: string;
+      /** @description License string as declared by the skill author (e.g. `MIT`, `Apache-2.0`). Informational; not enforced. */
       license?: string | null;
+      /** @description Free-form metadata declared by the skill author. */
       metadata?: {
         [key: string]: unknown;
       };
-      /** @example pdf-processing */
+      /**
+       * @description Stable kebab-case slug used to invoke the skill (e.g. `/pdf-processing` in chat). Safe to render in user-facing messages.
+       * @example pdf-processing
+       */
       name: string;
+      /** @description How the skill content is sourced (filesystem, URL, embedded). Determines reload semantics. */
       source_type: components["schemas"]["SkillSourceType"];
+      /** @description Current lifecycle status (`active`, `archived`, `deleted`). */
       status: components["schemas"]["SkillStatus"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was last updated (RFC 3339).
+       */
       updated_at: string;
-      /** @description Whether this skill appears as a /slash command for users */
+      /** @description Whether this skill appears as a `/`-prefixed slash command for end users in chat UIs. */
       user_invocable?: boolean;
+      /** @description Semver string declared by the skill author. Free-form; sorted lexicographically when comparing. */
       version: string;
     };
     /** @description Skill content response (for /content endpoint) */
@@ -6715,17 +11779,37 @@ export interface components {
      * @enum {string}
      */
     SkillStatus: "active" | "disabled" | "archived" | "deleted";
+    /**
+     * @description Number of agents and harnesses that reference a skill via its
+     *     `skill:{uuid}` capability id. The `/v1/skills/usage` endpoint returns this
+     *     keyed by public `SkillId`; skills with no references are omitted from the
+     *     map and the UI defaults missing entries to zero.
+     */
+    SkillUsage: {
+      /** Format: int64 */
+      agents: number;
+      /** Format: int64 */
+      harnesses: number;
+    };
     /** @description Validation result for SKILL.md */
     SkillValidationResult: {
+      /** @description Parsed skill description. `None` when not present in the input or unparseable. */
       description?: string | null;
+      /** @description Hard validation errors. Non-empty if and only if `valid` is `false`. */
       errors?: string[];
+      /** @description Parsed skill slug from the front matter. `None` when the input could not be parsed enough to extract a name. */
       name?: string | null;
+      /** @description `true` when the candidate SKILL.md parsed and passes all hard checks; `false` if any error was found. */
       valid: boolean;
+      /** @description Non-fatal warnings (style, deprecated patterns, optional fields missing). Emitted alongside a `valid` result. */
       warnings?: string[];
     };
     /** @description Request to get file stat */
     StatRequest: {
-      /** @description Path to the file or directory */
+      /**
+       * @description Path to the file or directory (relative to the session workspace root).
+       * @example docs/migration-plan.md
+       */
       path: string;
     };
     /** @description Data for subagent lifecycle events (spawned, completed, failed, cancelled). */
@@ -6756,7 +11840,17 @@ export interface components {
       | "max_iterations_reached";
     /** @description Request to submit client-side tool results */
     SubmitToolResultsRequest: {
-      /** @description Tool results from the client */
+      /**
+       * @description Tool results from the client
+       * @example [
+       *       {
+       *         "result": {
+       *           "url": "https://example.com/orders/42"
+       *         },
+       *         "tool_call_id": "toolu_01933b5a00007000800000000000001"
+       *       }
+       *     ]
+       */
       tool_results: components["schemas"]["ClientToolResult"][];
     };
     /** @description Response from submitting tool results */
@@ -6801,6 +11895,83 @@ export interface components {
           /** @enum {string} */
           status: "not_supported";
         };
+    /** @description Task response */
+    TaskResponse: {
+      /**
+       * @description Stable per-workflow activity ID (used for deduplication within a workflow run).
+       * @example tool_call_0042
+       */
+      activity_id: string;
+      /**
+       * @description Activity type name, used by workers to route the task.
+       * @example tool_call
+       */
+      activity_type: string;
+      /**
+       * Format: int32
+       * @description Attempt counter. `0` before the task has ever been claimed; incremented to `1` on the first claim and once more per retry.
+       * @example 1
+       */
+      attempt: number;
+      /**
+       * Format: date-time
+       * @description Timestamp when this task was last claimed by a worker (RFC 3339). `None` if never claimed.
+       * @example 2026-05-27T15:24:03Z
+       */
+      claimed_at?: string | null;
+      /**
+       * @description Worker ID that holds the current claim; `None` if pending or terminal.
+       * @example worker-7f3a9b2e-1c4d-4a5f-8b6c-9d0e1f2a3b4c
+       */
+      claimed_by?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when this task was enqueued (RFC 3339).
+       * @example 2026-05-27T15:24:00Z
+       */
+      created_at: string;
+      /**
+       * Format: uuid
+       * @description UUID of the task.
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      id: string;
+      /**
+       * @description Last error message recorded by the worker; `None` if the task has never failed.
+       * @example tool exceeded 30s budget
+       */
+      last_error?: string | null;
+      /**
+       * Format: int32
+       * @description Maximum number of attempts before the task is sent to the DLQ.
+       * @example 5
+       */
+      max_attempts: number;
+      /**
+       * Format: int32
+       * @description Priority; higher values run first within the same activity type.
+       * @example 10
+       */
+      priority: number;
+      /**
+       * @description Current lifecycle status (`pending`, `claimed`, `completed`, `failed`, `dead`, `cancelled`).
+       * @example claimed
+       */
+      status: string;
+      /**
+       * Format: uuid
+       * @description Owning workflow's identifier. `None` for one-off tasks not tied to a workflow.
+       * @example 9a1b2c3d-4e5f-6789-abcd-ef0123456789
+       */
+      workflow_id?: string | null;
+    };
+    /** @description Tasks list response */
+    TasksListResponse: {
+      /** @description Page of items returned by this query. */
+      data: components["schemas"]["TaskResponse"][];
+      /** @description Total number of items matching the query, across all pages. */
+      total: number;
+    };
     /** @description Text content part */
     TextContentPart: {
       text: string;
@@ -6876,6 +12047,10 @@ export interface components {
     };
     /** @description Data for tool.completed event */
     ToolCompletedData: {
+      /** @description Capability that contributed the tool definition, when known. */
+      capability_id?: string | null;
+      /** @description Human-readable capability name snapshot, when known. */
+      capability_name?: string | null;
       /** @description Human-readable display name for UI rendering */
       display_name?: string | null;
       /**
@@ -6893,10 +12068,14 @@ export interface components {
       status: string;
       /** @description Whether the tool call succeeded */
       success: boolean;
+      /** @description Stable fingerprint of tool name + normalized arguments. */
+      tool_call_fingerprint?: string | null;
       /** @description Tool call ID */
       tool_call_id: string;
       /** @description Tool name */
       tool_name: string;
+      /** @description Stable fingerprint of tool name + normalized result/error. */
+      tool_result_fingerprint?: string | null;
     };
     /** @description Tool definition in agent configuration */
     ToolDefinition:
@@ -6910,6 +12089,12 @@ export interface components {
         });
     /** @description Summary of a tool definition (compact form for events) */
     ToolDefinitionSummary: {
+      /** @description Capability that contributed the tool definition, when known. */
+      capability_id?: string | null;
+      /** @description Human-readable capability name snapshot, when known. */
+      capability_name?: string | null;
+      /** @description Tool category for namespace grouping. */
+      category?: string | null;
       /** @description Tool description */
       description: string;
       /** @description Human-readable display name for UI rendering */
@@ -6930,6 +12115,36 @@ export interface components {
      *     for execution gating (auto vs requires_approval).
      */
     ToolHints: {
+      /**
+       * @description Capability that contributed this tool definition.
+       *
+       *     Reporting uses this attribution only as metadata. It must never contain
+       *     tool arguments, results, prompts, or any other sensitive payload.
+       */
+      capability_id?: string | null;
+      /** @description Human-readable capability name snapshot for reporting. */
+      capability_name?: string | null;
+      /**
+       * @description Scheduling conflict key. Tool calls within the same act batch that share
+       *     a non-empty `concurrency_class` are executed sequentially in arrival
+       *     order; calls in different classes (or with no class) run concurrently.
+       *
+       *     Set this on tools that mutate shared session state so that, e.g., two
+       *     file writes or two SQL mutations in one batch do not race. Read-only
+       *     tools should leave this `None` so they always parallelize. See
+       *     `crate::atoms::tool_scheduler` for how the act scheduler consumes it.
+       */
+      concurrency_class?: string | null;
+      /**
+       * @description Tool performs significant CPU-bound or otherwise non-yielding work in
+       *     process (e.g. an in-process interpreter). When true, the act scheduler
+       *     runs the call on its own task (`tokio::spawn`) so a long CPU burst does
+       *     not starve the cooperative polling of I/O-bound tools in the same batch.
+       *
+       *     Distinct from `long_running`, which describes wall-clock time for
+       *     I/O-bound work (those tools yield at await points and need no offload).
+       */
+      cpu_bound?: boolean | null;
       /**
        * @description Tool may irreversibly destroy or delete data.
        *     Subset of non-readonly — a tool can be non-readonly (writes) without
@@ -6961,8 +12176,8 @@ export interface components {
       /**
        * @description Tool output should be persisted to session VFS before truncation.
        *     When set, the `tool_output_persistence` capability (EVE-222, EVE-245) writes
-       *     stdout to `/.outputs/{tool_call_id}.stdout` and stderr to
-       *     `/.outputs/{tool_call_id}.stderr`, injecting `full_output`, `total_lines`,
+       *     stdout to `/outputs/{tool_call_id}.stdout` and stderr to
+       *     `/outputs/{tool_call_id}.stderr`, injecting `full_output`, `total_lines`,
        *     and `output_files` into the result.
        */
       persist_output?: boolean | null;
@@ -7042,10 +12257,15 @@ export interface components {
       narration?: string | null;
       /** @description The tool call being executed */
       tool_call: components["schemas"]["ToolCall"];
+      /** @description Stable fingerprint of tool name + normalized arguments. */
+      tool_call_fingerprint?: string | null;
     };
     /** @description Manual trigger response */
     TriggerResponse: {
-      /** Format: uuid */
+      /**
+       * Format: uuid
+       * @description Schedule execution's identifier.
+       */
       execution_id: string;
     };
     /** @description Data for turn.cancelled event */
@@ -7066,6 +12286,13 @@ export interface components {
        * @description Duration in milliseconds
        */
       duration_ms?: number | null;
+      /** @description Bounded preview of the final visible assistant answer. */
+      final_answer_preview?: string | null;
+      /**
+       * @description Canonical assistant message emitted by `output.message.completed`.
+       * @example message_01933b5a00007000800000000000001
+       */
+      final_message_id?: string | null;
       /** @description Input message content (for observability, passed through from turn.started) */
       input_content?: string | null;
       /**
@@ -7073,6 +12300,23 @@ export interface components {
        * @description Number of iterations in this turn
        */
       iterations: number;
+      /**
+       * Format: int32
+       * @description Number of LLM generation calls executed during the turn.
+       */
+      llm_call_count?: number | null;
+      /** @description Optional explicit completion status for consumers that summarize turns. */
+      status?: string | null;
+      /**
+       * Format: int64
+       * @description First-token latency for the turn, usually from the first LLM generation.
+       */
+      time_to_first_token_ms?: number | null;
+      /**
+       * Format: int32
+       * @description Number of tool calls completed during the turn.
+       */
+      tool_call_count?: number | null;
       /**
        * @description Turn identifier
        * @example turn_01933b5a00007000800000000000001
@@ -7141,9 +12385,20 @@ export interface components {
        * @example Updated Support Agent
        */
       display_name?: string | null;
-      /** @description Starter files copied into each new session for this agent. */
+      /**
+       * @description Starter files copied into each new session for this agent.
+       * @example [
+       *       {
+       *         "content": "Always respond in formal English.\n",
+       *         "path": "INSTRUCTIONS.md"
+       *       }
+       *     ]
+       */
       initial_files?: components["schemas"]["InitialFile"][] | null;
-      /** @description Maximum number of LLM iterations per turn for this agent. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this agent.
+       * @example 20
+       */
       max_iterations?: number | null;
       mcpServers?: null | components["schemas"]["BTreeMap"];
       /**
@@ -7168,9 +12423,56 @@ export interface components {
       /**
        * @description Client-side tools for this agent.
        *     Replaces existing tools if provided.
+       * @example [
+       *       {
+       *         "description": "Open URL in the user's browser",
+       *         "name": "open_url",
+       *         "parameters": {
+       *           "properties": {
+       *             "url": {
+       *               "type": "string"
+       *             }
+       *           },
+       *           "required": [
+       *             "url"
+       *           ],
+       *           "type": "object"
+       *         },
+       *         "type": "client_side"
+       *       }
+       *     ]
        */
       tools?: components["schemas"]["ToolDefinition"][] | null;
     };
+    /** @description Request to update an app. Only provided fields will be updated. */
+    UpdateAppRequest: {
+      /**
+       * @description ID of the agent to use.
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /** @description Optional resident agent identity for unattended/channel execution. */
+      agent_identity_id?: string | null;
+      agent_version_id?: string | null;
+      agent_version_policy?: null | components["schemas"]["AgentVersionPolicy"];
+      /**
+       * @description Description of what the app does.
+       * @example Customer support bot connected to Slack
+       */
+      description?: string | null;
+      /**
+       * @description ID of the harness to use.
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id?: string | null;
+      /**
+       * @description Display name of the app.
+       * @example Support Bot
+       */
+      name?: string | null;
+      status?: null | components["schemas"]["AppStatus"];
+    };
+    /** @description Request body for the `update_declarative_capability` operation. */
     UpdateDeclarativeCapabilityRequest: {
       /** @description Replacement declarative definition. Changing `name` updates the canonical capability ref after uniqueness validation. */
       definition?: Record<string, never>;
@@ -7182,23 +12484,64 @@ export interface components {
     };
     /** @description Request to update a file */
     UpdateFileRequest: {
-      /** @description New file content */
+      /**
+       * @description New file content
+       * @example # Project notes (rev 2)
+       *
+       *     Updated migration plan with rollback steps.
+       */
       content?: string | null;
-      /** @description Content encoding: "text" or "base64" */
+      /**
+       * @description Content encoding: "text" or "base64". Defaults to text.
+       * @example text
+       */
       encoding?: string | null;
-      /** @description Whether file is read-only */
+      /**
+       * @description Whether file is read-only
+       * @example false
+       */
       is_readonly?: boolean | null;
     };
     /** @description Request to update a harness. Only provided fields will be updated. */
     UpdateHarnessRequest: {
+      /**
+       * @description Replace the capability list entirely; omit to leave unchanged.
+       * @example [
+       *       {
+       *         "config": {},
+       *         "ref": "current_time"
+       *       },
+       *       {
+       *         "config": {},
+       *         "ref": "web_fetch"
+       *       }
+       *     ]
+       */
       capabilities?: components["schemas"]["AgentCapabilityConfig"][] | null;
+      /**
+       * @description New default model selected when sessions inherit from this harness; omit to leave unchanged.
+       * @example model_01933b5a00007000800000000000001
+       */
       default_model_id?: string | null;
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Research harness with web tools
+       */
       description?: string | null;
       /**
        * @description Human-readable display name.
        * @example Updated Research Harness
        */
       display_name?: string | null;
+      /**
+       * @description Replace the initial-files list entirely; omit to leave unchanged.
+       * @example [
+       *       {
+       *         "content": "Cite sources verbatim.\n",
+       *         "path": "INSTRUCTIONS.md"
+       *       }
+       *     ]
+       */
       initial_files?: components["schemas"]["InitialFile"][] | null;
       mcpServers?: null | components["schemas"]["BTreeMap"];
       /**
@@ -7207,19 +12550,59 @@ export interface components {
        */
       name?: string | null;
       network_access?: null | components["schemas"]["NetworkAccessList"];
+      /** @description New parent harness for inheritance. Outer `None` leaves unchanged; inner `None` removes inheritance (becomes a root harness). */
       parent_harness_id?: string | null;
       status?: null | components["schemas"]["HarnessStatus"];
+      /**
+       * @description New system prompt the harness contributes to sessions; omit to leave unchanged.
+       * @example You are a research assistant. Cite sources verbatim.
+       */
       system_prompt?: string | null;
+      /**
+       * @description Replace the tag list entirely; omit to leave unchanged.
+       * @example [
+       *       "research",
+       *       "web-tools"
+       *     ]
+       */
       tags?: string[] | null;
     };
+    /** @description Request body for the `update_knowledge_base` operation. */
     UpdateKnowledgeBaseRequest: {
+      /** @description Human-readable description. Safe to render in user-facing messages. */
       description?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example support-runbooks-archive
+       */
       name?: string | null;
     };
+    /** @description Request body for the `update_knowledge_entry` operation. */
     UpdateKnowledgeEntryRequest: {
+      /**
+       * @description Updated entry body. Markdown is rendered when displayed.
+       * @example Use the `/v1/payments/{id}/refund` endpoint with `reason: "past_window"`. Now requires VP approval.
+       */
       body?: string | null;
+      /**
+       * @description Discriminator selecting the variant of this resource. One of `note`,
+       *     `table`, `business`, `query`, `runbook`.
+       * @example runbook
+       */
       kind?: string | null;
+      /**
+       * @description Free-form tags attached to this resource.
+       * @example [
+       *       "billing",
+       *       "refunds",
+       *       "vp-approval"
+       *     ]
+       */
       tags?: string[] | null;
+      /**
+       * @description Human-readable title. Safe to render in user-facing messages.
+       * @example Refund a payment past 60 days
+       */
       title?: string | null;
     };
     /** @description Request to update an LLM model. Only provided fields will be updated. */
@@ -7252,6 +12635,11 @@ export interface components {
        * @example gpt-4o-mini
        */
       model_id?: string | null;
+      /**
+       * @description Provider that owns this model.
+       * @example provider_019df670b5af7db7a5685a4ad18a544a
+       */
+      provider_id?: string | null;
     };
     /** @description Request to update an LLM provider. Only provided fields will be updated. */
     UpdateLlmProviderRequest: {
@@ -7275,7 +12663,10 @@ export interface components {
     };
     /** @description Request to update an MCP server. Only provided fields will be updated. */
     UpdateMcpServerRequest: {
-      /** @description API key for authentication. Set to update. */
+      /**
+       * @description API key for authentication. Set to update.
+       * @example sk-mcp-redacted-1234567890abcdef
+       */
       api_key?: string | null;
       auth_mode?: null | components["schemas"]["McpServerAuthMode"];
       /**
@@ -7283,7 +12674,12 @@ export interface components {
        * @example Updated description
        */
       description?: string | null;
-      /** @description Additional HTTP headers for authentication. */
+      /**
+       * @description Additional HTTP headers for authentication.
+       * @example {
+       *       "X-Atlassian-Cloud-Id": "00000000-0000-0000-0000-000000000000"
+       *     }
+       */
       headers?: {
         [key: string]: string;
       } | null;
@@ -7299,6 +12695,19 @@ export interface components {
        * @example https://mcp.example.com/v1/mcp
        */
       url?: string | null;
+    };
+    /** @description Request body for the `update_memory_store` operation. */
+    UpdateMemoryStoreRequest: {
+      /**
+       * @description Toggle this store as the org default.
+       * @example true
+       */
+      is_default?: boolean | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example customer-preferences-archive
+       */
+      name?: string | null;
     };
     /** @description Request to update an organization */
     UpdateOrganizationRequest: {
@@ -7330,52 +12739,162 @@ export interface components {
        */
       name?: string | null;
     };
+    /** @description Request body for the `update_payment_account` operation. */
     UpdatePaymentAccountRequest: {
+      /**
+       * @description New label, if changing.
+       * @example Refund agent · USDC on Base (prod)
+       */
       label?: string | null;
+      /**
+       * @description New free-form metadata. Replaces the existing metadata blob entirely when set.
+       *     Example: `{"team": "support", "cost_center": "ops-2026"}`.
+       */
       metadata?: unknown;
+      /**
+       * @description New private key material. Set to `Some(...)` to rotate; omit to leave unchanged.
+       *     Example shown as an obvious placeholder — supply a real 32-byte hex value when rotating.
+       * @example 0x<your-32-byte-hex-private-key>
+       */
       private_key?: string | null;
+      /** @description New public address. The outer `Option` indicates whether to update; the inner allows clearing the field. */
       public_address?: string | null;
+      /**
+       * @description New lifecycle status. Valid values: `active`, `disabled`.
+       * @example disabled
+       */
       status?: string | null;
     };
+    /** @description Request body for the `update_payment_policy` operation. */
     UpdatePaymentPolicyRequest: {
+      /**
+       * @description New capability allowlist. Outer `None` leaves the field unchanged.
+       * @example [
+       *       "weather.lookup",
+       *       "shipping.quote",
+       *       "currency.convert"
+       *     ]
+       */
       allowed_capabilities?: string[] | null;
+      /**
+       * @description New host allowlist. Outer `None` leaves the field unchanged.
+       * @example [
+       *       "api.shippo.com",
+       *       "api.openweathermap.org",
+       *       "api.exchangerate.host"
+       *     ]
+       */
       allowed_hosts?: string[] | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description New per-day cap (USD). **Advisory only — not yet enforced.** Outer `None` leaves the field unchanged; inner `None` clears the cap.
+       */
       max_amount_usd_per_day?: number | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description New per-request cap (USD). **Enforced** by the payment authority. Outer `None` leaves the field unchanged; inner `None` clears the cap.
+       */
       max_amount_usd_per_request?: number | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description New per-turn cap (USD). **Advisory only — not yet enforced.** Outer `None` leaves the field unchanged; inner `None` clears the cap.
+       */
       max_amount_usd_per_turn?: number | null;
+      /**
+       * @description New free-form metadata. Replaces the existing metadata blob entirely when set.
+       *     Example: `{"owner_team": "ops", "ticket": "OPS-1248", "review_due": "2026-09-01"}`.
+       */
       metadata?: unknown;
+      /**
+       * @description New rail preference order. Outer `None` leaves the field unchanged.
+       * @example [
+       *       "mpp_tempo",
+       *       "x402_base"
+       *     ]
+       */
       rail_preference?: string[] | null;
-      /** Format: double */
+      /**
+       * Format: double
+       * @description New approval threshold (USD). **Advisory only — not yet enforced.** Outer `None` leaves the field unchanged; inner `None` disables the (future) gate.
+       */
       require_approval_above_usd?: number | null;
+      /**
+       * @description New lifecycle status. Valid values: `active`, `disabled`.
+       * @example disabled
+       */
       status?: string | null;
+    };
+    /** @description Request to update current user's profile */
+    UpdateProfileRequest: {
+      /**
+       * @description New display name
+       * @example Jane Doe
+       */
+      name: string;
+    };
+    /** @description Request body for the `update_saved_report` operation. */
+    UpdateSavedReportRequest: {
+      dashboard?: null | components["schemas"]["SavedReportDashboardMetadata"];
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Rolling 60-day window; widened from 30d after the Q3 product launch.
+       */
+      description?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example Weekly active agents — last 60 days
+       */
+      name?: string | null;
+      /**
+       * @description Replace the saved report's query wholesale. Omit to keep the existing
+       *     query; send a new `ReportQuery` to swap it.
+       */
+      query?: components["schemas"]["ReportQuery"];
     };
     /** @description Update schedule request */
     UpdateScheduleRequest: {
-      /** @description Catch up missed triggers */
+      /**
+       * @description Catch up missed triggers
+       * @example true
+       */
       catch_up_missed?: boolean | null;
-      /** @description New cron expression */
+      /**
+       * @description New cron expression. Standard `min hour day-of-month month day-of-week` form.
+       * @example 0 8 * * 1-5
+       */
       cron_expression?: string | null;
-      /** @description New description */
+      /**
+       * @description New description
+       * @example Fires the support-triage agent every weekday at 08:00 UTC
+       */
       description?: string | null;
-      /** @description Enable/disable */
+      /**
+       * @description Enable/disable
+       * @example true
+       */
       enabled?: boolean | null;
       /**
        * Format: int32
        * @description Max catch-up executions
+       * @example 3
        */
       max_catch_up?: number | null;
       /**
        * Format: int32
        * @description Max concurrent executions
+       * @example 1
        */
       max_concurrent?: number | null;
-      /** @description Retry policy */
+      /**
+       * @description Retry policy (provider-specific JSON; see the durable engine's `RetryPolicy`).
+       *     Example: `{"max_attempts": 3, "initial_backoff_secs": 30, "backoff_multiplier": 2.0}`.
+       */
       retry_policy?: unknown;
       target?: null | components["schemas"]["ScheduleTarget"];
-      /** @description New timezone */
+      /**
+       * @description New timezone (IANA name).
+       * @example America/New_York
+       */
       timezone?: string | null;
     };
     /** @description Request to update a session. Only provided fields will be updated. */
@@ -7409,150 +12928,385 @@ export interface components {
       skill_md?: string | null;
       status?: null | components["schemas"]["SkillStatus"];
     };
+    /** @description Request body for the `update_volume` operation. */
     UpdateVolumeRequest: {
+      /** @description Human-readable description. Safe to render in user-facing messages. */
       description?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example design-docs
+       */
       name?: string | null;
+      source?: null | components["schemas"]["CreateVolumeSourceRequest"];
     };
     /** @description User response for listing */
     User: {
       auth_provider?: string | null;
       avatar_url?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
       email: string;
+      /** @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
       id: string;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
       name: string;
       roles: string[];
     };
     /** @description Request to validate a SKILL.md */
     ValidateSkillRequest: {
-      /** @description SKILL.md content to validate */
+      /**
+       * @description Full SKILL.md content to validate, including the YAML frontmatter and the markdown body.
+       * @example ---
+       *     name: refund-policy
+       *     description: Issue refunds inside the policy window.
+       *     ---
+       *
+       *     Use this when a customer asks for a refund within 30 days of purchase.
+       */
       skill_md: string;
     };
+    /** @description Request body for voice attach. */
     VoiceAttachRequest: components["schemas"]["VoiceSessionOptions"] & {
       provider_call_id: string;
     };
+    /** @description Response body for voice attach. */
     VoiceAttachResponse: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when the connection's lease expires (RFC 3339).
+       */
       expires_at: string;
+      /** @description Provider-side model identifier used for the realtime session. */
       model: string;
+      /** @description Realtime provider routing this connection. */
       provider: string;
+      /** @description Provider-side call identifier of the connected realtime call. */
       provider_call_id: string;
+      /** @description Reasoning effort tier for thinking-capable models. */
       reasoning_effort: string;
+      /** @description Realtime voice preset selected for the connection. */
       voice: string;
+      /** @description Prefixed public identifier of the voice connection. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
       voice_connection_id: string;
     };
+    /** @description Request body for voice call. */
     VoiceCallRequest: components["schemas"]["VoiceSessionOptions"] & {
       sdp: string;
     };
+    /** @description Response body for voice call. */
     VoiceCallResponse: {
+      /** @description Server-generated SDP answer to send back to the client to complete the WebRTC handshake. */
       answer_sdp: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when the call's lease expires (RFC 3339).
+       */
       expires_at: string;
+      /** @description Provider-side model identifier used for the realtime session. */
       model: string;
+      /** @description Realtime provider routing this connection. */
       provider: string;
+      /** @description Provider-side call identifier once issued. `None` until the realtime call is established. */
       provider_call_id?: string | null;
+      /** @description Reasoning effort tier for thinking-capable models. */
       reasoning_effort: string;
+      /** @description Realtime voice preset selected for the connection. */
       voice: string;
+      /** @description Prefixed public identifier of the voice connection. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
       voice_connection_id: string;
     };
+    /** @description Request body for voice client secret. */
     VoiceClientSecretRequest: components["schemas"]["VoiceSessionOptions"];
+    /** @description Response body for voice client secret. */
     VoiceClientSecretResponse: {
+      /** @description Provider-specific ephemeral credential payload the client uses to authenticate the realtime connection. */
       client_secret: unknown;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when the client secret expires (RFC 3339). The client must establish the realtime connection before this.
+       */
       expires_at: string;
+      /** @description Provider-side model identifier used for the realtime session. */
       model: string;
+      /** @description Realtime provider routing this connection (e.g. `openai`). */
       provider: string;
+      /** @description Reasoning effort tier for thinking-capable models (`none`, `minimal`, `low`, `medium`, `high`). */
       reasoning_effort: string;
+      /** @description Realtime voice preset selected for the connection (provider-specific). */
       voice: string;
+      /** @description Prefixed public identifier of the voice connection. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
       voice_connection_id: string;
     };
+    /** @description Request body for voice end. */
     VoiceEndRequest: {
+      /**
+       * @description Free-text reason recorded with the session-ended event. Useful for operator forensics.
+       * @example User hung up after refund confirmed.
+       */
       reason?: string | null;
     };
+    /** @description Response body for voice end. */
     VoiceEndResponse: {
+      /** @description Current lifecycle status. */
       status: string;
+      /** @description Prefixed public identifier of the voice connection that was ended. */
       voice_connection_id: string;
     };
     /** @description Data for voice.session.ended. */
     VoiceSessionEndedData: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total wall-clock duration of the connection in milliseconds. `None` when the connection
+       *     never completed an audio handshake.
+       * @example 184500
+       */
       duration_ms?: number | null;
+      /**
+       * @description Free-text end reason captured from the client or server. `None` when no reason was supplied.
+       * @example User hung up after refund confirmed.
+       */
       reason?: string | null;
+      /**
+       * @description Prefixed voice connection identifier for the ended session.
+       * @example voice_01933b5a00007000800000000000001
+       */
       voice_connection_id: string;
     };
     /** @description Data for voice.session.failed. */
     VoiceSessionFailedData: {
+      /**
+       * @description Error message captured at failure. Provider-formatted; not stable for parsing.
+       * @example realtime provider closed stream: 1011 internal_error
+       */
       error: string;
+      /**
+       * @description Prefixed voice connection identifier for the failed session.
+       * @example voice_01933b5a00007000800000000000001
+       */
       voice_connection_id: string;
     };
+    /**
+     * @description Realtime-session knobs flattened into the voice request bodies that
+     *     create or attach a realtime connection — `VoiceClientSecretRequest`,
+     *     `VoiceCallRequest`, and `VoiceAttachRequest`. The `/voice/.../end`
+     *     endpoint takes `VoiceEndRequest` and does not accept these options.
+     *     All fields are optional; omitted ones fall back to the agent's or
+     *     provider's default.
+     */
     VoiceSessionOptions: {
+      /**
+       * @description Extra system instructions appended to the realtime session prompt.
+       * @example Always confirm before placing an order.
+       */
       instructions?: string | null;
+      /**
+       * @description Provider-side realtime model identifier. When omitted the server picks the agent's configured default.
+       * @example gpt-realtime
+       */
       model?: string | null;
+      /**
+       * @description Reasoning effort hint passed through to the realtime model. One of `low`, `medium`, `high`.
+       *     When omitted the server picks the provider's default.
+       * @example medium
+       */
       reasoning_effort?: string | null;
+      /**
+       * @description Realtime voice preset (provider-specific). When omitted the server picks the agent's configured default.
+       * @example alloy
+       */
       voice?: string | null;
     };
+    /**
+     * @description Generic envelope returned by the agent/chat voice-session endpoints that
+     *     create-or-attach a session and a voice connection in one round trip.
+     *     `T` is the per-endpoint voice payload (`VoiceCallResponse`,
+     *     `VoiceAttachResponse`).
+     */
     VoiceSessionResponse_VoiceCallResponse: {
+      /**
+       * @description The session this voice connection is attached to. Returned alongside
+       *     the voice payload so a caller has a single round-trip view of both.
+       */
       session: components["schemas"]["Session"];
+      /** @description Response body for voice call. */
       voice: {
+        /** @description Server-generated SDP answer to send back to the client to complete the WebRTC handshake. */
         answer_sdp: string;
-        /** Format: date-time */
+        /**
+         * Format: date-time
+         * @description Timestamp when the call's lease expires (RFC 3339).
+         */
         expires_at: string;
+        /** @description Provider-side model identifier used for the realtime session. */
         model: string;
+        /** @description Realtime provider routing this connection. */
         provider: string;
+        /** @description Provider-side call identifier once issued. `None` until the realtime call is established. */
         provider_call_id?: string | null;
+        /** @description Reasoning effort tier for thinking-capable models. */
         reasoning_effort: string;
+        /** @description Realtime voice preset selected for the connection. */
         voice: string;
+        /** @description Prefixed public identifier of the voice connection. See [ID Schema](https://docs.everruns.com/advanced/id-schema/). */
         voice_connection_id: string;
       };
     };
     /** @description Data for voice.session.started. */
     VoiceSessionStartedData: {
+      /**
+       * @description Provider-side realtime model identifier negotiated for this session.
+       * @example gpt-realtime
+       */
       model: string;
+      /**
+       * @description Reasoning effort applied to the realtime model. One of `low`, `medium`, `high`.
+       * @example medium
+       */
       reasoning_effort: string;
+      /**
+       * @description Transport carrying the audio stream. One of `webrtc`, `sip`, `websocket`.
+       * @example webrtc
+       */
       transport: string;
+      /**
+       * @description Realtime voice preset selected for this session.
+       * @example alloy
+       */
       voice: string;
+      /**
+       * @description Prefixed voice connection identifier for the started session.
+       * @example voice_01933b5a00007000800000000000001
+       */
       voice_connection_id: string;
     };
     /** @description Data for voice transcript delta/completed events. */
     VoiceTranscriptData: {
+      /** @description Full transcript accumulated for this item up to and including `delta`. */
       accumulated: string;
+      /** @description Newly transcribed text chunk delivered in this event. Empty for "final" events that only mark completion. */
       delta?: string;
+      /** @description Provider-specific identifier of the conversation item being transcribed. `None` when not yet assigned. */
       item_id?: string | null;
+      /** @description Transcript phase: `user_partial`, `user_final`, `assistant_partial`, `assistant_final`. `None` when not yet classified. */
       phase?: string | null;
+      /** @description Provider-specific identifier of the response stream emitting this transcript. `None` for user-side transcripts. */
       response_id?: string | null;
+      /** @description Prefixed voice connection identifier this transcript belongs to. */
       voice_connection_id: string;
     };
+    /** @description Response body for volume. */
     VolumeResponse: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was archived, if any (RFC 3339).
+       * @example 2026-05-26T00:00:00Z
+       */
       archived_at?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       * @example 2026-04-01T10:00:00Z
+       */
       created_at: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+       * @example 2026-05-26T00:00:00Z
+       */
       deleted_at?: string | null;
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Living design documents synced from GitHub
+       */
       description?: string | null;
-      /** @example vol_01933b5a000070008000000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example vol_01933b5a000070008000000000000001
+       */
       id: string;
+      /**
+       * @description Whether the volume is mounted read-only into sessions. Read-only volumes accept no writes from the session sandbox.
+       * @example false
+       */
+      is_readonly: boolean;
+      /**
+       * @description Most recent sync error message; cleared on the next successful sync.
+       * @example ssh: connect to host github.com port 22: Connection timed out
+       */
+      last_sync_error?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent successful sync (RFC 3339). `None` if never synced.
+       * @example 2026-05-25T08:00:00Z
+       */
+      last_synced_at?: string | null;
+      /**
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example design-docs
+       */
       name: string;
+      /** @description Source-specific configuration (git remote, github repo, manual upload). */
+      source: components["schemas"]["VolumeSourceResponse"];
+      /**
+       * @description Source kind discriminator (`manual`, `git`, `github`). Determines which `source` variant is populated.
+       * @example github
+       */
+      source_type: string;
+      /**
+       * @description Current lifecycle status.
+       * @example active
+       */
       status: string;
-      /** Format: date-time */
+      /**
+       * @description Current sync status (`idle`, `syncing`, `succeeded`, `failed`). Only meaningful when `source_type` is `git` or `github`.
+       * @example succeeded
+       */
+      sync_status: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       * @example 2026-05-25T08:00:00Z
+       */
       updated_at: string;
     };
+    /** @description Response body for volume source. */
+    VolumeSourceResponse:
+      | (components["schemas"]["ManualVolumeSourceResponse"] & {
+          /** @enum {string} */
+          provider: "manual";
+        })
+      | (components["schemas"]["GitHubVolumeSourceResponse"] & {
+          /** @enum {string} */
+          provider: "github";
+        })
+      | (components["schemas"]["GitVolumeSourceResponse"] & {
+          /** @enum {string} */
+          provider: "git";
+        });
+    /** @description Response body for webhook invocation. */
     WebhookInvocationResponse: {
       accepted: boolean;
       created_session: boolean;
+      /** @description Session's prefixed public identifier. */
       session_id: string;
     };
     /**
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_Agent: {
       /**
        * Format: date-time
        * @description Timestamp when the agent was archived.
+       * @example 2026-05-26T00:00:00Z
        */
       archived_at?: string | null;
       /**
@@ -7563,6 +13317,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was created.
+       * @example 2026-04-01T10:00:00Z
        */
       created_at: string;
       /**
@@ -7579,13 +13334,18 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was deleted.
+       * @example 2026-05-26T00:00:00Z
        */
       deleted_at?: string | null;
-      /** @description Human-readable description of what the agent does. */
+      /**
+       * @description Human-readable description of what the agent does.
+       * @example Handles refund and shipping questions; escalates billing disputes.
+       */
       description?: string | null;
       /**
        * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
        *     Falls back to `name` when absent.
+       * @example Customer Support Agent
        */
       display_name?: string | null;
       /**
@@ -7606,11 +13366,17 @@ export interface components {
       id: string;
       /** @description Starter files copied into each new session for this agent. */
       initial_files?: components["schemas"]["InitialFile"][];
-      /** @description Maximum number of LLM iterations per turn for this agent. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this agent.
+       * @example 50
+       */
       max_iterations?: number | null;
       /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
       mcpServers?: components["schemas"]["BTreeMap"];
-      /** @description Name, unique per org (e.g. "customer-support"). */
+      /**
+       * @description Name, unique per org (e.g. "customer-support").
+       * @example customer-support
+       */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
       /**
@@ -7623,9 +13389,16 @@ export interface components {
       /**
        * @description System prompt that defines the agent's behavior.
        *     Sent as the first message in every conversation.
+       * @example You are a friendly customer support agent for Acme Corp. Verify orders before issuing refunds. Escalate any billing disputes to a human.
        */
       system_prompt: string;
-      /** @description Tags for organizing and filtering agents. */
+      /**
+       * @description Tags for organizing and filtering agents.
+       * @example [
+       *       "support",
+       *       "production"
+       *     ]
+       */
       tags?: string[];
       /**
        * @description Client-side tools registered for this agent.
@@ -7635,10 +13408,18 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was last updated.
+       * @example 2026-05-20T14:00:00Z
        */
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -7650,15 +13431,119 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
+     */
+    WithUrls_App: {
+      /**
+       * @description Optional ID of the agent to use (format: agent_{32-hex}).
+       * @example agent_01933b5a00007000800000000000001
+       */
+      agent_id?: string | null;
+      /**
+       * @description Optional virtual identity that represents the app in unattended/channel execution.
+       * @example identity_01933b5a00007000800000000000001
+       */
+      agent_identity_id?: string | null;
+      /**
+       * @description Pinned agent version. Required when policy is `pinned`.
+       * @example agentver_01933b5a00007000800000000000001
+       */
+      agent_version_id?: string | null;
+      /** @description Version resolution policy for the optional agent. */
+      agent_version_policy?: components["schemas"]["AgentVersionPolicy"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was archived.
+       */
+      archived_at?: string | null;
+      /** @description Distribution channels attached to this app. */
+      channels?: components["schemas"]["AppChannel"][];
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was created.
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was deleted.
+       */
+      deleted_at?: string | null;
+      /** @description Human-readable description of what the app does. */
+      description?: string | null;
+      effective_owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description ID of the harness to use (format: harness_{32-hex}).
+       * @example harness_01933b5a00007000800000000000001
+       */
+      harness_id: string;
+      /**
+       * @description External identifier (app_<32-hex>). Shown as "id" in API.
+       * @example app_01933b5a000070008000000000000001
+       */
+      id: string;
+      /** @description Display name of the app. */
+      name: string;
+      owner?: null | components["schemas"]["PrincipalSummary"];
+      /**
+       * @description Owning principal for this app.
+       * @example principal_01933b5a000070008000000000000001
+       */
+      owner_principal_id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was last published.
+       */
+      published_at?: string | null;
+      /**
+       * Format: uuid
+       * @description Denormalized effective human owner of the owning principal lineage.
+       */
+      resolved_owner_user_id?: string | null;
+      /** @description Current lifecycle status. */
+      status: components["schemas"]["AppStatus"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the app was last updated.
+       */
+      updated_at: string;
+    } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_CapabilityInfo: {
       /**
        * Format: int64
        * @description Number of active agents referencing this capability in the org.
+       * @example 42
        */
       agent_count?: number;
-      /** @description Category for grouping in UI */
+      /**
+       * @description Category for grouping in UI
+       * @example filesystem
+       */
       category?: string | null;
       /** @description JSON Schema for capability-specific per-agent config. */
       config_schema?: Record<string, never>;
@@ -7667,41 +13552,94 @@ export interface components {
       /**
        * @description IDs of capabilities that this capability depends on.
        *     When this capability is selected, its dependencies are automatically included.
+       * @example [
+       *       "approval"
+       *     ]
        */
       dependencies?: string[];
-      /** @description Description of what this capability provides */
+      /**
+       * @description Description of what this capability provides
+       * @example Read, write, edit, list, grep, delete, and stat files in the session workspace.
+       */
       description: string;
-      /** @description Slug under https://dev.everruns.com/capabilities/ when public docs exist. */
+      /**
+       * @description Slug under https://dev.everruns.com/capabilities/ when public docs exist.
+       * @example session_file_system
+       */
       docs_slug?: string | null;
       /**
        * @description UI feature strings this capability contributes to.
        *     Multiple capabilities can contribute the same feature.
+       * @example [
+       *       "file_browser"
+       *     ]
        */
       features?: string[];
       /**
        * Format: int64
        * @description Number of active harnesses referencing this capability in the org.
+       * @example 7
        */
       harness_count?: number;
-      /** @description Icon name (for UI rendering) */
+      /**
+       * @description Icon name (for UI rendering)
+       * @example Folder
+       */
       icon?: string | null;
-      /** @description Unique capability identifier */
+      /**
+       * @description Unique capability identifier
+       * @example session_file_system
+       */
       id: string;
-      /** @description Whether this is an MCP server capability (for UI badge) */
+      /**
+       * @description Whether this is an MCP server capability (for UI badge)
+       * @example false
+       */
       is_mcp?: boolean;
-      /** @description Whether this is an Agent Skill capability (for UI badge) */
+      /**
+       * @description Whether this is an Agent Skill capability (for UI badge)
+       * @example false
+       */
       is_skill?: boolean;
-      /** @description Display name */
+      /**
+       * @description Display name
+       * @example Session File System
+       */
       name: string;
       /** @description TM-AGENT-005: Risk level. High-risk capabilities require admin approval. */
       risk_level?: components["schemas"]["RiskLevel"];
-      /** @description Current status */
+      /**
+       * @description Current status
+       * @example active
+       */
       status: string;
-      /** @description System prompt addition contributed by this capability */
+      /**
+       * @description System prompt addition contributed by this capability
+       * @example You can read and write files in /workspace via the session_file_system tools.
+       */
       system_prompt?: string | null;
-      /** @description Tool definitions provided by this capability */
+      /**
+       * @description Tool definitions provided by this capability
+       * @example [
+       *       {
+       *         "description": "Read a file from the session workspace.",
+       *         "name": "read_file"
+       *       },
+       *       {
+       *         "description": "Write or overwrite a file in the session workspace.",
+       *         "name": "write_file"
+       *       }
+       *     ]
+       */
       tool_definitions?: Record<string, never>[];
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -7713,21 +13651,33 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_DeclarativeCapability: {
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was archived, if any (RFC 3339).
+       */
       archived_at?: string | null;
       /**
        * @description Runtime capability reference. Agents and harnesses may use this or the plain unique name.
        * @example declarative:research_pack
        */
       capability_id: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
       created_at: string;
       /** @description Declarative capability payload: system prompt, skills, starter files, MCP servers, and metadata. */
       definition: Record<string, never>;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+       */
       deleted_at?: string | null;
       /**
        * @description Short summary shown in pickers, search results, and API listings.
@@ -7754,9 +13704,19 @@ export interface components {
        * @example active
        */
       status: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was last updated (RFC 3339).
+       */
       updated_at: string;
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -7768,12 +13728,16 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_Harness: {
       /**
        * Format: date-time
        * @description Timestamp when the harness was archived.
+       * @example 2026-05-26T00:00:00Z
        */
       archived_at?: string | null;
       /** @description Capabilities enabled for this harness with per-harness configuration. */
@@ -7781,6 +13745,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the harness was created.
+       * @example 2026-04-01T10:00:00Z
        */
       created_at: string;
       /**
@@ -7792,11 +13757,18 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the harness was deleted.
+       * @example 2026-05-26T00:00:00Z
        */
       deleted_at?: string | null;
-      /** @description Human-readable description of what the harness does. */
+      /**
+       * @description Human-readable description of what the harness does.
+       * @example Default harness with file-system + secrets capabilities; safe baseline for new agents.
+       */
       description?: string | null;
-      /** @description Human-readable display name shown in UI. */
+      /**
+       * @description Human-readable display name shown in UI.
+       * @example Generic Harness
+       */
       display_name?: string | null;
       /**
        * @description Unique identifier for the harness (format: harness_{32-hex}).
@@ -7809,11 +13781,15 @@ export interface components {
        * @description Whether this harness is built-in (system-managed, readonly).
        *     Built-in harnesses are provisioned during org initialization and
        *     cannot be modified or deleted via the API. Users can copy them.
+       * @example false
        */
       is_built_in?: boolean;
       /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
       mcpServers?: components["schemas"]["BTreeMap"];
-      /** @description Name, unique per org (e.g. "generic"). */
+      /**
+       * @description Name, unique per org (e.g. "generic").
+       * @example generic
+       */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
       /**
@@ -7826,16 +13802,31 @@ export interface components {
       /**
        * @description System prompt that defines the harness's base behavior.
        *     Forms the foundation of the prompt stack.
+       * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
        */
       system_prompt: string;
-      /** @description Tags for organizing and filtering harnesses. */
+      /**
+       * @description Tags for organizing and filtering harnesses.
+       * @example [
+       *       "baseline",
+       *       "production"
+       *     ]
+       */
       tags?: string[];
       /**
        * Format: date-time
        * @description Timestamp when the harness was last updated.
+       * @example 2026-05-20T14:00:00Z
        */
       updated_at: string;
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -7847,29 +13838,52 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_LlmModel: {
+      /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
       capabilities: string[];
-      /** Format: date-time */
-      created_at: string;
-      display_name: string;
       /**
-       * @description Whether this model is enabled (visible in UI model pickers).
-       *     All models are available via API regardless of this flag.
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
        */
+      created_at: string;
+      /** @description Human-readable display name. Safe to render in user-facing messages. */
+      display_name: string;
+      /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
       enabled: boolean;
-      /** @example model_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
       id: string;
+      /** @description Whether this model is starred in the UI for quick access. */
       is_favorite: boolean;
+      /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
       model_id: string;
-      /** @example provider_01933b5a00007000800000000000001 */
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
       provider_id: string;
-      /** @description How the model was added to the system */
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
       source: components["schemas"]["LlmModelSource"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       */
       updated_at: string;
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -7881,35 +13895,89 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_LlmModelWithProvider: {
+      /**
+       * @description Capability tags supported by this model.
+       * @example [
+       *       "text",
+       *       "tools",
+       *       "vision",
+       *       "thinking"
+       *     ]
+       */
       capabilities: string[];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
+       * @example 2026-01-04T11:23:00Z
+       */
       created_at: string;
+      /**
+       * @description Human-readable display name.
+       * @example Claude Sonnet 4.5
+       */
       display_name: string;
-      /** @description Whether this model is enabled (visible in UI model pickers) */
+      /**
+       * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
+       * @example true
+       */
       enabled: boolean;
       /**
        * @description Derived: model is configured and ready for use. Currently means the
        *     joined provider is active and has an API key set; over time this may
        *     also incorporate live reachability checks. Not persisted.
+       * @example true
        */
       healthy: boolean;
-      /** @example model_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
       id: string;
+      /**
+       * @description Whether this model is starred in the UI for quick access.
+       * @example true
+       */
       is_favorite: boolean;
+      /**
+       * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
+       * @example claude-sonnet-4-5
+       */
       model_id: string;
       profile?: null | components["schemas"]["LlmModelProfile"];
-      /** @example provider_01933b5a00007000800000000000001 */
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
       provider_id: string;
+      /**
+       * @description Joined provider display name.
+       * @example Anthropic
+       */
       provider_name: string;
+      /** @description Joined provider implementation type. */
       provider_type: components["schemas"]["LlmProviderType"];
-      /** @description How the model was added to the system */
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
       source: components["schemas"]["LlmModelSource"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       * @example 2026-05-27T15:24:00Z
+       */
       updated_at: string;
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -7921,27 +13989,50 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_LlmProvider: {
-      /** @description Whether an API key is configured (key is never returned) */
+      /** @description Whether an API key is configured. The key itself is never returned. */
       api_key_set: boolean;
+      /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
       base_url?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was created (RFC 3339).
+       */
       created_at: string;
-      /** @example provider_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example provider_01933b5a00007000800000000000001
+       */
       id: string;
       /**
        * Format: date-time
-       * @description When models were last synced from provider API
+       * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
        */
       last_synced_at?: string | null;
+      /** @description Human-readable provider name. Safe to render in user-facing messages. */
       name: string;
+      /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
       provider_type: components["schemas"]["LlmProviderType"];
+      /** @description Current lifecycle status of this provider. */
       status: components["schemas"]["LlmProviderStatus"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was last updated (RFC 3339).
+       */
       updated_at: string;
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -7953,7 +14044,10 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_McpServer: {
       /** @description Whether an API key has been configured. */
@@ -8014,6 +14108,13 @@ export interface components {
        */
       url: string;
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -8025,12 +14126,16 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_ResourceWithCounts_Agent: ({
       /**
        * Format: date-time
        * @description Timestamp when the agent was archived.
+       * @example 2026-05-26T00:00:00Z
        */
       archived_at?: string | null;
       /**
@@ -8041,6 +14146,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was created.
+       * @example 2026-04-01T10:00:00Z
        */
       created_at: string;
       /**
@@ -8057,13 +14163,18 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was deleted.
+       * @example 2026-05-26T00:00:00Z
        */
       deleted_at?: string | null;
-      /** @description Human-readable description of what the agent does. */
+      /**
+       * @description Human-readable description of what the agent does.
+       * @example Handles refund and shipping questions; escalates billing disputes.
+       */
       description?: string | null;
       /**
        * @description Human-readable display name shown in UI (e.g. "Customer Support Agent").
        *     Falls back to `name` when absent.
+       * @example Customer Support Agent
        */
       display_name?: string | null;
       /**
@@ -8084,11 +14195,17 @@ export interface components {
       id: string;
       /** @description Starter files copied into each new session for this agent. */
       initial_files?: components["schemas"]["InitialFile"][];
-      /** @description Maximum number of LLM iterations per turn for this agent. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this agent.
+       * @example 50
+       */
       max_iterations?: number | null;
       /** @description Remote MCP servers scoped to this agent and inherited by its sessions. */
       mcpServers?: components["schemas"]["BTreeMap"];
-      /** @description Name, unique per org (e.g. "customer-support"). */
+      /**
+       * @description Name, unique per org (e.g. "customer-support").
+       * @example customer-support
+       */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
       /**
@@ -8101,9 +14218,16 @@ export interface components {
       /**
        * @description System prompt that defines the agent's behavior.
        *     Sent as the first message in every conversation.
+       * @example You are a friendly customer support agent for Acme Corp. Verify orders before issuing refunds. Escalate any billing disputes to a human.
        */
       system_prompt: string;
-      /** @description Tags for organizing and filtering agents. */
+      /**
+       * @description Tags for organizing and filtering agents.
+       * @example [
+       *       "support",
+       *       "production"
+       *     ]
+       */
       tags?: string[];
       /**
        * @description Client-side tools registered for this agent.
@@ -8113,6 +14237,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the agent was last updated.
+       * @example 2026-05-20T14:00:00Z
        */
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
@@ -8128,6 +14253,13 @@ export interface components {
        */
       session_count: number;
     }) & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -8139,12 +14271,16 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_ResourceWithCounts_Harness: ({
       /**
        * Format: date-time
        * @description Timestamp when the harness was archived.
+       * @example 2026-05-26T00:00:00Z
        */
       archived_at?: string | null;
       /** @description Capabilities enabled for this harness with per-harness configuration. */
@@ -8152,6 +14288,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the harness was created.
+       * @example 2026-04-01T10:00:00Z
        */
       created_at: string;
       /**
@@ -8163,11 +14300,18 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the harness was deleted.
+       * @example 2026-05-26T00:00:00Z
        */
       deleted_at?: string | null;
-      /** @description Human-readable description of what the harness does. */
+      /**
+       * @description Human-readable description of what the harness does.
+       * @example Default harness with file-system + secrets capabilities; safe baseline for new agents.
+       */
       description?: string | null;
-      /** @description Human-readable display name shown in UI. */
+      /**
+       * @description Human-readable display name shown in UI.
+       * @example Generic Harness
+       */
       display_name?: string | null;
       /**
        * @description Unique identifier for the harness (format: harness_{32-hex}).
@@ -8180,11 +14324,15 @@ export interface components {
        * @description Whether this harness is built-in (system-managed, readonly).
        *     Built-in harnesses are provisioned during org initialization and
        *     cannot be modified or deleted via the API. Users can copy them.
+       * @example false
        */
       is_built_in?: boolean;
       /** @description Remote MCP servers scoped to this harness and inherited by descendant layers. */
       mcpServers?: components["schemas"]["BTreeMap"];
-      /** @description Name, unique per org (e.g. "generic"). */
+      /**
+       * @description Name, unique per org (e.g. "generic").
+       * @example generic
+       */
       name: string;
       network_access?: null | components["schemas"]["NetworkAccessList"];
       /**
@@ -8197,13 +14345,21 @@ export interface components {
       /**
        * @description System prompt that defines the harness's base behavior.
        *     Forms the foundation of the prompt stack.
+       * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
        */
       system_prompt: string;
-      /** @description Tags for organizing and filtering harnesses. */
+      /**
+       * @description Tags for organizing and filtering harnesses.
+       * @example [
+       *       "baseline",
+       *       "production"
+       *     ]
+       */
       tags?: string[];
       /**
        * Format: date-time
        * @description Timestamp when the harness was last updated.
+       * @example 2026-05-20T14:00:00Z
        */
       updated_at: string;
     } & {
@@ -8218,6 +14374,13 @@ export interface components {
        */
       session_count: number;
     }) & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -8229,13 +14392,17 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_Session: {
       /**
        * Format: int32
        * @description Number of active (enabled) schedules for this session.
        *     Populated when the session is fetched for API responses.
+       * @example 2
        */
       active_schedule_count?: number | null;
       /**
@@ -8253,11 +14420,15 @@ export interface components {
        * @example agentver_01933b5a00007000800000000000001
        */
       agent_version_id?: string | null;
-      /** @description Validated config passed by host at blueprint spawn time. */
-      blueprint_config?: unknown;
+      /**
+       * @description Validated config passed by host at blueprint spawn time.
+       *     Example: `{"target_repo": "acme/everruns"}`.
+       */
+      blueprint_config?: Record<string, never> | null;
       /**
        * @description Blueprint ID. When set, reason_activity and act_activity build RuntimeAgent
        *     from the blueprint definition instead of from harness_id/agent_id.
+       * @example blueprint_research_pack
        */
       blueprint_id?: string | null;
       /**
@@ -8268,6 +14439,7 @@ export interface components {
       /**
        * Format: date-time
        * @description Timestamp when the session was created.
+       * @example 2026-05-25T10:00:00Z
        */
       created_at: string;
       effective_owner?: null | components["schemas"]["PrincipalSummary"];
@@ -8276,11 +14448,16 @@ export interface components {
        *     Computed at read time from the capability registry.
        *     Known features: "file_system", "schedules", "secrets", "key_value",
        *     "sql_database", "leased_resources".
+       * @example [
+       *       "file_system",
+       *       "secrets"
+       *     ]
        */
       features?: string[];
       /**
        * Format: date-time
        * @description Timestamp when the session finished (completed or failed).
+       * @example 2026-05-25T10:14:32Z
        */
       finished_at?: string | null;
       /**
@@ -8311,11 +14488,18 @@ export interface components {
       /**
        * @description Whether this session is pinned by the current user.
        *     Only populated when the request has an authenticated user context.
+       * @example false
        */
       is_pinned?: boolean | null;
-      /** @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`). */
+      /**
+       * @description Locale for localized agent behavior and formatting (BCP 47, e.g. `uk-UA`).
+       * @example en-US
+       */
       locale?: string | null;
-      /** @description Maximum number of LLM iterations per turn for this session. */
+      /**
+       * @description Maximum number of LLM iterations per turn for this session.
+       * @example 50
+       */
       max_iterations?: number | null;
       /** @description Remote MCP servers scoped to this session only. */
       mcpServers?: components["schemas"]["BTreeMap"];
@@ -8331,7 +14515,10 @@ export interface components {
        * @example org_00000000000000000000000000000001
        */
       organization_id: string;
-      /** @description Preview text from the last assistant response (truncated). */
+      /**
+       * @description Preview text from the last assistant response (truncated).
+       * @example Here is a Q3 plan covering the three pillars we discussed...
+       */
       output_preview?: string | null;
       owner?: null | components["schemas"]["PrincipalSummary"];
       /**
@@ -8341,43 +14528,72 @@ export interface components {
       owner_principal_id: string;
       /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
       parent_session_id?: string | null;
-      /** @description Preview text from the first user message (truncated). */
+      /**
+       * @description Preview text from the first user message (truncated).
+       * @example Help me draft the Q3 marketing plan
+       */
       preview?: string | null;
       /**
        * Format: uuid
        * @description Denormalized effective human owner of the owning principal lineage.
+       * @example 550e8400-e29b-41d4-a716-446655440000
        */
       resolved_owner_user_id?: string | null;
       /**
        * Format: date-time
        * @description Timestamp when the session started executing.
+       * @example 2026-05-25T10:00:01Z
        */
       started_at?: string | null;
       /** @description Current execution status of the session. */
       status: components["schemas"]["SessionStatus"];
-      /** @description Human-readable subagent name ("Test Runner"), unique per parent. */
+      /**
+       * @description Human-readable subagent name ("Test Runner"), unique per parent.
+       * @example Test Runner
+       */
       subagent_name?: string | null;
       subagent_status?: null | components["schemas"]["SubagentStatus"];
-      /** @description Original task description given to this subagent. */
+      /**
+       * @description Original task description given to this subagent.
+       * @example Run the integration test suite and report failures.
+       */
       subagent_task?: string | null;
       /**
        * @description Session-level system prompt override.
        *     Prepended to the agent's system prompt when building RuntimeAgent.
        */
       system_prompt?: string | null;
-      /** @description Tags for organizing and filtering sessions. */
+      /**
+       * @description Tags for organizing and filtering sessions.
+       * @example [
+       *       "marketing",
+       *       "q3",
+       *       "draft"
+       *     ]
+       */
       tags?: string[];
-      /** @description Human-readable title for the session. */
+      /**
+       * @description Human-readable title for the session.
+       * @example Q3 marketing brief
+       */
       title?: string | null;
       /** @description Client-side tools for this session (additive to agent tools). */
       tools?: components["schemas"]["ToolDefinition"][];
       /**
        * Format: date-time
        * @description Timestamp when the session was last updated.
+       * @example 2026-05-25T10:14:32Z
        */
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
@@ -8389,43 +14605,271 @@ export interface components {
      * @description Wrapper that adds API and UI links to a serialized resource.
      *
      *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer).
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
     WithUrls_Skill: {
+      /** @description Comma-separated list of tool patterns this skill may invoke. `None` means inherit from the harness. */
       allowed_tools?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was archived, if any (RFC 3339). Archived skills are hidden from default list views.
+       */
       archived_at?: string | null;
+      /** @description Compatibility marker describing host-runtime requirements declared by the skill (e.g. min platform version). Informational. */
       compatibility?: string | null;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was created (RFC 3339).
+       */
       created_at: string;
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was hard-deleted, if any (RFC 3339).
+       */
       deleted_at?: string | null;
-      /** @example Extract text and tables from PDF files. */
+      /**
+       * @description Short, agent- and user-readable summary of what the skill does and when to use it.
+       * @example Extract text and tables from PDF files.
+       */
       description: string;
-      /** @description Whether the model is prevented from auto-invoking this skill */
+      /** @description When `true`, the LLM is prevented from auto-invoking this skill; only the user can trigger it explicitly. */
       disable_model_invocation?: boolean;
-      /** @example skill_01933b5a00007000800000000000001 */
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example skill_01933b5a00007000800000000000001
+       */
       id: string;
+      /** @description License string as declared by the skill author (e.g. `MIT`, `Apache-2.0`). Informational; not enforced. */
       license?: string | null;
+      /** @description Free-form metadata declared by the skill author. */
       metadata?: {
         [key: string]: unknown;
       };
-      /** @example pdf-processing */
+      /**
+       * @description Stable kebab-case slug used to invoke the skill (e.g. `/pdf-processing` in chat). Safe to render in user-facing messages.
+       * @example pdf-processing
+       */
       name: string;
+      /** @description How the skill content is sourced (filesystem, URL, embedded). Determines reload semantics. */
       source_type: components["schemas"]["SkillSourceType"];
+      /** @description Current lifecycle status (`active`, `archived`, `deleted`). */
       status: components["schemas"]["SkillStatus"];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description Timestamp when this skill was last updated (RFC 3339).
+       */
       updated_at: string;
-      /** @description Whether this skill appears as a /slash command for users */
+      /** @description Whether this skill appears as a `/`-prefixed slash command for end users in chat UIs. */
       user_invocable?: boolean;
+      /** @description Semver string declared by the skill author. Free-form; sorted lexicographically when comparing. */
       version: string;
     } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
       /** @description Full API endpoint URL for this resource. */
       self_url: string;
       /** @description Alias for `view_url`, used by command and MCP outputs. */
       ui_link: string;
       /** @description Full UI URL for viewing this resource. */
       view_url: string;
+    };
+    /** @description Worker response */
+    WorkerResponse: {
+      /**
+       * @description Whether the worker is currently accepting new task assignments. Disabled briefly during drains or backpressure.
+       * @example true
+       */
+      accepting_tasks: boolean;
+      /**
+       * @description Activity types this worker accepts. Tasks with other activity types skip this worker.
+       * @example [
+       *       "agent_loop",
+       *       "tool_call"
+       *     ]
+       */
+      activity_types: string[];
+      /**
+       * Format: int64
+       * @description Average task duration in milliseconds across recent activity.
+       * @example 184
+       */
+      avg_task_duration_ms?: number | null;
+      /**
+       * @description Human-readable reason the worker is rejecting tasks, when `accepting_tasks` is `false`.
+       * @example draining for deploy
+       */
+      backpressure_reason?: string | null;
+      /**
+       * Format: int32
+       * @description Number of tasks currently executing on this worker.
+       * @example 3
+       */
+      current_load: number;
+      /**
+       * @description Hostname / pod name the worker is running on. Operator hint; not used for routing.
+       * @example worker-prod-7c8b9d-r2x4p
+       */
+      hostname?: string | null;
+      /**
+       * @description Opaque durable worker identifier (defaults to `worker-<uuid>`).
+       * @example worker-7f3a9b2e-1c4d-4a5f-8b6c-9d0e1f2a3b4c
+       */
+      id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent heartbeat from this worker (RFC 3339).
+       * @example 2026-05-27T15:30:42Z
+       */
+      last_heartbeat_at: string;
+      /**
+       * Format: int32
+       * @description Maximum number of tasks the worker will run concurrently.
+       * @example 8
+       */
+      max_concurrency: number;
+      /** @description Free-form worker-reported metadata (deployment, capabilities flag set, etc.). */
+      metadata?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description Timestamp when this worker started accepting tasks (RFC 3339).
+       * @example 2026-05-27T08:00:00Z
+       */
+      started_at: string;
+      /**
+       * @description Current lifecycle status (`running`, `draining`, `stopped`, etc.).
+       * @example running
+       */
+      status: string;
+      /**
+       * Format: int64
+       * @description Total tasks this worker has completed successfully.
+       * @example 12843
+       */
+      tasks_completed: number;
+      /**
+       * Format: int64
+       * @description Total tasks this worker has failed (including retries that were ultimately abandoned).
+       * @example 17
+       */
+      tasks_failed: number;
+      /**
+       * @description Build version of the worker binary.
+       * @example 0.8.35
+       */
+      version?: string | null;
+      /**
+       * @description Logical group this worker belongs to (used for routing). `None` for ungrouped workers.
+       * @example session-agents
+       */
+      worker_group?: string | null;
+    };
+    /** @description Workers list response */
+    WorkersListResponse: {
+      /** @description Page of items returned by this query. */
+      data: components["schemas"]["WorkerResponse"][];
+      summary: components["schemas"]["WorkersSummaryResponse"];
+      /** @description Total number of items matching the query, across all pages. */
+      total: number;
+    };
+    /** @description Workers summary stats */
+    WorkersSummaryResponse: {
+      /** @description Workers in `running` state, accepting tasks. */
+      active: number;
+      /** @description Workers in `draining` state, finishing in-flight tasks but not accepting new ones. */
+      draining: number;
+      /** @description Workers in `stopped` state, neither running nor draining. */
+      stopped: number;
+      /** @description Sum of `max_concurrency` across all `active` + `draining` workers. */
+      total_capacity: number;
+      /** @description Total tasks currently in flight across all workers. */
+      total_load: number;
+    };
+    /** @description Workflow event response */
+    WorkflowEventResponse: {
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       */
+      created_at: string;
+      event_data: unknown;
+      event_type: string;
+      /**
+       * Format: int64
+       * @description Monotonically-assigned internal event identifier.
+       */
+      id: number;
+      /** Format: int32 */
+      sequence_num: number;
+      /**
+       * Format: uuid
+       * @description Durable workflow's identifier.
+       */
+      workflow_id: string;
+    };
+    /** @description Workflow events list response */
+    WorkflowEventsListResponse: {
+      /** @description Page of items returned by this query. */
+      data: components["schemas"]["WorkflowEventResponse"][];
+      /** @description Total number of items matching the query, across all pages. */
+      total: number;
+    };
+    /** @description Workflow response */
+    WorkflowResponse: {
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource completed, if any (RFC 3339).
+       * @example 2026-05-27T15:24:42Z
+       */
+      completed_at?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was created (RFC 3339).
+       * @example 2026-05-27T15:24:00Z
+       */
+      created_at: string;
+      /** @description Human-readable error message, populated when this resource is in a failed state. */
+      error?: Record<string, never>;
+      /**
+       * Format: uuid
+       * @description UUID of the workflow.
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      id: string;
+      /** @description Initial input the workflow was started with. Shape varies by `workflow_type`. */
+      input: Record<string, never>;
+      /** @description Terminal result, populated when the workflow has completed successfully. */
+      result?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource started, if any (RFC 3339).
+       * @example 2026-05-27T15:24:01Z
+       */
+      started_at?: string | null;
+      /**
+       * @description Current lifecycle status.
+       * @example running
+       */
+      status: string;
+      /**
+       * @description Workflow type identifier registered with the durable executor.
+       * @example session_agent_loop
+       */
+      workflow_type: string;
+    };
+    /** @description Workflows list response */
+    WorkflowsListResponse: {
+      /** @description Page of items returned by this query. */
+      data: components["schemas"]["WorkflowResponse"][];
+      /** @description Total number of items matching the query, across all pages. */
+      total: number;
     };
     /**
      * @description Prefixed identifier with 'agent' prefix
@@ -8545,6 +14989,69 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  check_agent_name: {
+    parameters: {
+      query: {
+        /** @description The agent name to check. */
+        name: string;
+        /** @description Optional agent ID to exclude (for edit forms where the current agent's own name is valid). */
+        exclude_id?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Name availability result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CheckAgentNameResponse"];
+        };
+      };
+      /** @description Invalid exclude_id */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  agent_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for agents */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
         };
       };
     };
@@ -9262,6 +15769,364 @@ export interface operations {
       };
     };
   };
+  list_apps: {
+    parameters: {
+      query?: {
+        /** @description Search by name or description (case-insensitive substring match). */
+        search?: string | null;
+        /** @description Include archived apps. Deleted apps never appear in lists. */
+        include_archived?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of apps */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_App"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_app: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateAppRequest"];
+      };
+    };
+    responses: {
+      /** @description App created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_App"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  app_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for apps */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
+  get_app: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description App found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_App"];
+        };
+      };
+      /** @description Invalid app ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description App not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_app: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description App archived successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid app ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description App not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_app: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAppRequest"];
+      };
+    };
+    responses: {
+      /** @description App updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_App"];
+        };
+      };
+      /** @description Invalid app ID or input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  add_a2a_channel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddA2aChannelHttpRequest"];
+      };
+    };
+    responses: {
+      /** @description A2A channel created. The `api_key` field is the plaintext key returned exactly once and never recoverable later. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AddA2aChannelOutput"];
+        };
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  regenerate_a2a_key: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+        /** @description A2A channel ID */
+        channel_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description API key rotated. The `api_key` field is the new plaintext key returned exactly once; the previous key is invalidated immediately. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RegenerateA2aApiKeyOutput"];
+        };
+      };
+      /** @description Invalid app/channel ID or channel is not an A2A channel */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App or A2A channel not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   invoke_a2a: {
     parameters: {
       query?: never;
@@ -9314,7 +16179,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorResponse"];
         };
       };
-      /** @description SSE connection limit reached for the org/session */
+      /** @description Per-channel A2A rate limit exceeded, or SSE connection limit reached for the org/session */
       429: {
         headers: {
           [name: string]: unknown;
@@ -9354,6 +16219,299 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
         };
+      };
+    };
+  };
+  handshake: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Markdown handshake describing the FCP endpoint and how to authenticate. Always `text/markdown`. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description No FCP endpoint at this URL. Single sanitized body covers unknown apps, unpublished apps, apps without an FCP channel, and disabled FCP channels — operator state is never disclosed. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Per-app FCP rate limit exceeded. `Retry-After: 60` header is set. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+    };
+  };
+  message: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    /** @description Plain UTF-8 text, or `application/json` of shape `{"message": "..."}`. Maximum 256 KiB. */
+    requestBody: {
+      content: {
+        "text/plain": string;
+      };
+    };
+    responses: {
+      /** @description Agent reply as Markdown. The `Set-Cookie: fcp_session=...` header is emitted so subsequent POSTs can resume the same conversation. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Malformed body. Distinct messages for empty body, non-UTF-8 bytes, and JSON that did not parse into the expected shape — each Markdown body points back at the handshake. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Token required but missing or wrong. Markdown body explains both accepted headers (`Authorization: Bearer` and `X-Everruns-FCP-Token`) and points at the handshake. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Same generic 404 as the handshake — operator state is never disclosed. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description FCP session expired. Body tells the client to drop the `fcp_session` cookie and POST again. */
+      410: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Body exceeds 256 KiB. */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Per-app FCP rate limit exceeded. `Retry-After: 60` header is set. */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+      /** @description Agent did not reply within the configured timeout. The same `fcp_session` cookie is set so the client can retry the same conversation. */
+      504: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/markdown": unknown;
+        };
+      };
+    };
+  };
+  publish_app: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description App published */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_App"];
+        };
+      };
+      /** @description Invalid app ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description App not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_app_runs: {
+    parameters: {
+      query?: {
+        /** @description Time window to include, such as 24h, 60m, or 7d. */
+        window?: string | null;
+        /** @description Optional grouping. Currently only `hour` is supported. */
+        groupBy?: string | null;
+      };
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Recent app invocation runs */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AppRunListResponse"];
+        };
+      };
+      /** @description Invalid app ID or query */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description App not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  unpublish_app: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description App ID */
+        app_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description App unpublished */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_App"];
+        };
+      };
+      /** @description Invalid app ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description App not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -9732,6 +16890,184 @@ export interface operations {
       };
     };
   };
+  list_circuit_breakers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of circuit breakers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CircuitBreakersListResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_circuit_breaker: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Circuit breaker key */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Circuit breaker details */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CircuitBreakerResponse"];
+        };
+      };
+      /** @description Circuit breaker not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_circuit_breaker: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Circuit breaker key */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Circuit breaker deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Circuit breaker not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  force_close_circuit_breaker: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Circuit breaker key */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Circuit breaker closed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Circuit breaker not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  force_open_circuit_breaker: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Circuit breaker key */
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Circuit breaker opened */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   durable_config: {
     parameters: {
       query?: never;
@@ -9748,6 +17084,85 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
+  list_dlq: {
+    parameters: {
+      query?: {
+        /** @description Filter by workflow ID */
+        workflow_id?: string;
+        /** @description Filter by activity type */
+        activity_type?: string;
+        /** @description Pagination offset */
+        offset?: number;
+        /** @description Pagination limit */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of DLQ entries */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DlqListResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  retry_dlq: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description DLQ entry ID */
+        dlq_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Task requeued */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/plain": string;
+        };
+      };
+      /** @description DLQ entry not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
         };
       };
     };
@@ -9796,6 +17211,55 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_health: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description System health */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HealthResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_metrics_timeseries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Metrics time series */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MetricsTimeSeriesResponse"];
         };
       };
     };
@@ -10305,6 +17769,439 @@ export interface operations {
       };
     };
   };
+  stream_durable_sse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description SSE event stream with 'connected', 'snapshot', and 'disconnecting' events */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/event-stream": unknown;
+        };
+      };
+      /** @description Durable store not available */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_tasks: {
+    parameters: {
+      query?: {
+        /** @description Filter by status */
+        status?: string;
+        /** @description Filter by activity type */
+        activity_type?: string;
+        /** @description Filter by workflow ID */
+        workflow_id?: string;
+        /** @description Pagination offset */
+        offset?: number;
+        /** @description Pagination limit */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of tasks */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TasksListResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  enqueue_task: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EnqueueTaskRequest"];
+      };
+    };
+    responses: {
+      /** @description Task enqueued */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EnqueueTaskResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_workers: {
+    parameters: {
+      query?: {
+        /** @description Filter by status */
+        status?: string;
+        /** @description Filter by worker group */
+        worker_group?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of workers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkersListResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  drain_worker: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Worker ID */
+        worker_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Worker drained */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  resume_worker: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Worker ID */
+        worker_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Worker resumed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_workflows: {
+    parameters: {
+      query?: {
+        /** @description Filter by status */
+        status?: string;
+        /** @description Filter by workflow type */
+        workflow_type?: string;
+        /** @description Pagination offset */
+        offset?: number;
+        /** @description Pagination limit */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of workflows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowsListResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_workflow: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workflow ID */
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Workflow details */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowResponse"];
+        };
+      };
+      /** @description Workflow not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  cancel_workflow: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workflow ID */
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Workflow cancelled */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Workflow not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_workflow_events: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workflow ID */
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of workflow events */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowEventsListResponse"];
+        };
+      };
+      /** @description Workflow not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  send_signal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workflow ID */
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SendSignalRequest"];
+      };
+    };
+    responses: {
+      /** @description Signal sent */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Workflow not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  stream_workflow_sse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workflow ID */
+        workflow_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description SSE event stream with 'connected', 'snapshot', and 'disconnecting' events */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/event-stream": unknown;
+        };
+      };
+      /** @description Workflow not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Durable store not available */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   list_examples: {
     parameters: {
       query?: never;
@@ -10406,6 +18303,49 @@ export interface operations {
       };
       /** @description Internal server error */
       500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  check_harness_name: {
+    parameters: {
+      query: {
+        /** @description The harness name to check. */
+        name: string;
+        /** @description Optional harness ID to exclude (for edit forms where the current harness's own name is valid). */
+        exclude_id?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Name availability result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CheckNameResponse"];
+        };
+      };
+      /** @description Invalid exclude_id */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -10993,7 +18933,9 @@ export interface operations {
   list_kbs: {
     parameters: {
       query?: {
+        /** @description Substring filter applied to knowledge-base name and description. */
         search?: string | null;
+        /** @description When `true`, also returns archived knowledge bases. */
         include_archived?: boolean | null;
       };
       header?: never;
@@ -11174,7 +19116,12 @@ export interface operations {
   list_entries: {
     parameters: {
       query?: {
+        /** @description Substring filter applied to entry title and body. */
         search?: string | null;
+        /**
+         * @description Discriminator selecting the variant of this resource. One of `note`,
+         *     `table`, `business`, `query`, `runbook`.
+         */
         kind?: string | null;
       };
       header?: never;
@@ -11391,6 +19338,26 @@ export interface operations {
       };
     };
   };
+  llm_model_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for LLM models */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
   get_model: {
     parameters: {
       query?: never;
@@ -11559,6 +19526,26 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  llm_provider_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for LLM providers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
       };
     };
   };
@@ -11871,6 +19858,26 @@ export interface operations {
       };
     };
   };
+  mcp_server_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for MCP servers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
   get_mcp_server: {
     parameters: {
       query?: never;
@@ -12105,13 +20112,75 @@ export interface operations {
       };
     };
   };
+  update_memory_store: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory store ID */
+        store_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMemoryStoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Memory store updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryStoreResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Conflict (duplicate name or concurrent default reassignment) */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   list_memories: {
     parameters: {
       query?: {
+        /** @description Substring filter applied to memory content. */
         query?: string | null;
+        /**
+         * @description Discriminator selecting the variant of this resource. One of `fact`,
+         *     `preference`, `correction`, `procedure`, `context`.
+         */
         kind?: string | null;
+        /** @description Filter to memories tagged with at least one of these labels. */
         tag?: string[] | null;
+        /** @description When `true`, also returns inactive (deactivated) memories. */
         include_inactive?: boolean | null;
+        /** @description Maximum number of items returned in this page. */
         limit?: number | null;
       };
       header?: never;
@@ -12299,7 +20368,9 @@ export interface operations {
   list_payment_accounts: {
     parameters: {
       query?: {
+        /** @description Filter to a single owner class (user, agent identity, or organization). */
         owner_type?: string | null;
+        /** @description Filter to a specific owner principal id. */
         owner_id?: string | null;
       };
       header?: never;
@@ -12462,7 +20533,9 @@ export interface operations {
   list_payment_attempts: {
     parameters: {
       query?: {
+        /** @description Filter to attempts originating from a specific session. */
         session_id?: string | null;
+        /** @description Maximum number of attempts returned. Defaults to 50. */
         limit?: number;
       };
       header?: never;
@@ -12485,8 +20558,11 @@ export interface operations {
   list_payment_policies: {
     parameters: {
       query?: {
+        /** @description Filter to policies that authorize a specific payment account. */
         payment_account_id?: string | null;
+        /** @description Filter to a single subject class. */
         subject_type?: string | null;
+        /** @description Filter to a specific subject principal id. */
         subject_id?: string | null;
       };
       header?: never;
@@ -12646,6 +20722,541 @@ export interface operations {
       };
     };
   };
+  backfill_reporting: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportingBackfillRequest"];
+      };
+    };
+    responses: {
+      /** @description Reporting backfill enqueue result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportingBackfillResult"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_diagnostics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reporting diagnostics */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportingDiagnostics"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_catalog: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reporting semantic catalog */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DatasetCatalog"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  run_projector: {
+    parameters: {
+      query?: {
+        /** @description Maximum number of items returned in this page. */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reporting projector run result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProjectorRunResult"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  run_query: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReportQuery"];
+      };
+    };
+    responses: {
+      /** @description Reporting query result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportResult"];
+        };
+      };
+      /** @description Invalid semantic query */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  export_query: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExportReportQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Exported report content */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportExport"];
+        };
+      };
+      /** @description Invalid semantic query */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_saved_reports: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Saved reports */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_SavedReport"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  create_saved_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedReportRequest"];
+      };
+    };
+    responses: {
+      /** @description Saved report */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedReport"];
+        };
+      };
+      /** @description Invalid saved report */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_saved_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved report ID */
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Saved report */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedReport"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Saved report not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_saved_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved report ID */
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Saved report deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Saved report not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_saved_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved report ID */
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSavedReportRequest"];
+      };
+    };
+    responses: {
+      /** @description Saved report */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedReport"];
+        };
+      };
+      /** @description Invalid saved report */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Saved report not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  export_saved_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved report ID */
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExportSavedReportRequest"];
+      };
+    };
+    responses: {
+      /** @description Exported report content */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportExport"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Saved report not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  run_saved_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Saved report ID */
+        report_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reporting query result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReportResult"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Saved report not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  resolve_org: {
+    parameters: {
+      query: {
+        /** @description Prefixed public ID of the resource */
+        id: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Owning org resolved */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResolveOrgResponse"];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unknown id, unknown prefix, or caller is not a member of the owning org */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   list_sessions: {
     parameters: {
       query?: {
@@ -12694,6 +21305,16 @@ export interface operations {
     };
     requestBody: {
       content: {
+        /**
+         * @example {
+         *       "harness_name": "generic",
+         *       "tags": [
+         *         "debugging",
+         *         "urgent"
+         *       ],
+         *       "title": "Debug login issue"
+         *     }
+         */
         "application/json": components["schemas"]["CreateSessionRequest"];
       };
     };
@@ -12704,6 +21325,25 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
+          /**
+           * @example {
+           *       "created_at": "2026-05-27T15:24:00Z",
+           *       "harness_id": "harness_01933b5a00007000800000000000001",
+           *       "id": "session_01933b5a00007000800000000000001",
+           *       "organization_id": "org_00000000000000000000000000000001",
+           *       "owner_principal_id": "principal_01933b5a000070008000000000000001",
+           *       "self_url": "https://app.everruns.com/api/v1/sessions/session_01933b5a00007000800000000000001",
+           *       "status": "started",
+           *       "tags": [
+           *         "debugging",
+           *         "urgent"
+           *       ],
+           *       "title": "Debug login issue",
+           *       "ui_link": "https://app.everruns.com/sessions/session_01933b5a00007000800000000000001/chat",
+           *       "updated_at": "2026-05-27T15:24:00Z",
+           *       "view_url": "https://app.everruns.com/sessions/session_01933b5a00007000800000000000001/chat"
+           *     }
+           */
           "application/json": components["schemas"]["WithUrls_Session"];
         };
       };
@@ -12712,7 +21352,18 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          /**
+           * @example {
+           *       "code": "harness_not_found",
+           *       "detail": "Harness 'generic' not found in org org_00000000000000000000000000000001.",
+           *       "status": 404,
+           *       "title": "Not Found",
+           *       "type": "https://docs.everruns.com/errors/harness_not_found"
+           *     }
+           */
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
       };
       /** @description Internal server error */
       500: {
@@ -12784,6 +21435,33 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["VoiceSessionResponse_VoiceCallResponse"];
         };
+      };
+    };
+  };
+  get_session_stats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session statistics */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionStatsResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -12933,12 +21611,18 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Turn cancelled successfully (or no-op if idle) */
+      /** @description Turn cancelled, or no-op (status: no_op) if no turn was running */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
+          /**
+           * @example {
+           *       "message": "Turn cancelled successfully",
+           *       "status": "cancelled"
+           *     }
+           */
           "application/json": components["schemas"]["CancelTurnResponse"];
         };
       };
@@ -12954,7 +21638,18 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          /**
+           * @example {
+           *       "code": "session_not_found",
+           *       "detail": "Session session_01933b5a000070008000000000000001 not found in org org_00000000000000000000000000000001.",
+           *       "status": 404,
+           *       "title": "Not Found",
+           *       "type": "https://docs.everruns.com/errors/session_not_found"
+           *     }
+           */
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
       };
       /** @description Internal server error */
       500: {
@@ -14360,13 +23055,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Event stream. Includes 'connected' on open, domain events during streaming, and 'disconnecting' before graceful close. */
+      /** @description Server-Sent Events stream. Each SSE message has the wire shape `event: <type>\nid: <event_id>\ndata: <json>\n\n`, where `<type>` is one of the event types in the `EventData` catalog (`turn.started`, `tool.completed`, `reason.thinking.delta`, …), `<event_id>` is the event cursor (`event_{32-hex}` format, usable as `since_id` on reconnect), and `<json>` is the body schema below — a serialized `Event` whose `data` field carries the event-type-specific payload defined in `EventData`. Lifecycle framing events (`connected`, `disconnecting`) use the same SSE shape but carry a minimal JSON object in `data` rather than a full `Event`. See `specs/api-streaming.md` for the SSE convention. */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "text/event-stream": unknown;
+          "text/event-stream": components["schemas"]["Event"];
         };
       };
       /** @description Invalid session ID */
@@ -14449,6 +23144,54 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ListResponse_SecretInfo"];
         };
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  batch_set_secrets: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchSetSecretsRequest"];
+      };
+    };
+    responses: {
+      /** @description Secrets stored */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BatchSetSecretsResponse"];
+        };
+      };
+      /** @description Bad request (encryption not configured or invalid input) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Session not found */
       404: {
@@ -14694,6 +23437,26 @@ export interface operations {
       };
     };
   };
+  skill_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for skills */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
   upload_skill: {
     parameters: {
       query?: never;
@@ -14737,6 +23500,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_skills_usage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Usage map keyed by skill id */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["SkillUsage"];
+          };
         };
       };
     };
@@ -14927,6 +23712,133 @@ export interface operations {
       };
       /** @description Unauthorized */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_account: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Account deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeleteAccountResponse"];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description User not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_profile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProfileRequest"];
+      };
+    };
+    responses: {
+      /** @description Profile updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProfileResponse"];
+        };
+      };
+      /** @description Invalid request (empty name) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  export_user_data: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description User data export */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ExportUserDataResponse"];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description User not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -15158,6 +24070,47 @@ export interface operations {
       };
       /** @description Duplicate volume name */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  sync_volume_now: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Volume ID */
+        volume_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Volume sync queued */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VolumeResponse"];
+        };
+      };
+      /** @description Invalid sync request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Volume not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
