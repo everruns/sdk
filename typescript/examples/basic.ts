@@ -50,19 +50,15 @@ async function main() {
     exclude: ["output.message.delta"],
   });
 
-  const events = stream[Symbol.asyncIterator]();
-  try {
-    while (true) {
-      let next: Awaited<ReturnType<typeof events.next>>;
-      try {
-        next = await withTimeout(events.next(), EVENT_WAIT_MS);
-      } catch {
-        console.log("Timed out waiting for turn events; ending demo.");
-        break;
-      }
-      if (next.done) break;
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    console.log("Timed out waiting for turn events; ending demo.");
+    stream.abort();
+  }, EVENT_WAIT_MS);
 
-      const event = next.value;
+  try {
+    for await (const event of stream) {
       console.log(`[${event.type}]`, JSON.stringify(event.data).slice(0, 100));
 
       if (
@@ -70,30 +66,17 @@ async function main() {
         event.type === "turn.completed" ||
         event.type === "turn.failed"
       ) {
+        stream.abort();
         break;
       }
     }
   } finally {
-    stream.abort();
+    clearTimeout(timeoutId);
   }
 
-  console.log("Done!");
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("timeout")), ms);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
+  if (!timedOut) {
+    console.log("Done!");
+  }
 }
 
 main().catch(console.error);

@@ -32,20 +32,15 @@ async function main() {
 
   // Stream events (with retry limit for CI)
   const stream = client.events.stream(session.id, { maxRetries: 3 });
-  const events = stream[Symbol.asyncIterator]();
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    console.log("Timed out waiting for turn events; ending demo.");
+    stream.abort();
+  }, EVENT_WAIT_MS);
 
   try {
-    while (true) {
-      let next: Awaited<ReturnType<typeof events.next>>;
-      try {
-        next = await withTimeout(events.next(), EVENT_WAIT_MS);
-      } catch {
-        console.log("Timed out waiting for turn events; ending demo.");
-        return;
-      }
-      if (next.done) return;
-
-      const event = next.value;
+    for await (const event of stream) {
       if (verbose) {
         console.log(
           `\n[EVENT] ${event.type}: ${JSON.stringify(event.data, null, 2)}`,
@@ -75,15 +70,21 @@ async function main() {
 
         case "turn.completed":
           console.log("\n[Turn completed]");
+          stream.abort();
           return;
 
         case "turn.failed":
           console.log("\n[Turn failed]");
+          stream.abort();
           return;
       }
     }
   } finally {
-    stream.abort();
+    clearTimeout(timeoutId);
+  }
+
+  if (!timedOut) {
+    console.log("\n[Stream ended]");
   }
 }
 
@@ -109,22 +110,6 @@ function extractText(data: unknown): string | null {
     .map((part) => part.text ?? "");
 
   return texts.length > 0 ? texts.join("") : null;
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("timeout")), ms);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
 }
 
 function devClient(): Everruns {
