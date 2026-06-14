@@ -985,9 +985,10 @@ class WorkspacesClient:
         include_archived: Optional[bool] = None,
     ) -> list[Workspace]:
         """List workspaces."""
+        include_archived_param = None if include_archived is None else str(include_archived).lower()
         path = _with_query(
             "/workspaces",
-            {"search": search, "include_archived": include_archived},
+            {"search": search, "include_archived": include_archived_param},
         )
         resp = await self._client._get(path)
         return [Workspace(**w) for w in resp.get("data", [])]
@@ -1233,9 +1234,10 @@ class MemoriesClient:
         include_archived: Optional[bool] = None,
     ) -> list[Memory]:
         """List memories."""
+        include_archived_param = None if include_archived is None else str(include_archived).lower()
         path = _with_query(
             "/memories",
-            {"search": search, "include_archived": include_archived},
+            {"search": search, "include_archived": include_archived_param},
         )
         resp = await self._client._get(path)
         return [Memory(**m) for m in resp.get("data", [])]

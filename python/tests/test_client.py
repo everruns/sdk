@@ -1317,6 +1317,27 @@ async def test_workspaces_and_memories():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_workspace_and_memory_list_include_archived_query_values():
+    workspace_route = respx.get(
+        "https://custom.example.com/api/v1/workspaces?include_archived=false"
+    ).mock(return_value=httpx.Response(200, json={"data": []}))
+    memory_route = respx.get(
+        "https://custom.example.com/api/v1/memories?include_archived=true"
+    ).mock(return_value=httpx.Response(200, json={"data": []}))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.workspaces.list(include_archived=False)
+        await client.memories.list(include_archived=True)
+    finally:
+        await client.close()
+
+    assert workspace_route.called
+    assert memory_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_events_list_with_upstream_filters():
     route = respx.get(
         "https://custom.example.com/api/v1/sessions/sess_123/events"

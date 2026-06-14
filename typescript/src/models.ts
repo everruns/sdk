@@ -451,11 +451,11 @@ export interface Workspace {
   id: string;
   name: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   description?: string | null;
-  archivedAt?: string | null;
-  deletedAt?: string | null;
+  archived_at?: string | null;
+  deleted_at?: string | null;
 }
 
 /** Request to create a workspace */
@@ -476,27 +476,27 @@ export interface UpdateWorkspaceRequest {
 /** File metadata without content */
 export interface FileInfo {
   id: string;
-  sessionId: string;
+  session_id: string;
   path: string;
   name: string;
-  isDirectory: boolean;
-  isReadonly: boolean;
-  sizeBytes: number;
-  createdAt: string;
-  updatedAt: string;
+  is_directory: boolean;
+  is_readonly: boolean;
+  size_bytes: number;
+  created_at: string;
+  updated_at: string;
 }
 
 /** Complete file with content */
 export interface SessionFile {
   id: string;
-  sessionId: string;
+  session_id: string;
   path: string;
   name: string;
-  isDirectory: boolean;
-  isReadonly: boolean;
-  sizeBytes: number;
-  createdAt: string;
-  updatedAt: string;
+  is_directory: boolean;
+  is_readonly: boolean;
+  size_bytes: number;
+  created_at: string;
+  updated_at: string;
   content?: string | null;
   encoding?: string | null;
 }
@@ -505,17 +505,17 @@ export interface SessionFile {
 export interface FileStat {
   path: string;
   name: string;
-  isDirectory: boolean;
-  isReadonly: boolean;
-  sizeBytes: number;
-  createdAt: string;
-  updatedAt: string;
+  is_directory: boolean;
+  is_readonly: boolean;
+  size_bytes: number;
+  created_at: string;
+  updated_at: string;
 }
 
 /** Single grep match */
 export interface GrepMatch {
   path: string;
-  lineNumber: number;
+  line_number: number;
   line: string;
 }
 
@@ -536,42 +536,62 @@ export interface DeleteFileResponse {
 export interface Memory {
   id: string;
   name: string;
-  sourceType: string;
+  source_type: string;
   source: Record<string, unknown>;
-  isReadonly: boolean;
-  syncStatus: string;
+  is_readonly: boolean;
+  sync_status: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   description?: string | null;
-  lastSyncError?: string | null;
-  lastSyncedAt?: string | null;
-  archivedAt?: string | null;
-  deletedAt?: string | null;
+  last_sync_error?: string | null;
+  last_synced_at?: string | null;
+  archived_at?: string | null;
+  deleted_at?: string | null;
 }
+
+export interface GitHubMemorySourceRequest {
+  type: "github";
+  repository: string;
+  branch?: string | null;
+  root_folder?: string | null;
+  sync_interval_secs?: number | null;
+}
+
+export interface GitMemorySourceRequest {
+  type: "git";
+  url: string;
+  branch?: string | null;
+  root_folder?: string | null;
+  sync_interval_secs?: number | null;
+}
+
+export type CreateMemorySourceRequest =
+  | GitHubMemorySourceRequest
+  | GitMemorySourceRequest;
 
 /** Request to create a memory */
 export interface CreateMemoryRequest {
   name: string;
-  description?: string;
-  source?: Record<string, unknown>;
+  description?: string | null;
+  source?: CreateMemorySourceRequest | null;
 }
 
 /** Request to update a memory */
 export interface UpdateMemoryRequest {
-  name?: string;
+  name?: string | null;
   description?: string | null;
-  source?: Record<string, unknown> | null;
+  source?: CreateMemorySourceRequest | null;
 }
 
 /** Memory file metadata */
 export interface MemoryFileInfo {
   path: string;
-  isDirectory: boolean;
-  sizeBytes: number;
-  createdAt: string;
-  updatedAt: string;
-  contentHash?: string | null;
+  is_directory: boolean;
+  size_bytes: number;
+  created_at: string;
+  updated_at: string;
+  content_hash?: string | null;
 }
 
 /** Memory file content */
@@ -579,10 +599,10 @@ export interface MemoryFile {
   path: string;
   content: string;
   encoding: string;
-  sizeBytes: number;
-  createdAt: string;
-  updatedAt: string;
-  contentHash?: string | null;
+  size_bytes: number;
+  created_at: string;
+  updated_at: string;
+  content_hash?: string | null;
 }
 
 /** Request to create a memory file or directory */
@@ -601,7 +621,7 @@ export interface UpdateMemoryFileRequest {
 /** Memory grep result entry */
 export interface MemoryGrepResult {
   path: string;
-  sizeBytes: number;
+  size_bytes: number;
 }
 
 // --- Agent Analysis and Guardrail Models ---
@@ -620,7 +640,7 @@ export interface FindingLocation {
 }
 
 export interface Finding {
-  ruleId: string;
+  rule_id: string;
   severity: string;
   category: string;
   source: string;
@@ -644,12 +664,12 @@ export interface GuardrailsDryRunRequest {
 }
 
 export interface GuardrailsDryRunHit {
-  checkIndex: number;
-  checkId: string;
+  check_index: number;
+  check_id: string;
   stage: GuardrailStage;
-  ruleType: string;
+  rule_type: string;
   action: GuardrailAction;
-  reasonCode: string;
+  reason_code: string;
   matched?: string | null;
   replacement?: string | null;
 }
@@ -661,12 +681,12 @@ export interface GuardrailsDryRunResponse {
 
 export interface GuardrailExample {
   name: string;
-  displayName: string;
+  display_name: string;
   description: string;
   tags: string[];
-  checkTypes: string[];
+  check_types: string[];
   stages: string[];
-  dataEgress: string;
+  data_egress: string;
   config: Record<string, unknown>;
 }
 
