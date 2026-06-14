@@ -574,6 +574,326 @@ describe("Everruns", () => {
     );
   });
 
+  it("should analyze agent shape", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        findings: [
+          {
+            rule_id: "prompt.empty",
+            severity: "warning",
+            category: "quality",
+            source: "builtin",
+            message: "Prompt is short",
+          },
+        ],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.agents.analyze({
+      systemPrompt: "You are helpful.",
+    });
+
+    expect(response.findings[0].rule_id).toBe("prompt.empty");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/agents/analyze",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          system_prompt: "You are helpful.",
+          capabilities: [],
+          tools: [],
+        }),
+      }),
+    );
+  });
+
+  it("should call guardrail helper endpoints", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          examples: [
+            {
+              name: "secret-detection",
+              display_name: "Secret Detection",
+              description: "Detects secrets",
+              tags: ["security"],
+              check_types: ["regex"],
+              stages: ["output"],
+              data_egress: "none",
+              config: { checks: [] },
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ hits: [], blocked: false }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const examples = await client.capabilities.listGuardrailExamples();
+    const dryRun = await client.capabilities.dryRunGuardrails({
+      config: { checks: [] },
+      stage: "output",
+      text: "hello",
+    });
+
+    expect(examples.examples[0].name).toBe("secret-detection");
+    expect(dryRun.blocked).toBe(false);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "https://custom.example.com/api/v1/capabilities/guardrails/examples",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "https://custom.example.com/api/v1/capabilities/guardrails/dry-run",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          config: { checks: [] },
+          stage: "output",
+          text: "hello",
+        }),
+      }),
+    );
+  });
+
+  it("should create workspaces and memories", async () => {
+    const workspaceJson = {
+      id: "wsp_123",
+      name: "team-research",
+      description: "Research workspace",
+      status: "active",
+      created_at: "2026-06-13T00:00:00Z",
+      updated_at: "2026-06-13T00:00:00Z",
+    };
+    const memoryJson = {
+      id: "mem_123",
+      name: "design-docs",
+      description: "Docs",
+      source_type: "manual",
+      source: { provider: "manual" },
+      is_readonly: false,
+      sync_status: "idle",
+      status: "active",
+      created_at: "2026-06-13T00:00:00Z",
+      updated_at: "2026-06-13T00:00:00Z",
+    };
+    const memoryFileInfo = {
+      path: "/notes.md",
+      is_directory: false,
+      size_bytes: 5,
+      created_at: "2026-06-13T00:00:00Z",
+      updated_at: "2026-06-13T00:00:00Z",
+    };
+    const memoryFile = {
+      path: "/notes.md",
+      content: "hello",
+      encoding: "text",
+      size_bytes: 5,
+      created_at: "2026-06-13T00:00:00Z",
+      updated_at: "2026-06-13T00:00:00Z",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => workspaceJson,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => memoryJson,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => memoryJson,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: [memoryFileInfo] }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => memoryFile,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => "hello",
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => memoryFileInfo,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => ({
+          path: "/folder",
+          is_directory: true,
+          size_bytes: 0,
+          created_at: "2026-06-13T00:00:00Z",
+          updated_at: "2026-06-13T00:00:00Z",
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => memoryFile,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+        json: async () => undefined,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: [{ path: "/notes.md", size_bytes: 5 }] }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => memoryFileInfo,
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const workspace = await client.workspaces.create({
+      name: "team-research",
+      description: "Research workspace",
+    });
+    const memory = await client.memories.create({
+      name: "design-docs",
+      description: "Docs",
+    });
+    const synced = await client.memories.sync("mem_123");
+    const files = await client.memories.listFiles("mem_123");
+    const file = await client.memories.readFile("mem_123", "/notes.md");
+    const downloaded = await client.memories.downloadFile("mem_123", "/notes.md");
+    await client.memories.createFile("mem_123", "/new.md", {
+      content: "new",
+      encoding: "text",
+    });
+    await client.memories.createDir("mem_123", "/folder");
+    await client.memories.updateFile("mem_123", "/notes.md", {
+      content: "updated",
+      encoding: "text",
+    });
+    await client.memories.deleteFile("mem_123", "/old.md");
+    const grep = await client.memories.grepFiles("mem_123", "hello");
+    const stat = await client.memories.statFile("mem_123", "/notes.md");
+
+    expect(workspace.id).toBe("wsp_123");
+    expect(memory.id).toBe("mem_123");
+    expect(synced.sync_status).toBe("idle");
+    expect(files[0].path).toBe("/notes.md");
+    expect(file.content).toBe("hello");
+    expect(downloaded).toBe("hello");
+    expect(grep[0].path).toBe("/notes.md");
+    expect(stat.path).toBe("/notes.md");
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "https://custom.example.com/api/v1/workspaces",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          name: "team-research",
+          description: "Research workspace",
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "https://custom.example.com/api/v1/memories",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ name: "design-docs", description: "Docs" }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "https://custom.example.com/api/v1/memories/mem_123/sync",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      4,
+      "https://custom.example.com/api/v1/memories/mem_123/fs",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      5,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/notes.md",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      6,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/_/download/notes.md",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      7,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/new.md",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ content: "new", encoding: "text" }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      8,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/folder",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ is_directory: true }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      9,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/notes.md",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ content: "updated", encoding: "text" }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      10,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/old.md",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      11,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/_/grep",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ pattern: "hello" }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      12,
+      "https://custom.example.com/api/v1/memories/mem_123/fs/_/stat",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ path: "/notes.md" }),
+      }),
+    );
+  });
+
   it("should submit tool results with the tool-results endpoint", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -1142,7 +1462,7 @@ describe("toolResult and toolError helpers", () => {
 
 const FILE_RESPONSE = {
   id: "file_001",
-  session_id: "sess_123",
+  session_id: "wsp_123",
   path: "/workspace/hello.txt",
   name: "hello.txt",
   is_directory: false,
@@ -1154,10 +1474,10 @@ const FILE_RESPONSE = {
   updated_at: "2026-03-20T00:00:00Z",
 };
 
-describe("SessionFilesClient", () => {
-  it("should have sessionFiles on client", () => {
+describe("WorkspaceFilesClient", () => {
+  it("should have workspaceFiles on client", () => {
     const client = new Everruns({ apiKey: "evr_test_key" });
-    expect(client.sessionFiles).toBeDefined();
+    expect(client.workspaceFiles).toBeDefined();
   });
 
   it("should list files", async () => {
@@ -1174,13 +1494,13 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const response = await client.sessionFiles.list("sess_123", {
+    const response = await client.workspaceFiles.list("wsp_123", {
       recursive: true,
     });
 
     expect(response.data).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs?recursive=true",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs?recursive=true",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -1194,10 +1514,10 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    await client.sessionFiles.list("sess_123", { path: "/workspace" });
+    await client.workspaceFiles.list("wsp_123", { path: "/workspace" });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -1211,14 +1531,14 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const file = await client.sessionFiles.read(
-      "sess_123",
+    const file = await client.workspaceFiles.read(
+      "wsp_123",
       "/workspace/hello.txt",
     );
 
     expect(file.content).toBe("hello");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -1232,15 +1552,15 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    await client.sessionFiles.create(
-      "sess_123",
+    await client.workspaceFiles.create(
+      "wsp_123",
       "/workspace/new.txt",
       "hello",
       { encoding: "text" },
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/new.txt",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/new.txt",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ content: "hello", encoding: "text" }),
@@ -1257,10 +1577,10 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    await client.sessionFiles.createDir("sess_123", "/workspace/subdir");
+    await client.workspaceFiles.createDir("wsp_123", "/workspace/subdir");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/subdir",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/subdir",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ is_directory: true }),
@@ -1277,14 +1597,14 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    await client.sessionFiles.update(
-      "sess_123",
+    await client.workspaceFiles.update(
+      "wsp_123",
       "/workspace/hello.txt",
       "updated",
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt",
       expect.objectContaining({
         method: "PUT",
         body: JSON.stringify({ content: "updated" }),
@@ -1301,14 +1621,14 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const resp = await client.sessionFiles.delete(
-      "sess_123",
+    const resp = await client.workspaceFiles.delete(
+      "wsp_123",
       "/workspace/hello.txt",
     );
 
     expect(resp.deleted).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -1322,12 +1642,12 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    await client.sessionFiles.delete("sess_123", "/workspace/dir", {
+    await client.workspaceFiles.delete("wsp_123", "/workspace/dir", {
       recursive: true,
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/dir?recursive=true",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/dir?recursive=true",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -1341,14 +1661,14 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    await client.sessionFiles.moveFile(
-      "sess_123",
+    await client.workspaceFiles.moveFile(
+      "wsp_123",
       "/workspace/old.txt",
       "/workspace/new.txt",
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/move",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/move",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -1368,14 +1688,14 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    await client.sessionFiles.copyFile(
-      "sess_123",
+    await client.workspaceFiles.copyFile(
+      "wsp_123",
       "/workspace/original.txt",
       "/workspace/copy.txt",
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/copy",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/copy",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -1411,12 +1731,12 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const results = await client.sessionFiles.grep("sess_123", "TODO");
+    const results = await client.workspaceFiles.grep("wsp_123", "TODO");
 
     expect(results).toHaveLength(1);
     expect(results[0].matches).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/grep",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/grep",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ pattern: "TODO" }),
@@ -1441,14 +1761,14 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const stat = await client.sessionFiles.stat(
-      "sess_123",
+    const stat = await client.workspaceFiles.stat(
+      "wsp_123",
       "/workspace/hello.txt",
     );
 
     expect(stat.name).toBe("hello.txt");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://custom.example.com/api/v1/sessions/sess_123/fs/_/stat",
+      "https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/stat",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ path: "/workspace/hello.txt" }),
@@ -1465,7 +1785,7 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const response = await client.sessionFiles.list("sess_123");
+    const response = await client.workspaceFiles.list("wsp_123");
 
     expect(response.data).toHaveLength(1);
     expect(response.total).toBe(0);
@@ -1487,7 +1807,7 @@ describe("SessionFilesClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const response = await client.sessionFiles.list("sess_123");
+    const response = await client.workspaceFiles.list("wsp_123");
 
     expect(response.data).toHaveLength(1);
     expect(response.total).toBe(42);

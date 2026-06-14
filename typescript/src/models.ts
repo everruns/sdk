@@ -444,7 +444,34 @@ export interface ListEventsOptions {
   orderDesc?: boolean;
 }
 
-// --- Session Filesystem Models ---
+// --- Workspace Models ---
+
+/** Workspace resource */
+export interface Workspace {
+  id: string;
+  name: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  description?: string | null;
+  archivedAt?: string | null;
+  deletedAt?: string | null;
+}
+
+/** Request to create a workspace */
+export interface CreateWorkspaceRequest {
+  name: string;
+  description?: string;
+}
+
+/** Request to update a workspace */
+export interface UpdateWorkspaceRequest {
+  name?: string;
+  description?: string | null;
+  status?: string;
+}
+
+// --- Workspace Filesystem Models ---
 
 /** File metadata without content */
 export interface FileInfo {
@@ -501,6 +528,150 @@ export interface GrepResult {
 /** Response for delete operation */
 export interface DeleteFileResponse {
   deleted: boolean;
+}
+
+// --- Memory Models ---
+
+/** Workspace memory resource */
+export interface Memory {
+  id: string;
+  name: string;
+  sourceType: string;
+  source: Record<string, unknown>;
+  isReadonly: boolean;
+  syncStatus: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  description?: string | null;
+  lastSyncError?: string | null;
+  lastSyncedAt?: string | null;
+  archivedAt?: string | null;
+  deletedAt?: string | null;
+}
+
+/** Request to create a memory */
+export interface CreateMemoryRequest {
+  name: string;
+  description?: string;
+  source?: Record<string, unknown>;
+}
+
+/** Request to update a memory */
+export interface UpdateMemoryRequest {
+  name?: string;
+  description?: string | null;
+  source?: Record<string, unknown> | null;
+}
+
+/** Memory file metadata */
+export interface MemoryFileInfo {
+  path: string;
+  isDirectory: boolean;
+  sizeBytes: number;
+  createdAt: string;
+  updatedAt: string;
+  contentHash?: string | null;
+}
+
+/** Memory file content */
+export interface MemoryFile {
+  path: string;
+  content: string;
+  encoding: string;
+  sizeBytes: number;
+  createdAt: string;
+  updatedAt: string;
+  contentHash?: string | null;
+}
+
+/** Request to create a memory file or directory */
+export interface CreateMemoryFileRequest {
+  content?: string;
+  encoding?: string;
+  isDirectory?: boolean;
+}
+
+/** Request to update a memory file */
+export interface UpdateMemoryFileRequest {
+  content?: string;
+  encoding?: string;
+}
+
+/** Memory grep result entry */
+export interface MemoryGrepResult {
+  path: string;
+  sizeBytes: number;
+}
+
+// --- Agent Analysis and Guardrail Models ---
+
+export interface AnalyzeAgentRequest {
+  systemPrompt: string;
+  capabilities?: AgentCapabilityConfig[];
+  tools?: Record<string, unknown>[];
+  mcpServers?: Record<string, unknown>;
+}
+
+export interface FindingLocation {
+  field: string;
+  start?: number | null;
+  end?: number | null;
+}
+
+export interface Finding {
+  ruleId: string;
+  severity: string;
+  category: string;
+  source: string;
+  message: string;
+  location?: FindingLocation | null;
+  fix?: string | null;
+}
+
+export interface AgentAnalysisResponse {
+  findings: Finding[];
+}
+
+export type GuardrailStage = "output" | "tool_use" | "tool_output";
+export type GuardrailAction = "block" | "log";
+
+export interface GuardrailsDryRunRequest {
+  config: Record<string, unknown>;
+  stage: GuardrailStage;
+  text: string;
+  toolName?: string;
+}
+
+export interface GuardrailsDryRunHit {
+  checkIndex: number;
+  checkId: string;
+  stage: GuardrailStage;
+  ruleType: string;
+  action: GuardrailAction;
+  reasonCode: string;
+  matched?: string | null;
+  replacement?: string | null;
+}
+
+export interface GuardrailsDryRunResponse {
+  hits: GuardrailsDryRunHit[];
+  blocked: boolean;
+}
+
+export interface GuardrailExample {
+  name: string;
+  displayName: string;
+  description: string;
+  tags: string[];
+  checkTypes: string[];
+  stages: string[];
+  dataEgress: string;
+  config: Record<string, unknown>;
+}
+
+export interface GuardrailExamplesResponse {
+  examples: GuardrailExample[];
 }
 
 // --- Budget Models ---

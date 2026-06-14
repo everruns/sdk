@@ -22,6 +22,7 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 - `GET /v1/agents/{id}/versions/{from_version_id}/diff/{to_version_id}` - Diff two agent versions
 - `POST /v1/agents/{id}/versions/{version_id}/fork` - Create a new agent from a saved version
 - `POST /v1/agents/{id}/versions/{version_id}/rollback` - Restore an agent from a saved version
+- `POST /v1/agents/analyze` - Run advisory checks against an agent shape
 
 #### Agent Names
 
@@ -72,6 +73,8 @@ Session create/update payloads support optional `title`, `locale`, `model_id`, `
 ### Capabilities
 - `GET /v1/capabilities` - List available capabilities (supports `search`, `offset`, `limit`)
 - `GET /v1/capabilities/{id}` - Get capability details
+- `GET /v1/capabilities/guardrails/examples` - List adoptable guardrail presets
+- `POST /v1/capabilities/guardrails/dry-run` - Evaluate guardrail checks against sample text
 
 ### Messages
 - `POST /v1/sessions/{id}/messages` - Create message (supports `external_actor` for channel identity)
@@ -88,16 +91,39 @@ Session create/update payloads support optional `title`, `locale`, `model_id`, `
 - `DELETE /v1/images/{id}` - Delete image
 - `GET /v1/images/{id}/thumbnail` - Get image thumbnail
 
-### Session Filesystem
-- `GET /v1/sessions/{id}/fs` - List root directory (supports `recursive` query param)
-- `GET /v1/sessions/{id}/fs/{path}` - Read file content or list directory
-- `POST /v1/sessions/{id}/fs/{path}` - Create file or directory
-- `PUT /v1/sessions/{id}/fs/{path}` - Update file content
-- `DELETE /v1/sessions/{id}/fs/{path}` - Delete file or directory (supports `recursive` query param)
-- `POST /v1/sessions/{id}/fs/_/move` - Move/rename file
-- `POST /v1/sessions/{id}/fs/_/copy` - Copy file
-- `POST /v1/sessions/{id}/fs/_/grep` - Search files with regex
-- `POST /v1/sessions/{id}/fs/_/stat` - Get file/directory metadata
+### Workspaces
+- `GET /v1/workspaces` - List workspaces (supports `search`, `include_archived`)
+- `POST /v1/workspaces` - Create workspace
+- `GET /v1/workspaces/{workspace_id}` - Get workspace
+- `PATCH /v1/workspaces/{workspace_id}` - Update workspace
+- `DELETE /v1/workspaces/{workspace_id}` - Archive workspace
+
+### Workspace Filesystem
+- `GET /v1/workspaces/{workspace_id}/fs` - List root directory (supports `recursive` query param)
+- `GET /v1/workspaces/{workspace_id}/fs/{path}` - Read file content or list directory
+- `POST /v1/workspaces/{workspace_id}/fs/{path}` - Create file or directory
+- `PUT /v1/workspaces/{workspace_id}/fs/{path}` - Update file content
+- `DELETE /v1/workspaces/{workspace_id}/fs/{path}` - Delete file or directory (supports `recursive` query param)
+- `POST /v1/workspaces/{workspace_id}/fs/_/move` - Move/rename file
+- `POST /v1/workspaces/{workspace_id}/fs/_/copy` - Copy file
+- `POST /v1/workspaces/{workspace_id}/fs/_/grep` - Search files with regex
+- `POST /v1/workspaces/{workspace_id}/fs/_/stat` - Get file/directory metadata
+
+### Memories
+- `GET /v1/memories` - List memories (supports `search`, `include_archived`)
+- `POST /v1/memories` - Create memory
+- `GET /v1/memories/{memory_id}` - Get memory
+- `PATCH /v1/memories/{memory_id}` - Update memory
+- `DELETE /v1/memories/{memory_id}` - Archive memory
+- `POST /v1/memories/{memory_id}/sync` - Trigger memory sync
+- `GET /v1/memories/{memory_id}/fs` - List memory root
+- `GET /v1/memories/{memory_id}/fs/{path}` - Read file or list directory
+- `POST /v1/memories/{memory_id}/fs/{path}` - Create file or directory
+- `PUT /v1/memories/{memory_id}/fs/{path}` - Update file content
+- `DELETE /v1/memories/{memory_id}/fs/{path}` - Delete file or directory
+- `GET /v1/memories/{memory_id}/fs/_/download/{path}` - Download raw file bytes
+- `POST /v1/memories/{memory_id}/fs/_/grep` - Search memory files
+- `POST /v1/memories/{memory_id}/fs/_/stat` - Get memory file metadata
 
 ### Tool Results
 - `POST /v1/sessions/{id}/tool-results` - Submit tool results
@@ -161,5 +187,5 @@ Server administration endpoints not exposed via SDK:
 - `DELETE /v1/orgs/{org}` - Delete organization
 - `POST /v1/users/me/switch-org` - Switch organization
 
-### LLM Providers
-- `POST /v1/llm-providers/{id}/sync-models` - Sync models
+### Providers
+- `POST /v1/providers/{id}/sync-models` - Sync models

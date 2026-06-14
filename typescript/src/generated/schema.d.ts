@@ -22,6 +22,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/agents/analyze": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * POST /v1/agents/analyze - Run advisory checks against an agent shape
+     * @description Runs built-in rules plus on-demand LLM analysis (specs/agent-checks.md)
+     *     and returns merged advisory findings. Requires the system utility LLM
+     *     service to be configured.
+     */
+    post: operations["analyze_agent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/agents/check-name": {
     parameters: {
       query?: never;
@@ -593,6 +615,40 @@ export interface paths {
     put?: never;
     /** POST /v1/capabilities/declarative/{capability_id}/delete - Permanently delete archived resource. */
     post: operations["destroy_declarative_capability"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/capabilities/guardrails/dry-run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/capabilities/guardrails/dry-run - Evaluate guardrail checks against sample text. */
+    post: operations["dry_run_guardrails"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/capabilities/guardrails/examples": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/capabilities/guardrails/examples - List adoptable guardrail presets. */
+    get: operations["list_guardrail_examples"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1448,152 +1504,6 @@ export interface paths {
     patch: operations["update_entry"];
     trace?: never;
   };
-  "/v1/llm-models": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List all models across all providers */
-    get: operations["list_all_models"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/llm-models/config": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** GET /v1/llm-models/config */
-    get: operations["llm_model_config"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/llm-models/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a specific model with provider info and profile */
-    get: operations["get_model"];
-    put?: never;
-    post?: never;
-    /** Delete a model */
-    delete: operations["delete_model"];
-    options?: never;
-    head?: never;
-    /** Update a model */
-    patch: operations["update_model"];
-    trace?: never;
-  };
-  "/v1/llm-providers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List all LLM providers */
-    get: operations["list_providers"];
-    put?: never;
-    /** Create a new LLM provider */
-    post: operations["create_provider"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/llm-providers/config": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** GET /v1/llm-providers/config */
-    get: operations["llm_provider_config"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/llm-providers/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a specific LLM provider */
-    get: operations["get_provider"];
-    put?: never;
-    post?: never;
-    /** Delete an LLM provider */
-    delete: operations["delete_provider"];
-    options?: never;
-    head?: never;
-    /** Update an LLM provider */
-    patch: operations["update_provider"];
-    trace?: never;
-  };
-  "/v1/llm-providers/{id}/sync-models": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Sync models from an LLM provider
-     * @description Fetches the list of available models from the provider's API and updates
-     *     the database. Only works for providers with standard base URLs (not custom).
-     */
-    post: operations["sync_models"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/llm-providers/{provider_id}/models": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List models for a specific provider */
-    get: operations["list_provider_models"];
-    put?: never;
-    /** Create a new model for a provider */
-    post: operations["create_model"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/v1/mcp-servers": {
     parameters: {
       query?: never;
@@ -1651,52 +1561,53 @@ export interface paths {
     patch: operations["update_mcp_server"];
     trace?: never;
   };
-  "/v1/memory-stores": {
+  "/v1/memories": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** @description List memory stores. */
-    get: operations["list_memory_stores"];
-    put?: never;
-    /** @description Create a new memory store. */
-    post: operations["create_memory_store"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/memory-stores/{store_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Get a memory store by ID. */
-    get: operations["get_memory_store"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** @description Update a memory store. Only provided fields are modified. */
-    patch: operations["update_memory_store"];
-    trace?: never;
-  };
-  "/v1/memory-stores/{store_id}/memories": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description List memories. */
+    /** @description List workspace memories. */
     get: operations["list_memories"];
     put?: never;
+    /** @description Create a new workspace memory. */
+    post: operations["create_memory"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/memories/{memory_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Get a workspace memory by ID. */
+    get: operations["get_memory"];
+    put?: never;
+    post?: never;
+    /** @description Delete a workspace memory. */
+    delete: operations["delete_memory"];
+    options?: never;
+    head?: never;
+    /** @description Update a workspace memory. Only provided fields are modified. */
+    patch: operations["update_memory"];
+    trace?: never;
+  };
+  "/v1/memories/{memory_id}/fs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description List immediate children of the Memory root. */
+    get: operations["list_root"];
+    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -1704,7 +1615,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/v1/memory-stores/{store_id}/memories/{memory_id}": {
+  "/v1/memories/{memory_id}/fs/_/download/{path}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Download raw bytes of a Memory file. */
+    get: operations["download_action"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/memories/{memory_id}/fs/_/grep": {
     parameters: {
       query?: never;
       header?: never;
@@ -1713,12 +1641,119 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post?: never;
-    /** @description Forget a memory. */
-    delete: operations["forget_memory"];
+    /** @description Search Memory files by regex. */
+    post: operations["grep_action"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/v1/memories/{memory_id}/fs/_/stat": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Stat a file or directory inside a Memory. */
+    post: operations["stat_action"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/memories/{memory_id}/fs/{path}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Read a file or list a directory inside a Memory. */
+    get: operations["get_file"];
+    /** @description Update a file's content. Directories cannot be updated. */
+    put: operations["update_file"];
+    /** @description Create a file or directory inside a Memory. */
+    post: operations["create_file"];
+    /** @description Delete a file or directory. Pass `recursive=true` to delete non-empty directories. */
+    delete: operations["delete_file"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/memories/{memory_id}/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Trigger a synchronous sync of a memory now. */
+    post: operations["sync_memory_now"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/models": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all models across all providers */
+    get: operations["list_all_models"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/models/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/models/config */
+    get: operations["model_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/models/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a specific model with provider info and profile */
+    get: operations["get_model"];
+    put?: never;
+    post?: never;
+    /** Delete a model */
+    delete: operations["delete_model"];
+    options?: never;
+    head?: never;
+    /** Update a model */
+    patch: operations["update_model"];
     trace?: never;
   };
   "/v1/orgs": {
@@ -1755,6 +1790,41 @@ export interface paths {
     head?: never;
     /** PATCH /v1/orgs/:org - Update organization */
     patch: operations["update_organization"];
+    trace?: never;
+  };
+  "/v1/orgs/{org}/feature-flags": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/orgs/{org}/feature-flags — effective flags for the organization. */
+    get: operations["get_org_feature_flags"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** PATCH /v1/orgs/{org}/feature-flags — update org opt-in (admin only). */
+    patch: operations["update_org_feature_flags"];
+    trace?: never;
+  };
+  "/v1/orgs/{org}/feature-flags/settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/orgs/{org}/feature-flags/settings — catalog with system/org/effective state. */
+    get: operations["get_org_feature_flag_settings"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/v1/payments/accounts": {
@@ -1846,6 +1916,99 @@ export interface paths {
     head?: never;
     /** @description Update a payment policy. Only provided fields are modified. */
     patch: operations["update_payment_policy"];
+    trace?: never;
+  };
+  "/v1/providers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List all LLM providers */
+    get: operations["list_providers"];
+    put?: never;
+    /** Create a new LLM provider */
+    post: operations["create_provider"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/providers/config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/providers/config */
+    get: operations["provider_config"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/providers/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a specific LLM provider */
+    get: operations["get_provider"];
+    put?: never;
+    post?: never;
+    /** Delete an LLM provider */
+    delete: operations["delete_provider"];
+    options?: never;
+    head?: never;
+    /** Update an LLM provider */
+    patch: operations["update_provider"];
+    trace?: never;
+  };
+  "/v1/providers/{id}/sync-models": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sync models from an LLM provider
+     * @description Fetches the list of available models from the provider's API and updates
+     *     the database. Only works for providers with standard base URLs (not custom).
+     */
+    post: operations["sync_models"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/providers/{provider_id}/models": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List models for a specific provider */
+    get: operations["list_provider_models"];
+    put?: never;
+    /** Create a new model for a provider */
+    post: operations["create_model"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/v1/reports/admin/backfill": {
@@ -2305,128 +2468,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/v1/sessions/{session_id}/fs": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** GET /fs - Get root directory listing */
-    get: operations["get_root"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/sessions/{session_id}/fs/_/copy": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** POST /fs/_/copy - Copy file */
-    post: operations["copy_file"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/sessions/{session_id}/fs/_/download/{path}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** GET /fs/_/download/*path - Download raw file bytes */
-    get: operations["download_path"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/sessions/{session_id}/fs/_/grep": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** POST /fs/_/grep - Search files */
-    post: operations["grep_files"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/sessions/{session_id}/fs/_/move": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** POST /fs/_/move - Move/rename file */
-    post: operations["move_file"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/sessions/{session_id}/fs/_/stat": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** POST /fs/_/stat - Get file or directory stat */
-    post: operations["stat_file"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/sessions/{session_id}/fs/{path}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** GET /fs/*path - Get file content or directory listing */
-    get: operations["get_path"];
-    /** PUT /fs/*path - Update file content */
-    put: operations["update_path"];
-    /** POST /fs/*path - Create file or directory */
-    post: operations["create_path"];
-    /** DELETE /fs/*path - Delete file or directory */
-    delete: operations["delete_path"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/v1/sessions/{session_id}/git/branches": {
     parameters: {
       query?: never;
@@ -2689,6 +2730,74 @@ export interface paths {
      */
     put: operations["batch_set_secrets"];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List background tasks owned by a session. */
+    get: operations["list_tasks"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/tasks/{task_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get one session task with its recent message thread. */
+    get: operations["get_task"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/tasks/{task_id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Request cooperative cancellation of a session task. */
+    post: operations["cancel_task"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/sessions/{session_id}/tasks/{task_id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Send an inbound message to a session task. */
+    post: operations["post_task_message"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2991,44 +3100,61 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/v1/volumes": {
+  "/v1/workspaces": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** @description List workspace volumes. */
-    get: operations["list_volumes"];
+    /** @description List Workspaces. */
+    get: operations["list_workspaces"];
     put?: never;
-    /** @description Create a new workspace volume. */
-    post: operations["create_volume"];
+    /** @description Create a Workspace. */
+    post: operations["create_workspace"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/v1/volumes/{volume_id}": {
+  "/v1/workspaces/{workspace_id}": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** @description Get a workspace volume by ID. */
-    get: operations["get_volume"];
+    /** @description Get a Workspace by ID. */
+    get: operations["get_workspace"];
     put?: never;
     post?: never;
-    /** @description Delete a workspace volume. */
-    delete: operations["delete_volume"];
+    /** @description Archive a Workspace. */
+    delete: operations["delete_workspace"];
     options?: never;
     head?: never;
-    /** @description Update a workspace volume. Only provided fields are modified. */
-    patch: operations["update_volume"];
+    /** @description Update a Workspace. */
+    patch: operations["update_workspace"];
     trace?: never;
   };
-  "/v1/volumes/{volume_id}/sync": {
+  "/v1/workspaces/{workspace_id}/fs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/workspaces/{workspace_id}/fs - Workspace root listing */
+    get: operations["get_root"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/workspaces/{workspace_id}/fs/_/copy": {
     parameters: {
       query?: never;
       header?: never;
@@ -3037,9 +3163,97 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Trigger a synchronous sync of a volume now. */
-    post: operations["sync_volume_now"];
+    /** POST /v1/workspaces/{workspace_id}/fs/_/copy - Copy a file */
+    post: operations["copy_file"];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/workspaces/{workspace_id}/fs/_/download/{path}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/workspaces/{workspace_id}/fs/_/download/{path} - Download raw file bytes */
+    get: operations["download_path"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/workspaces/{workspace_id}/fs/_/grep": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/workspaces/{workspace_id}/fs/_/grep - Search files */
+    post: operations["grep_files"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/workspaces/{workspace_id}/fs/_/move": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/workspaces/{workspace_id}/fs/_/move - Move/rename a file or directory */
+    post: operations["move_file"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/workspaces/{workspace_id}/fs/_/stat": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** POST /v1/workspaces/{workspace_id}/fs/_/stat - File metadata */
+    post: operations["stat_file"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/workspaces/{workspace_id}/fs/{path}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** GET /v1/workspaces/{workspace_id}/fs/{path} - Read file or list directory */
+    get: operations["get_path"];
+    /** PUT /v1/workspaces/{workspace_id}/fs/{path} - Update file content */
+    put: operations["update_path"];
+    /** POST /v1/workspaces/{workspace_id}/fs/{path} - Create file or directory */
+    post: operations["create_path"];
+    /** DELETE /v1/workspaces/{workspace_id}/fs/{path} - Delete file or directory */
+    delete: operations["delete_path"];
     options?: never;
     head?: never;
     patch?: never;
@@ -3229,6 +3443,11 @@ export interface components {
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
     };
+    /** @description Response from on-demand agent analysis (built-in rules + LLM checkers) */
+    AgentAnalysisResponse: {
+      /** @description Advisory findings, built-in and LLM-sourced (specs/agent-checks.md) */
+      findings: components["schemas"]["Finding"][];
+    };
     /**
      * @description Per-agent capability configuration
      *
@@ -3243,6 +3462,8 @@ export interface components {
     };
     /** @description Response showing the final agent shape after applying capabilities */
     AgentPreviewResponse: {
+      /** @description Advisory findings from built-in checks (specs/agent-checks.md) */
+      findings: components["schemas"]["Finding"][];
       /** @description The full system prompt with capability additions prepended */
       system_prompt: string;
       /** @description All tool definitions from capabilities */
@@ -3589,6 +3810,16 @@ export interface components {
       | {
           allowed_values?: string[];
           header_name: string;
+          /**
+           * @description Shared secret the trusted proxy includes in `proxy_secret_header`.
+           *     Write-only: redacted in GET responses. See TM-AUTH-021.
+           */
+          proxy_secret?: string | null;
+          /**
+           * @description Header the trusted reverse proxy uses to prove its identity.
+           *     Required. Configs without this field fail closed at verification time.
+           */
+          proxy_secret_header?: string | null;
           /** @enum {string} */
           type: "mtls";
         };
@@ -3676,9 +3907,17 @@ export interface components {
     AppStatus: "draft" | "published" | "archived" | "deleted";
     BTreeMap: {
       [key: string]: {
+        /** @description Arguments passed to the stdio `command`. */
+        args?: string[];
         /** @description Authentication mode used when executing tools from this scoped server. */
         auth_mode?: components["schemas"]["McpServerAuthMode"];
-        /** @description Additional HTTP headers sent on MCP requests. */
+        /** @description Executable to spawn for a stdio transport server. */
+        command?: string | null;
+        /** @description Environment variables set for the stdio `command`. */
+        env?: {
+          [key: string]: string;
+        };
+        /** @description Additional HTTP headers sent on MCP requests (HTTP transport only). */
         headers?: {
           [key: string]: string;
         };
@@ -3688,9 +3927,21 @@ export interface components {
         tool_discovery?: boolean;
         /** @description MCP transport type. Only remote HTTP is supported today. */
         type?: components["schemas"]["McpServerTransportType"];
-        /** @description URL of the remote MCP server endpoint. */
-        url: string;
+        /**
+         * @description URL of the remote MCP server endpoint. Required for HTTP transport;
+         *     empty/ignored for stdio.
+         */
+        url?: string;
       };
+    };
+    /** @description Structured progress reported by background tools. */
+    BackgroundProgress: {
+      /** Format: int64 */
+      current?: number | null;
+      label?: string | null;
+      /** Format: int64 */
+      total?: number | null;
+      unit?: string | null;
     };
     /** @description Batch secret set request */
     BatchSetSecretsRequest: {
@@ -3748,6 +3999,12 @@ export interface components {
       description: string;
       /** @description Human-readable display name for UI rendering (e.g., "Get Current Time" for `get_current_time`) */
       display_name?: string | null;
+      /**
+       * @description Original full parameter schema saved by `DeferSchemaHook` before stripping.
+       *     Serialized only when present so durable reason-to-act scheduling can
+       *     preserve deferred schemas for `tool_search` in the act phase.
+       */
+      full_parameters?: unknown;
       /** @description Semantic hints describing the tool's behavioral properties */
       hints?: components["schemas"]["ToolHints"];
       /** @description Tool name (used by LLM and for registry lookup) */
@@ -3836,6 +4093,12 @@ export interface components {
        */
       id: string;
       /**
+       * @description Whether this capability is a guardrail (constrains agent behavior
+       *     rather than granting abilities). Used for UI grouping and filtering.
+       * @example false
+       */
+      is_guardrail?: boolean;
+      /**
        * @description Whether this is an MCP server capability (for UI badge)
        * @example false
        */
@@ -3845,6 +4108,20 @@ export interface components {
        * @example false
        */
       is_skill?: boolean;
+      /**
+       * @description Localized display strings keyed by lowercase language tag (e.g. "uk").
+       *     The "en" entry carries only `config_description`, since the base
+       *     name/description/config_schema strings are already English.
+       * @example {
+       *       "uk": {
+       *         "description": "Монтує спільні файли пам'яті в сесії.",
+       *         "name": "Пам'ять"
+       *       }
+       *     }
+       */
+      localizations?: {
+        [key: string]: components["schemas"]["CapabilityLocalizationInfo"];
+      };
       /**
        * @description Display name
        * @example Session File System
@@ -3876,6 +4153,20 @@ export interface components {
        *     ]
        */
       tool_definitions?: Record<string, never>[];
+    };
+    /** @description Localized display strings for one locale of a capability. */
+    CapabilityLocalizationInfo: {
+      /** @description One-line summary of what this capability's config controls. */
+      config_description?: string | null;
+      /**
+       * @description Overlay merged into `config_schema` before rendering: mirrors the
+       *     schema property tree with `title`/`description`/`enum_labels` leaves.
+       */
+      config_overlay?: Record<string, never>;
+      /** @description Localized description; absent means fall back to `description`. */
+      description?: string | null;
+      /** @description Localized display name; absent means fall back to `name`. */
+      name?: string | null;
     };
     /** @description Data for capability.usage events. */
     CapabilityUsageData: {
@@ -4001,6 +4292,12 @@ export interface components {
       description: string;
       /** @description Human-readable display name for UI rendering */
       display_name?: string | null;
+      /**
+       * @description Original full parameter schema saved by `DeferSchemaHook` before stripping.
+       *     Serialized only when present so durable reason-to-act scheduling can
+       *     preserve deferred schemas for `tool_search` in the act phase.
+       */
+      full_parameters?: unknown;
       /** @description Semantic hints describing the tool's behavioral properties */
       hints?: components["schemas"]["ToolHints"];
       /** @description Tool name (used by LLM and for correlation) */
@@ -4165,6 +4462,13 @@ export interface components {
     /** @description Runtime controls for message processing */
     Controls: {
       /**
+       * @description Error disclosure override for this turn: "generic", "standard", or
+       *     "detailed". Clamped to at most the mode allowed by the agent's
+       *     `error_disclosure` capability (capability absent => "standard"), so a
+       *     client can narrow but never widen disclosure.
+       */
+      error_disclosure?: string | null;
+      /**
        * @description Generic client hints — arbitrary key-value pairs declared by the client.
        *     Session-level defaults are set at session creation; per-message values
        *     override session hints key-by-key (shallow merge).
@@ -4188,12 +4492,12 @@ export interface components {
     /** @description Request to copy a file */
     CopyFileRequest: {
       /**
-       * @description Destination path (relative to the session workspace root).
+       * @description Destination path (relative to the workspace filesystem root).
        * @example docs/runbooks/refund-30-days.md
        */
       dst_path: string;
       /**
-       * @description Source path (relative to the session workspace root).
+       * @description Source path (relative to the workspace filesystem root).
        * @example templates/runbook.md
        */
       src_path: string;
@@ -4495,6 +4799,8 @@ export interface components {
        * @example Runbooks for the support team
        */
       description?: string | null;
+      /** @description Optional embedding model for hybrid retrieval. Omit or null for keyword search only. */
+      embedding_model_id?: string | null;
       /**
        * @description Human-readable name. Safe to render in user-facing messages.
        * @example support-runbooks
@@ -4527,59 +4833,6 @@ export interface components {
        * @example Refund a payment past 30 days
        */
       title: string;
-    };
-    /** @description Request to create a new LLM model for a provider */
-    CreateLlmModelRequest: {
-      /**
-       * @description List of capabilities this model supports (e.g., "chat", "vision", "tools").
-       * @example [
-       *       "chat",
-       *       "vision",
-       *       "tools"
-       *     ]
-       */
-      capabilities?: string[];
-      /**
-       * @description Human-readable display name for the model.
-       * @example GPT-4o
-       */
-      display_name: string;
-      /**
-       * @description Whether this model should be enabled (visible in UI model pickers).
-       * @example false
-       */
-      enabled?: boolean;
-      /**
-       * @description Whether this model should be marked as a favorite for quick access.
-       * @example false
-       */
-      is_favorite?: boolean;
-      /**
-       * @description The model identifier used by the provider's API (e.g., "gpt-4", "claude-3-opus").
-       * @example gpt-4o
-       */
-      model_id: string;
-    };
-    /** @description Request to create a new LLM provider */
-    CreateLlmProviderRequest: {
-      /**
-       * @description API key for authenticating with the provider.
-       *     Will be encrypted at rest if encryption is configured.
-       */
-      api_key?: string | null;
-      /**
-       * @description Base URL for the provider's API. Required for custom endpoints.
-       *     For standard providers, this can be omitted to use the default URL.
-       * @example https://api.openai.com/v1
-       */
-      base_url?: string | null;
-      /**
-       * @description Display name for the provider.
-       * @example OpenAI Production
-       */
-      name: string;
-      /** @description The type of LLM provider (e.g., openai, anthropic). */
-      provider_type: components["schemas"]["LlmProviderType"];
     };
     /** @description Request to create a new MCP server */
     CreateMcpServerRequest: {
@@ -4619,19 +4872,46 @@ export interface components {
        */
       url: string;
     };
-    /** @description Request body for the `create_memory_store` operation. */
-    CreateMemoryStoreRequest: {
+    CreateMemoryFileRequest: {
+      /** @description File content (text or base64). Default empty. */
+      content?: string | null;
+      /** @description "text" or "base64". Defaults to "text". */
+      encoding?: string | null;
+      /** @description If true, create a directory instead of a file. */
+      is_directory?: boolean | null;
+    };
+    /** @description Request body for the `create_memory` operation. */
+    CreateMemoryRequest: {
       /**
-       * @description When `true`, sets this store as the org's default for newly-created memories.
-       * @example false
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Living design documents synced from GitHub
        */
-      is_default?: boolean;
+      description?: string | null;
       /**
        * @description Human-readable name. Safe to render in user-facing messages.
-       * @example customer-preferences
+       * @example design-docs
        */
       name: string;
+      source?: null | components["schemas"]["CreateMemorySourceRequest"];
     };
+    /**
+     * @description Request body for the `create_memory_source` operation.
+     * @example {
+     *       "branch": "main",
+     *       "repository": "acme/design-docs",
+     *       "root_folder": "docs/",
+     *       "type": "github"
+     *     }
+     */
+    CreateMemorySourceRequest:
+      | (components["schemas"]["GitHubMemorySourceRequest"] & {
+          /** @enum {string} */
+          type: "github";
+        })
+      | (components["schemas"]["GitMemorySourceRequest"] & {
+          /** @enum {string} */
+          type: "git";
+        });
     /** @description Request to create a message */
     CreateMessageRequest: {
       controls?: null | components["schemas"]["Controls"];
@@ -4657,6 +4937,38 @@ export interface components {
        *     ]
        */
       tags?: string[] | null;
+    };
+    /** @description Request to create a new LLM model for a provider */
+    CreateModelRequest: {
+      /**
+       * @description List of capabilities this model supports (e.g., "chat", "vision", "tools").
+       * @example [
+       *       "chat",
+       *       "vision",
+       *       "tools"
+       *     ]
+       */
+      capabilities?: string[];
+      /**
+       * @description Human-readable display name for the model.
+       * @example GPT-4o
+       */
+      display_name: string;
+      /**
+       * @description Whether this model should be enabled (visible in UI model pickers).
+       * @example false
+       */
+      enabled?: boolean;
+      /**
+       * @description Whether this model should be marked as a favorite for quick access.
+       * @example false
+       */
+      is_favorite?: boolean;
+      /**
+       * @description The model identifier used by the provider's API (e.g., "gpt-4", "claude-3-opus").
+       * @example gpt-4o
+       */
+      model_id: string;
     };
     /** @description Request to create a new organization */
     CreateOrganizationRequest: {
@@ -4782,6 +5094,27 @@ export interface components {
        * @example agent_identity
        */
       subject_type: string;
+    };
+    /** @description Request to create a new LLM provider */
+    CreateProviderRequest: {
+      /**
+       * @description API key for authenticating with the provider.
+       *     Will be encrypted at rest if encryption is configured.
+       */
+      api_key?: string | null;
+      /**
+       * @description Base URL for the provider's API. Required for custom endpoints.
+       *     For standard providers, this can be omitted to use the default URL.
+       * @example https://api.openai.com/v1
+       */
+      base_url?: string | null;
+      /**
+       * @description Display name for the provider.
+       * @example OpenAI Production
+       */
+      name: string;
+      /** @description The type of LLM provider (e.g., openai, anthropic). */
+      provider_type: components["schemas"]["DriverId"];
     };
     /** @description Request body for the `create_saved_report` operation. */
     CreateSavedReportRequest: {
@@ -4979,6 +5312,14 @@ export interface components {
        *     ]
        */
       tools?: components["schemas"]["ToolDefinition"][];
+      /**
+       * @description Attach this session to an existing Workspace (format: `wsp_<32-hex>`)
+       *     instead of auto-creating a default per-session workspace. The workspace
+       *     must exist in the caller's org and be `active`. Lets multiple sessions
+       *     share one working filesystem. Omit for the default 1:1 behavior.
+       * @example wsp_01933b5a00007000800000000000001
+       */
+      workspace_id?: string | null;
     };
     /** @description Request to create a skill from SKILL.md content */
     CreateSkillRequest: {
@@ -4995,38 +5336,12 @@ export interface components {
        */
       skill_md: string;
     };
-    /** @description Request body for the `create_volume` operation. */
-    CreateVolumeRequest: {
-      /**
-       * @description Human-readable description. Safe to render in user-facing messages.
-       * @example Living design documents synced from GitHub
-       */
+    CreateWorkspaceRequest: {
+      /** @example Shared workspace for the Q4 research project */
       description?: string | null;
-      /**
-       * @description Human-readable name. Safe to render in user-facing messages.
-       * @example design-docs
-       */
+      /** @example team-research */
       name: string;
-      source?: null | components["schemas"]["CreateVolumeSourceRequest"];
     };
-    /**
-     * @description Request body for the `create_volume_source` operation.
-     * @example {
-     *       "branch": "main",
-     *       "repository": "acme/design-docs",
-     *       "root_folder": "docs/",
-     *       "type": "github"
-     *     }
-     */
-    CreateVolumeSourceRequest:
-      | (components["schemas"]["GitHubVolumeSourceRequest"] & {
-          /** @enum {string} */
-          type: "github";
-        })
-      | (components["schemas"]["GitVolumeSourceRequest"] & {
-          /** @enum {string} */
-          type: "git";
-        });
     /** @description Database info response. */
     DatabaseInfoResponse: {
       /** @description Timestamp when this resource was created (RFC 3339). */
@@ -5157,9 +5472,7 @@ export interface components {
     DeleteAccountResponse: {
       deleted: boolean;
     };
-    /** @description Query parameters for DELETE requests */
     DeleteQuery: {
-      /** @description Whether to delete recursively */
       recursive?: boolean;
     };
     /** @description Response for delete operation */
@@ -5247,6 +5560,8 @@ export interface components {
       /** @description Total number of items matching the query, across all pages. */
       total: number;
     };
+    /** @description LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock. Any other string is treated as an embedder-defined external provider. */
+    DriverId: string;
     /** @description Options for enqueuing a standalone task */
     EnqueueTaskOptions: {
       /**
@@ -5444,6 +5759,7 @@ export interface components {
       | components["schemas"]["TurnFailedData"]
       | components["schemas"]["ReasonStartedData"]
       | components["schemas"]["ReasonCompletedData"]
+      | components["schemas"]["ReasonRecoveredData"]
       | components["schemas"]["CapabilityUsageData"]
       | components["schemas"]["ActStartedData"]
       | components["schemas"]["ActCompletedData"]
@@ -5452,6 +5768,7 @@ export interface components {
       | components["schemas"]["ToolProgressData"]
       | components["schemas"]["ToolOutputDeltaData"]
       | components["schemas"]["ToolCallRequestedData"]
+      | components["schemas"]["TranscriptRepairedData"]
       | components["schemas"]["LlmGenerationData"]
       | components["schemas"]["ReasonThinkingDeltaData"]
       | components["schemas"]["ReasonItemData"]
@@ -5465,6 +5782,10 @@ export interface components {
       | components["schemas"]["SubagentEventData"]
       | components["schemas"]["SubagentEventData"]
       | components["schemas"]["SubagentEventData"]
+      | components["schemas"]["SessionTaskEventData"]
+      | components["schemas"]["SessionTaskEventData"]
+      | components["schemas"]["TaskMessageEventData"]
+      | components["schemas"]["TaskMessageEventData"]
       | components["schemas"]["ContextCompactingData"]
       | components["schemas"]["ContextCompactedData"]
       | components["schemas"]["FileWrittenData"]
@@ -5738,6 +6059,44 @@ export interface components {
        */
       updated_at: string;
     };
+    /**
+     * @description Feature flags exposed via `GET /v1/feature-flags` and consumed by the frontend.
+     *
+     *     Currently backed by environment variables and deployment grade.
+     *     Future: per-org flags, per-user flags, external providers.
+     */
+    FeatureFlags: {
+      /**
+       * @description Outbound agent delegation capabilities (`a2a_agent_delegation`, `agent_handoff`).
+       *     Experimental: auto-enabled in dev, off in prod by default.
+       *     When off, these capabilities are not registered and cannot be assigned to agents.
+       */
+      agent_delegation: boolean;
+      /**
+       * @description Immutable agent versions, snapshots, forks, and app version binding.
+       *     Experimental.
+       */
+      agent_versions: boolean;
+      /**
+       * @description App / channel scoped budgets and periodic budget resets (`5h`, `1d`, ...).
+       *     Experimental.
+       */
+      app_budgets: boolean;
+      /** @description Channels-first app detail page and full-page channel forms. Experimental. */
+      "apps.detailV2": boolean;
+      /** @description Evals (user-facing behavioral evals for agents). Experimental. */
+      evals: boolean;
+      /** @description Global chat (per-user singleton chat session). Experimental. */
+      global_chat: boolean;
+      /** @description MCP endpoint (POST /mcp — Everruns as an MCP server). Experimental. */
+      mcp_endpoint: boolean;
+      /** @description In-app notifications (bell, toasts, notification SSE). Experimental. */
+      notifications: boolean;
+      /** @description Observers (online scoring of production sessions). Experimental. */
+      observers: boolean;
+      /** @description Realtime voice endpoints and microphone controls. Experimental. */
+      voice: boolean;
+    };
     /** @description File metadata without content */
     FileInfo: {
       /**
@@ -5831,6 +6190,52 @@ export interface components {
        */
       size_bytes: number;
     };
+    /** @description A single advisory finding about an agent configuration. */
+    Finding: {
+      category: components["schemas"]["FindingCategory"];
+      /** @description Proposed replacement text (phase 2+; always absent for builtin rules). */
+      fix?: string | null;
+      location?: null | components["schemas"]["FindingLocation"];
+      /** @description Human-readable explanation. Safe to render in user-facing messages. */
+      message: string;
+      /** @description Stable rule identifier, e.g. `prompt.duplicate_paragraphs`. */
+      rule_id: string;
+      severity: components["schemas"]["FindingSeverity"];
+      source: components["schemas"]["FindingSource"];
+    };
+    /** @enum {string} */
+    FindingCategory:
+      | "structure"
+      | "completeness"
+      | "effectiveness"
+      | "safety"
+      | "cost";
+    /**
+     * @description Pointer to the config field (and optional byte span within it) a finding
+     *     refers to.
+     */
+    FindingLocation: {
+      /** Format: int32 */
+      end?: number | null;
+      /** @description Config field name, e.g. `system_prompt`, `tools`. */
+      field: string;
+      /**
+       * Format: int32
+       * @description Byte offset range into the field's authored text, when applicable.
+       */
+      start?: number | null;
+    };
+    /**
+     * @description Advisory severity. There is deliberately no `error`: checks never gate
+     *     save/publish (specs/agent-checks.md, Non-Goals).
+     * @enum {string}
+     */
+    FindingSeverity: "warning" | "info" | "suggestion";
+    /**
+     * @description Which tier produced the finding.
+     * @enum {string}
+     */
+    FindingSource: "builtin" | "llm" | "health_check";
     /** @description Request body for the `fork_agent_version` operation. */
     ForkAgentVersionRequest: {
       /**
@@ -5957,8 +6362,8 @@ export interface components {
        */
       insertions: number;
     };
-    /** @description Request body for GitHub volume source. */
-    GitHubVolumeSourceRequest: {
+    /** @description Request body for GitHub memory source. */
+    GitHubMemorySourceRequest: {
       /**
        * @description Branch to sync. Defaults to the repository's default branch when omitted.
        * @example main
@@ -5981,8 +6386,8 @@ export interface components {
        */
       sync_interval_secs?: number | null;
     };
-    /** @description Response body for GitHub volume source. */
-    GitHubVolumeSourceResponse: {
+    /** @description Response body for GitHub memory source. */
+    GitHubMemorySourceResponse: {
       branch: string;
       repository: string;
       root_folder?: string | null;
@@ -5992,15 +6397,8 @@ export interface components {
        */
       sync_interval_secs?: number | null;
     };
-    /** @description A git ref (branch pointer) */
-    GitRefInfo: {
-      is_symbolic: boolean;
-      /** @description Human-readable name. Safe to render in user-facing messages. */
-      name: string;
-      target: string;
-    };
-    /** @description Request body for git volume source. */
-    GitVolumeSourceRequest: {
+    /** @description Request body for git memory source. */
+    GitMemorySourceRequest: {
       /**
        * @description Branch to sync. Defaults to the repository's default branch when omitted.
        * @example main
@@ -6023,8 +6421,8 @@ export interface components {
        */
       url: string;
     };
-    /** @description Response body for git volume source. */
-    GitVolumeSourceResponse: {
+    /** @description Response body for git memory source. */
+    GitMemorySourceResponse: {
       branch: string;
       root_folder?: string | null;
       /**
@@ -6034,29 +6432,158 @@ export interface components {
       sync_interval_secs?: number | null;
       url: string;
     };
+    /** @description A git ref (branch pointer) */
+    GitRefInfo: {
+      is_symbolic: boolean;
+      /** @description Human-readable name. Safe to render in user-facing messages. */
+      name: string;
+      target: string;
+    };
     /** @description Grep match result */
     GrepMatch: {
       line: string;
       line_number: number;
       path: string;
     };
-    /** @description Request to search files */
     GrepRequest: {
-      /**
-       * @description Optional path glob to filter files (`**\/*.rs`, `docs/*.md`).
-       * @example **\/*.rs
-       */
       path_pattern?: string | null;
-      /**
-       * @description Regex pattern to search for. Standard PCRE-ish (Rust `regex` crate) syntax.
-       * @example TODO\(perf\)
-       */
       pattern: string;
     };
     /** @description Grep result for a file */
     GrepResult: {
       matches: components["schemas"]["GrepMatch"][];
       path: string;
+    };
+    GrepResultEntry: {
+      path: string;
+      /** Format: int64 */
+      size_bytes: number;
+    };
+    /**
+     * @description Effective action of a hit after applying the config mode.
+     * @example block
+     * @enum {string}
+     */
+    GuardrailAction: "block" | "log";
+    /**
+     * @description A read-only, adoptable guardrails preset from the gallery. Adopt by
+     *     dropping `config` into an agent's `guardrails` capability config.
+     */
+    GuardrailExample: {
+      /**
+       * @description Distinct rule types used across the preset's checks
+       *     (`regex`, `blocklist`, `tool_pattern`) — the check-type composition.
+       */
+      check_types: string[];
+      /**
+       * @description The adoptable `GuardrailsConfig`. Same shape persisted in
+       *     `AgentCapabilityConfig.config` for the `guardrails` capability.
+       */
+      config: Record<string, never>;
+      /**
+       * @description Where the preset sends data when it runs. `none` for deterministic
+       *     presets (everything runs in-process).
+       * @example none
+       */
+      data_egress: string;
+      /** @description What the preset protects against and how to tune it. */
+      description: string;
+      /**
+       * @description Human-facing label.
+       * @example Secret & Credential Detection
+       */
+      display_name: string;
+      /**
+       * @description Stable slug used to reference the preset (e.g. `secret-detection`).
+       * @example secret-detection
+       */
+      name: string;
+      /**
+       * @description Distinct stages the preset's checks run in (`output`, `tool_use`,
+       *     `tool_output`).
+       */
+      stages: string[];
+      /** @description Tags for grouping/filtering in a picker. */
+      tags: string[];
+    };
+    /** @description Response for the `list_guardrail_examples` operation. */
+    GuardrailExamplesResponse: {
+      /** @description Adoptable guardrail presets, in display order. */
+      examples: components["schemas"]["GuardrailExample"][];
+    };
+    /**
+     * @description Pipeline stage a check applies to.
+     * @example output
+     * @enum {string}
+     */
+    GuardrailStage: "output" | "tool_use" | "tool_output";
+    /** @description One triggered check from a guardrails dry run. */
+    GuardrailsDryRunHit: {
+      /** @description Effective action (advisory mode downgrades block to log). */
+      action: components["schemas"]["GuardrailAction"];
+      /**
+       * @description The check's `id`, or `"<type>#<index>"` when none was set.
+       * @example profanity
+       */
+      check_id: string;
+      /**
+       * Format: int32
+       * @description Index of the check in the config's `checks` array.
+       */
+      check_index: number;
+      /**
+       * @description Bounded excerpt of what matched.
+       * @example darn
+       */
+      matched?: string | null;
+      /**
+       * @description Stable machine-readable code, `guardrail.<rule_type>`.
+       * @example guardrail.blocklist
+       */
+      reason_code: string;
+      /** @description The check's custom replacement text, if configured. */
+      replacement?: string | null;
+      /**
+       * @description Rule type: regex, blocklist, or tool_pattern.
+       * @example blocklist
+       */
+      rule_type: string;
+      /** @description Stage the check ran in. */
+      stage: components["schemas"]["GuardrailStage"];
+    };
+    /**
+     * @description Request body for the `dry_run_guardrails` operation: evaluate a
+     *     guardrails capability config against sample content without a session.
+     */
+    GuardrailsDryRunRequest: {
+      /**
+       * @description The `guardrails` capability config to evaluate (same shape persisted
+       *     in `AgentCapabilityConfig.config`).
+       */
+      config: Record<string, never>;
+      /** @description Pipeline stage to evaluate. */
+      stage: components["schemas"]["GuardrailStage"];
+      /**
+       * @description Sample content: model output, serialized tool arguments, or tool
+       *     output, depending on `stage`.
+       * @example the model said something darn surprising
+       */
+      text: string;
+      /**
+       * @description Tool name for `tool_use` stage checks (`tool_pattern` rules).
+       * @example bashkit_exec
+       */
+      tool_name?: string | null;
+    };
+    /** @description Response for the `dry_run_guardrails` operation. */
+    GuardrailsDryRunResponse: {
+      /**
+       * @description Whether any hit would block (i.e. the content would be suppressed
+       *     or the tool call refused when this config runs active).
+       */
+      blocked: boolean;
+      /** @description All triggered checks, in config order. */
+      hits: components["schemas"]["GuardrailsDryRunHit"][];
     };
     /**
      * @description Harness configuration for sessions.
@@ -6433,6 +6960,8 @@ export interface components {
       deleted_at?: string | null;
       /** @description Human-readable description. Safe to render in user-facing messages. */
       description?: string | null;
+      /** @description Optional embedding model for hybrid retrieval. `null` = keyword search only. */
+      embedding_model_id?: string | null;
       /**
        * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
        * @example kb_01933b5a000070008000000000000001
@@ -6653,49 +7182,12 @@ export interface components {
       search?: string | null;
     };
     /**
-     * @description Query parameters for listing memories within a store — optional content
-     *     search and kind filter.
+     * @description Query parameters for `GET /v1/memories` — optional name search and a
+     *     flag to include archived memories in the listing.
      */
     ListMemoriesQuery: {
-      /**
-       * @description When `true`, also returns inactive (deactivated) memories.
-       * @example false
-       */
-      include_inactive?: boolean | null;
-      /**
-       * @description Discriminator selecting the variant of this resource. One of `fact`,
-       *     `preference`, `correction`, `procedure`, `context`.
-       * @example preference
-       */
-      kind?: string | null;
-      /**
-       * @description Maximum number of items returned in this page.
-       * @example 50
-       */
-      limit?: number | null;
-      /**
-       * @description Substring filter applied to memory content.
-       * @example preferred timezone
-       */
-      query?: string | null;
-      /**
-       * @description Filter to memories tagged with at least one of these labels.
-       * @example [
-       *       "onboarding",
-       *       "billing"
-       *     ]
-       */
-      tag?: string[] | null;
-    };
-    /** @description Response body for the `list_memories` operation. */
-    ListMemoriesResponse: {
-      /** @description Page of items returned by this query. */
-      data: components["schemas"]["MemoryResponse"][];
-      /**
-       * Format: int64
-       * @description Total number of items matching the query, across all pages.
-       */
-      total: number;
+      include_archived?: boolean | null;
+      search?: string | null;
     };
     /**
      * @description Response wrapper for list endpoints.
@@ -6880,6 +7372,12 @@ export interface components {
          */
         id: string;
         /**
+         * @description Whether this capability is a guardrail (constrains agent behavior
+         *     rather than granting abilities). Used for UI grouping and filtering.
+         * @example false
+         */
+        is_guardrail?: boolean;
+        /**
          * @description Whether this is an MCP server capability (for UI badge)
          * @example false
          */
@@ -6889,6 +7387,20 @@ export interface components {
          * @example false
          */
         is_skill?: boolean;
+        /**
+         * @description Localized display strings keyed by lowercase language tag (e.g. "uk").
+         *     The "en" entry carries only `config_description`, since the base
+         *     name/description/config_schema strings are already English.
+         * @example {
+         *       "uk": {
+         *         "description": "Монтує спільні файли пам'яті в сесії.",
+         *         "name": "Пам'ять"
+         *       }
+         *     }
+         */
+        localizations?: {
+          [key: string]: components["schemas"]["CapabilityLocalizationInfo"];
+        };
         /**
          * @description Display name
          * @example Session File System
@@ -7057,6 +7569,18 @@ export interface components {
      * @description Response wrapper for list endpoints.
      *     All list endpoints return responses wrapped in a `data` field.
      */
+    ListResponse_GrepResultEntry: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        path: string;
+        /** Format: int64 */
+        size_bytes: number;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
     ListResponse_Harness: {
       /** @description Array of items returned by the list operation. */
       data: {
@@ -7188,6 +7712,8 @@ export interface components {
         deleted_at?: string | null;
         /** @description Human-readable description. Safe to render in user-facing messages. */
         description?: string | null;
+        /** @description Optional embedding model for hybrid retrieval. `null` = keyword search only. */
+        embedding_model_id?: string | null;
         /**
          * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
          * @example kb_01933b5a000070008000000000000001
@@ -7310,27 +7836,97 @@ export interface components {
      * @description Response wrapper for list endpoints.
      *     All list endpoints return responses wrapped in a `data` field.
      */
-    ListResponse_MemoryStoreResponse: {
+    ListResponse_MemoryFileInfo: {
       /** @description Array of items returned by the list operation. */
       data: {
+        content_hash?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        is_directory: boolean;
+        path: string;
         /** Format: int64 */
-        active_memory_count: number;
+        size_bytes: number;
+        /** Format: date-time */
+        updated_at: string;
+      }[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_MemoryResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /**
+         * Format: date-time
+         * @description Timestamp when this resource was archived, if any (RFC 3339).
+         * @example 2026-05-26T00:00:00Z
+         */
+        archived_at?: string | null;
         /**
          * Format: date-time
          * @description Timestamp when this resource was created (RFC 3339).
+         * @example 2026-04-01T10:00:00Z
          */
         created_at: string;
         /**
+         * Format: date-time
+         * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+         * @example 2026-05-26T00:00:00Z
+         */
+        deleted_at?: string | null;
+        /**
+         * @description Human-readable description. Safe to render in user-facing messages.
+         * @example Living design documents synced from GitHub
+         */
+        description?: string | null;
+        /**
          * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-         * @example mst_01933b5a000070008000000000000001
+         * @example mem_01933b5a000070008000000000000001
          */
         id: string;
-        is_default: boolean;
-        /** @description Human-readable name. Safe to render in user-facing messages. */
+        /**
+         * @description Whether the memory is mounted read-only into sessions. Read-only memories accept no writes from the session sandbox.
+         * @example false
+         */
+        is_readonly: boolean;
+        /**
+         * @description Most recent sync error message; cleared on the next successful sync.
+         * @example ssh: connect to host github.com port 22: Connection timed out
+         */
+        last_sync_error?: string | null;
+        /**
+         * Format: date-time
+         * @description Timestamp of the most recent successful sync (RFC 3339). `None` if never synced.
+         * @example 2026-05-25T08:00:00Z
+         */
+        last_synced_at?: string | null;
+        /**
+         * @description Human-readable name. Safe to render in user-facing messages.
+         * @example design-docs
+         */
         name: string;
+        /** @description Source-specific configuration (git remote, github repo, manual upload). */
+        source: components["schemas"]["MemorySourceResponse"];
+        /**
+         * @description Source kind discriminator (`manual`, `git`, `github`). Determines which `source` variant is populated.
+         * @example github
+         */
+        source_type: string;
+        /**
+         * @description Current lifecycle status.
+         * @example active
+         */
+        status: string;
+        /**
+         * @description Current sync status (`idle`, `syncing`, `succeeded`, `failed`). Only meaningful when `source_type` is `git` or `github`.
+         * @example succeeded
+         */
+        sync_status: string;
         /**
          * Format: date-time
          * @description Timestamp when this resource was last updated (RFC 3339).
+         * @example 2026-05-25T08:00:00Z
          */
         updated_at: string;
       }[];
@@ -7541,87 +8137,6 @@ export interface components {
      * @description Response wrapper for list endpoints.
      *     All list endpoints return responses wrapped in a `data` field.
      */
-    ListResponse_VolumeResponse: {
-      /** @description Array of items returned by the list operation. */
-      data: {
-        /**
-         * Format: date-time
-         * @description Timestamp when this resource was archived, if any (RFC 3339).
-         * @example 2026-05-26T00:00:00Z
-         */
-        archived_at?: string | null;
-        /**
-         * Format: date-time
-         * @description Timestamp when this resource was created (RFC 3339).
-         * @example 2026-04-01T10:00:00Z
-         */
-        created_at: string;
-        /**
-         * Format: date-time
-         * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
-         * @example 2026-05-26T00:00:00Z
-         */
-        deleted_at?: string | null;
-        /**
-         * @description Human-readable description. Safe to render in user-facing messages.
-         * @example Living design documents synced from GitHub
-         */
-        description?: string | null;
-        /**
-         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-         * @example vol_01933b5a000070008000000000000001
-         */
-        id: string;
-        /**
-         * @description Whether the volume is mounted read-only into sessions. Read-only volumes accept no writes from the session sandbox.
-         * @example false
-         */
-        is_readonly: boolean;
-        /**
-         * @description Most recent sync error message; cleared on the next successful sync.
-         * @example ssh: connect to host github.com port 22: Connection timed out
-         */
-        last_sync_error?: string | null;
-        /**
-         * Format: date-time
-         * @description Timestamp of the most recent successful sync (RFC 3339). `None` if never synced.
-         * @example 2026-05-25T08:00:00Z
-         */
-        last_synced_at?: string | null;
-        /**
-         * @description Human-readable name. Safe to render in user-facing messages.
-         * @example design-docs
-         */
-        name: string;
-        /** @description Source-specific configuration (git remote, github repo, manual upload). */
-        source: components["schemas"]["VolumeSourceResponse"];
-        /**
-         * @description Source kind discriminator (`manual`, `git`, `github`). Determines which `source` variant is populated.
-         * @example github
-         */
-        source_type: string;
-        /**
-         * @description Current lifecycle status.
-         * @example active
-         */
-        status: string;
-        /**
-         * @description Current sync status (`idle`, `syncing`, `succeeded`, `failed`). Only meaningful when `source_type` is `git` or `github`.
-         * @example succeeded
-         */
-        sync_status: string;
-        /**
-         * Format: date-time
-         * @description Timestamp when this resource was last updated (RFC 3339).
-         * @example 2026-05-25T08:00:00Z
-         */
-        updated_at: string;
-      }[];
-    };
-    /**
-     * @description Response wrapper for list endpoints.
-     *     All list endpoints return responses wrapped in a `data` field.
-     */
     ListResponse_WithUrls_App: {
       /** @description Array of items returned by the list operation. */
       data: ({
@@ -7792,206 +8307,6 @@ export interface components {
      * @description Response wrapper for list endpoints.
      *     All list endpoints return responses wrapped in a `data` field.
      */
-    ListResponse_WithUrls_LlmModel: {
-      /** @description Array of items returned by the list operation. */
-      data: ({
-        /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
-        capabilities: string[];
-        /**
-         * Format: date-time
-         * @description Timestamp when this model was created (RFC 3339).
-         */
-        created_at: string;
-        /** @description Human-readable display name. Safe to render in user-facing messages. */
-        display_name: string;
-        /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
-        enabled: boolean;
-        /**
-         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-         * @example model_01933b5a00007000800000000000001
-         */
-        id: string;
-        /** @description Whether this model is starred in the UI for quick access. */
-        is_favorite: boolean;
-        /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
-        model_id: string;
-        /**
-         * @description Owning provider's prefixed public identifier.
-         * @example provider_01933b5a00007000800000000000001
-         */
-        provider_id: string;
-        /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
-        source: components["schemas"]["LlmModelSource"];
-        /**
-         * Format: date-time
-         * @description Timestamp when this model was last updated (RFC 3339).
-         */
-        updated_at: string;
-      } & {
-        /**
-         * @description State-aware hypermedia actions the caller can take on this resource
-         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
-         *     shape when empty so resources that haven't opted into the
-         *     convention don't grow their payloads.
-         */
-        allowed_actions?: components["schemas"]["AllowedAction"][];
-        /** @description Full API endpoint URL for this resource. */
-        self_url: string;
-        /** @description Alias for `view_url`, used by command and MCP outputs. */
-        ui_link: string;
-        /** @description Full UI URL for viewing this resource. */
-        view_url: string;
-      })[];
-    };
-    /**
-     * @description Response wrapper for list endpoints.
-     *     All list endpoints return responses wrapped in a `data` field.
-     */
-    ListResponse_WithUrls_LlmModelWithProvider: {
-      /** @description Array of items returned by the list operation. */
-      data: ({
-        /**
-         * @description Capability tags supported by this model.
-         * @example [
-         *       "text",
-         *       "tools",
-         *       "vision",
-         *       "thinking"
-         *     ]
-         */
-        capabilities: string[];
-        /**
-         * Format: date-time
-         * @description Timestamp when this model was created (RFC 3339).
-         * @example 2026-01-04T11:23:00Z
-         */
-        created_at: string;
-        /**
-         * @description Human-readable display name.
-         * @example Claude Sonnet 4.5
-         */
-        display_name: string;
-        /**
-         * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
-         * @example true
-         */
-        enabled: boolean;
-        /**
-         * @description Derived: model is configured and ready for use. Currently means the
-         *     joined provider is active and has an API key set; over time this may
-         *     also incorporate live reachability checks. Not persisted.
-         * @example true
-         */
-        healthy: boolean;
-        /**
-         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-         * @example model_01933b5a00007000800000000000001
-         */
-        id: string;
-        /**
-         * @description Whether this model is starred in the UI for quick access.
-         * @example true
-         */
-        is_favorite: boolean;
-        /**
-         * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
-         * @example claude-sonnet-4-5
-         */
-        model_id: string;
-        profile?: null | components["schemas"]["LlmModelProfile"];
-        /**
-         * @description Owning provider's prefixed public identifier.
-         * @example provider_01933b5a00007000800000000000001
-         */
-        provider_id: string;
-        /**
-         * @description Joined provider display name.
-         * @example Anthropic
-         */
-        provider_name: string;
-        /** @description Joined provider implementation type. */
-        provider_type: components["schemas"]["LlmProviderType"];
-        /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
-        source: components["schemas"]["LlmModelSource"];
-        /**
-         * Format: date-time
-         * @description Timestamp when this model was last updated (RFC 3339).
-         * @example 2026-05-27T15:24:00Z
-         */
-        updated_at: string;
-      } & {
-        /**
-         * @description State-aware hypermedia actions the caller can take on this resource
-         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
-         *     shape when empty so resources that haven't opted into the
-         *     convention don't grow their payloads.
-         */
-        allowed_actions?: components["schemas"]["AllowedAction"][];
-        /** @description Full API endpoint URL for this resource. */
-        self_url: string;
-        /** @description Alias for `view_url`, used by command and MCP outputs. */
-        ui_link: string;
-        /** @description Full UI URL for viewing this resource. */
-        view_url: string;
-      })[];
-    };
-    /**
-     * @description Response wrapper for list endpoints.
-     *     All list endpoints return responses wrapped in a `data` field.
-     */
-    ListResponse_WithUrls_LlmProvider: {
-      /** @description Array of items returned by the list operation. */
-      data: ({
-        /** @description Whether an API key is configured. The key itself is never returned. */
-        api_key_set: boolean;
-        /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
-        base_url?: string | null;
-        /**
-         * Format: date-time
-         * @description Timestamp when this provider was created (RFC 3339).
-         */
-        created_at: string;
-        /**
-         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-         * @example provider_01933b5a00007000800000000000001
-         */
-        id: string;
-        /**
-         * Format: date-time
-         * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
-         */
-        last_synced_at?: string | null;
-        /** @description Human-readable provider name. Safe to render in user-facing messages. */
-        name: string;
-        /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
-        provider_type: components["schemas"]["LlmProviderType"];
-        /** @description Current lifecycle status of this provider. */
-        status: components["schemas"]["LlmProviderStatus"];
-        /**
-         * Format: date-time
-         * @description Timestamp when this provider was last updated (RFC 3339).
-         */
-        updated_at: string;
-      } & {
-        /**
-         * @description State-aware hypermedia actions the caller can take on this resource
-         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
-         *     shape when empty so resources that haven't opted into the
-         *     convention don't grow their payloads.
-         */
-        allowed_actions?: components["schemas"]["AllowedAction"][];
-        /** @description Full API endpoint URL for this resource. */
-        self_url: string;
-        /** @description Alias for `view_url`, used by command and MCP outputs. */
-        ui_link: string;
-        /** @description Full UI URL for viewing this resource. */
-        view_url: string;
-      })[];
-    };
-    /**
-     * @description Response wrapper for list endpoints.
-     *     All list endpoints return responses wrapped in a `data` field.
-     */
     ListResponse_WithUrls_McpServer: {
       /** @description Array of items returned by the list operation. */
       data: ({
@@ -8052,6 +8367,207 @@ export interface components {
          * @example https://mcp.atlassian.com/v1/mcp
          */
         url: string;
+      } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_Model: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
+        capabilities: string[];
+        /**
+         * Format: date-time
+         * @description Timestamp when this model was created (RFC 3339).
+         */
+        created_at: string;
+        /** @description Human-readable display name. Safe to render in user-facing messages. */
+        display_name: string;
+        /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `ProviderResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
+        enabled: boolean;
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example model_01933b5a00007000800000000000001
+         */
+        id: string;
+        /** @description Whether this model is starred in the UI for quick access. */
+        is_favorite: boolean;
+        /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
+        model_id: string;
+        /**
+         * @description Owning provider's prefixed public identifier.
+         * @example provider_01933b5a00007000800000000000001
+         */
+        provider_id: string;
+        /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
+        source: components["schemas"]["ModelSource"];
+        /**
+         * Format: date-time
+         * @description Timestamp when this model was last updated (RFC 3339).
+         */
+        updated_at: string;
+      } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_ModelWithProvider: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /**
+         * @description Capability tags supported by this model.
+         * @example [
+         *       "text",
+         *       "tools",
+         *       "vision",
+         *       "thinking"
+         *     ]
+         */
+        capabilities: string[];
+        /**
+         * Format: date-time
+         * @description Timestamp when this model was created (RFC 3339).
+         * @example 2026-01-04T11:23:00Z
+         */
+        created_at: string;
+        /**
+         * @description Human-readable display name.
+         * @example Claude Sonnet 4.5
+         */
+        display_name: string;
+        /**
+         * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `ProviderResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
+         * @example true
+         */
+        enabled: boolean;
+        /**
+         * @description Derived: model is configured and ready for use. Currently means the
+         *     joined provider is active and has an API key set; over time this may
+         *     also incorporate live reachability checks. Not persisted.
+         * @example true
+         */
+        healthy: boolean;
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example model_01933b5a00007000800000000000001
+         */
+        id: string;
+        /**
+         * @description Whether this model is starred in the UI for quick access.
+         * @example true
+         */
+        is_favorite: boolean;
+        /**
+         * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
+         * @example claude-sonnet-4-5
+         */
+        model_id: string;
+        model_vendor?: null | components["schemas"]["ModelVendor"];
+        profile?: null | components["schemas"]["ModelProfile"];
+        /**
+         * @description Owning provider's prefixed public identifier.
+         * @example provider_01933b5a00007000800000000000001
+         */
+        provider_id: string;
+        /**
+         * @description Joined provider display name.
+         * @example Anthropic
+         */
+        provider_name: string;
+        /** @description Joined provider implementation type. */
+        provider_type: components["schemas"]["DriverId"];
+        /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
+        source: components["schemas"]["ModelSource"];
+        /**
+         * Format: date-time
+         * @description Timestamp when this model was last updated (RFC 3339).
+         * @example 2026-05-27T15:24:00Z
+         */
+        updated_at: string;
+      } & {
+        /**
+         * @description State-aware hypermedia actions the caller can take on this resource
+         *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+         *     shape when empty so resources that haven't opted into the
+         *     convention don't grow their payloads.
+         */
+        allowed_actions?: components["schemas"]["AllowedAction"][];
+        /** @description Full API endpoint URL for this resource. */
+        self_url: string;
+        /** @description Alias for `view_url`, used by command and MCP outputs. */
+        ui_link: string;
+        /** @description Full UI URL for viewing this resource. */
+        view_url: string;
+      })[];
+    };
+    /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WithUrls_Provider: {
+      /** @description Array of items returned by the list operation. */
+      data: ({
+        /** @description Whether an API key is configured. The key itself is never returned. */
+        api_key_set: boolean;
+        /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
+        base_url?: string | null;
+        /**
+         * Format: date-time
+         * @description Timestamp when this provider was created (RFC 3339).
+         */
+        created_at: string;
+        /**
+         * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+         * @example provider_01933b5a00007000800000000000001
+         */
+        id: string;
+        /**
+         * Format: date-time
+         * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
+         */
+        last_synced_at?: string | null;
+        /** @description Human-readable provider name. Safe to render in user-facing messages. */
+        name: string;
+        /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
+        provider_type: components["schemas"]["DriverId"];
+        /** @description Current lifecycle status of this provider. */
+        status: components["schemas"]["ProviderStatus"];
+        /**
+         * Format: date-time
+         * @description Timestamp when this provider was last updated (RFC 3339).
+         */
+        updated_at: string;
       } & {
         /**
          * @description State-aware hypermedia actions the caller can take on this resource
@@ -8266,6 +8782,31 @@ export interface components {
       })[];
     };
     /**
+     * @description Response wrapper for list endpoints.
+     *     All list endpoints return responses wrapped in a `data` field.
+     */
+    ListResponse_WorkspaceResponse: {
+      /** @description Array of items returned by the list operation. */
+      data: {
+        /** Format: date-time */
+        archived_at?: string | null;
+        /** Format: date-time */
+        created_at: string;
+        /** Format: date-time */
+        deleted_at?: string | null;
+        /** @example Shared workspace for the Q4 research project */
+        description?: string | null;
+        /** @example wsp_01933b5a000070008000000000000001 */
+        id: string;
+        /** @example team-research */
+        name: string;
+        /** @example active */
+        status: string;
+        /** Format: date-time */
+        updated_at: string;
+      }[];
+    };
+    /**
      * @description Query parameters for `GET /v1/schedules` — optional enabled/target-type
      *     filters plus standard offset/limit paging.
      */
@@ -8298,12 +8839,8 @@ export interface components {
       /** @description Search query to filter by name or email */
       search?: string | null;
     };
-    /**
-     * @description Query parameters for `GET /v1/volumes` — optional name search and a
-     *     flag to include archived volumes in the listing.
-     */
-    ListVolumesQuery: {
-      include_archived?: boolean | null;
+    ListWorkspacesQuery: {
+      include_archived?: boolean;
       search?: string | null;
     };
     /**
@@ -8407,225 +8944,6 @@ export interface components {
       /** @description Tool calls requested by the model */
       tool_calls?: components["schemas"]["ToolCall"][];
     };
-    /** @description LLM Model entity */
-    LlmModel: {
-      /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
-      capabilities: string[];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was created (RFC 3339).
-       */
-      created_at: string;
-      /** @description Human-readable display name. Safe to render in user-facing messages. */
-      display_name: string;
-      /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
-      enabled: boolean;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example model_01933b5a00007000800000000000001
-       */
-      id: string;
-      /** @description Whether this model is starred in the UI for quick access. */
-      is_favorite: boolean;
-      /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
-      model_id: string;
-      /**
-       * @description Owning provider's prefixed public identifier.
-       * @example provider_01933b5a00007000800000000000001
-       */
-      provider_id: string;
-      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
-      source: components["schemas"]["LlmModelSource"];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was last updated (RFC 3339).
-       */
-      updated_at: string;
-    };
-    /** @description Cost information for the model (per million tokens) */
-    LlmModelCost: {
-      /**
-       * Format: double
-       * @description Cached read cost per million tokens (USD), if supported
-       */
-      cache_read?: number | null;
-      /**
-       * @description Tiered pricing that applies above certain context thresholds.
-       *     When present, the base cost fields apply up to the tier threshold,
-       *     and each tier's costs apply for tokens beyond that threshold.
-       */
-      cost_tiers?: components["schemas"]["CostTier"][];
-      /**
-       * Format: double
-       * @description Input cost per million tokens (USD)
-       */
-      input: number;
-      /**
-       * Format: double
-       * @description Output cost per million tokens (USD)
-       */
-      output: number;
-    };
-    /** @description Token limits for the model */
-    LlmModelLimits: {
-      /**
-       * Format: int32
-       * @description Maximum context window size in tokens
-       */
-      context: number;
-      /**
-       * Format: int32
-       * @description Maximum input tokens (if different from context - output)
-       */
-      input?: number | null;
-      /**
-       * Format: int32
-       * @description Maximum images or PDF pages per request
-       */
-      max_media?: number | null;
-      /**
-       * Format: int32
-       * @description Maximum output tokens
-       */
-      output: number;
-    };
-    /** @description Model modalities for input and output */
-    LlmModelModalities: {
-      /** @description Supported input modalities */
-      input: components["schemas"]["Modality"][];
-      /** @description Supported output modalities */
-      output: components["schemas"]["Modality"][];
-    };
-    /**
-     * @description LLM Model Profile describing model capabilities
-     *     Based on models.dev structure (<https://models.dev/api.json>)
-     *
-     *     NOTE: Currently only includes profiles for:
-     *     - OpenAI: gpt-4o, gpt-4o-mini, o1, o1-mini, o1-pro, o3-mini
-     *     - Anthropic: claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus, claude-3-sonnet, claude-3-haiku, claude-sonnet-4, claude-opus-4
-     *
-     *     Additional model profiles can be added as needed.
-     */
-    LlmModelProfile: {
-      /** @description Whether the model supports file/image attachments */
-      attachment: boolean;
-      cost?: null | components["schemas"]["LlmModelCost"];
-      /** @description Short human-readable description of the model's strengths and intended use */
-      description?: string | null;
-      /** @description Model family (e.g., "gpt-4o", "claude-3-5-sonnet") */
-      family: string;
-      /** @description Knowledge cutoff date (YYYY-MM-DD format) */
-      knowledge?: string | null;
-      /** @description Last updated date (YYYY-MM-DD format) */
-      last_updated?: string | null;
-      limits?: null | components["schemas"]["LlmModelLimits"];
-      modalities?: null | components["schemas"]["LlmModelModalities"];
-      /** @description Display name of the model */
-      name: string;
-      /** @description Whether the model has open weights */
-      open_weights: boolean;
-      /** @description Whether the model has reasoning/chain-of-thought capabilities */
-      reasoning: boolean;
-      reasoning_effort?: null | components["schemas"]["ReasoningEffortConfig"];
-      /** @description Release date (YYYY-MM-DD format) */
-      release_date?: string | null;
-      /** @description Whether the model supports structured output (JSON mode) */
-      structured_output: boolean;
-      /**
-       * @description Whether the model supports native execution phases ("commentary" / "final_answer").
-       *     When true, the driver sends the `phase` field on assistant messages in the wire format.
-       *     Currently supported by GPT-5.4 and newer via OpenAI Responses API.
-       */
-      supports_phases?: boolean;
-      /** @description Whether temperature control is supported */
-      temperature: boolean;
-      /** @description Whether the model supports tool/function calling */
-      tool_call: boolean;
-      /**
-       * @description Whether the model supports tool_search (deferred tool loading).
-       *     When true, the driver can use namespaces and defer_loading to reduce
-       *     token usage for large tool sets. Currently supported by GPT-5.4 and newer.
-       */
-      tool_search?: boolean;
-    };
-    /**
-     * @description How the model was added to the system
-     * @example predefined
-     * @enum {string}
-     */
-    LlmModelSource: "manual" | "discovered" | "predefined";
-    /** @description LLM Model with provider info */
-    LlmModelWithProvider: {
-      /**
-       * @description Capability tags supported by this model.
-       * @example [
-       *       "text",
-       *       "tools",
-       *       "vision",
-       *       "thinking"
-       *     ]
-       */
-      capabilities: string[];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was created (RFC 3339).
-       * @example 2026-01-04T11:23:00Z
-       */
-      created_at: string;
-      /**
-       * @description Human-readable display name.
-       * @example Claude Sonnet 4.5
-       */
-      display_name: string;
-      /**
-       * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
-       * @example true
-       */
-      enabled: boolean;
-      /**
-       * @description Derived: model is configured and ready for use. Currently means the
-       *     joined provider is active and has an API key set; over time this may
-       *     also incorporate live reachability checks. Not persisted.
-       * @example true
-       */
-      healthy: boolean;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example model_01933b5a00007000800000000000001
-       */
-      id: string;
-      /**
-       * @description Whether this model is starred in the UI for quick access.
-       * @example true
-       */
-      is_favorite: boolean;
-      /**
-       * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
-       * @example claude-sonnet-4-5
-       */
-      model_id: string;
-      profile?: null | components["schemas"]["LlmModelProfile"];
-      /**
-       * @description Owning provider's prefixed public identifier.
-       * @example provider_01933b5a00007000800000000000001
-       */
-      provider_id: string;
-      /**
-       * @description Joined provider display name.
-       * @example Anthropic
-       */
-      provider_name: string;
-      /** @description Joined provider implementation type. */
-      provider_type: components["schemas"]["LlmProviderType"];
-      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
-      source: components["schemas"]["LlmModelSource"];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was last updated (RFC 3339).
-       * @example 2026-05-27T15:24:00Z
-       */
-      updated_at: string;
-    };
     /** @description Request-side prompt cache settings for an LLM generation. */
     LlmPromptCacheInfo: {
       /** @description Whether prompt caching was enabled on the request. */
@@ -8635,59 +8953,6 @@ export interface components {
       /** @description Strategy used to enable prompt caching. */
       strategy: components["schemas"]["PromptCacheStrategy"];
     };
-    /**
-     * @description LLM Provider entity (API keys never exposed)
-     *     Note: This is the entity struct, separate from the LlmProvider trait in llm.rs
-     */
-    LlmProvider: {
-      /** @description Whether an API key is configured. The key itself is never returned. */
-      api_key_set: boolean;
-      /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
-      base_url?: string | null;
-      /**
-       * Format: date-time
-       * @description Timestamp when this provider was created (RFC 3339).
-       */
-      created_at: string;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example provider_01933b5a00007000800000000000001
-       */
-      id: string;
-      /**
-       * Format: date-time
-       * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
-       */
-      last_synced_at?: string | null;
-      /** @description Human-readable provider name. Safe to render in user-facing messages. */
-      name: string;
-      /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
-      provider_type: components["schemas"]["LlmProviderType"];
-      /** @description Current lifecycle status of this provider. */
-      status: components["schemas"]["LlmProviderStatus"];
-      /**
-       * Format: date-time
-       * @description Timestamp when this provider was last updated (RFC 3339).
-       */
-      updated_at: string;
-    };
-    /**
-     * @description LLM provider status
-     * @enum {string}
-     */
-    LlmProviderStatus: "active" | "disabled";
-    /**
-     * @description LLM provider type
-     * @example anthropic
-     * @enum {string}
-     */
-    LlmProviderType:
-      | "openai"
-      | "azure_openai"
-      | "openai_completions"
-      | "anthropic"
-      | "gemini"
-      | "llmsim";
     /**
      * @description Request options applied to an LLM generation.
      *
@@ -8760,8 +9025,8 @@ export interface components {
       /** @description Absolute path of the sandbox workspace root. */
       workspace_path?: string | null;
     };
-    /** @description Response body for manual volume source. */
-    ManualVolumeSourceResponse: Record<string, never>;
+    /** @description Response body for manual memory source. */
+    ManualMemorySourceResponse: Record<string, never>;
     /**
      * @description Broad-strokes routing hint sitting alongside the precise [`McpErrorCode`].
      *     The categories are stable enough that an LLM can pick a recovery
@@ -8919,11 +9184,10 @@ export interface components {
     McpServerStatus: "active" | "disabled" | "archived" | "deleted";
     /**
      * @description MCP Server transport type.
-     *     Currently only HTTP is supported.
      * @example http
      * @enum {string}
      */
-    McpServerTransportType: "http";
+    McpServerTransportType: "http" | "stdio";
     /**
      * @description MCP tool annotations as defined by the MCP specification.
      *     All fields are optional booleans following the MCP convention.
@@ -8934,58 +9198,120 @@ export interface components {
       openWorldHint?: boolean | null;
       readOnlyHint?: boolean | null;
     };
+    MemoryFile: {
+      /** @description Text or base64-encoded content; check `encoding`. */
+      content: string;
+      content_hash?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** @description "text" or "base64". */
+      encoding: string;
+      path: string;
+      /** Format: int64 */
+      size_bytes: number;
+      /** Format: date-time */
+      updated_at: string;
+    };
+    MemoryFileInfo: {
+      content_hash?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      is_directory: boolean;
+      path: string;
+      /** Format: int64 */
+      size_bytes: number;
+      /** Format: date-time */
+      updated_at: string;
+    };
     /** @description Response body for memory. */
     MemoryResponse: {
-      active: boolean;
-      content: string;
-      content_parts: unknown;
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was archived, if any (RFC 3339).
+       * @example 2026-05-26T00:00:00Z
+       */
+      archived_at?: string | null;
       /**
        * Format: date-time
        * @description Timestamp when this resource was created (RFC 3339).
+       * @example 2026-04-01T10:00:00Z
        */
       created_at: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+       * @example 2026-05-26T00:00:00Z
+       */
+      deleted_at?: string | null;
+      /**
+       * @description Human-readable description. Safe to render in user-facing messages.
+       * @example Living design documents synced from GitHub
+       */
+      description?: string | null;
       /**
        * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
        * @example mem_01933b5a000070008000000000000001
        */
       id: string;
-      /** Format: int32 */
-      importance: number;
-      /** @description Discriminator selecting the variant of this resource. */
-      kind: string;
-      /** @example mst_01933b5a000070008000000000000001 */
-      store_id: string;
-      /** @description Free-form tags attached to this resource. */
-      tags: string[];
+      /**
+       * @description Whether the memory is mounted read-only into sessions. Read-only memories accept no writes from the session sandbox.
+       * @example false
+       */
+      is_readonly: boolean;
+      /**
+       * @description Most recent sync error message; cleared on the next successful sync.
+       * @example ssh: connect to host github.com port 22: Connection timed out
+       */
+      last_sync_error?: string | null;
       /**
        * Format: date-time
-       * @description Timestamp when this resource was last updated (RFC 3339).
+       * @description Timestamp of the most recent successful sync (RFC 3339). `None` if never synced.
+       * @example 2026-05-25T08:00:00Z
        */
-      updated_at: string;
-    };
-    /** @description Response body for memory store. */
-    MemoryStoreResponse: {
-      /** Format: int64 */
-      active_memory_count: number;
+      last_synced_at?: string | null;
       /**
-       * Format: date-time
-       * @description Timestamp when this resource was created (RFC 3339).
+       * @description Human-readable name. Safe to render in user-facing messages.
+       * @example design-docs
        */
-      created_at: string;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example mst_01933b5a000070008000000000000001
-       */
-      id: string;
-      is_default: boolean;
-      /** @description Human-readable name. Safe to render in user-facing messages. */
       name: string;
+      /** @description Source-specific configuration (git remote, github repo, manual upload). */
+      source: components["schemas"]["MemorySourceResponse"];
+      /**
+       * @description Source kind discriminator (`manual`, `git`, `github`). Determines which `source` variant is populated.
+       * @example github
+       */
+      source_type: string;
+      /**
+       * @description Current lifecycle status.
+       * @example active
+       */
+      status: string;
+      /**
+       * @description Current sync status (`idle`, `syncing`, `succeeded`, `failed`). Only meaningful when `source_type` is `git` or `github`.
+       * @example succeeded
+       */
+      sync_status: string;
       /**
        * Format: date-time
        * @description Timestamp when this resource was last updated (RFC 3339).
+       * @example 2026-05-25T08:00:00Z
        */
       updated_at: string;
     };
+    /** @description Response body for memory source. */
+    MemorySourceResponse:
+      | (components["schemas"]["ManualMemorySourceResponse"] & {
+          /** @enum {string} */
+          provider: "manual";
+        })
+      | (components["schemas"]["GitHubMemorySourceResponse"] & {
+          /** @enum {string} */
+          provider: "github";
+        })
+      | (components["schemas"]["GitMemorySourceResponse"] & {
+          /** @enum {string} */
+          provider: "git";
+        });
     /** @description A message in the conversation */
     Message: {
       /** @description Message content as array of content parts (text, images, tool calls, tool results) */
@@ -9128,6 +9454,88 @@ export interface components {
      * @enum {string}
      */
     Modality: "text" | "image" | "audio" | "video" | "pdf";
+    /** @description LLM Model entity */
+    Model: {
+      /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
+      capabilities: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
+       */
+      created_at: string;
+      /** @description Human-readable display name. Safe to render in user-facing messages. */
+      display_name: string;
+      /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `ProviderResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
+      enabled: boolean;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Whether this model is starred in the UI for quick access. */
+      is_favorite: boolean;
+      /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
+      model_id: string;
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
+      provider_id: string;
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
+      source: components["schemas"]["ModelSource"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       */
+      updated_at: string;
+    };
+    /** @description Cost information for the model (per million tokens) */
+    ModelCost: {
+      /**
+       * Format: double
+       * @description Cached read cost per million tokens (USD), if supported
+       */
+      cache_read?: number | null;
+      /**
+       * @description Tiered pricing that applies above certain context thresholds.
+       *     When present, the base cost fields apply up to the tier threshold,
+       *     and each tier's costs apply for tokens beyond that threshold.
+       */
+      cost_tiers?: components["schemas"]["CostTier"][];
+      /**
+       * Format: double
+       * @description Input cost per million tokens (USD)
+       */
+      input: number;
+      /**
+       * Format: double
+       * @description Output cost per million tokens (USD)
+       */
+      output: number;
+    };
+    /** @description Token limits for the model */
+    ModelLimits: {
+      /**
+       * Format: int32
+       * @description Maximum context window size in tokens
+       */
+      context: number;
+      /**
+       * Format: int32
+       * @description Maximum input tokens (if different from context - output)
+       */
+      input?: number | null;
+      /**
+       * Format: int32
+       * @description Maximum images or PDF pages per request
+       */
+      max_media?: number | null;
+      /**
+       * Format: int32
+       * @description Maximum output tokens
+       */
+      output: number;
+    };
     /** @description Metadata about the model used for generation */
     ModelMetadata: {
       /** @description Model name (e.g., "gpt-4o", "claude-3-sonnet") */
@@ -9143,15 +9551,172 @@ export interface components {
        */
       provider_id?: string | null;
     };
+    /** @description Model modalities for input and output */
+    ModelModalities: {
+      /** @description Supported input modalities */
+      input: components["schemas"]["Modality"][];
+      /** @description Supported output modalities */
+      output: components["schemas"]["Modality"][];
+    };
+    /**
+     * @description LLM Model Profile describing model capabilities
+     *     Based on models.dev structure (<https://models.dev/api.json>)
+     *
+     *     NOTE: Currently only includes profiles for:
+     *     - OpenAI: gpt-4o, gpt-4o-mini, o1, o1-mini, o1-pro, o3-mini
+     *     - Anthropic: claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus, claude-3-sonnet, claude-3-haiku, claude-sonnet-4, claude-opus-4
+     *
+     *     Additional model profiles can be added as needed.
+     */
+    ModelProfile: {
+      /** @description Whether the model supports file/image attachments */
+      attachment: boolean;
+      cost?: null | components["schemas"]["ModelCost"];
+      /** @description Short human-readable description of the model's strengths and intended use */
+      description?: string | null;
+      /** @description Model family (e.g., "gpt-4o", "claude-3-5-sonnet") */
+      family: string;
+      /** @description Knowledge cutoff date (YYYY-MM-DD format) */
+      knowledge?: string | null;
+      /** @description Last updated date (YYYY-MM-DD format) */
+      last_updated?: string | null;
+      limits?: null | components["schemas"]["ModelLimits"];
+      modalities?: null | components["schemas"]["ModelModalities"];
+      /** @description Display name of the model */
+      name: string;
+      /** @description Whether the model has open weights */
+      open_weights: boolean;
+      /** @description Whether the model has reasoning/chain-of-thought capabilities */
+      reasoning: boolean;
+      reasoning_effort?: null | components["schemas"]["ReasoningEffortConfig"];
+      /** @description Release date (YYYY-MM-DD format) */
+      release_date?: string | null;
+      /** @description Whether the model supports structured output (JSON mode) */
+      structured_output: boolean;
+      /** @description Provider-advertised request parameters supported by this model. */
+      supported_parameters?: string[];
+      /**
+       * @description Whether the model supports native execution phases ("commentary" / "final_answer").
+       *     When true, the driver sends the `phase` field on assistant messages in the wire format.
+       *     Currently supported by GPT-5.4 and newer via OpenAI Responses API.
+       */
+      supports_phases?: boolean;
+      /** @description Whether temperature control is supported */
+      temperature: boolean;
+      /** @description Whether the model supports tool/function calling */
+      tool_call: boolean;
+      /**
+       * @description Whether the model supports tool_search (deferred tool loading).
+       *     When true, the driver can use namespaces and defer_loading to reduce
+       *     token usage for large tool sets. Currently supported by GPT-5.4 and newer.
+       */
+      tool_search?: boolean;
+    };
+    /**
+     * @description How the model was added to the system
+     * @example predefined
+     * @enum {string}
+     */
+    ModelSource: "manual" | "discovered" | "predefined";
+    /**
+     * @description Vendor / brand that authored a model. Independent of the provider type
+     *     that serves it (the same model may be offered by several providers or
+     *     gateways). Primarily drives UI iconography.
+     * @enum {string}
+     */
+    ModelVendor:
+      | "openai"
+      | "anthropic"
+      | "google"
+      | "nvidia"
+      | "qwen"
+      | "microsoft"
+      | "minimax"
+      | "moonshot"
+      | "xai"
+      | "llmsim";
+    /** @description LLM Model with provider info */
+    ModelWithProvider: {
+      /**
+       * @description Capability tags supported by this model.
+       * @example [
+       *       "text",
+       *       "tools",
+       *       "vision",
+       *       "thinking"
+       *     ]
+       */
+      capabilities: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
+       * @example 2026-01-04T11:23:00Z
+       */
+      created_at: string;
+      /**
+       * @description Human-readable display name.
+       * @example Claude Sonnet 4.5
+       */
+      display_name: string;
+      /**
+       * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `ProviderResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
+       * @example true
+       */
+      enabled: boolean;
+      /**
+       * @description Derived: model is configured and ready for use. Currently means the
+       *     joined provider is active and has an API key set; over time this may
+       *     also incorporate live reachability checks. Not persisted.
+       * @example true
+       */
+      healthy: boolean;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * @description Whether this model is starred in the UI for quick access.
+       * @example true
+       */
+      is_favorite: boolean;
+      /**
+       * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
+       * @example claude-sonnet-4-5
+       */
+      model_id: string;
+      model_vendor?: null | components["schemas"]["ModelVendor"];
+      profile?: null | components["schemas"]["ModelProfile"];
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
+      provider_id: string;
+      /**
+       * @description Joined provider display name.
+       * @example Anthropic
+       */
+      provider_name: string;
+      /** @description Joined provider implementation type. */
+      provider_type: components["schemas"]["DriverId"];
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
+      source: components["schemas"]["ModelSource"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       * @example 2026-05-27T15:24:00Z
+       */
+      updated_at: string;
+    };
     /** @description Request to move/rename a file */
     MoveFileRequest: {
       /**
-       * @description Destination path (relative to the session workspace root).
+       * @description Destination path (relative to the workspace filesystem root).
        * @example docs/migration-plan.md
        */
       dst_path: string;
       /**
-       * @description Source path (relative to the session workspace root).
+       * @description Source path (relative to the workspace filesystem root).
        * @example drafts/migration-plan.md
        */
       src_path: string;
@@ -9185,6 +9750,21 @@ export interface components {
       /** @description Blocked host patterns. Always denied, even if matched by `allowed`. */
       blocked?: string[];
     };
+    OrgFeatureFlagSetting: {
+      description: string;
+      /** @description Effective value (`system_enabled && org_enabled`). */
+      effective: boolean;
+      experimental: boolean;
+      label: string;
+      name: string;
+      /** @description Whether the organization has opted in. */
+      org_enabled: boolean;
+      /** @description Whether the deployment allows this flag (env / grade). */
+      system_enabled: boolean;
+    };
+    OrgFeatureFlagsSettingsResponse: {
+      flags: components["schemas"]["OrgFeatureFlagSetting"][];
+    };
     /** @description Response for organization operations */
     OrganizationResponse: {
       /** @description Base harness used when session creation omits harness_id. */
@@ -9212,6 +9792,12 @@ export interface components {
     OutputMessageCompletedData: {
       /** @description Stable error code for user-facing failures surfaced as assistant text. */
       error_code?: string | null;
+      /**
+       * @description Error-disclosure mode applied to `error_code`/`error_fields`
+       *     ("generic" | "standard" | "detailed"). Tracking metadata; absent for
+       *     non-error messages and for paths that predate disclosure modes.
+       */
+      error_disclosure?: string | null;
       /** @description Structured interpolation fields for localized error rendering. */
       error_fields?: Record<string, never> | null;
       /** @description The agent message */
@@ -9425,7 +10011,10 @@ export interface components {
          * @example principal_01933b5a000070008000000000000001
          */
         owner_principal_id: string;
-        /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+        /**
+         * @description Parent session that spawned this subagent. NULL for top-level sessions.
+         *     Used as the nesting guard in spawn_subagent.
+         */
         parent_session_id?: string | null;
         /**
          * @description Preview text from the first user message (truncated).
@@ -9446,17 +10035,6 @@ export interface components {
         started_at?: string | null;
         /** @description Current execution status of the session. */
         status: components["schemas"]["SessionStatus"];
-        /**
-         * @description Human-readable subagent name ("Test Runner"), unique per parent.
-         * @example Test Runner
-         */
-        subagent_name?: string | null;
-        subagent_status?: null | components["schemas"]["SubagentStatus"];
-        /**
-         * @description Original task description given to this subagent.
-         * @example Run the integration test suite and report failures.
-         */
-        subagent_task?: string | null;
         /**
          * @description Session-level system prompt override.
          *     Prepended to the agent's system prompt when building RuntimeAgent.
@@ -9485,6 +10063,13 @@ export interface components {
          */
         updated_at: string;
         usage?: null | components["schemas"]["TokenUsage"];
+        /**
+         * @description Workspace this session is attached to (format: wsp_{32-hex}). Owns the
+         *     session's virtual filesystem. For the default 1:1 case this mirrors the
+         *     session id, but clients should read it here rather than deriving it.
+         * @example wsp_01933b5a00007000800000000000001
+         */
+        workspace_id: string;
       }[];
       /**
        * Format: int32
@@ -9575,6 +10160,12 @@ export interface components {
          */
         id: string;
         /**
+         * @description Whether this capability is a guardrail (constrains agent behavior
+         *     rather than granting abilities). Used for UI grouping and filtering.
+         * @example false
+         */
+        is_guardrail?: boolean;
+        /**
          * @description Whether this is an MCP server capability (for UI badge)
          * @example false
          */
@@ -9584,6 +10175,20 @@ export interface components {
          * @example false
          */
         is_skill?: boolean;
+        /**
+         * @description Localized display strings keyed by lowercase language tag (e.g. "uk").
+         *     The "en" entry carries only `config_description`, since the base
+         *     name/description/config_schema strings are already English.
+         * @example {
+         *       "uk": {
+         *         "description": "Монтує спільні файли пам'яті в сесії.",
+         *         "name": "Пам'ять"
+         *       }
+         *     }
+         */
+        localizations?: {
+          [key: string]: components["schemas"]["CapabilityLocalizationInfo"];
+        };
         /**
          * @description Display name
          * @example Session File System
@@ -9955,7 +10560,10 @@ export interface components {
          * @example principal_01933b5a000070008000000000000001
          */
         owner_principal_id: string;
-        /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+        /**
+         * @description Parent session that spawned this subagent. NULL for top-level sessions.
+         *     Used as the nesting guard in spawn_subagent.
+         */
         parent_session_id?: string | null;
         /**
          * @description Preview text from the first user message (truncated).
@@ -9976,17 +10584,6 @@ export interface components {
         started_at?: string | null;
         /** @description Current execution status of the session. */
         status: components["schemas"]["SessionStatus"];
-        /**
-         * @description Human-readable subagent name ("Test Runner"), unique per parent.
-         * @example Test Runner
-         */
-        subagent_name?: string | null;
-        subagent_status?: null | components["schemas"]["SubagentStatus"];
-        /**
-         * @description Original task description given to this subagent.
-         * @example Run the integration test suite and report failures.
-         */
-        subagent_task?: string | null;
         /**
          * @description Session-level system prompt override.
          *     Prepended to the agent's system prompt when building RuntimeAgent.
@@ -10015,6 +10612,13 @@ export interface components {
          */
         updated_at: string;
         usage?: null | components["schemas"]["TokenUsage"];
+        /**
+         * @description Workspace this session is attached to (format: wsp_{32-hex}). Owns the
+         *     session's virtual filesystem. For the default 1:1 case this mirrors the
+         *     session id, but clients should read it here rather than deriving it.
+         * @example wsp_01933b5a00007000800000000000001
+         */
+        workspace_id: string;
       } & {
         /**
          * @description State-aware hypermedia actions the caller can take on this resource
@@ -10279,6 +10883,15 @@ export interface components {
       | "succeeded"
       | "failed"
       | "released";
+    /** @description Request body for posting an inbound task message. */
+    PostTaskMessageBody: {
+      /** @description Structured message parts (alternative to `text`). */
+      content?: components["schemas"]["TaskMessagePart"][] | null;
+      /** @description Input request ID this message answers, when applicable. */
+      in_reply_to?: string | null;
+      /** @description Plain-text message (alternative to `content`). */
+      text?: string | null;
+    };
     /** @description Request to preview the final agent shape with capabilities applied */
     PreviewAgentRequest: {
       /**
@@ -10398,6 +11011,47 @@ export interface components {
      * @enum {string}
      */
     PromptCacheStrategy: "auto";
+    /**
+     * @description LLM Provider entity (API keys never exposed)
+     *     Note: This is the entity struct, separate from the Provider trait in llm.rs
+     */
+    Provider: {
+      /** @description Whether an API key is configured. The key itself is never returned. */
+      api_key_set: boolean;
+      /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
+      base_url?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was created (RFC 3339).
+       */
+      created_at: string;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example provider_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
+       */
+      last_synced_at?: string | null;
+      /** @description Human-readable provider name. Safe to render in user-facing messages. */
+      name: string;
+      /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
+      provider_type: components["schemas"]["DriverId"];
+      /** @description Current lifecycle status of this provider. */
+      status: components["schemas"]["ProviderStatus"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was last updated (RFC 3339).
+       */
+      updated_at: string;
+    };
+    /**
+     * @description LLM provider status
+     * @enum {string}
+     */
+    ProviderStatus: "active" | "disabled";
     /** @description Data for reason.completed event */
     ReasonCompletedData: {
       /**
@@ -10450,6 +11104,24 @@ export interface components {
       token_count?: number | null;
       /**
        * @description Turn ID this reasoning item belongs to.
+       * @example turn_01933b5a00007000800000000000001
+       */
+      turn_id: string;
+    };
+    /**
+     * @description Data for the `reason.recovered` event (EVE-532).
+     *
+     *     Emitted by `ReasonAtom` when it detects an in-flight partial assistant
+     *     message from a previous worker execution and applies the ContinuePartial
+     *     recovery policy.
+     */
+    ReasonRecoveredData: {
+      /** @description Character length of the persisted accumulated text. */
+      accumulated_len: number;
+      /** @description Recovery action taken. */
+      mode: components["schemas"]["RecoveryMode"];
+      /**
+       * @description Turn ID the partial belonged to.
        * @example turn_01933b5a00007000800000000000001
        */
       turn_id: string;
@@ -10534,6 +11206,11 @@ export interface components {
       /** @description The API value (e.g., "low", "medium") */
       value: components["schemas"]["ReasoningEffort"];
     };
+    /**
+     * @description Recovery mode chosen by the ContinuePartial classifier (EVE-532).
+     * @enum {string}
+     */
+    RecoveryMode: "finalize" | "restart";
     /**
      * @description Output of [`RegenerateA2aApiKeyCmd`] — includes the newly generated
      *     plaintext API key (returned **once**, never persisted) plus the updated
@@ -10914,6 +11591,13 @@ export interface components {
        */
       started_session_count: number;
       /**
+       * Format: double
+       * @description Cumulative provider-reported actual cost in USD across all sessions
+       *     (e.g. OpenRouter's `usage.cost`). Excludes generations with no reported cost.
+       * @example 31.07
+       */
+      total_actual_cost_usd: number;
+      /**
        * Format: int64
        * @description Cumulative cache-write tokens across all sessions (charged when first writing a cache entry).
        * @example 412005
@@ -10925,6 +11609,20 @@ export interface components {
        * @example 5234122
        */
       total_cache_read_tokens: number;
+      /**
+       * Format: double
+       * @description Cumulative best-effort cost in USD across all sessions: actual provider
+       *     cost where reported, otherwise the price-table estimate. Actual takes priority.
+       * @example 42.18
+       */
+      total_cost_usd: number;
+      /**
+       * Format: double
+       * @description Cumulative price-table estimated cost in USD across all sessions.
+       *     Excludes generations with no profile cost data.
+       * @example 40.55
+       */
+      total_estimated_cost_usd: number;
       /**
        * Format: int64
        * @description Cumulative LLM input tokens billed across all sessions.
@@ -11441,7 +12139,10 @@ export interface components {
        * @example principal_01933b5a000070008000000000000001
        */
       owner_principal_id: string;
-      /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+      /**
+       * @description Parent session that spawned this subagent. NULL for top-level sessions.
+       *     Used as the nesting guard in spawn_subagent.
+       */
       parent_session_id?: string | null;
       /**
        * @description Preview text from the first user message (truncated).
@@ -11462,17 +12163,6 @@ export interface components {
       started_at?: string | null;
       /** @description Current execution status of the session. */
       status: components["schemas"]["SessionStatus"];
-      /**
-       * @description Human-readable subagent name ("Test Runner"), unique per parent.
-       * @example Test Runner
-       */
-      subagent_name?: string | null;
-      subagent_status?: null | components["schemas"]["SubagentStatus"];
-      /**
-       * @description Original task description given to this subagent.
-       * @example Run the integration test suite and report failures.
-       */
-      subagent_task?: string | null;
       /**
        * @description Session-level system prompt override.
        *     Prepended to the agent's system prompt when building RuntimeAgent.
@@ -11501,6 +12191,13 @@ export interface components {
        */
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
+      /**
+       * @description Workspace this session is attached to (format: wsp_{32-hex}). Owns the
+       *     session's virtual filesystem. For the default 1:1 case this mirrors the
+       *     session id, but clients should read it here rather than deriving it.
+       * @example wsp_01933b5a00007000800000000000001
+       */
+      workspace_id: string;
     };
     /** @description Data for session.activated event (turn started, session now active) */
     SessionActivatedData: {
@@ -11693,6 +12390,82 @@ export interface components {
       | "idle"
       | "waitingfortoolresults"
       | "paused";
+    /** @description A unit of background work owned by a session. */
+    SessionTask: {
+      artifacts?: components["schemas"]["TaskArtifact"][];
+      /**
+       * Format: int32
+       * @description Execution attempt, starting at 1. Incremented on re-attach.
+       */
+      attempt?: number;
+      /**
+       * Format: date-time
+       * @description Cooperative cancel intent. A flag, not a state.
+       */
+      cancel_requested_at?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** @description Human-readable label. */
+      display_name: string;
+      error?: null | components["schemas"]["TaskError"];
+      /** Format: date-time */
+      finished_at?: string | null;
+      /** Format: date-time */
+      heartbeat_at?: string | null;
+      /** @description `task_*` public ID. */
+      id: string;
+      input_request?: null | components["schemas"]["TaskInputRequest"];
+      /** @description Task kind: "subagent", "external_agent", "background_tool", "monitor", … */
+      kind: string;
+      links?: components["schemas"]["TaskLinks"];
+      progress?: null | components["schemas"]["BackgroundProgress"];
+      /** @description Machine result in the session VFS: `/.tasks/{task_id}/result.json`. */
+      result_path?: string | null;
+      /** @description Owning session. */
+      session_id: string;
+      /** @description Kind-specific input (instructions, tool args, external agent id). */
+      spec?: Record<string, never>;
+      /** Format: date-time */
+      started_at?: string | null;
+      state: components["schemas"]["SessionTaskState"];
+      /** @description Short live status line ("polling remote task", "iteration 4/10"). */
+      state_detail?: string | null;
+      /** @description Human-readable outcome. */
+      summary?: string | null;
+      /** Format: date-time */
+      updated_at: string;
+      wake_policy?: components["schemas"]["TaskWakePolicy"];
+      worker_id?: string | null;
+    };
+    /** @description Task snapshot plus the recent message thread. */
+    SessionTaskDetail: {
+      messages: components["schemas"]["TaskMessage"][];
+      task: components["schemas"]["SessionTask"];
+    };
+    /**
+     * @description Data for task lifecycle events (`task.created`, `task.updated`).
+     *
+     *     Carries the full task snapshot so consumers never need a follow-up read;
+     *     UIs reconcile by `task.id` (snapshot-then-delta).
+     */
+    SessionTaskEventData: {
+      task: components["schemas"]["SessionTask"];
+    };
+    /**
+     * @description Lifecycle state of a session task.
+     *
+     *     Three classes: active (`queued`, `running`), interrupted (`awaiting_input`,
+     *     resumable), terminal (`succeeded`, `failed`, `canceled`). Timeout and
+     *     rejection are `error.kind` values on `failed`, not states.
+     * @enum {string}
+     */
+    SessionTaskState:
+      | "queued"
+      | "running"
+      | "awaiting_input"
+      | "succeeded"
+      | "failed"
+      | "canceled";
     /** @description Request body for the `set_default_agent_version` operation. */
     SetDefaultAgentVersionRequest: {
       /**
@@ -11701,6 +12474,20 @@ export interface components {
        */
       version_id: string;
     };
+    /**
+     * @description How many times a tool call may safely be executed given the same inputs.
+     *
+     *     Used by the durable Act activity (EVE-530) to decide what to do when a
+     *     prior execution attempt left a `running` claim in `durable_tool_results`:
+     *
+     *     * `Pure` / `Idempotent` — the running claim is stale; re-execute freely.
+     *     * `AtMostOnce` — never re-execute from a stale running claim; settle it
+     *       as `interrupted` and surface an uncertain result to the model instead.
+     *
+     *     When unset (`None`), the conservative default is `AtMostOnce`.
+     * @enum {string}
+     */
+    SideEffectClass: "Pure" | "Idempotent" | "AtMostOnce";
     /** @description Skill entity (API response type) */
     Skill: {
       /** @description Comma-separated list of tool patterns this skill may invoke. `None` means inherit from the harness. */
@@ -11804,12 +12591,7 @@ export interface components {
       /** @description Non-fatal warnings (style, deprecated patterns, optional fields missing). Emitted alongside a `valid` result. */
       warnings?: string[];
     };
-    /** @description Request to get file stat */
     StatRequest: {
-      /**
-       * @description Path to the file or directory (relative to the session workspace root).
-       * @example docs/migration-plan.md
-       */
       path: string;
     };
     /** @description Data for subagent lifecycle events (spawned, completed, failed, cancelled). */
@@ -11827,17 +12609,6 @@ export interface components {
       /** @description Task description */
       task: string;
     };
-    /**
-     * @description Subagent lifecycle status.
-     * @enum {string}
-     */
-    SubagentStatus:
-      | "spawning"
-      | "running"
-      | "completed"
-      | "failed"
-      | "cancelled"
-      | "max_iterations_reached";
     /** @description Request to submit client-side tool results */
     SubmitToolResultsRequest: {
       /**
@@ -11894,6 +12665,73 @@ export interface components {
       | {
           /** @enum {string} */
           status: "not_supported";
+        };
+    /** @description Typed link to something the task produced. */
+    TaskArtifact: {
+      name: string;
+      /** @description Session VFS path, when the artifact lives in the session filesystem. */
+      path?: string | null;
+      /** @description Artifact type: "file", "url", "session", "pr", etc. */
+      type: string;
+      /** @description External URL, when the artifact lives elsewhere. */
+      url?: string | null;
+    };
+    /** @description Terminal error detail. Timeout/rejection/orphaned are kinds, not states. */
+    TaskError: {
+      kind: string;
+      message: string;
+    };
+    /** @description Structured ask posted by a task that needs input to continue. */
+    TaskInputRequest: {
+      /** @description Optional machine-readable description of the expected answer. */
+      expected?: Record<string, never>;
+      /** @description Stable ID referenced by the answering message's `in_reply_to`. */
+      id: string;
+      /** @description Human/agent-readable prompt. */
+      prompt: string;
+    };
+    /** @description Cross-references owned by a task. */
+    TaskLinks: {
+      /** @description Child session, for subagent-shaped tasks. Full transcript lives there. */
+      child_session_id?: string | null;
+      /** @description Remote task ID, for tasks wrapping an external protocol task (A2A). */
+      remote_task_id?: string | null;
+      /** @description Session resources (sandboxes, browser sessions) this task holds. */
+      resource_ids?: string[];
+    };
+    /** @description A message exchanged between a session and one of its tasks. */
+    TaskMessage: {
+      content: components["schemas"]["TaskMessagePart"][];
+      /** Format: date-time */
+      created_at: string;
+      direction: components["schemas"]["TaskMessageDirection"];
+      /** @description `tmsg_*` public ID. */
+      id: string;
+      /** @description Set when this message answers a `TaskInputRequest`. */
+      in_reply_to?: string | null;
+      task_id: string;
+    };
+    /**
+     * @description Direction of a task message. Inbound = session → task.
+     * @enum {string}
+     */
+    TaskMessageDirection: "inbound" | "outbound";
+    /** @description Data for task message events (`task.message.sent`, `task.message.received`). */
+    TaskMessageEventData: {
+      message: components["schemas"]["TaskMessage"];
+      task_id: string;
+    };
+    /** @description One content part of a task message. */
+    TaskMessagePart:
+      | {
+          text: string;
+          /** @enum {string} */
+          type: "text";
+        }
+      | {
+          data: Record<string, never>;
+          /** @enum {string} */
+          type: "data";
         };
     /** @description Task response */
     TaskResponse: {
@@ -11965,6 +12803,11 @@ export interface components {
        */
       workflow_id?: string | null;
     };
+    /**
+     * @description When outbound task activity wakes the owning session's agent.
+     * @enum {string}
+     */
+    TaskWakePolicy: "silent" | "on_terminal" | "on_activity";
     /** @description Tasks list response */
     TasksListResponse: {
       /** @description Page of items returned by this query. */
@@ -11987,6 +12830,13 @@ export interface components {
      */
     TokenUsage: {
       /**
+       * Format: double
+       * @description Actual cost of this generation in USD, as reported by the provider inline
+       *     (e.g. OpenRouter's `usage.cost`, which reflects real post-routing/BYOK/cache
+       *     pricing). `None` for providers that do not return a cost.
+       */
+      actual_cost_usd?: number | null;
+      /**
        * Format: int32
        * @description Number of tokens written to cache (Anthropic-specific)
        */
@@ -11996,6 +12846,14 @@ export interface components {
        * @description Number of tokens read from cache (reduces cost)
        */
       cache_read_tokens?: number | null;
+      /**
+       * Format: double
+       * @description Estimated cost of this generation in USD, derived from the model's static
+       *     price-table profile. Computed whenever a profile with cost data exists,
+       *     independently of `actual_cost_usd`, so estimate-vs-actual drift can be
+       *     reconciled. `None` when there is no profile cost data for the model.
+       */
+      estimated_cost_usd?: number | null;
       /**
        * Format: int32
        * @description Number of input/prompt tokens
@@ -12192,6 +13050,7 @@ export interface components {
        *     authentication failures.
        */
       requires_secrets?: boolean | null;
+      side_effect_class?: null | components["schemas"]["SideEffectClass"];
       /**
        * @description Tool supports detached background execution via `spawn_background`.
        *     When true, the tool may be executed asynchronously outside the current
@@ -12259,6 +13118,26 @@ export interface components {
       tool_call: components["schemas"]["ToolCall"];
       /** @description Stable fingerprint of tool name + normalized arguments. */
       tool_call_fingerprint?: string | null;
+    };
+    /**
+     * @description Action taken during transcript repair for a dangling tool call.
+     * @enum {string}
+     */
+    TranscriptRepairAction: "replay" | "synthesize";
+    /**
+     * @description Data for transcript.repaired event (EVE-533).
+     *
+     *     Emitted once per dangling tool call when transcript repair runs before a `reason` call.
+     *     A dangling call is an assistant `tool_call` with no matching `ToolResult` in the
+     *     message history. Repair makes the transcript well-formed so the next LLM call succeeds.
+     */
+    TranscriptRepairedData: {
+      /** @description Action taken: `replay` (settled result reused) or `synthesize` (interrupted placeholder added). */
+      action: components["schemas"]["TranscriptRepairAction"];
+      /** @description The tool call ID that was repaired. */
+      tool_call_id: string;
+      /** @description The tool name, if known. */
+      tool_name?: string | null;
     };
     /** @description Manual trigger response */
     TriggerResponse: {
@@ -12330,6 +13209,12 @@ export interface components {
       error: string;
       /** @description Error code */
       error_code?: string | null;
+      /**
+       * @description Error-disclosure mode applied to `error_code`/`error_fields`
+       *     ("generic" | "standard" | "detailed"). Full diagnostic detail remains
+       *     available to operators via reason.completed failure events and tracing.
+       */
+      error_disclosure?: string | null;
       /** @description Structured interpolation fields for localized error rendering. */
       error_fields?: Record<string, never> | null;
       /**
@@ -12571,6 +13456,8 @@ export interface components {
     UpdateKnowledgeBaseRequest: {
       /** @description Human-readable description. Safe to render in user-facing messages. */
       description?: string | null;
+      /** @description Optional embedding model for hybrid retrieval. Set to null to clear. */
+      embedding_model_id?: string | null;
       /**
        * @description Human-readable name. Safe to render in user-facing messages.
        * @example support-runbooks-archive
@@ -12604,62 +13491,6 @@ export interface components {
        * @example Refund a payment past 60 days
        */
       title?: string | null;
-    };
-    /** @description Request to update an LLM model. Only provided fields will be updated. */
-    UpdateLlmModelRequest: {
-      /**
-       * @description List of capabilities this model supports.
-       * @example [
-       *       "chat",
-       *       "tools"
-       *     ]
-       */
-      capabilities?: string[] | null;
-      /**
-       * @description Human-readable display name for the model.
-       * @example GPT-4o Mini
-       */
-      display_name?: string | null;
-      /**
-       * @description Whether this model should be enabled (visible in UI model pickers).
-       * @example true
-       */
-      enabled?: boolean | null;
-      /**
-       * @description Whether this model should be marked as a favorite for quick access.
-       * @example true
-       */
-      is_favorite?: boolean | null;
-      /**
-       * @description The model identifier used by the provider's API.
-       * @example gpt-4o-mini
-       */
-      model_id?: string | null;
-      /**
-       * @description Provider that owns this model.
-       * @example provider_019df670b5af7db7a5685a4ad18a544a
-       */
-      provider_id?: string | null;
-    };
-    /** @description Request to update an LLM provider. Only provided fields will be updated. */
-    UpdateLlmProviderRequest: {
-      /**
-       * @description API key for authenticating with the provider.
-       *     Will be encrypted at rest if encryption is configured.
-       */
-      api_key?: string | null;
-      /**
-       * @description Base URL for the provider's API.
-       * @example https://api.openai.com/v1
-       */
-      base_url?: string | null;
-      /**
-       * @description Display name for the provider.
-       * @example OpenAI Development
-       */
-      name?: string | null;
-      provider_type?: null | components["schemas"]["LlmProviderType"];
-      status?: null | components["schemas"]["LlmProviderStatus"];
     };
     /** @description Request to update an MCP server. Only provided fields will be updated. */
     UpdateMcpServerRequest: {
@@ -12696,18 +13527,62 @@ export interface components {
        */
       url?: string | null;
     };
-    /** @description Request body for the `update_memory_store` operation. */
-    UpdateMemoryStoreRequest: {
-      /**
-       * @description Toggle this store as the org default.
-       * @example true
-       */
-      is_default?: boolean | null;
+    UpdateMemoryFileRequest: {
+      content?: string | null;
+      encoding?: string | null;
+    };
+    /** @description Request body for the `update_memory` operation. */
+    UpdateMemoryRequest: {
+      /** @description Human-readable description. Safe to render in user-facing messages. */
+      description?: string | null;
       /**
        * @description Human-readable name. Safe to render in user-facing messages.
-       * @example customer-preferences-archive
+       * @example design-docs
        */
       name?: string | null;
+      source?: null | components["schemas"]["CreateMemorySourceRequest"];
+    };
+    /** @description Request to update an LLM model. Only provided fields will be updated. */
+    UpdateModelRequest: {
+      /**
+       * @description List of capabilities this model supports.
+       * @example [
+       *       "chat",
+       *       "tools"
+       *     ]
+       */
+      capabilities?: string[] | null;
+      /**
+       * @description Human-readable display name for the model.
+       * @example GPT-4o Mini
+       */
+      display_name?: string | null;
+      /**
+       * @description Whether this model should be enabled (visible in UI model pickers).
+       * @example true
+       */
+      enabled?: boolean | null;
+      /**
+       * @description Whether this model should be marked as a favorite for quick access.
+       * @example true
+       */
+      is_favorite?: boolean | null;
+      /**
+       * @description The model identifier used by the provider's API.
+       * @example gpt-4o-mini
+       */
+      model_id?: string | null;
+      /**
+       * @description Provider that owns this model.
+       * @example provider_019df670b5af7db7a5685a4ad18a544a
+       */
+      provider_id?: string | null;
+    };
+    UpdateOrgFeatureFlagsRequest: {
+      /** @description Map of flag name -> enabled. Omitted flags are unchanged. */
+      flags: {
+        [key: string]: boolean;
+      };
     };
     /** @description Request to update an organization */
     UpdateOrganizationRequest: {
@@ -12832,6 +13707,26 @@ export interface components {
        */
       name: string;
     };
+    /** @description Request to update an LLM provider. Only provided fields will be updated. */
+    UpdateProviderRequest: {
+      /**
+       * @description API key for authenticating with the provider.
+       *     Will be encrypted at rest if encryption is configured.
+       */
+      api_key?: string | null;
+      /**
+       * @description Base URL for the provider's API.
+       * @example https://api.openai.com/v1
+       */
+      base_url?: string | null;
+      /**
+       * @description Display name for the provider.
+       * @example OpenAI Development
+       */
+      name?: string | null;
+      provider_type?: null | components["schemas"]["DriverId"];
+      status?: null | components["schemas"]["ProviderStatus"];
+    };
     /** @description Request body for the `update_saved_report` operation. */
     UpdateSavedReportRequest: {
       dashboard?: null | components["schemas"]["SavedReportDashboardMetadata"];
@@ -12928,16 +13823,10 @@ export interface components {
       skill_md?: string | null;
       status?: null | components["schemas"]["SkillStatus"];
     };
-    /** @description Request body for the `update_volume` operation. */
-    UpdateVolumeRequest: {
-      /** @description Human-readable description. Safe to render in user-facing messages. */
+    UpdateWorkspaceRequest: {
       description?: string | null;
-      /**
-       * @description Human-readable name. Safe to render in user-facing messages.
-       * @example design-docs
-       */
       name?: string | null;
-      source?: null | components["schemas"]["CreateVolumeSourceRequest"];
+      status?: string | null;
     };
     /** @description User response for listing */
     User: {
@@ -13197,95 +14086,6 @@ export interface components {
       /** @description Prefixed voice connection identifier this transcript belongs to. */
       voice_connection_id: string;
     };
-    /** @description Response body for volume. */
-    VolumeResponse: {
-      /**
-       * Format: date-time
-       * @description Timestamp when this resource was archived, if any (RFC 3339).
-       * @example 2026-05-26T00:00:00Z
-       */
-      archived_at?: string | null;
-      /**
-       * Format: date-time
-       * @description Timestamp when this resource was created (RFC 3339).
-       * @example 2026-04-01T10:00:00Z
-       */
-      created_at: string;
-      /**
-       * Format: date-time
-       * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
-       * @example 2026-05-26T00:00:00Z
-       */
-      deleted_at?: string | null;
-      /**
-       * @description Human-readable description. Safe to render in user-facing messages.
-       * @example Living design documents synced from GitHub
-       */
-      description?: string | null;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example vol_01933b5a000070008000000000000001
-       */
-      id: string;
-      /**
-       * @description Whether the volume is mounted read-only into sessions. Read-only volumes accept no writes from the session sandbox.
-       * @example false
-       */
-      is_readonly: boolean;
-      /**
-       * @description Most recent sync error message; cleared on the next successful sync.
-       * @example ssh: connect to host github.com port 22: Connection timed out
-       */
-      last_sync_error?: string | null;
-      /**
-       * Format: date-time
-       * @description Timestamp of the most recent successful sync (RFC 3339). `None` if never synced.
-       * @example 2026-05-25T08:00:00Z
-       */
-      last_synced_at?: string | null;
-      /**
-       * @description Human-readable name. Safe to render in user-facing messages.
-       * @example design-docs
-       */
-      name: string;
-      /** @description Source-specific configuration (git remote, github repo, manual upload). */
-      source: components["schemas"]["VolumeSourceResponse"];
-      /**
-       * @description Source kind discriminator (`manual`, `git`, `github`). Determines which `source` variant is populated.
-       * @example github
-       */
-      source_type: string;
-      /**
-       * @description Current lifecycle status.
-       * @example active
-       */
-      status: string;
-      /**
-       * @description Current sync status (`idle`, `syncing`, `succeeded`, `failed`). Only meaningful when `source_type` is `git` or `github`.
-       * @example succeeded
-       */
-      sync_status: string;
-      /**
-       * Format: date-time
-       * @description Timestamp when this resource was last updated (RFC 3339).
-       * @example 2026-05-25T08:00:00Z
-       */
-      updated_at: string;
-    };
-    /** @description Response body for volume source. */
-    VolumeSourceResponse:
-      | (components["schemas"]["ManualVolumeSourceResponse"] & {
-          /** @enum {string} */
-          provider: "manual";
-        })
-      | (components["schemas"]["GitHubVolumeSourceResponse"] & {
-          /** @enum {string} */
-          provider: "github";
-        })
-      | (components["schemas"]["GitVolumeSourceResponse"] & {
-          /** @enum {string} */
-          provider: "git";
-        });
     /** @description Response body for webhook invocation. */
     WebhookInvocationResponse: {
       accepted: boolean;
@@ -13592,6 +14392,12 @@ export interface components {
        */
       id: string;
       /**
+       * @description Whether this capability is a guardrail (constrains agent behavior
+       *     rather than granting abilities). Used for UI grouping and filtering.
+       * @example false
+       */
+      is_guardrail?: boolean;
+      /**
        * @description Whether this is an MCP server capability (for UI badge)
        * @example false
        */
@@ -13601,6 +14407,20 @@ export interface components {
        * @example false
        */
       is_skill?: boolean;
+      /**
+       * @description Localized display strings keyed by lowercase language tag (e.g. "uk").
+       *     The "en" entry carries only `config_description`, since the base
+       *     name/description/config_schema strings are already English.
+       * @example {
+       *       "uk": {
+       *         "description": "Монтує спільні файли пам'яті в сесії.",
+       *         "name": "Пам'ять"
+       *       }
+       *     }
+       */
+      localizations?: {
+        [key: string]: components["schemas"]["CapabilityLocalizationInfo"];
+      };
       /**
        * @description Display name
        * @example Session File System
@@ -13843,212 +14663,6 @@ export interface components {
      *     (and omitted from the wire shape) until the underlying resource opts
      *     into the convention by overriding `ResourceUrlable::allowed_actions`.
      */
-    WithUrls_LlmModel: {
-      /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
-      capabilities: string[];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was created (RFC 3339).
-       */
-      created_at: string;
-      /** @description Human-readable display name. Safe to render in user-facing messages. */
-      display_name: string;
-      /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
-      enabled: boolean;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example model_01933b5a00007000800000000000001
-       */
-      id: string;
-      /** @description Whether this model is starred in the UI for quick access. */
-      is_favorite: boolean;
-      /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
-      model_id: string;
-      /**
-       * @description Owning provider's prefixed public identifier.
-       * @example provider_01933b5a00007000800000000000001
-       */
-      provider_id: string;
-      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
-      source: components["schemas"]["LlmModelSource"];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was last updated (RFC 3339).
-       */
-      updated_at: string;
-    } & {
-      /**
-       * @description State-aware hypermedia actions the caller can take on this resource
-       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
-       *     shape when empty so resources that haven't opted into the
-       *     convention don't grow their payloads.
-       */
-      allowed_actions?: components["schemas"]["AllowedAction"][];
-      /** @description Full API endpoint URL for this resource. */
-      self_url: string;
-      /** @description Alias for `view_url`, used by command and MCP outputs. */
-      ui_link: string;
-      /** @description Full UI URL for viewing this resource. */
-      view_url: string;
-    };
-    /**
-     * @description Wrapper that adds API and UI links to a serialized resource.
-     *
-     *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer). The
-     *     `allowed_actions` array carries state-aware hypermedia links — empty
-     *     (and omitted from the wire shape) until the underlying resource opts
-     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
-     */
-    WithUrls_LlmModelWithProvider: {
-      /**
-       * @description Capability tags supported by this model.
-       * @example [
-       *       "text",
-       *       "tools",
-       *       "vision",
-       *       "thinking"
-       *     ]
-       */
-      capabilities: string[];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was created (RFC 3339).
-       * @example 2026-01-04T11:23:00Z
-       */
-      created_at: string;
-      /**
-       * @description Human-readable display name.
-       * @example Claude Sonnet 4.5
-       */
-      display_name: string;
-      /**
-       * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `LlmResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
-       * @example true
-       */
-      enabled: boolean;
-      /**
-       * @description Derived: model is configured and ready for use. Currently means the
-       *     joined provider is active and has an API key set; over time this may
-       *     also incorporate live reachability checks. Not persisted.
-       * @example true
-       */
-      healthy: boolean;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example model_01933b5a00007000800000000000001
-       */
-      id: string;
-      /**
-       * @description Whether this model is starred in the UI for quick access.
-       * @example true
-       */
-      is_favorite: boolean;
-      /**
-       * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
-       * @example claude-sonnet-4-5
-       */
-      model_id: string;
-      profile?: null | components["schemas"]["LlmModelProfile"];
-      /**
-       * @description Owning provider's prefixed public identifier.
-       * @example provider_01933b5a00007000800000000000001
-       */
-      provider_id: string;
-      /**
-       * @description Joined provider display name.
-       * @example Anthropic
-       */
-      provider_name: string;
-      /** @description Joined provider implementation type. */
-      provider_type: components["schemas"]["LlmProviderType"];
-      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
-      source: components["schemas"]["LlmModelSource"];
-      /**
-       * Format: date-time
-       * @description Timestamp when this model was last updated (RFC 3339).
-       * @example 2026-05-27T15:24:00Z
-       */
-      updated_at: string;
-    } & {
-      /**
-       * @description State-aware hypermedia actions the caller can take on this resource
-       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
-       *     shape when empty so resources that haven't opted into the
-       *     convention don't grow their payloads.
-       */
-      allowed_actions?: components["schemas"]["AllowedAction"][];
-      /** @description Full API endpoint URL for this resource. */
-      self_url: string;
-      /** @description Alias for `view_url`, used by command and MCP outputs. */
-      ui_link: string;
-      /** @description Full UI URL for viewing this resource. */
-      view_url: string;
-    };
-    /**
-     * @description Wrapper that adds API and UI links to a serialized resource.
-     *
-     *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer). The
-     *     `allowed_actions` array carries state-aware hypermedia links — empty
-     *     (and omitted from the wire shape) until the underlying resource opts
-     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
-     */
-    WithUrls_LlmProvider: {
-      /** @description Whether an API key is configured. The key itself is never returned. */
-      api_key_set: boolean;
-      /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
-      base_url?: string | null;
-      /**
-       * Format: date-time
-       * @description Timestamp when this provider was created (RFC 3339).
-       */
-      created_at: string;
-      /**
-       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
-       * @example provider_01933b5a00007000800000000000001
-       */
-      id: string;
-      /**
-       * Format: date-time
-       * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
-       */
-      last_synced_at?: string | null;
-      /** @description Human-readable provider name. Safe to render in user-facing messages. */
-      name: string;
-      /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
-      provider_type: components["schemas"]["LlmProviderType"];
-      /** @description Current lifecycle status of this provider. */
-      status: components["schemas"]["LlmProviderStatus"];
-      /**
-       * Format: date-time
-       * @description Timestamp when this provider was last updated (RFC 3339).
-       */
-      updated_at: string;
-    } & {
-      /**
-       * @description State-aware hypermedia actions the caller can take on this resource
-       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
-       *     shape when empty so resources that haven't opted into the
-       *     convention don't grow their payloads.
-       */
-      allowed_actions?: components["schemas"]["AllowedAction"][];
-      /** @description Full API endpoint URL for this resource. */
-      self_url: string;
-      /** @description Alias for `view_url`, used by command and MCP outputs. */
-      ui_link: string;
-      /** @description Full UI URL for viewing this resource. */
-      view_url: string;
-    };
-    /**
-     * @description Wrapper that adds API and UI links to a serialized resource.
-     *
-     *     Uses `self_url` (not `url`) for the API link to avoid collision with
-     *     resources that already have a `url` field (e.g. McpServer). The
-     *     `allowed_actions` array carries state-aware hypermedia links — empty
-     *     (and omitted from the wire shape) until the underlying resource opts
-     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
-     */
     WithUrls_McpServer: {
       /** @description Whether an API key has been configured. */
       api_key_set: boolean;
@@ -14107,6 +14721,213 @@ export interface components {
        * @example https://mcp.atlassian.com/v1/mcp
        */
       url: string;
+    } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
+     */
+    WithUrls_Model: {
+      /** @description Capability tags supported by this model (e.g. `chat`, `tools`, `vision`). */
+      capabilities: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
+       */
+      created_at: string;
+      /** @description Human-readable display name. Safe to render in user-facing messages. */
+      display_name: string;
+      /** @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `ProviderResolverService` requires `enabled = true`, and org default-model validation rejects disabled models. Disabled models stay visible in raw list endpoints (so admins can re-enable them) but cannot be used in active sessions or as a session/agent default. */
+      enabled: boolean;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
+      id: string;
+      /** @description Whether this model is starred in the UI for quick access. */
+      is_favorite: boolean;
+      /** @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`, `claude-sonnet-4`). */
+      model_id: string;
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
+      provider_id: string;
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
+      source: components["schemas"]["ModelSource"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       */
+      updated_at: string;
+    } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
+     */
+    WithUrls_ModelWithProvider: {
+      /**
+       * @description Capability tags supported by this model.
+       * @example [
+       *       "text",
+       *       "tools",
+       *       "vision",
+       *       "thinking"
+       *     ]
+       */
+      capabilities: string[];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was created (RFC 3339).
+       * @example 2026-01-04T11:23:00Z
+       */
+      created_at: string;
+      /**
+       * @description Human-readable display name.
+       * @example Claude Sonnet 4.5
+       */
+      display_name: string;
+      /**
+       * @description Whether this model is selectable. Controls UI visibility AND server-side resolution: `ProviderResolverService` requires `enabled = true`, and org default-model validation rejects disabled models.
+       * @example true
+       */
+      enabled: boolean;
+      /**
+       * @description Derived: model is configured and ready for use. Currently means the
+       *     joined provider is active and has an API key set; over time this may
+       *     also incorporate live reachability checks. Not persisted.
+       * @example true
+       */
+      healthy: boolean;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example model_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * @description Whether this model is starred in the UI for quick access.
+       * @example true
+       */
+      is_favorite: boolean;
+      /**
+       * @description Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).
+       * @example claude-sonnet-4-5
+       */
+      model_id: string;
+      model_vendor?: null | components["schemas"]["ModelVendor"];
+      profile?: null | components["schemas"]["ModelProfile"];
+      /**
+       * @description Owning provider's prefixed public identifier.
+       * @example provider_01933b5a00007000800000000000001
+       */
+      provider_id: string;
+      /**
+       * @description Joined provider display name.
+       * @example Anthropic
+       */
+      provider_name: string;
+      /** @description Joined provider implementation type. */
+      provider_type: components["schemas"]["DriverId"];
+      /** @description How this model entry was added (manually, discovered, or seeded as predefined). */
+      source: components["schemas"]["ModelSource"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this model was last updated (RFC 3339).
+       * @example 2026-05-27T15:24:00Z
+       */
+      updated_at: string;
+    } & {
+      /**
+       * @description State-aware hypermedia actions the caller can take on this resource
+       *     next (e.g. `cancel`, `events`, `update`). Omitted from the wire
+       *     shape when empty so resources that haven't opted into the
+       *     convention don't grow their payloads.
+       */
+      allowed_actions?: components["schemas"]["AllowedAction"][];
+      /** @description Full API endpoint URL for this resource. */
+      self_url: string;
+      /** @description Alias for `view_url`, used by command and MCP outputs. */
+      ui_link: string;
+      /** @description Full UI URL for viewing this resource. */
+      view_url: string;
+    };
+    /**
+     * @description Wrapper that adds API and UI links to a serialized resource.
+     *
+     *     Uses `self_url` (not `url`) for the API link to avoid collision with
+     *     resources that already have a `url` field (e.g. McpServer). The
+     *     `allowed_actions` array carries state-aware hypermedia links — empty
+     *     (and omitted from the wire shape) until the underlying resource opts
+     *     into the convention by overriding `ResourceUrlable::allowed_actions`.
+     */
+    WithUrls_Provider: {
+      /** @description Whether an API key is configured. The key itself is never returned. */
+      api_key_set: boolean;
+      /** @description Custom base URL for self-hosted / proxied providers. `None` means use the provider's default endpoint. */
+      base_url?: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was created (RFC 3339).
+       */
+      created_at: string;
+      /**
+       * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+       * @example provider_01933b5a00007000800000000000001
+       */
+      id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of the most recent successful model sync from the provider's API (RFC 3339).
+       */
+      last_synced_at?: string | null;
+      /** @description Human-readable provider name. Safe to render in user-facing messages. */
+      name: string;
+      /** @description Provider implementation type (OpenAI, Anthropic, Gemini, etc.). */
+      provider_type: components["schemas"]["DriverId"];
+      /** @description Current lifecycle status of this provider. */
+      status: components["schemas"]["ProviderStatus"];
+      /**
+       * Format: date-time
+       * @description Timestamp when this provider was last updated (RFC 3339).
+       */
+      updated_at: string;
     } & {
       /**
        * @description State-aware hypermedia actions the caller can take on this resource
@@ -14526,7 +15347,10 @@ export interface components {
        * @example principal_01933b5a000070008000000000000001
        */
       owner_principal_id: string;
-      /** @description Parent session that spawned this subagent. NULL for top-level sessions. */
+      /**
+       * @description Parent session that spawned this subagent. NULL for top-level sessions.
+       *     Used as the nesting guard in spawn_subagent.
+       */
       parent_session_id?: string | null;
       /**
        * @description Preview text from the first user message (truncated).
@@ -14547,17 +15371,6 @@ export interface components {
       started_at?: string | null;
       /** @description Current execution status of the session. */
       status: components["schemas"]["SessionStatus"];
-      /**
-       * @description Human-readable subagent name ("Test Runner"), unique per parent.
-       * @example Test Runner
-       */
-      subagent_name?: string | null;
-      subagent_status?: null | components["schemas"]["SubagentStatus"];
-      /**
-       * @description Original task description given to this subagent.
-       * @example Run the integration test suite and report failures.
-       */
-      subagent_task?: string | null;
       /**
        * @description Session-level system prompt override.
        *     Prepended to the agent's system prompt when building RuntimeAgent.
@@ -14586,6 +15399,13 @@ export interface components {
        */
       updated_at: string;
       usage?: null | components["schemas"]["TokenUsage"];
+      /**
+       * @description Workspace this session is attached to (format: wsp_{32-hex}). Owns the
+       *     session's virtual filesystem. For the default 1:1 case this mirrors the
+       *     session id, but clients should read it here rather than deriving it.
+       * @example wsp_01933b5a00007000800000000000001
+       */
+      workspace_id: string;
     } & {
       /**
        * @description State-aware hypermedia actions the caller can take on this resource
@@ -14871,6 +15691,24 @@ export interface components {
       /** @description Total number of items matching the query, across all pages. */
       total: number;
     };
+    WorkspaceResponse: {
+      /** Format: date-time */
+      archived_at?: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      deleted_at?: string | null;
+      /** @example Shared workspace for the Q4 research project */
+      description?: string | null;
+      /** @example wsp_01933b5a000070008000000000000001 */
+      id: string;
+      /** @example team-research */
+      name: string;
+      /** @example active */
+      status: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
     /**
      * @description Prefixed identifier with 'agent' prefix
      * @example agent_01933b5a00007000800000000000001
@@ -14974,6 +15812,48 @@ export interface operations {
         };
       };
       /** @description Input exceeds allowed limits */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  analyze_agent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PreviewAgentRequest"];
+      };
+    };
+    responses: {
+      /** @description Agent analysis completed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AgentAnalysisResponse"];
+        };
+      };
+      /** @description Utility LLM service not configured */
       400: {
         headers: {
           [name: string]: unknown;
@@ -16845,6 +17725,59 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  dry_run_guardrails: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GuardrailsDryRunRequest"];
+      };
+    };
+    responses: {
+      /** @description Triggered checks for the sample content */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GuardrailsDryRunResponse"];
+        };
+      };
+      /** @description Invalid guardrails config, stage, or oversized text */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_guardrail_examples: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Adoptable guardrail presets with trust metadata */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GuardrailExamplesResponse"];
         };
       };
     };
@@ -19311,479 +20244,6 @@ export interface operations {
       };
     };
   };
-  list_all_models: {
-    parameters: {
-      query?: {
-        /** @description Filter by model source (manual, discovered, predefined) */
-        source?: null | components["schemas"]["LlmModelSource"];
-        /** @description Include models that are stale (not seen in recent sync). Default: true */
-        include_stale?: boolean;
-        /** @description Only return favorite models. Default: false */
-        favorites_only?: boolean;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description List of all models */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ListResponse_WithUrls_LlmModelWithProvider"];
-        };
-      };
-    };
-  };
-  llm_model_config: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Resource config for LLM models */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ResourceConfigResponse"];
-        };
-      };
-    };
-  };
-  get_model: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Model ID (prefixed, e.g., mod_...) */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Model found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["WithUrls_LlmModelWithProvider"];
-        };
-      };
-      /** @description Invalid model ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Model not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  delete_model: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Model ID (prefixed, e.g., mod_...) */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Model deleted */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Invalid model ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Model not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  update_model: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Model ID (prefixed, e.g., mod_...) */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateLlmModelRequest"];
-      };
-    };
-    responses: {
-      /** @description Model updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["WithUrls_LlmModel"];
-        };
-      };
-      /** @description Invalid model ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Model not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  list_providers: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description List of providers */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ListResponse_WithUrls_LlmProvider"];
-        };
-      };
-    };
-  };
-  create_provider: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateLlmProviderRequest"];
-      };
-    };
-    responses: {
-      /** @description Provider created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["WithUrls_LlmProvider"];
-        };
-      };
-      /** @description Invalid request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  llm_provider_config: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Resource config for LLM providers */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ResourceConfigResponse"];
-        };
-      };
-    };
-  };
-  get_provider: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Provider ID (prefixed, e.g., prov_...) */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Provider found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["WithUrls_LlmProvider"];
-        };
-      };
-      /** @description Invalid provider ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Provider not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  delete_provider: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Provider ID (prefixed, e.g., prov_...) */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Provider deleted */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Invalid provider ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Provider not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  update_provider: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Provider ID (prefixed, e.g., prov_...) */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateLlmProviderRequest"];
-      };
-    };
-    responses: {
-      /** @description Provider updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["WithUrls_LlmProvider"];
-        };
-      };
-      /** @description Invalid provider ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Provider not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  sync_models: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Provider ID (prefixed, e.g., prov_...) */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Models synced */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SyncModelsResponse"];
-        };
-      };
-      /** @description Invalid provider ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Provider not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Sync failed */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  list_provider_models: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Provider ID (prefixed, e.g., prov_...) */
-        provider_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description List of models */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ListResponse_WithUrls_LlmModel"];
-        };
-      };
-      /** @description Invalid provider ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  create_model: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Provider ID (prefixed, e.g., prov_...) */
-        provider_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateLlmModelRequest"];
-      };
-    };
-    responses: {
-      /** @description Model created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["WithUrls_LlmModel"];
-        };
-      };
-      /** @description Invalid provider ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Provider not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   list_mcp_servers: {
     parameters: {
       query?: {
@@ -20018,27 +20478,30 @@ export interface operations {
       };
     };
   };
-  list_memory_stores: {
+  list_memories: {
     parameters: {
-      query?: never;
+      query?: {
+        search?: string | null;
+        include_archived?: boolean | null;
+      };
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description List org memory stores */
+      /** @description List memories */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse_MemoryStoreResponse"];
+          "application/json": components["schemas"]["ListResponse_MemoryResponse"];
         };
       };
     };
   };
-  create_memory_store: {
+  create_memory: {
     parameters: {
       query?: never;
       header?: never;
@@ -20047,17 +20510,17 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateMemoryStoreRequest"];
+        "application/json": components["schemas"]["CreateMemoryRequest"];
       };
     };
     responses: {
-      /** @description Memory store created */
+      /** @description Memory created */
       201: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MemoryStoreResponse"];
+          "application/json": components["schemas"]["MemoryResponse"];
         };
       };
       /** @description Invalid input */
@@ -20069,7 +20532,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorResponse"];
         };
       };
-      /** @description Duplicate name or default conflict */
+      /** @description Duplicate memory name */
       409: {
         headers: {
           [name: string]: unknown;
@@ -20080,145 +20543,11 @@ export interface operations {
       };
     };
   };
-  get_memory_store: {
+  get_memory: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        /** @description Memory store ID */
-        store_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Memory store */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MemoryStoreResponse"];
-        };
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  update_memory_store: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Memory store ID */
-        store_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateMemoryStoreRequest"];
-      };
-    };
-    responses: {
-      /** @description Memory store updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MemoryStoreResponse"];
-        };
-      };
-      /** @description Invalid input */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description Conflict (duplicate name or concurrent default reassignment) */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  list_memories: {
-    parameters: {
-      query?: {
-        /** @description Substring filter applied to memory content. */
-        query?: string | null;
-        /**
-         * @description Discriminator selecting the variant of this resource. One of `fact`,
-         *     `preference`, `correction`, `procedure`, `context`.
-         */
-        kind?: string | null;
-        /** @description Filter to memories tagged with at least one of these labels. */
-        tag?: string[] | null;
-        /** @description When `true`, also returns inactive (deactivated) memories. */
-        include_inactive?: boolean | null;
-        /** @description Maximum number of items returned in this page. */
-        limit?: number | null;
-      };
-      header?: never;
-      path: {
-        /** @description Memory store ID */
-        store_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Memories */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ListMemoriesResponse"];
-        };
-      };
-      /** @description Store not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  forget_memory: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Memory store ID */
-        store_id: string;
         /** @description Memory ID */
         memory_id: string;
       };
@@ -20226,8 +20555,280 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Memory deactivated */
+      /** @description Memory found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryResponse"];
+        };
+      };
+      /** @description Memory not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_memory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Memory archived */
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Memory not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_memory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMemoryRequest"];
+      };
+    };
+    responses: {
+      /** @description Memory updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryResponse"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Memory not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Duplicate memory name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_root: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Directory listing */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_MemoryFileInfo"];
+        };
+      };
+      /** @description Memory not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  download_action: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+        /** @description File path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Raw file bytes */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Path is a directory */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  grep_action: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GrepRequest"];
+      };
+    };
+    responses: {
+      /** @description Matched files */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_GrepResultEntry"];
+        };
+      };
+      /** @description Invalid pattern */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Memory not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  stat_action: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StatRequest"];
+      };
+    };
+    responses: {
+      /** @description File metadata */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryFileInfo"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+        /** @description File or directory path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File content or directory listing */
+      200: {
         headers: {
           [name: string]: unknown;
         };
@@ -20241,6 +20842,369 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
         };
+      };
+    };
+  };
+  update_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+        /** @description Target path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMemoryFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryFile"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Source-backed Memory is read-only */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  create_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+        /** @description Target path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMemoryFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryFileInfo"];
+        };
+      };
+      /** @description Invalid input */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Source-backed Memory is read-only */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Path already exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  delete_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+        /** @description Target path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Source-backed Memory is read-only */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Directory not empty */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  sync_memory_now: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Memory ID */
+        memory_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Memory sync queued */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MemoryResponse"];
+        };
+      };
+      /** @description Invalid sync request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Memory not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  list_all_models: {
+    parameters: {
+      query?: {
+        /** @description Filter by model source (manual, discovered, predefined) */
+        source?: null | components["schemas"]["ModelSource"];
+        /** @description Include models that are stale (not seen in recent sync). Default: true */
+        include_stale?: boolean;
+        /** @description Only return favorite models. Default: false */
+        favorites_only?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of all models */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_ModelWithProvider"];
+        };
+      };
+    };
+  };
+  model_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for LLM models */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
+  get_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Model ID (prefixed, e.g., mod_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Model found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_ModelWithProvider"];
+        };
+      };
+      /** @description Invalid model ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Model not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Model ID (prefixed, e.g., mod_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Model deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid model ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Model not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Model ID (prefixed, e.g., mod_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateModelRequest"];
+      };
+    };
+    responses: {
+      /** @description Model updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Model"];
+        };
+      };
+      /** @description Invalid model ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Model not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -20352,6 +21316,124 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["OrganizationResponse"];
+        };
+      };
+      /** @description Organization not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_org_feature_flags: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization public id */
+        org: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Effective feature flags */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FeatureFlags"];
+        };
+      };
+      /** @description Organization not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  update_org_feature_flags: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization public id */
+        org: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOrgFeatureFlagsRequest"];
+      };
+    };
+    responses: {
+      /** @description Updated effective flags */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FeatureFlags"];
+        };
+      };
+      /** @description Invalid flag */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Organization not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  get_org_feature_flag_settings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization public id */
+        org: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Feature flag settings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrgFeatureFlagsSettingsResponse"];
         };
       };
       /** @description Organization not found */
@@ -20719,6 +21801,319 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
         };
+      };
+    };
+  };
+  list_providers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of providers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_Provider"];
+        };
+      };
+    };
+  };
+  create_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProviderRequest"];
+      };
+    };
+    responses: {
+      /** @description Provider created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Provider"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  provider_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resource config for LLM providers */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResourceConfigResponse"];
+        };
+      };
+    };
+  };
+  get_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Provider found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Provider"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Provider deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_provider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProviderRequest"];
+      };
+    };
+    responses: {
+      /** @description Provider updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Provider"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  sync_models: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Models synced */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SyncModelsResponse"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Sync failed */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_provider_models: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        provider_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of models */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_WithUrls_Model"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_model: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Provider ID (prefixed, e.g., prov_...) */
+        provider_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateModelRequest"];
+      };
+    };
+    responses: {
+      /** @description Model created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WithUrls_Model"];
+        };
+      };
+      /** @description Invalid provider ID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Provider not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -22058,485 +23453,6 @@ export interface operations {
       };
     };
   };
-  get_root: {
-    parameters: {
-      query?: {
-        /** @description List recursively */
-        recursive?: boolean;
-      };
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Directory listing */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Invalid session ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  copy_file: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CopyFileRequest"];
-      };
-    };
-    responses: {
-      /** @description Copied successfully */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SessionFile"];
-        };
-      };
-      /** @description Invalid session ID or cannot copy directories */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Source not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Destination exists */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  download_path: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-        /** @description File path */
-        path: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Raw file bytes */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/octet-stream": unknown;
-        };
-      };
-      /** @description Invalid session ID or path points to a directory */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description File not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  grep_files: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GrepRequest"];
-      };
-    };
-    responses: {
-      /** @description Search results */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ListResponse_GrepResult"];
-        };
-      };
-      /** @description Invalid session ID or regex pattern */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  move_file: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MoveFileRequest"];
-      };
-    };
-    responses: {
-      /** @description Moved successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SessionFile"];
-        };
-      };
-      /** @description Invalid session ID or path */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Source not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Destination exists */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  stat_file: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StatRequest"];
-      };
-    };
-    responses: {
-      /** @description Stat info */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["FileStat"];
-        };
-      };
-      /** @description Invalid session ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  get_path: {
-    parameters: {
-      query?: {
-        /** @description List recursively */
-        recursive?: boolean;
-      };
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-        /** @description File or directory path */
-        path: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description File content or directory listing */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Invalid session ID */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  update_path: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-        /** @description File path */
-        path: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateFileRequest"];
-      };
-    };
-    responses: {
-      /** @description Updated successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SessionFile"];
-        };
-      };
-      /** @description Invalid session ID or cannot modify readonly file or directory */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  create_path: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-        /** @description File or directory path */
-        path: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateFileRequest"];
-      };
-    };
-    responses: {
-      /** @description Created successfully */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SessionFile"];
-        };
-      };
-      /** @description Invalid session ID or request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Already exists */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  delete_path: {
-    parameters: {
-      query?: {
-        /** @description Delete recursively */
-        recursive?: boolean;
-      };
-      header?: never;
-      path: {
-        /** @description Session ID (prefixed, e.g., sess_...) */
-        session_id: string;
-        /** @description File or directory path */
-        path: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Deleted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["DeleteResponse"];
-        };
-      };
-      /** @description Invalid session ID or directory not empty */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cannot delete readonly file or directory containing readonly files */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Internal server error */
-      500: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   create_branch: {
     parameters: {
       query?: never;
@@ -23202,6 +24118,148 @@ export interface operations {
       };
       /** @description Internal server error */
       500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  list_tasks: {
+    parameters: {
+      query?: {
+        /** @description Filter by state */
+        state?: string;
+        /** @description Filter by kind */
+        kind?: string;
+      };
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session tasks */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionTask"][];
+        };
+      };
+      /** @description Session not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_task: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+        /** @description Task ID */
+        task_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Session task detail */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionTaskDetail"];
+        };
+      };
+      /** @description Session or task not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  cancel_task: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+        /** @description Task ID */
+        task_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Task with cancel intent recorded */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionTask"];
+        };
+      };
+      /** @description Session or task not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  post_task_message: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Session ID */
+        session_id: string;
+        /** @description Task ID */
+        task_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PostTaskMessageBody"];
+      };
+    };
+    responses: {
+      /** @description Recorded task message */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TaskMessage"];
+        };
+      };
+      /** @description Empty message */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Session or task not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -23898,11 +24956,11 @@ export interface operations {
       };
     };
   };
-  list_volumes: {
+  list_workspaces: {
     parameters: {
       query?: {
         search?: string | null;
-        include_archived?: boolean | null;
+        include_archived?: boolean;
       };
       header?: never;
       path?: never;
@@ -23910,18 +24968,18 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description List volumes */
+      /** @description Workspaces */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListResponse_VolumeResponse"];
+          "application/json": components["schemas"]["ListResponse_WorkspaceResponse"];
         };
       };
     };
   };
-  create_volume: {
+  create_workspace: {
     parameters: {
       query?: never;
       header?: never;
@@ -23930,17 +24988,17 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateVolumeRequest"];
+        "application/json": components["schemas"]["CreateWorkspaceRequest"];
       };
     };
     responses: {
-      /** @description Volume created */
+      /** @description Created */
       201: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["VolumeResponse"];
+          "application/json": components["schemas"]["WorkspaceResponse"];
         };
       };
       /** @description Invalid input */
@@ -23952,7 +25010,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorResponse"];
         };
       };
-      /** @description Duplicate volume name */
+      /** @description Name conflict */
       409: {
         headers: {
           [name: string]: unknown;
@@ -23963,28 +25021,28 @@ export interface operations {
       };
     };
   };
-  get_volume: {
+  get_workspace: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        /** @description Volume ID */
-        volume_id: string;
+        /** @description Workspace ID */
+        workspace_id: string;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Volume found */
+      /** @description Workspace */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["VolumeResponse"];
+          "application/json": components["schemas"]["WorkspaceResponse"];
         };
       };
-      /** @description Volume not found */
+      /** @description Not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -23995,26 +25053,26 @@ export interface operations {
       };
     };
   };
-  delete_volume: {
+  delete_workspace: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        /** @description Volume ID */
-        volume_id: string;
+        /** @description Workspace ID */
+        workspace_id: string;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Volume archived */
+      /** @description Archived */
       204: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Volume not found */
+      /** @description Not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -24025,29 +25083,29 @@ export interface operations {
       };
     };
   };
-  update_volume: {
+  update_workspace: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        /** @description Volume ID */
-        volume_id: string;
+        /** @description Workspace ID */
+        workspace_id: string;
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UpdateVolumeRequest"];
+        "application/json": components["schemas"]["UpdateWorkspaceRequest"];
       };
     };
     responses: {
-      /** @description Volume updated */
+      /** @description Updated */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["VolumeResponse"];
+          "application/json": components["schemas"]["WorkspaceResponse"];
         };
       };
       /** @description Invalid input */
@@ -24059,7 +25117,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorResponse"];
         };
       };
-      /** @description Volume not found */
+      /** @description Not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -24068,7 +25126,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorResponse"];
         };
       };
-      /** @description Duplicate volume name */
+      /** @description Name conflict */
       409: {
         headers: {
           [name: string]: unknown;
@@ -24079,44 +25137,472 @@ export interface operations {
       };
     };
   };
-  sync_volume_now: {
+  get_root: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description List recursively */
+        recursive?: boolean;
+      };
       header?: never;
       path: {
-        /** @description Volume ID */
-        volume_id: string;
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Volume sync queued */
+      /** @description Directory listing */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["VolumeResponse"];
+          "application/json": components["schemas"]["ListResponse_FileInfo"];
         };
       };
-      /** @description Invalid sync request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description Volume not found */
+      /** @description Workspace not found */
       404: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
+    };
+  };
+  copy_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CopyFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Copied */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid request or cannot copy directories */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Source not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Destination exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  download_path: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+        /** @description File path. Wildcard route: nested paths are literal `/`-separated segments, not a single URL-encoded value. */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Raw file bytes */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/octet-stream": unknown;
+        };
+      };
+      /** @description Path points to a directory */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  grep_files: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GrepRequest"];
+      };
+    };
+    responses: {
+      /** @description Search results */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ListResponse_GrepResult"];
+        };
+      };
+      /** @description Invalid regex pattern */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  move_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MoveFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Moved */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Source not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Destination exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  stat_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StatRequest"];
+      };
+    };
+    responses: {
+      /** @description File metadata */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FileStat"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_path: {
+    parameters: {
+      query?: {
+        /** @description List recursively */
+        recursive?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+        /** @description File or directory path. Wildcard route: nested paths are literal `/`-separated segments, not a single URL-encoded value. */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File content or directory listing */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GetResponse"];
+        };
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_path: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+        /** @description File path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_path: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+        /** @description File or directory path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SessionFile"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Already exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_path: {
+    parameters: {
+      query?: {
+        /** @description Delete recursively */
+        recursive?: boolean;
+      };
+      header?: never;
+      path: {
+        /** @description Workspace ID (wsp_<32-hex>) */
+        workspace_id: string;
+        /** @description File or directory path */
+        path: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeleteResponse"];
+        };
+      };
+      /** @description Invalid request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cannot delete readonly content */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal server error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

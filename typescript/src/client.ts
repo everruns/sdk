@@ -4,8 +4,10 @@
 import { ApiKey } from "./auth.js";
 import {
   Agent,
+  AgentAnalysisResponse,
   AgentVersion,
   AgentVersionDiffResponse,
+  AnalyzeAgentRequest,
   Budget,
   BudgetCheckResult,
   CapabilityInfo,
@@ -14,12 +16,18 @@ import {
   CreateAgentRequest,
   CreateAgentVersionRequest,
   CreateBudgetRequest,
+  CreateMemoryFileRequest,
+  CreateMemoryRequest,
+  CreateWorkspaceRequest,
   DeleteFileResponse,
   Session,
   CreateSessionRequest,
   FileInfo,
   FileStat,
   ForkAgentVersionRequest,
+  GuardrailExamplesResponse,
+  GuardrailsDryRunRequest,
+  GuardrailsDryRunResponse,
   GrepResult,
   LedgerEntry,
   Message,
@@ -27,6 +35,10 @@ import {
   Event,
   ListEventsOptions,
   ListResponse,
+  Memory,
+  MemoryFile,
+  MemoryFileInfo,
+  MemoryGrepResult,
   ResourceStats,
   ResumeSessionResponse,
   RollbackAgentVersionRequest,
@@ -36,6 +48,10 @@ import {
   SetDefaultAgentVersionRequest,
   TopUpRequest,
   UpdateBudgetRequest,
+  UpdateMemoryFileRequest,
+  UpdateMemoryRequest,
+  UpdateWorkspaceRequest,
+  Workspace,
   validateAgentName,
   validateHarnessName,
 } from "./models.js";
@@ -64,7 +80,9 @@ export class Everruns {
   readonly messages: MessagesClient;
   readonly events: EventsClient;
   readonly capabilities: CapabilitiesClient;
-  readonly sessionFiles: SessionFilesClient;
+  readonly workspaces: WorkspacesClient;
+  readonly workspaceFiles: WorkspaceFilesClient;
+  readonly memories: MemoriesClient;
   readonly connections: ConnectionsClient;
   readonly budgets: BudgetsClient;
 
@@ -93,7 +111,9 @@ export class Everruns {
     this.messages = new MessagesClient(this);
     this.events = new EventsClient(this);
     this.capabilities = new CapabilitiesClient(this);
-    this.sessionFiles = new SessionFilesClient(this);
+    this.workspaces = new WorkspacesClient(this);
+    this.workspaceFiles = new WorkspaceFilesClient(this);
+    this.memories = new MemoriesClient(this);
     this.connections = new ConnectionsClient(this);
     this.budgets = new BudgetsClient(this);
   }
@@ -398,6 +418,19 @@ class AgentsClient {
   /** Export an agent as Markdown with YAML front matter. */
   async export(agentId: string): Promise<string> {
     return this.client.fetchText(`/agents/${agentId}/export`);
+  }
+
+  /** Run advisory checks against an agent shape. */
+  async analyze(request: AnalyzeAgentRequest): Promise<AgentAnalysisResponse> {
+    return this.client.fetch("/agents/analyze", {
+      method: "POST",
+      body: JSON.stringify({
+        system_prompt: request.systemPrompt,
+        capabilities: request.capabilities ?? [],
+        tools: request.tools ?? [],
+        mcpServers: request.mcpServers,
+      }),
+    });
   }
 }
 
@@ -727,19 +760,89 @@ class CapabilitiesClient {
   async get(capabilityId: string): Promise<CapabilityInfo> {
     return this.client.fetch(`/capabilities/${capabilityId}`);
   }
+
+  /** List adoptable guardrail presets. */
+  async listGuardrailExamples(): Promise<GuardrailExamplesResponse> {
+    return this.client.fetch("/capabilities/guardrails/examples");
+  }
+
+  /** Evaluate a guardrails config against sample content. */
+  async dryRunGuardrails(
+    request: GuardrailsDryRunRequest,
+  ): Promise<GuardrailsDryRunResponse> {
+    return this.client.fetch("/capabilities/guardrails/dry-run", {
+      method: "POST",
+      body: JSON.stringify({
+        config: request.config,
+        stage: request.stage,
+        text: request.text,
+        tool_name: request.toolName,
+      }),
+    });
+  }
 }
 
-class SessionFilesClient {
+class WorkspacesClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** List workspaces. */
+  async list(options?: {
+    search?: string;
+    includeArchived?: boolean;
+  }): Promise<Workspace[]> {
+    const params = new URLSearchParams();
+    if (options?.search) params.set("search", options.search);
+    if (options?.includeArchived != null) {
+      params.set("include_archived", String(options.includeArchived));
+    }
+    const query = params.toString() ? `?${params}` : "";
+    const response = await this.client.fetch<ListResponse<Workspace>>(
+      `/workspaces${query}`,
+    );
+    return response.data;
+  }
+
+  /** Create a workspace. */
+  async create(request: CreateWorkspaceRequest): Promise<Workspace> {
+    return this.client.fetch("/workspaces", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  }
+
+  /** Get a workspace by ID. */
+  async get(workspaceId: string): Promise<Workspace> {
+    return this.client.fetch(`/workspaces/${workspaceId}`);
+  }
+
+  /** Update a workspace. */
+  async update(
+    workspaceId: string,
+    request: UpdateWorkspaceRequest,
+  ): Promise<Workspace> {
+    return this.client.fetch(`/workspaces/${workspaceId}`, {
+      method: "PATCH",
+      body: JSON.stringify(request),
+    });
+  }
+
+  /** Archive a workspace. */
+  async delete(workspaceId: string): Promise<void> {
+    await this.client.fetch(`/workspaces/${workspaceId}`, { method: "DELETE" });
+  }
+}
+
+class WorkspaceFilesClient {
   constructor(private readonly client: Everruns) {}
 
   /** List files in a directory. */
   async list(
-    sessionId: string,
+    workspaceId: string,
     options?: { path?: string; recursive?: boolean },
   ): Promise<ListResponse<FileInfo>> {
     const fsPath = options?.path
-      ? `/sessions/${sessionId}/fs/${options.path.replace(/^\//, "")}`
-      : `/sessions/${sessionId}/fs`;
+      ? `/workspaces/${workspaceId}/fs/${options.path.replace(/^\//, "")}`
+      : `/workspaces/${workspaceId}/fs`;
     const params = new URLSearchParams();
     if (options?.recursive) params.set("recursive", "true");
     const query = params.toString() ? `?${params}` : "";
@@ -755,15 +858,15 @@ class SessionFilesClient {
   }
 
   /** Read a file's content. */
-  async read(sessionId: string, path: string): Promise<SessionFile> {
+  async read(workspaceId: string, path: string): Promise<SessionFile> {
     return this.client.fetch(
-      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+      `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
     );
   }
 
   /** Create a file. */
   async create(
-    sessionId: string,
+    workspaceId: string,
     path: string,
     content: string,
     options?: { encoding?: string; isReadonly?: boolean },
@@ -772,22 +875,22 @@ class SessionFilesClient {
     if (options?.encoding) body.encoding = options.encoding;
     if (options?.isReadonly != null) body.is_readonly = options.isReadonly;
     return this.client.fetch(
-      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+      `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
       { method: "POST", body: JSON.stringify(body) },
     );
   }
 
   /** Create a directory. */
-  async createDir(sessionId: string, path: string): Promise<SessionFile> {
+  async createDir(workspaceId: string, path: string): Promise<SessionFile> {
     return this.client.fetch(
-      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+      `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
       { method: "POST", body: JSON.stringify({ is_directory: true }) },
     );
   }
 
   /** Update a file's content. */
   async update(
-    sessionId: string,
+    workspaceId: string,
     path: string,
     content: string,
     options?: { encoding?: string; isReadonly?: boolean },
@@ -796,14 +899,14 @@ class SessionFilesClient {
     if (options?.encoding) body.encoding = options.encoding;
     if (options?.isReadonly != null) body.is_readonly = options.isReadonly;
     return this.client.fetch(
-      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}`,
+      `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
       { method: "PUT", body: JSON.stringify(body) },
     );
   }
 
   /** Delete a file or directory. */
   async delete(
-    sessionId: string,
+    workspaceId: string,
     path: string,
     options?: { recursive?: boolean },
   ): Promise<DeleteFileResponse> {
@@ -811,18 +914,18 @@ class SessionFilesClient {
     if (options?.recursive) params.set("recursive", "true");
     const query = params.toString() ? `?${params}` : "";
     return this.client.fetch(
-      `/sessions/${sessionId}/fs/${path.replace(/^\//, "")}${query}`,
+      `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}${query}`,
       { method: "DELETE" },
     );
   }
 
   /** Move/rename a file. */
   async moveFile(
-    sessionId: string,
+    workspaceId: string,
     srcPath: string,
     dstPath: string,
   ): Promise<SessionFile> {
-    return this.client.fetch(`/sessions/${sessionId}/fs/_/move`, {
+    return this.client.fetch(`/workspaces/${workspaceId}/fs/_/move`, {
       method: "POST",
       body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
     });
@@ -830,11 +933,11 @@ class SessionFilesClient {
 
   /** Copy a file. */
   async copyFile(
-    sessionId: string,
+    workspaceId: string,
     srcPath: string,
     dstPath: string,
   ): Promise<SessionFile> {
-    return this.client.fetch(`/sessions/${sessionId}/fs/_/copy`, {
+    return this.client.fetch(`/workspaces/${workspaceId}/fs/_/copy`, {
       method: "POST",
       body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
     });
@@ -842,22 +945,174 @@ class SessionFilesClient {
 
   /** Search files with regex. */
   async grep(
-    sessionId: string,
+    workspaceId: string,
     pattern: string,
     options?: { pathPattern?: string },
   ): Promise<GrepResult[]> {
     const body: Record<string, unknown> = { pattern };
     if (options?.pathPattern) body.path_pattern = options.pathPattern;
     const response = await this.client.fetch<{ data: GrepResult[] }>(
-      `/sessions/${sessionId}/fs/_/grep`,
+      `/workspaces/${workspaceId}/fs/_/grep`,
       { method: "POST", body: JSON.stringify(body) },
     );
     return response.data;
   }
 
   /** Get file or directory stat. */
-  async stat(sessionId: string, path: string): Promise<FileStat> {
-    return this.client.fetch(`/sessions/${sessionId}/fs/_/stat`, {
+  async stat(workspaceId: string, path: string): Promise<FileStat> {
+    return this.client.fetch(`/workspaces/${workspaceId}/fs/_/stat`, {
+      method: "POST",
+      body: JSON.stringify({ path }),
+    });
+  }
+}
+
+class MemoriesClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** List memories. */
+  async list(options?: {
+    search?: string;
+    includeArchived?: boolean;
+  }): Promise<Memory[]> {
+    const params = new URLSearchParams();
+    if (options?.search) params.set("search", options.search);
+    if (options?.includeArchived != null) {
+      params.set("include_archived", String(options.includeArchived));
+    }
+    const query = params.toString() ? `?${params}` : "";
+    const response = await this.client.fetch<ListResponse<Memory>>(
+      `/memories${query}`,
+    );
+    return response.data;
+  }
+
+  /** Create a memory. */
+  async create(request: CreateMemoryRequest): Promise<Memory> {
+    return this.client.fetch("/memories", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  }
+
+  /** Get a memory by ID. */
+  async get(memoryId: string): Promise<Memory> {
+    return this.client.fetch(`/memories/${memoryId}`);
+  }
+
+  /** Update a memory. */
+  async update(
+    memoryId: string,
+    request: UpdateMemoryRequest,
+  ): Promise<Memory> {
+    return this.client.fetch(`/memories/${memoryId}`, {
+      method: "PATCH",
+      body: JSON.stringify(request),
+    });
+  }
+
+  /** Archive a memory. */
+  async delete(memoryId: string): Promise<void> {
+    await this.client.fetch(`/memories/${memoryId}`, { method: "DELETE" });
+  }
+
+  /** Trigger memory sync now. */
+  async sync(memoryId: string): Promise<Memory> {
+    return this.client.fetch(`/memories/${memoryId}/sync`, {
+      method: "POST",
+    });
+  }
+
+  /** List memory files at the root. */
+  async listFiles(memoryId: string): Promise<MemoryFileInfo[]> {
+    const response = await this.client.fetch<ListResponse<MemoryFileInfo>>(
+      `/memories/${memoryId}/fs`,
+    );
+    return response.data;
+  }
+
+  /** Read a memory file. */
+  async readFile(memoryId: string, path: string): Promise<MemoryFile> {
+    return this.client.fetch(
+      `/memories/${memoryId}/fs/${path.replace(/^\//, "")}`,
+    );
+  }
+
+  /** Download a memory file as text. */
+  async downloadFile(memoryId: string, path: string): Promise<string> {
+    return this.client.fetchText(
+      `/memories/${memoryId}/fs/_/download/${path.replace(/^\//, "")}`,
+    );
+  }
+
+  /** Create a memory file. */
+  async createFile(
+    memoryId: string,
+    path: string,
+    request: CreateMemoryFileRequest,
+  ): Promise<MemoryFileInfo> {
+    return this.client.fetch(
+      `/memories/${memoryId}/fs/${path.replace(/^\//, "")}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          content: request.content,
+          encoding: request.encoding,
+          is_directory: request.isDirectory,
+        }),
+      },
+    );
+  }
+
+  /** Create a memory directory. */
+  async createDir(memoryId: string, path: string): Promise<MemoryFileInfo> {
+    return this.createFile(memoryId, path, { isDirectory: true });
+  }
+
+  /** Update a memory file. */
+  async updateFile(
+    memoryId: string,
+    path: string,
+    request: UpdateMemoryFileRequest,
+  ): Promise<MemoryFile> {
+    return this.client.fetch(
+      `/memories/${memoryId}/fs/${path.replace(/^\//, "")}`,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          content: request.content,
+          encoding: request.encoding,
+        }),
+      },
+    );
+  }
+
+  /** Delete a memory file or directory. */
+  async deleteFile(memoryId: string, path: string): Promise<void> {
+    await this.client.fetch(
+      `/memories/${memoryId}/fs/${path.replace(/^\//, "")}`,
+      { method: "DELETE" },
+    );
+  }
+
+  /** Search memory files by regex. */
+  async grepFiles(
+    memoryId: string,
+    pattern: string,
+    options?: { pathPattern?: string },
+  ): Promise<MemoryGrepResult[]> {
+    const body: Record<string, unknown> = { pattern };
+    if (options?.pathPattern) body.path_pattern = options.pathPattern;
+    const response = await this.client.fetch<ListResponse<MemoryGrepResult>>(
+      `/memories/${memoryId}/fs/_/grep`,
+      { method: "POST", body: JSON.stringify(body) },
+    );
+    return response.data;
+  }
+
+  /** Stat a memory file or directory. */
+  async statFile(memoryId: string, path: string): Promise<MemoryFileInfo> {
+    return this.client.fetch(`/memories/${memoryId}/fs/_/stat`, {
       method: "POST",
       body: JSON.stringify({ path }),
     });
