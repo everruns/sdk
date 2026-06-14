@@ -181,9 +181,19 @@ impl Everruns {
         CapabilitiesClient { client: self }
     }
 
-    /// Get the session files client
-    pub fn session_files(&self) -> SessionFilesClient<'_> {
-        SessionFilesClient { client: self }
+    /// Get the workspaces client
+    pub fn workspaces(&self) -> WorkspacesClient<'_> {
+        WorkspacesClient { client: self }
+    }
+
+    /// Get the workspace files client
+    pub fn workspace_files(&self) -> WorkspaceFilesClient<'_> {
+        WorkspaceFilesClient { client: self }
+    }
+
+    /// Get the memories client
+    pub fn memories(&self) -> MemoriesClient<'_> {
+        MemoriesClient { client: self }
     }
 
     /// Get the connections client
@@ -597,6 +607,11 @@ impl<'a> AgentsClient<'a> {
             .get_text(&format!("/agents/{}/export", id))
             .await
     }
+
+    /// Run advisory checks against an agent shape.
+    pub async fn analyze(&self, req: AnalyzeAgentRequest) -> Result<AgentAnalysisResponse> {
+        self.client.post("/agents/analyze", &req).await
+    }
 }
 
 /// Client for session operations
@@ -972,24 +987,102 @@ impl<'a> CapabilitiesClient<'a> {
     pub async fn get(&self, id: &str) -> Result<CapabilityInfo> {
         self.client.get(&format!("/capabilities/{}", id)).await
     }
+
+    /// List adoptable guardrail presets.
+    pub async fn list_guardrail_examples(&self) -> Result<GuardrailExamplesResponse> {
+        self.client.get("/capabilities/guardrails/examples").await
+    }
+
+    /// Evaluate a guardrails config against sample content.
+    pub async fn dry_run_guardrails(
+        &self,
+        req: GuardrailsDryRunRequest,
+    ) -> Result<GuardrailsDryRunResponse> {
+        self.client
+            .post("/capabilities/guardrails/dry-run", &req)
+            .await
+    }
 }
 
-/// Client for session filesystem operations
-pub struct SessionFilesClient<'a> {
+/// Client for workspace operations
+pub struct WorkspacesClient<'a> {
     client: &'a Everruns,
 }
 
-impl<'a> SessionFilesClient<'a> {
+impl<'a> WorkspacesClient<'a> {
+    /// List workspaces.
+    pub async fn list(&self) -> Result<ListResponse<Workspace>> {
+        self.client.get("/workspaces").await
+    }
+
+    /// List workspaces with search and archived filtering.
+    pub async fn list_with_options(
+        &self,
+        search: Option<&str>,
+        include_archived: Option<bool>,
+    ) -> Result<ListResponse<Workspace>> {
+        let mut url = self.client.url("/workspaces");
+        if let Some(search) = search {
+            url.query_pairs_mut().append_pair("search", search);
+        }
+        if let Some(include_archived) = include_archived {
+            url.query_pairs_mut()
+                .append_pair("include_archived", &include_archived.to_string());
+        }
+        self.client.get_url(url).await
+    }
+
+    /// Create a workspace.
+    pub async fn create(&self, req: CreateWorkspaceRequest) -> Result<Workspace> {
+        self.client.post("/workspaces", &req).await
+    }
+
+    /// Get a workspace by ID.
+    pub async fn get(&self, workspace_id: &str) -> Result<Workspace> {
+        self.client
+            .get(&format!("/workspaces/{}", workspace_id))
+            .await
+    }
+
+    /// Update a workspace.
+    pub async fn update(
+        &self,
+        workspace_id: &str,
+        req: UpdateWorkspaceRequest,
+    ) -> Result<Workspace> {
+        self.client
+            .patch(&format!("/workspaces/{}", workspace_id), &req)
+            .await
+    }
+
+    /// Archive a workspace.
+    pub async fn delete(&self, workspace_id: &str) -> Result<()> {
+        self.client
+            .delete(&format!("/workspaces/{}", workspace_id))
+            .await
+    }
+}
+
+/// Client for workspace filesystem operations
+pub struct WorkspaceFilesClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> WorkspaceFilesClient<'a> {
     /// List files in a directory
     pub async fn list(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         path: Option<&str>,
         recursive: Option<bool>,
     ) -> Result<ListResponse<FileInfo>> {
         let api_path = match path {
-            Some(p) => format!("/sessions/{}/fs/{}", session_id, p.trim_start_matches('/')),
-            None => format!("/sessions/{}/fs", session_id),
+            Some(p) => format!(
+                "/workspaces/{}/fs/{}",
+                workspace_id,
+                p.trim_start_matches('/')
+            ),
+            None => format!("/workspaces/{}/fs", workspace_id),
         };
         let mut url = self.client.url(&api_path);
         if let Some(true) = recursive {
@@ -999,11 +1092,11 @@ impl<'a> SessionFilesClient<'a> {
     }
 
     /// Read a file's content
-    pub async fn read(&self, session_id: &str, path: &str) -> Result<SessionFile> {
+    pub async fn read(&self, workspace_id: &str, path: &str) -> Result<SessionFile> {
         self.client
             .get(&format!(
-                "/sessions/{}/fs/{}",
-                session_id,
+                "/workspaces/{}/fs/{}",
+                workspace_id,
                 path.trim_start_matches('/')
             ))
             .await
@@ -1012,7 +1105,7 @@ impl<'a> SessionFilesClient<'a> {
     /// Create a file
     pub async fn create(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         path: &str,
         content: &str,
         encoding: Option<&str>,
@@ -1024,8 +1117,8 @@ impl<'a> SessionFilesClient<'a> {
         self.client
             .post(
                 &format!(
-                    "/sessions/{}/fs/{}",
-                    session_id,
+                    "/workspaces/{}/fs/{}",
+                    workspace_id,
                     path.trim_start_matches('/')
                 ),
                 &req,
@@ -1036,15 +1129,15 @@ impl<'a> SessionFilesClient<'a> {
     /// Create a file with full options
     pub async fn create_with_options(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         path: &str,
         req: CreateFileRequest,
     ) -> Result<SessionFile> {
         self.client
             .post(
                 &format!(
-                    "/sessions/{}/fs/{}",
-                    session_id,
+                    "/workspaces/{}/fs/{}",
+                    workspace_id,
                     path.trim_start_matches('/')
                 ),
                 &req,
@@ -1053,15 +1146,15 @@ impl<'a> SessionFilesClient<'a> {
     }
 
     /// Create a directory
-    pub async fn create_dir(&self, session_id: &str, path: &str) -> Result<SessionFile> {
-        self.create_with_options(session_id, path, CreateFileRequest::directory())
+    pub async fn create_dir(&self, workspace_id: &str, path: &str) -> Result<SessionFile> {
+        self.create_with_options(workspace_id, path, CreateFileRequest::directory())
             .await
     }
 
     /// Update a file's content
     pub async fn update(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         path: &str,
         content: &str,
         encoding: Option<&str>,
@@ -1073,8 +1166,8 @@ impl<'a> SessionFilesClient<'a> {
         self.client
             .put(
                 &format!(
-                    "/sessions/{}/fs/{}",
-                    session_id,
+                    "/workspaces/{}/fs/{}",
+                    workspace_id,
                     path.trim_start_matches('/')
                 ),
                 &req,
@@ -1085,15 +1178,15 @@ impl<'a> SessionFilesClient<'a> {
     /// Update a file with full options
     pub async fn update_with_options(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         path: &str,
         req: UpdateFileRequest,
     ) -> Result<SessionFile> {
         self.client
             .put(
                 &format!(
-                    "/sessions/{}/fs/{}",
-                    session_id,
+                    "/workspaces/{}/fs/{}",
+                    workspace_id,
                     path.trim_start_matches('/')
                 ),
                 &req,
@@ -1104,13 +1197,13 @@ impl<'a> SessionFilesClient<'a> {
     /// Delete a file or directory
     pub async fn delete(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         path: &str,
         recursive: Option<bool>,
     ) -> Result<DeleteResponse> {
         let mut url = self.client.url(&format!(
-            "/sessions/{}/fs/{}",
-            session_id,
+            "/workspaces/{}/fs/{}",
+            workspace_id,
             path.trim_start_matches('/')
         ));
         if let Some(true) = recursive {
@@ -1122,33 +1215,33 @@ impl<'a> SessionFilesClient<'a> {
     /// Move/rename a file
     pub async fn move_file(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         src_path: &str,
         dst_path: &str,
     ) -> Result<SessionFile> {
         let req = MoveFileRequest::new(src_path, dst_path);
         self.client
-            .post(&format!("/sessions/{}/fs/_/move", session_id), &req)
+            .post(&format!("/workspaces/{}/fs/_/move", workspace_id), &req)
             .await
     }
 
     /// Copy a file
     pub async fn copy_file(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         src_path: &str,
         dst_path: &str,
     ) -> Result<SessionFile> {
         let req = CopyFileRequest::new(src_path, dst_path);
         self.client
-            .post(&format!("/sessions/{}/fs/_/copy", session_id), &req)
+            .post(&format!("/workspaces/{}/fs/_/copy", workspace_id), &req)
             .await
     }
 
     /// Search files with regex
     pub async fn grep(
         &self,
-        session_id: &str,
+        workspace_id: &str,
         pattern: &str,
         path_pattern: Option<&str>,
     ) -> Result<ListResponse<GrepResult>> {
@@ -1157,15 +1250,201 @@ impl<'a> SessionFilesClient<'a> {
             req = req.path_pattern(pp);
         }
         self.client
-            .post(&format!("/sessions/{}/fs/_/grep", session_id), &req)
+            .post(&format!("/workspaces/{}/fs/_/grep", workspace_id), &req)
             .await
     }
 
     /// Get file or directory stat
-    pub async fn stat(&self, session_id: &str, path: &str) -> Result<FileStat> {
+    pub async fn stat(&self, workspace_id: &str, path: &str) -> Result<FileStat> {
         let req = StatRequest::new(path);
         self.client
-            .post(&format!("/sessions/{}/fs/_/stat", session_id), &req)
+            .post(&format!("/workspaces/{}/fs/_/stat", workspace_id), &req)
+            .await
+    }
+}
+
+/// Client for memory operations
+pub struct MemoriesClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> MemoriesClient<'a> {
+    /// List memories.
+    pub async fn list(&self) -> Result<ListResponse<Memory>> {
+        self.client.get("/memories").await
+    }
+
+    /// List memories with search and archived filtering.
+    pub async fn list_with_options(
+        &self,
+        search: Option<&str>,
+        include_archived: Option<bool>,
+    ) -> Result<ListResponse<Memory>> {
+        let mut url = self.client.url("/memories");
+        if let Some(search) = search {
+            url.query_pairs_mut().append_pair("search", search);
+        }
+        if let Some(include_archived) = include_archived {
+            url.query_pairs_mut()
+                .append_pair("include_archived", &include_archived.to_string());
+        }
+        self.client.get_url(url).await
+    }
+
+    /// Create a memory.
+    pub async fn create(&self, req: CreateMemoryRequest) -> Result<Memory> {
+        self.client.post("/memories", &req).await
+    }
+
+    /// Get a memory by ID.
+    pub async fn get(&self, memory_id: &str) -> Result<Memory> {
+        self.client.get(&format!("/memories/{}", memory_id)).await
+    }
+
+    /// Update a memory.
+    pub async fn update(&self, memory_id: &str, req: UpdateMemoryRequest) -> Result<Memory> {
+        self.client
+            .patch(&format!("/memories/{}", memory_id), &req)
+            .await
+    }
+
+    /// Archive a memory.
+    pub async fn delete(&self, memory_id: &str) -> Result<()> {
+        self.client
+            .delete(&format!("/memories/{}", memory_id))
+            .await
+    }
+
+    /// Trigger memory sync now.
+    pub async fn sync(&self, memory_id: &str) -> Result<Memory> {
+        self.client
+            .post::<Memory, _>(&format!("/memories/{}/sync", memory_id), &())
+            .await
+    }
+
+    /// List memory files at the root.
+    pub async fn list_files(&self, memory_id: &str) -> Result<ListResponse<MemoryFileInfo>> {
+        self.client
+            .get(&format!("/memories/{}/fs", memory_id))
+            .await
+    }
+
+    /// Read a memory file.
+    pub async fn read_file(&self, memory_id: &str, path: &str) -> Result<MemoryFile> {
+        self.client
+            .get(&format!(
+                "/memories/{}/fs/{}",
+                memory_id,
+                path.trim_start_matches('/')
+            ))
+            .await
+    }
+
+    /// Download a memory file as text.
+    pub async fn download_file(&self, memory_id: &str, path: &str) -> Result<String> {
+        self.client
+            .get_text(&format!(
+                "/memories/{}/fs/_/download/{}",
+                memory_id,
+                path.trim_start_matches('/')
+            ))
+            .await
+    }
+
+    /// Create a memory file.
+    pub async fn create_file(
+        &self,
+        memory_id: &str,
+        path: &str,
+        content: &str,
+        encoding: Option<&str>,
+    ) -> Result<MemoryFileInfo> {
+        let mut req = CreateMemoryFileRequest::file(content);
+        if let Some(encoding) = encoding {
+            req = req.encoding(encoding);
+        }
+        self.client
+            .post(
+                &format!(
+                    "/memories/{}/fs/{}",
+                    memory_id,
+                    path.trim_start_matches('/')
+                ),
+                &req,
+            )
+            .await
+    }
+
+    /// Create a memory directory.
+    pub async fn create_dir(&self, memory_id: &str, path: &str) -> Result<MemoryFileInfo> {
+        self.client
+            .post(
+                &format!(
+                    "/memories/{}/fs/{}",
+                    memory_id,
+                    path.trim_start_matches('/')
+                ),
+                &CreateMemoryFileRequest::directory(),
+            )
+            .await
+    }
+
+    /// Update a memory file.
+    pub async fn update_file(
+        &self,
+        memory_id: &str,
+        path: &str,
+        content: &str,
+        encoding: Option<&str>,
+    ) -> Result<MemoryFile> {
+        let mut req = UpdateMemoryFileRequest::content(content);
+        if let Some(encoding) = encoding {
+            req = req.encoding(encoding);
+        }
+        self.client
+            .put(
+                &format!(
+                    "/memories/{}/fs/{}",
+                    memory_id,
+                    path.trim_start_matches('/')
+                ),
+                &req,
+            )
+            .await
+    }
+
+    /// Delete a memory file or directory.
+    pub async fn delete_file(&self, memory_id: &str, path: &str) -> Result<()> {
+        self.client
+            .delete(&format!(
+                "/memories/{}/fs/{}",
+                memory_id,
+                path.trim_start_matches('/')
+            ))
+            .await
+    }
+
+    /// Search memory files by regex.
+    pub async fn grep_files(
+        &self,
+        memory_id: &str,
+        pattern: &str,
+        path_pattern: Option<&str>,
+    ) -> Result<ListResponse<MemoryGrepResult>> {
+        let mut req = GrepRequest::new(pattern);
+        if let Some(path_pattern) = path_pattern {
+            req = req.path_pattern(path_pattern);
+        }
+        self.client
+            .post(&format!("/memories/{}/fs/_/grep", memory_id), &req)
+            .await
+    }
+
+    /// Stat a memory file or directory.
+    pub async fn stat_file(&self, memory_id: &str, path: &str) -> Result<MemoryFileInfo> {
+        let req = StatRequest::new(path);
+        self.client
+            .post(&format!("/memories/{}/fs/_/stat", memory_id), &req)
             .await
     }
 }

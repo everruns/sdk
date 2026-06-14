@@ -1,9 +1,10 @@
 //! Integration tests for Everruns SDK
 
 use everruns_sdk::{
-    AgentVersionChangeKind, ContentPart, CreateAgentRequest, CreateAgentVersionRequest,
-    CreateBudgetRequest, CreateSessionRequest, Everruns, ForkAgentVersionRequest, InitialFile,
-    RollbackAgentVersionRequest, TopUpRequest, UpdateBudgetRequest,
+    AgentVersionChangeKind, AnalyzeAgentRequest, ContentPart, CreateAgentRequest,
+    CreateAgentVersionRequest, CreateBudgetRequest, CreateMemoryRequest, CreateSessionRequest,
+    CreateWorkspaceRequest, Everruns, ForkAgentVersionRequest, GuardrailsDryRunRequest,
+    InitialFile, RollbackAgentVersionRequest, TopUpRequest, UpdateBudgetRequest,
 };
 use std::sync::Mutex;
 use wiremock::{
@@ -547,6 +548,298 @@ async fn test_capabilities_list_with_options() {
 }
 
 #[tokio::test]
+async fn test_agent_analyze() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/agents/analyze"))
+        .and(body_json(serde_json::json!({
+            "system_prompt": "You are helpful."
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "findings": [{
+                "rule_id": "prompt.empty",
+                "severity": "warning",
+                "category": "quality",
+                "source": "builtin",
+                "message": "Prompt is short"
+            }]
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client
+        .agents()
+        .analyze(AnalyzeAgentRequest::new("You are helpful."))
+        .await
+        .expect("analyze should succeed");
+
+    assert_eq!(response.findings[0].rule_id, "prompt.empty");
+}
+
+#[tokio::test]
+async fn test_guardrails_helpers() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/capabilities/guardrails/examples"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "examples": [{
+                "name": "secret-detection",
+                "display_name": "Secret Detection",
+                "description": "Detects secrets",
+                "tags": ["security"],
+                "check_types": ["regex"],
+                "stages": ["output"],
+                "data_egress": "none",
+                "config": {"checks": []}
+            }]
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/capabilities/guardrails/dry-run"))
+        .and(body_json(serde_json::json!({
+            "config": {"checks": []},
+            "stage": "output",
+            "text": "hello"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "hits": [],
+            "blocked": false
+        })))
+        .mount(&server)
+        .await;
+
+    let examples = client
+        .capabilities()
+        .list_guardrail_examples()
+        .await
+        .expect("examples should succeed");
+    let dry_run = client
+        .capabilities()
+        .dry_run_guardrails(GuardrailsDryRunRequest::new(
+            serde_json::json!({"checks": []}),
+            "output",
+            "hello",
+        ))
+        .await
+        .expect("dry run should succeed");
+
+    assert_eq!(examples.examples[0].name, "secret-detection");
+    assert!(!dry_run.blocked);
+}
+
+#[tokio::test]
+async fn test_workspaces_and_memories() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+    let workspace = serde_json::json!({
+        "id": "wsp_123",
+        "name": "team-research",
+        "description": "Research workspace",
+        "status": "active",
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z"
+    });
+    let memory = serde_json::json!({
+        "id": "mem_123",
+        "name": "design-docs",
+        "description": "Docs",
+        "source_type": "manual",
+        "source": {"provider": "manual"},
+        "is_readonly": false,
+        "sync_status": "idle",
+        "status": "active",
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z"
+    });
+
+    Mock::given(method("POST"))
+        .and(path("/v1/workspaces"))
+        .and(body_json(serde_json::json!({
+            "name": "team-research",
+            "description": "Research workspace"
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(workspace))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/memories"))
+        .and(body_json(serde_json::json!({
+            "name": "design-docs",
+            "description": "Docs"
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(memory.clone()))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/memories/mem_123/sync"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(memory))
+        .mount(&server)
+        .await;
+    let memory_file_info = serde_json::json!({
+        "path": "/notes.md",
+        "is_directory": false,
+        "size_bytes": 5,
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z"
+    });
+    let memory_file = serde_json::json!({
+        "path": "/notes.md",
+        "content": "hello",
+        "encoding": "text",
+        "size_bytes": 5,
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z"
+    });
+    Mock::given(method("GET"))
+        .and(path("/v1/memories/mem_123/fs"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [memory_file_info.clone()]
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/v1/memories/mem_123/fs/notes.md"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(memory_file.clone()))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/v1/memories/mem_123/fs/_/download/notes.md"))
+        .respond_with(ResponseTemplate::new(200).set_body_string("hello"))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/memories/mem_123/fs/new.md"))
+        .and(body_json(serde_json::json!({
+            "content": "new",
+            "encoding": "text"
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(memory_file_info.clone()))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/memories/mem_123/fs/folder"))
+        .and(body_json(serde_json::json!({
+            "is_directory": true
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "path": "/folder",
+            "is_directory": true,
+            "size_bytes": 0,
+            "created_at": "2026-06-13T00:00:00Z",
+            "updated_at": "2026-06-13T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("PUT"))
+        .and(path("/v1/memories/mem_123/fs/notes.md"))
+        .and(body_json(serde_json::json!({
+            "content": "updated",
+            "encoding": "text"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(memory_file.clone()))
+        .mount(&server)
+        .await;
+    Mock::given(method("DELETE"))
+        .and(path("/v1/memories/mem_123/fs/old.md"))
+        .respond_with(ResponseTemplate::new(204))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/memories/mem_123/fs/_/grep"))
+        .and(body_json(serde_json::json!({
+            "pattern": "hello"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [{"path": "/notes.md", "size_bytes": 5}]
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/memories/mem_123/fs/_/stat"))
+        .and(body_json(serde_json::json!({
+            "path": "/notes.md"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(memory_file_info))
+        .mount(&server)
+        .await;
+
+    let workspace = client
+        .workspaces()
+        .create(CreateWorkspaceRequest::new("team-research").description("Research workspace"))
+        .await
+        .expect("workspace create should succeed");
+    let memory = client
+        .memories()
+        .create(CreateMemoryRequest::new("design-docs").description("Docs"))
+        .await
+        .expect("memory create should succeed");
+    let synced = client
+        .memories()
+        .sync("mem_123")
+        .await
+        .expect("memory sync should succeed");
+    let files = client
+        .memories()
+        .list_files("mem_123")
+        .await
+        .expect("memory files should list");
+    let file = client
+        .memories()
+        .read_file("mem_123", "/notes.md")
+        .await
+        .expect("memory file should read");
+    let downloaded = client
+        .memories()
+        .download_file("mem_123", "/notes.md")
+        .await
+        .expect("memory file should download");
+    client
+        .memories()
+        .create_file("mem_123", "/new.md", "new", Some("text"))
+        .await
+        .expect("memory file should create");
+    client
+        .memories()
+        .create_dir("mem_123", "/folder")
+        .await
+        .expect("memory dir should create");
+    client
+        .memories()
+        .update_file("mem_123", "/notes.md", "updated", Some("text"))
+        .await
+        .expect("memory file should update");
+    client
+        .memories()
+        .delete_file("mem_123", "/old.md")
+        .await
+        .expect("memory file should delete");
+    let grep = client
+        .memories()
+        .grep_files("mem_123", "hello", None)
+        .await
+        .expect("memory grep should succeed");
+    let stat = client
+        .memories()
+        .stat_file("mem_123", "/notes.md")
+        .await
+        .expect("memory stat should succeed");
+
+    assert_eq!(workspace.id, "wsp_123");
+    assert_eq!(memory.id, "mem_123");
+    assert_eq!(synced.sync_status, "idle");
+    assert_eq!(files.data[0].path, "/notes.md");
+    assert_eq!(file.content, "hello");
+    assert_eq!(downloaded, "hello");
+    assert_eq!(grep.data[0].path, "/notes.md");
+    assert_eq!(stat.path, "/notes.md");
+}
+
+#[tokio::test]
 async fn test_events_list_with_upstream_filters() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
@@ -657,17 +950,17 @@ async fn test_create_tool_results_uses_tool_results_endpoint() {
 // --- Session Files Tests ---
 
 #[tokio::test]
-async fn test_session_files_list() {
+async fn test_workspace_files_list() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/sessions/sess_123/fs"))
+        .and(path("/v1/workspaces/wsp_123/fs"))
         .and(query_param("recursive", "true"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [{
                 "id": "file_001",
-                "session_id": "sess_123",
+                "session_id": "wsp_123",
                 "path": "/workspace/hello.txt",
                 "name": "hello.txt",
                 "is_directory": false,
@@ -684,8 +977,8 @@ async fn test_session_files_list() {
         .await;
 
     let files = client
-        .session_files()
-        .list("sess_123", None, Some(true))
+        .workspace_files()
+        .list("wsp_123", None, Some(true))
         .await
         .expect("list should succeed");
 
@@ -695,15 +988,15 @@ async fn test_session_files_list() {
 }
 
 #[tokio::test]
-async fn test_session_files_read() {
+async fn test_workspace_files_read() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/sessions/sess_123/fs/workspace/hello.txt"))
+        .and(path("/v1/workspaces/wsp_123/fs/workspace/hello.txt"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "id": "file_001",
-            "session_id": "sess_123",
+            "session_id": "wsp_123",
             "path": "/workspace/hello.txt",
             "name": "hello.txt",
             "is_directory": false,
@@ -718,8 +1011,8 @@ async fn test_session_files_read() {
         .await;
 
     let file = client
-        .session_files()
-        .read("sess_123", "/workspace/hello.txt")
+        .workspace_files()
+        .read("wsp_123", "/workspace/hello.txt")
         .await
         .expect("read should succeed");
 
@@ -728,19 +1021,19 @@ async fn test_session_files_read() {
 }
 
 #[tokio::test]
-async fn test_session_files_create() {
+async fn test_workspace_files_create() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/sess_123/fs/workspace/new.txt"))
+        .and(path("/v1/workspaces/wsp_123/fs/workspace/new.txt"))
         .and(body_json(serde_json::json!({
             "content": "new content",
             "encoding": "text"
         })))
         .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
             "id": "file_002",
-            "session_id": "sess_123",
+            "session_id": "wsp_123",
             "path": "/workspace/new.txt",
             "name": "new.txt",
             "is_directory": false,
@@ -755,13 +1048,8 @@ async fn test_session_files_create() {
         .await;
 
     let file = client
-        .session_files()
-        .create(
-            "sess_123",
-            "/workspace/new.txt",
-            "new content",
-            Some("text"),
-        )
+        .workspace_files()
+        .create("wsp_123", "/workspace/new.txt", "new content", Some("text"))
         .await
         .expect("create should succeed");
 
@@ -770,18 +1058,18 @@ async fn test_session_files_create() {
 }
 
 #[tokio::test]
-async fn test_session_files_create_dir() {
+async fn test_workspace_files_create_dir() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/sess_123/fs/workspace/subdir"))
+        .and(path("/v1/workspaces/wsp_123/fs/workspace/subdir"))
         .and(body_json(serde_json::json!({
             "is_directory": true
         })))
         .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
             "id": "file_003",
-            "session_id": "sess_123",
+            "session_id": "wsp_123",
             "path": "/workspace/subdir",
             "name": "subdir",
             "is_directory": true,
@@ -794,8 +1082,8 @@ async fn test_session_files_create_dir() {
         .await;
 
     let file = client
-        .session_files()
-        .create_dir("sess_123", "/workspace/subdir")
+        .workspace_files()
+        .create_dir("wsp_123", "/workspace/subdir")
         .await
         .expect("create_dir should succeed");
 
@@ -804,18 +1092,18 @@ async fn test_session_files_create_dir() {
 }
 
 #[tokio::test]
-async fn test_session_files_update() {
+async fn test_workspace_files_update() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("PUT"))
-        .and(path("/v1/sessions/sess_123/fs/workspace/hello.txt"))
+        .and(path("/v1/workspaces/wsp_123/fs/workspace/hello.txt"))
         .and(body_json(serde_json::json!({
             "content": "updated"
         })))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "id": "file_001",
-            "session_id": "sess_123",
+            "session_id": "wsp_123",
             "path": "/workspace/hello.txt",
             "name": "hello.txt",
             "is_directory": false,
@@ -830,8 +1118,8 @@ async fn test_session_files_update() {
         .await;
 
     let file = client
-        .session_files()
-        .update("sess_123", "/workspace/hello.txt", "updated", None)
+        .workspace_files()
+        .update("wsp_123", "/workspace/hello.txt", "updated", None)
         .await
         .expect("update should succeed");
 
@@ -839,12 +1127,12 @@ async fn test_session_files_update() {
 }
 
 #[tokio::test]
-async fn test_session_files_delete() {
+async fn test_workspace_files_delete() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("DELETE"))
-        .and(path("/v1/sessions/sess_123/fs/workspace/hello.txt"))
+        .and(path("/v1/workspaces/wsp_123/fs/workspace/hello.txt"))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(serde_json::json!({"deleted": true})),
         )
@@ -852,8 +1140,8 @@ async fn test_session_files_delete() {
         .await;
 
     let resp = client
-        .session_files()
-        .delete("sess_123", "/workspace/hello.txt", None)
+        .workspace_files()
+        .delete("wsp_123", "/workspace/hello.txt", None)
         .await
         .expect("delete should succeed");
 
@@ -861,19 +1149,19 @@ async fn test_session_files_delete() {
 }
 
 #[tokio::test]
-async fn test_session_files_move() {
+async fn test_workspace_files_move() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/sess_123/fs/_/move"))
+        .and(path("/v1/workspaces/wsp_123/fs/_/move"))
         .and(body_json(serde_json::json!({
             "src_path": "/workspace/old.txt",
             "dst_path": "/workspace/new.txt"
         })))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "id": "file_001",
-            "session_id": "sess_123",
+            "session_id": "wsp_123",
             "path": "/workspace/new.txt",
             "name": "new.txt",
             "is_directory": false,
@@ -886,8 +1174,8 @@ async fn test_session_files_move() {
         .await;
 
     let file = client
-        .session_files()
-        .move_file("sess_123", "/workspace/old.txt", "/workspace/new.txt")
+        .workspace_files()
+        .move_file("wsp_123", "/workspace/old.txt", "/workspace/new.txt")
         .await
         .expect("move should succeed");
 
@@ -895,19 +1183,19 @@ async fn test_session_files_move() {
 }
 
 #[tokio::test]
-async fn test_session_files_copy() {
+async fn test_workspace_files_copy() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/sess_123/fs/_/copy"))
+        .and(path("/v1/workspaces/wsp_123/fs/_/copy"))
         .and(body_json(serde_json::json!({
             "src_path": "/workspace/original.txt",
             "dst_path": "/workspace/copy.txt"
         })))
         .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
             "id": "file_004",
-            "session_id": "sess_123",
+            "session_id": "wsp_123",
             "path": "/workspace/copy.txt",
             "name": "copy.txt",
             "is_directory": false,
@@ -920,8 +1208,8 @@ async fn test_session_files_copy() {
         .await;
 
     let file = client
-        .session_files()
-        .copy_file("sess_123", "/workspace/original.txt", "/workspace/copy.txt")
+        .workspace_files()
+        .copy_file("wsp_123", "/workspace/original.txt", "/workspace/copy.txt")
         .await
         .expect("copy should succeed");
 
@@ -929,12 +1217,12 @@ async fn test_session_files_copy() {
 }
 
 #[tokio::test]
-async fn test_session_files_grep() {
+async fn test_workspace_files_grep() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/sess_123/fs/_/grep"))
+        .and(path("/v1/workspaces/wsp_123/fs/_/grep"))
         .and(body_json(serde_json::json!({
             "pattern": "TODO"
         })))
@@ -955,8 +1243,8 @@ async fn test_session_files_grep() {
         .await;
 
     let results = client
-        .session_files()
-        .grep("sess_123", "TODO", None)
+        .workspace_files()
+        .grep("wsp_123", "TODO", None)
         .await
         .expect("grep should succeed");
 
@@ -966,12 +1254,12 @@ async fn test_session_files_grep() {
 }
 
 #[tokio::test]
-async fn test_session_files_stat() {
+async fn test_workspace_files_stat() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/sess_123/fs/_/stat"))
+        .and(path("/v1/workspaces/wsp_123/fs/_/stat"))
         .and(body_json(serde_json::json!({
             "path": "/workspace/hello.txt"
         })))
@@ -988,8 +1276,8 @@ async fn test_session_files_stat() {
         .await;
 
     let stat = client
-        .session_files()
-        .stat("sess_123", "/workspace/hello.txt")
+        .workspace_files()
+        .stat("wsp_123", "/workspace/hello.txt")
         .await
         .expect("stat should succeed");
 

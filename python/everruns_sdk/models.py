@@ -435,7 +435,38 @@ class ListResponse(BaseModel):
     limit: int = 0
 
 
-# --- Session Filesystem Models ---
+# --- Workspace Models ---
+
+
+class Workspace(BaseModel):
+    """Workspace resource."""
+
+    id: str
+    name: str
+    status: str
+    created_at: str
+    updated_at: str
+    description: Optional[str] = None
+    archived_at: Optional[str] = None
+    deleted_at: Optional[str] = None
+
+
+class CreateWorkspaceRequest(BaseModel):
+    """Request to create a workspace."""
+
+    name: str
+    description: Optional[str] = None
+
+
+class UpdateWorkspaceRequest(BaseModel):
+    """Request to update a workspace."""
+
+    name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+
+
+# --- Workspace Filesystem Models ---
 
 
 class FileInfo(BaseModel):
@@ -499,6 +530,175 @@ class DeleteFileResponse(BaseModel):
     """Response for delete operation."""
 
     deleted: bool
+
+
+# --- Memory Models ---
+
+
+class Memory(BaseModel):
+    """Workspace memory resource."""
+
+    id: str
+    name: str
+    source_type: str
+    source: dict[str, Any]
+    is_readonly: bool
+    sync_status: str
+    status: str
+    created_at: str
+    updated_at: str
+    description: Optional[str] = None
+    last_sync_error: Optional[str] = None
+    last_synced_at: Optional[str] = None
+    archived_at: Optional[str] = None
+    deleted_at: Optional[str] = None
+
+
+class CreateMemoryRequest(BaseModel):
+    """Request to create a workspace memory."""
+
+    name: str
+    description: Optional[str] = None
+    source: Optional[dict[str, Any]] = None
+
+
+class UpdateMemoryRequest(BaseModel):
+    """Request to update a workspace memory."""
+
+    name: Optional[str] = None
+    description: Optional[str] = None
+    source: Optional[dict[str, Any]] = None
+
+
+class MemoryFileInfo(BaseModel):
+    """Memory file metadata."""
+
+    path: str
+    is_directory: bool
+    size_bytes: int
+    created_at: str
+    updated_at: str
+    content_hash: Optional[str] = None
+
+
+class MemoryFile(BaseModel):
+    """Memory file content."""
+
+    path: str
+    content: str
+    encoding: str
+    size_bytes: int
+    created_at: str
+    updated_at: str
+    content_hash: Optional[str] = None
+
+
+class CreateMemoryFileRequest(BaseModel):
+    """Request to create a memory file or directory."""
+
+    content: Optional[str] = None
+    encoding: Optional[str] = None
+    is_directory: Optional[bool] = None
+
+
+class UpdateMemoryFileRequest(BaseModel):
+    """Request to update a memory file."""
+
+    content: Optional[str] = None
+    encoding: Optional[str] = None
+
+
+class MemoryGrepResult(BaseModel):
+    """Memory grep result entry."""
+
+    path: str
+    size_bytes: int
+
+
+# --- Agent Analysis and Guardrail Models ---
+
+
+class AnalyzeAgentRequest(BaseModel):
+    """Request to run advisory checks against an agent shape."""
+
+    system_prompt: str
+    capabilities: list[AgentCapabilityConfig] = []
+    tools: list[dict[str, Any]] = []
+    mcp_servers: Optional[dict[str, Any]] = Field(default=None, alias="mcpServers")
+
+
+class FindingLocation(BaseModel):
+    """Finding location in authored config."""
+
+    field: str
+    start: Optional[int] = None
+    end: Optional[int] = None
+
+
+class Finding(BaseModel):
+    """Advisory agent finding."""
+
+    rule_id: str
+    severity: str
+    category: str
+    source: str
+    message: str
+    location: Optional[FindingLocation] = None
+    fix: Optional[str] = None
+
+
+class AgentAnalysisResponse(BaseModel):
+    """Response from agent analysis."""
+
+    findings: list[Finding]
+
+
+class GuardrailsDryRunRequest(BaseModel):
+    """Request to evaluate guardrails against sample text."""
+
+    config: dict[str, Any]
+    stage: Literal["output", "tool_use", "tool_output"]
+    text: str
+    tool_name: Optional[str] = None
+
+
+class GuardrailsDryRunHit(BaseModel):
+    """One triggered guardrail check."""
+
+    check_index: int
+    check_id: str
+    stage: str
+    rule_type: str
+    action: Literal["block", "log"]
+    reason_code: str
+    matched: Optional[str] = None
+    replacement: Optional[str] = None
+
+
+class GuardrailsDryRunResponse(BaseModel):
+    """Guardrail dry-run response."""
+
+    hits: list[GuardrailsDryRunHit]
+    blocked: bool
+
+
+class GuardrailExample(BaseModel):
+    """Adoptable guardrail preset."""
+
+    name: str
+    display_name: str
+    description: str
+    tags: list[str]
+    check_types: list[str]
+    stages: list[str]
+    data_egress: str
+    config: dict[str, Any]
+
+
+class GuardrailExamplesResponse(BaseModel):
+    """Guardrail preset list response."""
+
+    examples: list[GuardrailExample]
 
 
 # --- Budget Models ---

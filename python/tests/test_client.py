@@ -1099,6 +1099,245 @@ async def test_capabilities_list_with_options():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_agent_analyze():
+    route = respx.post("https://custom.example.com/api/v1/agents/analyze").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "findings": [
+                    {
+                        "rule_id": "prompt.empty",
+                        "severity": "warning",
+                        "category": "quality",
+                        "source": "builtin",
+                        "message": "Prompt is short",
+                    }
+                ]
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        response = await client.agents.analyze("You are helpful.")
+    finally:
+        await client.close()
+
+    assert response.findings[0].rule_id == "prompt.empty"
+    assert json.loads(route.calls.last.request.content) == {
+        "system_prompt": "You are helpful.",
+        "capabilities": [],
+        "tools": [],
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_guardrails_helpers():
+    examples_route = respx.get(
+        "https://custom.example.com/api/v1/capabilities/guardrails/examples"
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "examples": [
+                    {
+                        "name": "secret-detection",
+                        "display_name": "Secret Detection",
+                        "description": "Detects secrets",
+                        "tags": ["security"],
+                        "check_types": ["regex"],
+                        "stages": ["output"],
+                        "data_egress": "none",
+                        "config": {"checks": []},
+                    }
+                ]
+            },
+        )
+    )
+    dry_run_route = respx.post(
+        "https://custom.example.com/api/v1/capabilities/guardrails/dry-run"
+    ).mock(return_value=httpx.Response(200, json={"hits": [], "blocked": False}))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        examples = await client.capabilities.list_guardrail_examples()
+        dry_run = await client.capabilities.dry_run_guardrails({"checks": []}, "output", "hello")
+    finally:
+        await client.close()
+
+    assert examples.examples[0].name == "secret-detection"
+    assert dry_run.blocked is False
+    assert examples_route.called
+    assert json.loads(dry_run_route.calls.last.request.content) == {
+        "config": {"checks": []},
+        "stage": "output",
+        "text": "hello",
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_workspaces_and_memories():
+    workspace_json = {
+        "id": "wsp_123",
+        "name": "team-research",
+        "description": "Research workspace",
+        "status": "active",
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z",
+    }
+    memory_json = {
+        "id": "mem_123",
+        "name": "design-docs",
+        "description": "Docs",
+        "source_type": "manual",
+        "source": {"provider": "manual"},
+        "is_readonly": False,
+        "sync_status": "idle",
+        "status": "active",
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z",
+    }
+    workspace_route = respx.post("https://custom.example.com/api/v1/workspaces").mock(
+        return_value=httpx.Response(201, json=workspace_json)
+    )
+    memory_route = respx.post("https://custom.example.com/api/v1/memories").mock(
+        return_value=httpx.Response(201, json=memory_json)
+    )
+    sync_route = respx.post("https://custom.example.com/api/v1/memories/mem_123/sync").mock(
+        return_value=httpx.Response(200, json=memory_json)
+    )
+    memory_file_info = {
+        "path": "/notes.md",
+        "is_directory": False,
+        "size_bytes": 5,
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z",
+    }
+    memory_file = {
+        "path": "/notes.md",
+        "content": "hello",
+        "encoding": "text",
+        "size_bytes": 5,
+        "created_at": "2026-06-13T00:00:00Z",
+        "updated_at": "2026-06-13T00:00:00Z",
+    }
+    list_files_route = respx.get("https://custom.example.com/api/v1/memories/mem_123/fs").mock(
+        return_value=httpx.Response(200, json={"data": [memory_file_info]})
+    )
+    read_file_route = respx.get(
+        "https://custom.example.com/api/v1/memories/mem_123/fs/notes.md"
+    ).mock(return_value=httpx.Response(200, json=memory_file))
+    download_route = respx.get(
+        "https://custom.example.com/api/v1/memories/mem_123/fs/_/download/notes.md"
+    ).mock(return_value=httpx.Response(200, text="hello"))
+    create_file_route = respx.post(
+        "https://custom.example.com/api/v1/memories/mem_123/fs/new.md"
+    ).mock(return_value=httpx.Response(201, json=memory_file_info))
+    create_dir_route = respx.post(
+        "https://custom.example.com/api/v1/memories/mem_123/fs/folder"
+    ).mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "path": "/folder",
+                "is_directory": True,
+                "size_bytes": 0,
+                "created_at": "2026-06-13T00:00:00Z",
+                "updated_at": "2026-06-13T00:00:00Z",
+            },
+        )
+    )
+    update_file_route = respx.put(
+        "https://custom.example.com/api/v1/memories/mem_123/fs/notes.md"
+    ).mock(return_value=httpx.Response(200, json=memory_file))
+    delete_file_route = respx.delete(
+        "https://custom.example.com/api/v1/memories/mem_123/fs/old.md"
+    ).mock(return_value=httpx.Response(204))
+    grep_route = respx.post("https://custom.example.com/api/v1/memories/mem_123/fs/_/grep").mock(
+        return_value=httpx.Response(200, json={"data": [{"path": "/notes.md", "size_bytes": 5}]})
+    )
+    stat_route = respx.post("https://custom.example.com/api/v1/memories/mem_123/fs/_/stat").mock(
+        return_value=httpx.Response(200, json=memory_file_info)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        workspace = await client.workspaces.create(
+            "team-research", description="Research workspace"
+        )
+        memory = await client.memories.create("design-docs", description="Docs")
+        synced = await client.memories.sync("mem_123")
+        files = await client.memories.list_files("mem_123")
+        file = await client.memories.read_file("mem_123", "/notes.md")
+        downloaded = await client.memories.download_file("mem_123", "/notes.md")
+        await client.memories.create_file("mem_123", "/new.md", "new", encoding="text")
+        await client.memories.create_dir("mem_123", "/folder")
+        await client.memories.update_file("mem_123", "/notes.md", "updated", encoding="text")
+        await client.memories.delete_file("mem_123", "/old.md")
+        grep = await client.memories.grep_files("mem_123", "hello")
+        stat = await client.memories.stat_file("mem_123", "/notes.md")
+    finally:
+        await client.close()
+
+    assert workspace.id == "wsp_123"
+    assert memory.id == "mem_123"
+    assert synced.sync_status == "idle"
+    assert files[0].path == "/notes.md"
+    assert file.content == "hello"
+    assert downloaded == "hello"
+    assert grep[0].path == "/notes.md"
+    assert stat.path == "/notes.md"
+    assert json.loads(workspace_route.calls.last.request.content) == {
+        "name": "team-research",
+        "description": "Research workspace",
+    }
+    assert json.loads(memory_route.calls.last.request.content) == {
+        "name": "design-docs",
+        "description": "Docs",
+    }
+    assert sync_route.called
+    assert list_files_route.called
+    assert read_file_route.called
+    assert download_route.called
+    assert json.loads(create_file_route.calls.last.request.content) == {
+        "content": "new",
+        "encoding": "text",
+    }
+    assert json.loads(create_dir_route.calls.last.request.content) == {"is_directory": True}
+    assert json.loads(update_file_route.calls.last.request.content) == {
+        "content": "updated",
+        "encoding": "text",
+    }
+    assert delete_file_route.called
+    assert json.loads(grep_route.calls.last.request.content) == {"pattern": "hello"}
+    assert json.loads(stat_route.calls.last.request.content) == {"path": "/notes.md"}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_workspace_and_memory_list_include_archived_query_values():
+    workspace_route = respx.get(
+        "https://custom.example.com/api/v1/workspaces?include_archived=false"
+    ).mock(return_value=httpx.Response(200, json={"data": []}))
+    memory_route = respx.get(
+        "https://custom.example.com/api/v1/memories?include_archived=true"
+    ).mock(return_value=httpx.Response(200, json={"data": []}))
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.workspaces.list(include_archived=False)
+        await client.memories.list(include_archived=True)
+    finally:
+        await client.close()
+
+    assert workspace_route.called
+    assert memory_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_events_list_with_upstream_filters():
     route = respx.get(
         "https://custom.example.com/api/v1/sessions/sess_123/events"
@@ -1196,7 +1435,7 @@ async def test_create_tool_results_uses_tool_results_endpoint():
 
 FILE_RESPONSE = {
     "id": "file_001",
-    "session_id": "sess_123",
+    "session_id": "wsp_123",
     "path": "/workspace/hello.txt",
     "name": "hello.txt",
     "is_directory": False,
@@ -1211,15 +1450,17 @@ FILE_RESPONSE = {
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_list():
-    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/fs?recursive=true").mock(
+async def test_workspace_files_list():
+    route = respx.get(
+        "https://custom.example.com/api/v1/workspaces/wsp_123/fs?recursive=true"
+    ).mock(
         return_value=httpx.Response(
             200,
             json={
                 "data": [
                     {
                         "id": "file_001",
-                        "session_id": "sess_123",
+                        "session_id": "wsp_123",
                         "path": "/workspace/hello.txt",
                         "name": "hello.txt",
                         "is_directory": False,
@@ -1238,7 +1479,7 @@ async def test_session_files_list():
 
     client = Everruns(api_key="evr_test_key")
     try:
-        files = await client.session_files.list("sess_123", recursive=True)
+        files = await client.workspace_files.list("wsp_123", recursive=True)
     finally:
         await client.close()
 
@@ -1250,14 +1491,14 @@ async def test_session_files_list():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_read():
+async def test_workspace_files_read():
     route = respx.get(
-        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt"
+        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
     ).mock(return_value=httpx.Response(200, json=FILE_RESPONSE))
 
     client = Everruns(api_key="evr_test_key")
     try:
-        file = await client.session_files.read("sess_123", "/workspace/hello.txt")
+        file = await client.workspace_files.read("wsp_123", "/workspace/hello.txt")
     finally:
         await client.close()
 
@@ -1268,15 +1509,15 @@ async def test_session_files_read():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_create():
+async def test_workspace_files_create():
     route = respx.post(
-        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/new.txt"
+        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/new.txt"
     ).mock(return_value=httpx.Response(201, json=FILE_RESPONSE))
 
     client = Everruns(api_key="evr_test_key")
     try:
-        file = await client.session_files.create(
-            "sess_123", "/workspace/new.txt", "hello", encoding="text"
+        file = await client.workspace_files.create(
+            "wsp_123", "/workspace/new.txt", "hello", encoding="text"
         )
     finally:
         await client.close()
@@ -1290,15 +1531,15 @@ async def test_session_files_create():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_create_dir():
+async def test_workspace_files_create_dir():
     route = respx.post(
-        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/subdir"
+        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/subdir"
     ).mock(
         return_value=httpx.Response(
             201,
             json={
                 "id": "file_003",
-                "session_id": "sess_123",
+                "session_id": "wsp_123",
                 "path": "/workspace/subdir",
                 "name": "subdir",
                 "is_directory": True,
@@ -1312,7 +1553,7 @@ async def test_session_files_create_dir():
 
     client = Everruns(api_key="evr_test_key")
     try:
-        file = await client.session_files.create_dir("sess_123", "/workspace/subdir")
+        file = await client.workspace_files.create_dir("wsp_123", "/workspace/subdir")
     finally:
         await client.close()
 
@@ -1324,14 +1565,14 @@ async def test_session_files_create_dir():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_update():
+async def test_workspace_files_update():
     route = respx.put(
-        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt"
+        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
     ).mock(return_value=httpx.Response(200, json=FILE_RESPONSE))
 
     client = Everruns(api_key="evr_test_key")
     try:
-        file = await client.session_files.update("sess_123", "/workspace/hello.txt", "hello")
+        file = await client.workspace_files.update("wsp_123", "/workspace/hello.txt", "hello")
     finally:
         await client.close()
 
@@ -1343,14 +1584,14 @@ async def test_session_files_update():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_delete():
+async def test_workspace_files_delete():
     route = respx.delete(
-        "https://custom.example.com/api/v1/sessions/sess_123/fs/workspace/hello.txt"
+        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
     ).mock(return_value=httpx.Response(200, json={"deleted": True}))
 
     client = Everruns(api_key="evr_test_key")
     try:
-        resp = await client.session_files.delete("sess_123", "/workspace/hello.txt")
+        resp = await client.workspace_files.delete("wsp_123", "/workspace/hello.txt")
     finally:
         await client.close()
 
@@ -1360,14 +1601,16 @@ async def test_session_files_delete():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_move():
-    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/move").mock(
+async def test_workspace_files_move():
+    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/move").mock(
         return_value=httpx.Response(200, json=FILE_RESPONSE)
     )
 
     client = Everruns(api_key="evr_test_key")
     try:
-        await client.session_files.move_file("sess_123", "/workspace/old.txt", "/workspace/new.txt")
+        await client.workspace_files.move_file(
+            "wsp_123", "/workspace/old.txt", "/workspace/new.txt"
+        )
     finally:
         await client.close()
 
@@ -1379,15 +1622,15 @@ async def test_session_files_move():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_copy():
-    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/copy").mock(
+async def test_workspace_files_copy():
+    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/copy").mock(
         return_value=httpx.Response(201, json=FILE_RESPONSE)
     )
 
     client = Everruns(api_key="evr_test_key")
     try:
-        await client.session_files.copy_file(
-            "sess_123", "/workspace/original.txt", "/workspace/copy.txt"
+        await client.workspace_files.copy_file(
+            "wsp_123", "/workspace/original.txt", "/workspace/copy.txt"
         )
     finally:
         await client.close()
@@ -1400,8 +1643,8 @@ async def test_session_files_copy():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_grep():
-    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/grep").mock(
+async def test_workspace_files_grep():
+    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/grep").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1426,7 +1669,7 @@ async def test_session_files_grep():
 
     client = Everruns(api_key="evr_test_key")
     try:
-        results = await client.session_files.grep("sess_123", "TODO")
+        results = await client.workspace_files.grep("wsp_123", "TODO")
     finally:
         await client.close()
 
@@ -1438,8 +1681,8 @@ async def test_session_files_grep():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_session_files_stat():
-    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/fs/_/stat").mock(
+async def test_workspace_files_stat():
+    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/stat").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1456,7 +1699,7 @@ async def test_session_files_stat():
 
     client = Everruns(api_key="evr_test_key")
     try:
-        stat = await client.session_files.stat("sess_123", "/workspace/hello.txt")
+        stat = await client.workspace_files.stat("wsp_123", "/workspace/hello.txt")
     finally:
         await client.close()
 

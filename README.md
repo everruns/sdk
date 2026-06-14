@@ -138,17 +138,20 @@ main();
 - **Async/await** patterns throughout
 - **SSE streaming** with automatic reconnection
 - **Typed models** generated from OpenAPI spec
-- **Sub-client organization**: `.agents()`, `.sessions()`, `.messages()`, `.events()`
+- **Sub-client organization**: `.agents()`, `.sessions()`, `.messages()`, `.events()`, `.workspaces()`, `.workspace_files()`, `.memories()`
 
 ## API Coverage
 
 | Resource | Operations |
 |----------|------------|
-| Agents | Create, list, get, update, archive, version, diff, fork, rollback |
+| Agents | Create, list, get, update, archive, version, diff, fork, rollback, analyze |
 | Sessions | Create, list, get, update, delete, cancel |
 | Messages | Create, list |
 | Events | Poll, stream (SSE) |
-| Filesystem | List, read, write session files |
+| Capabilities | List, get, guardrail examples, guardrail dry-run |
+| Workspaces | Create, list, get, update, archive |
+| Filesystem | List, read, write workspace files |
+| Memories | Create, list, get, update, archive, sync, file operations |
 | Images | Upload, retrieve |
 
 ## Event Types

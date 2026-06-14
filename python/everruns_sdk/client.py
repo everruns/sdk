@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 from urllib.parse import urlencode
 
 import httpx
@@ -13,10 +13,12 @@ from everruns_sdk.auth import ApiKey
 from everruns_sdk.errors import ApiError, ValidationError
 from everruns_sdk.models import (
     Agent,
+    AgentAnalysisResponse,
     AgentCapabilityConfig,
     AgentVersion,
     AgentVersionChangeKind,
     AgentVersionDiffResponse,
+    AnalyzeAgentRequest,
     Budget,
     BudgetCheckResult,
     CapabilityInfo,
@@ -26,17 +28,27 @@ from everruns_sdk.models import (
     Controls,
     CreateAgentRequest,
     CreateAgentVersionRequest,
+    CreateMemoryFileRequest,
+    CreateMemoryRequest,
     CreateMessageRequest,
     CreateSessionRequest,
+    CreateWorkspaceRequest,
     DeleteFileResponse,
     Event,
     FileInfo,
     FileStat,
     ForkAgentVersionRequest,
     GrepResult,
+    GuardrailExamplesResponse,
+    GuardrailsDryRunRequest,
+    GuardrailsDryRunResponse,
     InitialFile,
     LedgerEntry,
     ListResponse,
+    Memory,
+    MemoryFile,
+    MemoryFileInfo,
+    MemoryGrepResult,
     Message,
     MessageInput,
     ResourceStats,
@@ -48,6 +60,10 @@ from everruns_sdk.models import (
     SubmitToolResultsRequest,
     SubmitToolResultsResponse,
     ToolDefinition,
+    UpdateMemoryFileRequest,
+    UpdateMemoryRequest,
+    UpdateWorkspaceRequest,
+    Workspace,
     validate_agent_name,
     validate_harness_name,
 )
@@ -163,9 +179,19 @@ class Everruns:
         return CapabilitiesClient(self)
 
     @property
-    def session_files(self) -> "SessionFilesClient":
-        """Get the session files client."""
-        return SessionFilesClient(self)
+    def workspaces(self) -> "WorkspacesClient":
+        """Get the workspaces client."""
+        return WorkspacesClient(self)
+
+    @property
+    def workspace_files(self) -> "WorkspaceFilesClient":
+        """Get the workspace files client."""
+        return WorkspaceFilesClient(self)
+
+    @property
+    def memories(self) -> "MemoriesClient":
+        """Get the memories client."""
+        return MemoriesClient(self)
 
     @property
     def connections(self) -> "ConnectionsClient":
@@ -542,6 +568,27 @@ class AgentsClient:
         """Export an agent as Markdown with YAML front matter."""
         return await self._client._get_text(f"/agents/{agent_id}/export")
 
+    async def analyze(
+        self,
+        system_prompt: str,
+        *,
+        capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        mcp_servers: Optional[dict[str, Any]] = None,
+    ) -> AgentAnalysisResponse:
+        """Run advisory checks against an agent shape."""
+        req = AnalyzeAgentRequest(
+            system_prompt=system_prompt,
+            capabilities=capabilities or [],
+            tools=tools or [],
+            mcpServers=mcp_servers,
+        )
+        resp = await self._client._post(
+            "/agents/analyze",
+            req.model_dump(by_alias=True, exclude_none=True),
+        )
+        return AgentAnalysisResponse(**resp)
+
 
 class SessionsClient:
     """Client for session operations."""
@@ -898,16 +945,95 @@ class CapabilitiesClient:
         resp = await self._client._get(f"/capabilities/{capability_id}")
         return CapabilityInfo(**resp)
 
+    async def list_guardrail_examples(self) -> GuardrailExamplesResponse:
+        """List adoptable guardrail presets."""
+        resp = await self._client._get("/capabilities/guardrails/examples")
+        return GuardrailExamplesResponse(**resp)
 
-class SessionFilesClient:
-    """Client for session filesystem operations."""
+    async def dry_run_guardrails(
+        self,
+        config: dict[str, Any],
+        stage: Literal["output", "tool_use", "tool_output"],
+        text: str,
+        *,
+        tool_name: Optional[str] = None,
+    ) -> GuardrailsDryRunResponse:
+        """Evaluate a guardrails config against sample content."""
+        req = GuardrailsDryRunRequest(
+            config=config,
+            stage=stage,
+            text=text,
+            tool_name=tool_name,
+        )
+        resp = await self._client._post(
+            "/capabilities/guardrails/dry-run",
+            req.model_dump(exclude_none=True),
+        )
+        return GuardrailsDryRunResponse(**resp)
+
+
+class WorkspacesClient:
+    """Client for workspace operations."""
 
     def __init__(self, client: Everruns):
         self._client = client
 
     async def list(
         self,
-        session_id: str,
+        *,
+        search: Optional[str] = None,
+        include_archived: Optional[bool] = None,
+    ) -> list[Workspace]:
+        """List workspaces."""
+        include_archived_param = None if include_archived is None else str(include_archived).lower()
+        path = _with_query(
+            "/workspaces",
+            {"search": search, "include_archived": include_archived_param},
+        )
+        resp = await self._client._get(path)
+        return [Workspace(**w) for w in resp.get("data", [])]
+
+    async def create(self, name: str, *, description: Optional[str] = None) -> Workspace:
+        """Create a workspace."""
+        req = CreateWorkspaceRequest(name=name, description=description)
+        resp = await self._client._post("/workspaces", req.model_dump(exclude_none=True))
+        return Workspace(**resp)
+
+    async def get(self, workspace_id: str) -> Workspace:
+        """Get a workspace by ID."""
+        resp = await self._client._get(f"/workspaces/{workspace_id}")
+        return Workspace(**resp)
+
+    async def update(
+        self,
+        workspace_id: str,
+        *,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> Workspace:
+        """Update a workspace."""
+        req = UpdateWorkspaceRequest(name=name, description=description, status=status)
+        resp = await self._client._patch(
+            f"/workspaces/{workspace_id}",
+            req.model_dump(exclude_none=True),
+        )
+        return Workspace(**resp)
+
+    async def delete(self, workspace_id: str) -> None:
+        """Archive a workspace."""
+        await self._client._delete(f"/workspaces/{workspace_id}")
+
+
+class WorkspaceFilesClient:
+    """Client for workspace filesystem operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def list(
+        self,
+        workspace_id: str,
         path: Optional[str] = None,
         *,
         recursive: Optional[bool] = None,
@@ -915,14 +1041,14 @@ class SessionFilesClient:
         """List files in a directory.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             path: Directory path (defaults to root).
             recursive: List recursively.
         """
         if path:
-            api_path = f"/sessions/{session_id}/fs/{path.lstrip('/')}"
+            api_path = f"/workspaces/{workspace_id}/fs/{path.lstrip('/')}"
         else:
-            api_path = f"/sessions/{session_id}/fs"
+            api_path = f"/workspaces/{workspace_id}/fs"
         params: list[str] = []
         if recursive:
             params.append("recursive=true")
@@ -931,19 +1057,19 @@ class SessionFilesClient:
         resp = await self._client._get(api_path)
         return [FileInfo(**f) for f in resp.get("data", [])]
 
-    async def read(self, session_id: str, path: str) -> SessionFile:
+    async def read(self, workspace_id: str, path: str) -> SessionFile:
         """Read a file's content.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             path: File path.
         """
-        resp = await self._client._get(f"/sessions/{session_id}/fs/{path.lstrip('/')}")
+        resp = await self._client._get(f"/workspaces/{workspace_id}/fs/{path.lstrip('/')}")
         return SessionFile(**resp)
 
     async def create(
         self,
-        session_id: str,
+        workspace_id: str,
         path: str,
         content: str,
         *,
@@ -953,7 +1079,7 @@ class SessionFilesClient:
         """Create a file.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             path: File path.
             content: File content.
             encoding: Content encoding ("text" or "base64").
@@ -964,25 +1090,25 @@ class SessionFilesClient:
             body["encoding"] = encoding
         if is_readonly is not None:
             body["is_readonly"] = is_readonly
-        resp = await self._client._post(f"/sessions/{session_id}/fs/{path.lstrip('/')}", body)
+        resp = await self._client._post(f"/workspaces/{workspace_id}/fs/{path.lstrip('/')}", body)
         return SessionFile(**resp)
 
-    async def create_dir(self, session_id: str, path: str) -> SessionFile:
+    async def create_dir(self, workspace_id: str, path: str) -> SessionFile:
         """Create a directory.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             path: Directory path.
         """
         resp = await self._client._post(
-            f"/sessions/{session_id}/fs/{path.lstrip('/')}",
+            f"/workspaces/{workspace_id}/fs/{path.lstrip('/')}",
             {"is_directory": True},
         )
         return SessionFile(**resp)
 
     async def update(
         self,
-        session_id: str,
+        workspace_id: str,
         path: str,
         content: str,
         *,
@@ -992,7 +1118,7 @@ class SessionFilesClient:
         """Update a file's content.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             path: File path.
             content: New file content.
             encoding: Content encoding ("text" or "base64").
@@ -1003,12 +1129,12 @@ class SessionFilesClient:
             body["encoding"] = encoding
         if is_readonly is not None:
             body["is_readonly"] = is_readonly
-        resp = await self._client._put(f"/sessions/{session_id}/fs/{path.lstrip('/')}", body)
+        resp = await self._client._put(f"/workspaces/{workspace_id}/fs/{path.lstrip('/')}", body)
         return SessionFile(**resp)
 
     async def delete(
         self,
-        session_id: str,
+        workspace_id: str,
         path: str,
         *,
         recursive: Optional[bool] = None,
@@ -1016,11 +1142,11 @@ class SessionFilesClient:
         """Delete a file or directory.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             path: File or directory path.
             recursive: Delete recursively (for directories).
         """
-        api_path = f"/sessions/{session_id}/fs/{path.lstrip('/')}"
+        api_path = f"/workspaces/{workspace_id}/fs/{path.lstrip('/')}"
         if recursive:
             api_path += "?recursive=true"
         resp = await self._client._delete_json(api_path)
@@ -1028,45 +1154,45 @@ class SessionFilesClient:
 
     async def move_file(
         self,
-        session_id: str,
+        workspace_id: str,
         src_path: str,
         dst_path: str,
     ) -> SessionFile:
         """Move/rename a file.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             src_path: Source path.
             dst_path: Destination path.
         """
         resp = await self._client._post(
-            f"/sessions/{session_id}/fs/_/move",
+            f"/workspaces/{workspace_id}/fs/_/move",
             {"src_path": src_path, "dst_path": dst_path},
         )
         return SessionFile(**resp)
 
     async def copy_file(
         self,
-        session_id: str,
+        workspace_id: str,
         src_path: str,
         dst_path: str,
     ) -> SessionFile:
         """Copy a file.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             src_path: Source path.
             dst_path: Destination path.
         """
         resp = await self._client._post(
-            f"/sessions/{session_id}/fs/_/copy",
+            f"/workspaces/{workspace_id}/fs/_/copy",
             {"src_path": src_path, "dst_path": dst_path},
         )
         return SessionFile(**resp)
 
     async def grep(
         self,
-        session_id: str,
+        workspace_id: str,
         pattern: str,
         *,
         path_pattern: Optional[str] = None,
@@ -1074,25 +1200,169 @@ class SessionFilesClient:
         """Search files with regex.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             pattern: Regex pattern to search for.
             path_pattern: Optional path pattern to filter files.
         """
         body: dict[str, Any] = {"pattern": pattern}
         if path_pattern is not None:
             body["path_pattern"] = path_pattern
-        resp = await self._client._post(f"/sessions/{session_id}/fs/_/grep", body)
+        resp = await self._client._post(f"/workspaces/{workspace_id}/fs/_/grep", body)
         return [GrepResult(**r) for r in resp.get("data", [])]
 
-    async def stat(self, session_id: str, path: str) -> FileStat:
+    async def stat(self, workspace_id: str, path: str) -> FileStat:
         """Get file or directory stat.
 
         Args:
-            session_id: Session ID.
+            workspace_id: Workspace ID.
             path: File or directory path.
         """
-        resp = await self._client._post(f"/sessions/{session_id}/fs/_/stat", {"path": path})
+        resp = await self._client._post(f"/workspaces/{workspace_id}/fs/_/stat", {"path": path})
         return FileStat(**resp)
+
+
+class MemoriesClient:
+    """Client for memory operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def list(
+        self,
+        *,
+        search: Optional[str] = None,
+        include_archived: Optional[bool] = None,
+    ) -> list[Memory]:
+        """List memories."""
+        include_archived_param = None if include_archived is None else str(include_archived).lower()
+        path = _with_query(
+            "/memories",
+            {"search": search, "include_archived": include_archived_param},
+        )
+        resp = await self._client._get(path)
+        return [Memory(**m) for m in resp.get("data", [])]
+
+    async def create(
+        self,
+        name: str,
+        *,
+        description: Optional[str] = None,
+        source: Optional[dict[str, Any]] = None,
+    ) -> Memory:
+        """Create a memory."""
+        req = CreateMemoryRequest(name=name, description=description, source=source)
+        resp = await self._client._post("/memories", req.model_dump(exclude_none=True))
+        return Memory(**resp)
+
+    async def get(self, memory_id: str) -> Memory:
+        """Get a memory by ID."""
+        resp = await self._client._get(f"/memories/{memory_id}")
+        return Memory(**resp)
+
+    async def update(
+        self,
+        memory_id: str,
+        *,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        source: Optional[dict[str, Any]] = None,
+    ) -> Memory:
+        """Update a memory."""
+        req = UpdateMemoryRequest(name=name, description=description, source=source)
+        resp = await self._client._patch(
+            f"/memories/{memory_id}",
+            req.model_dump(exclude_none=True),
+        )
+        return Memory(**resp)
+
+    async def delete(self, memory_id: str) -> None:
+        """Archive a memory."""
+        await self._client._delete(f"/memories/{memory_id}")
+
+    async def sync(self, memory_id: str) -> Memory:
+        """Trigger memory sync now."""
+        resp = await self._client._post(f"/memories/{memory_id}/sync", {})
+        return Memory(**resp)
+
+    async def list_files(self, memory_id: str) -> list[MemoryFileInfo]:
+        """List memory files at the root."""
+        resp = await self._client._get(f"/memories/{memory_id}/fs")
+        return [MemoryFileInfo(**item) for item in resp.get("data", [])]
+
+    async def read_file(self, memory_id: str, path: str) -> MemoryFile:
+        """Read a memory file."""
+        resp = await self._client._get(f"/memories/{memory_id}/fs/{path.lstrip('/')}")
+        return MemoryFile(**resp)
+
+    async def download_file(self, memory_id: str, path: str) -> str:
+        """Download a memory file as text."""
+        return await self._client._get_text(
+            f"/memories/{memory_id}/fs/_/download/{path.lstrip('/')}"
+        )
+
+    async def create_file(
+        self,
+        memory_id: str,
+        path: str,
+        content: str,
+        *,
+        encoding: Optional[str] = None,
+    ) -> MemoryFileInfo:
+        """Create a memory file."""
+        req = CreateMemoryFileRequest(content=content, encoding=encoding)
+        resp = await self._client._post(
+            f"/memories/{memory_id}/fs/{path.lstrip('/')}",
+            req.model_dump(exclude_none=True),
+        )
+        return MemoryFileInfo(**resp)
+
+    async def create_dir(self, memory_id: str, path: str) -> MemoryFileInfo:
+        """Create a memory directory."""
+        req = CreateMemoryFileRequest(is_directory=True)
+        resp = await self._client._post(
+            f"/memories/{memory_id}/fs/{path.lstrip('/')}",
+            req.model_dump(exclude_none=True),
+        )
+        return MemoryFileInfo(**resp)
+
+    async def update_file(
+        self,
+        memory_id: str,
+        path: str,
+        content: str,
+        *,
+        encoding: Optional[str] = None,
+    ) -> MemoryFile:
+        """Update a memory file."""
+        req = UpdateMemoryFileRequest(content=content, encoding=encoding)
+        resp = await self._client._put(
+            f"/memories/{memory_id}/fs/{path.lstrip('/')}",
+            req.model_dump(exclude_none=True),
+        )
+        return MemoryFile(**resp)
+
+    async def delete_file(self, memory_id: str, path: str) -> None:
+        """Delete a memory file or directory."""
+        await self._client._delete(f"/memories/{memory_id}/fs/{path.lstrip('/')}")
+
+    async def grep_files(
+        self,
+        memory_id: str,
+        pattern: str,
+        *,
+        path_pattern: Optional[str] = None,
+    ) -> list[MemoryGrepResult]:
+        """Search memory files by regex."""
+        body: dict[str, Any] = {"pattern": pattern}
+        if path_pattern is not None:
+            body["path_pattern"] = path_pattern
+        resp = await self._client._post(f"/memories/{memory_id}/fs/_/grep", body)
+        return [MemoryGrepResult(**item) for item in resp.get("data", [])]
+
+    async def stat_file(self, memory_id: str, path: str) -> MemoryFileInfo:
+        """Stat a memory file or directory."""
+        resp = await self._client._post(f"/memories/{memory_id}/fs/_/stat", {"path": path})
+        return MemoryFileInfo(**resp)
 
 
 class BudgetsClient:

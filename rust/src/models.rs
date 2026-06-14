@@ -1107,7 +1107,82 @@ pub struct EventContext {
     pub input_message_id: Option<String>,
 }
 
-// --- Session Filesystem Models ---
+// --- Workspace Models ---
+
+/// Workspace resource.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct Workspace {
+    pub id: String,
+    pub name: String,
+    pub status: String,
+    pub created_at: String,
+    pub updated_at: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub archived_at: Option<String>,
+    #[serde(default)]
+    pub deleted_at: Option<String>,
+}
+
+/// Request to create a workspace.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct CreateWorkspaceRequest {
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
+impl CreateWorkspaceRequest {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            description: None,
+        }
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+}
+
+/// Request to update a workspace.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct UpdateWorkspaceRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+
+impl UpdateWorkspaceRequest {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    pub fn status(mut self, status: impl Into<String>) -> Self {
+        self.status = Some(status.into());
+        self
+    }
+}
+
+// --- Workspace Filesystem Models ---
 
 /// File metadata without content
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1327,6 +1402,317 @@ pub struct GrepResult {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeleteResponse {
     pub deleted: bool,
+}
+
+// --- Memory Models ---
+
+/// Memory resource.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct Memory {
+    pub id: String,
+    pub name: String,
+    pub source_type: String,
+    pub source: serde_json::Value,
+    pub is_readonly: bool,
+    pub sync_status: String,
+    pub status: String,
+    pub created_at: String,
+    pub updated_at: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub last_sync_error: Option<String>,
+    #[serde(default)]
+    pub last_synced_at: Option<String>,
+    #[serde(default)]
+    pub archived_at: Option<String>,
+    #[serde(default)]
+    pub deleted_at: Option<String>,
+}
+
+/// Request to create a memory.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct CreateMemoryRequest {
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<serde_json::Value>,
+}
+
+impl CreateMemoryRequest {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            description: None,
+            source: None,
+        }
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    pub fn source(mut self, source: serde_json::Value) -> Self {
+        self.source = Some(source);
+        self
+    }
+}
+
+/// Request to update a memory.
+#[derive(Debug, Clone, Default, Serialize)]
+#[non_exhaustive]
+pub struct UpdateMemoryRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<serde_json::Value>,
+}
+
+impl UpdateMemoryRequest {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    pub fn source(mut self, source: serde_json::Value) -> Self {
+        self.source = Some(source);
+        self
+    }
+}
+
+/// Memory file metadata.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MemoryFileInfo {
+    pub path: String,
+    pub is_directory: bool,
+    pub size_bytes: i64,
+    pub created_at: String,
+    pub updated_at: String,
+    #[serde(default)]
+    pub content_hash: Option<String>,
+}
+
+/// Memory file content.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MemoryFile {
+    pub path: String,
+    pub content: String,
+    pub encoding: String,
+    pub size_bytes: i64,
+    pub created_at: String,
+    pub updated_at: String,
+    #[serde(default)]
+    pub content_hash: Option<String>,
+}
+
+/// Request to create a memory file or directory.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct CreateMemoryFileRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub encoding: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_directory: Option<bool>,
+}
+
+impl CreateMemoryFileRequest {
+    pub fn file(content: impl Into<String>) -> Self {
+        Self {
+            content: Some(content.into()),
+            encoding: None,
+            is_directory: None,
+        }
+    }
+
+    pub fn directory() -> Self {
+        Self {
+            content: None,
+            encoding: None,
+            is_directory: Some(true),
+        }
+    }
+
+    pub fn encoding(mut self, encoding: impl Into<String>) -> Self {
+        self.encoding = Some(encoding.into());
+        self
+    }
+}
+
+/// Request to update a memory file.
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct UpdateMemoryFileRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub encoding: Option<String>,
+}
+
+impl UpdateMemoryFileRequest {
+    pub fn content(content: impl Into<String>) -> Self {
+        Self {
+            content: Some(content.into()),
+            encoding: None,
+        }
+    }
+
+    pub fn encoding(mut self, encoding: impl Into<String>) -> Self {
+        self.encoding = Some(encoding.into());
+        self
+    }
+}
+
+/// Memory grep result entry.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MemoryGrepResult {
+    pub path: String,
+    pub size_bytes: i64,
+}
+
+// --- Agent Analysis and Guardrail Models ---
+
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct AnalyzeAgentRequest {
+    pub system_prompt: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub capabilities: Vec<AgentCapabilityConfig>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tools: Vec<serde_json::Value>,
+    #[serde(rename = "mcpServers", skip_serializing_if = "Option::is_none")]
+    pub mcp_servers: Option<serde_json::Value>,
+}
+
+impl AnalyzeAgentRequest {
+    pub fn new(system_prompt: impl Into<String>) -> Self {
+        Self {
+            system_prompt: system_prompt.into(),
+            capabilities: Vec::new(),
+            tools: Vec::new(),
+            mcp_servers: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct AgentAnalysisResponse {
+    pub findings: Vec<Finding>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct Finding {
+    pub rule_id: String,
+    pub severity: String,
+    pub category: String,
+    pub source: String,
+    pub message: String,
+    #[serde(default)]
+    pub location: Option<FindingLocation>,
+    #[serde(default)]
+    pub fix: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct FindingLocation {
+    pub field: String,
+    #[serde(default)]
+    pub start: Option<u64>,
+    #[serde(default)]
+    pub end: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[non_exhaustive]
+pub struct GuardrailsDryRunRequest {
+    pub config: serde_json::Value,
+    pub stage: String,
+    pub text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tool_name: Option<String>,
+}
+
+impl GuardrailsDryRunRequest {
+    pub fn new(
+        config: serde_json::Value,
+        stage: impl Into<String>,
+        text: impl Into<String>,
+    ) -> Self {
+        Self {
+            config,
+            stage: stage.into(),
+            text: text.into(),
+            tool_name: None,
+        }
+    }
+
+    pub fn tool_name(mut self, tool_name: impl Into<String>) -> Self {
+        self.tool_name = Some(tool_name.into());
+        self
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct GuardrailsDryRunResponse {
+    pub hits: Vec<GuardrailsDryRunHit>,
+    pub blocked: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct GuardrailsDryRunHit {
+    pub check_index: i32,
+    pub check_id: String,
+    pub stage: String,
+    pub rule_type: String,
+    pub action: String,
+    pub reason_code: String,
+    #[serde(default)]
+    pub matched: Option<String>,
+    #[serde(default)]
+    pub replacement: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct GuardrailExamplesResponse {
+    pub examples: Vec<GuardrailExample>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct GuardrailExample {
+    pub name: String,
+    pub display_name: String,
+    pub description: String,
+    pub tags: Vec<String>,
+    pub check_types: Vec<String>,
+    pub stages: Vec<String>,
+    pub data_egress: String,
+    pub config: serde_json::Value,
 }
 
 // --- Budget Models ---
