@@ -15,3 +15,15 @@ DEV_MODE=1 everruns-server
 - [rust/](rust/) - Rust SDK example
 - [python/](python/) - Python SDK example
 - [typescript/](typescript/) - TypeScript SDK example
+
+## Workspaces & Memories
+
+Workspaces hold files shared across sessions; memories are long-term,
+searchable knowledge stores for agents. Runnable, single-file examples live in
+each SDK's `examples/` directory:
+
+| | Workspaces | Memories |
+|---|---|---|
+| Rust | `cargo run --example workspaces` | `cargo run --example memories` |
+| Python | `uv run python examples/workspaces.py` | `uv run python examples/memories.py` |
+| TypeScript | `npx tsx examples/workspaces.ts` | `npx tsx examples/memories.ts` |

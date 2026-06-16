@@ -86,6 +86,38 @@ async for event in client.events.stream(session.id):
         print(event.data.message.content)
 ```
 
+### 7. Workspaces
+
+Workspaces hold files shared across sessions.
+
+```python
+workspace = await client.workspaces.create(name="team-docs")
+
+await client.workspace_files.create(
+    workspace.id,
+    "/notes/welcome.md",
+    "# Welcome\n",
+    encoding="text",
+)
+files = await client.workspace_files.list(workspace.id, recursive=True)
+```
+
+### 8. Memories
+
+Memories are long-term, searchable knowledge stores for agents.
+
+```python
+memory = await client.memories.create(name="product-knowledge")
+
+await client.memories.create_file(
+    memory.id,
+    "/facts/product.md",
+    "# Product\n",
+    encoding="text",
+)
+results = await client.memories.grep_files(memory.id, "product")
+```
+
 ## Next Steps
 
 - See `cookbook/` for practical recipes
