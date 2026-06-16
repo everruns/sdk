@@ -121,8 +121,11 @@ The SDK uses personal access token authentication. Set the `EVERRUNS_API_KEY` en
 ```typescript
 // From environment variable
 const client = Everruns.fromEnv();
+```
 
-// Explicit token and organization
+Or with an explicit token and organization:
+
+```typescript
 const client = new Everruns({
 apiKey: "evr_pat_...",
 orgId: "org_..."

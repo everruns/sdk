@@ -75,8 +75,11 @@ The SDK uses personal access token authentication. Set `EVERRUNS_API_KEY` or pas
 ```python
 # From environment
 client = Everruns()
+```
 
-# Explicit token and organization
+Or with an explicit token and organization:
+
+```python
 client = Everruns(api_key="evr_pat_...", org_id="org_...")
 ```
 
