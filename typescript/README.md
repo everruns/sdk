@@ -166,9 +166,9 @@ await client.agents.get("invalid-id");
 if (error instanceof AuthenticationError) {
 console.error("Invalid personal access token");
 } else if (error instanceof RateLimitError) {
-console.log(`Retry after \${error.retryAfter} seconds`);
+console.log(`Retry after ${error.retryAfter} seconds`);
 } else if (error instanceof ApiError) {
-console.error(`API error \${error.statusCode}: \${error.message}`);
+console.error(`API error ${error.statusCode}: ${error.message}`);
 }
 }
 ```
