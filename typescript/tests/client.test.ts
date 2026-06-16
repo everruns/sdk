@@ -464,7 +464,7 @@ describe("Everruns", () => {
     expect(list[0].summary?.passed).toBe(2);
     expect(fetched.results?.[0].session_id).toBe("session_1");
     expect(triggered.status).toBe("pending");
-    expect(triggered.summary).toBeUndefined();
+    expect(triggered.summary == null).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/agents/agent_123/health-checks",
       expect.objectContaining({ method: "POST" }),
