@@ -22,6 +22,7 @@ import {
   type CreateSessionRequest,
   type ExternalActor,
   type FileInfo,
+  type HealthCheckRun,
   type LedgerEntry,
   type SessionFile,
   type FileStat,
@@ -391,6 +392,82 @@ describe("Everruns", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/agents/agent_123/stats",
       expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should call agent health check endpoints", async () => {
+    const run: HealthCheckRun = {
+      id: "healthcheck_123",
+      config_hash: "abc123",
+      status: "completed",
+      created_at: "2026-05-01T00:00:00Z",
+      agent_id: "agent_123",
+      model_id: "gpt-4",
+      completed_at: "2026-05-01T00:01:00Z",
+      summary: {
+        total: 2,
+        passed: 2,
+        failed: 0,
+        errored: 0,
+        pass_rate: 1.0,
+        avg_score: 0.95,
+        avg_turns: 1.5,
+        total_input_tokens: 200,
+        total_output_tokens: 100,
+      },
+      results: [
+        {
+          name: "greeting",
+          user_message: "hi",
+          rubric: "is polite",
+          passed: true,
+          score: 0.95,
+          judge_reason: "polite",
+          deterministic_reason: "completed",
+          turns: 1,
+          latency_ms: 1200,
+          session_id: "session_1",
+        },
+      ],
+    };
+    const pending: HealthCheckRun = {
+      id: "healthcheck_456",
+      config_hash: "abc123",
+      status: "pending",
+      created_at: "2026-05-01T00:02:00Z",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => ({
+        ok: true,
+        status: 200,
+        json: async () =>
+          init?.method === "POST"
+            ? pending
+            : url.endsWith("/health-checks")
+              ? [run]
+              : run,
+      }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const list = await client.agents.listHealthChecks("agent_123");
+    const triggered = await client.agents.triggerHealthCheck("agent_123");
+    const fetched = await client.agents.getHealthCheck(
+      "agent_123",
+      "healthcheck_123",
+    );
+
+    expect(list).toHaveLength(1);
+    expect(list[0].id).toBe("healthcheck_123");
+    expect(list[0].status).toBe("completed");
+    expect(list[0].summary?.passed).toBe(2);
+    expect(fetched.results?.[0].session_id).toBe("session_1");
+    expect(triggered.status).toBe("pending");
+    expect(triggered.summary).toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/agents/agent_123/health-checks",
+      expect.objectContaining({ method: "POST" }),
     );
   });
 

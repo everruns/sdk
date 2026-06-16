@@ -734,6 +734,152 @@
         }
       }
     },
+    "/v1/agents/{agent_id}/health-checks": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "GET /v1/agents/{agent_id}/health-checks - List recent health check runs",
+        "operationId": "list_health_checks",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Agent ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Health check runs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HealthCheckRun"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "POST /v1/agents/{agent_id}/health-checks - Trigger a behavioral health check",
+        "operationId": "trigger_health_check",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Agent ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Health check run started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Health checks unavailable on this deployment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/health-checks/{run_id}": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "GET /v1/agents/{agent_id}/health-checks/{run_id} - Get a health check run",
+        "operationId": "get_health_check",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Agent ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "run_id",
+            "in": "path",
+            "description": "Health check run ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Health check run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckRun"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agents/{agent_id}/stats": {
       "get": {
         "tags": [
@@ -10574,6 +10720,26 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "after_id",
+            "in": "query",
+            "description": "Return only messages after this message ID (exclusive cursor)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max messages to return (default 50, max 500)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
           }
         ],
         "responses": {
@@ -11309,6 +11475,301 @@
           },
           "404": {
             "description": "Skill not found"
+          }
+        }
+      }
+    },
+    "/v1/task-webhooks": {
+      "get": {
+        "tags": [
+          "task-webhooks"
+        ],
+        "summary": "List all task webhooks configured for the organization.",
+        "operationId": "list_webhooks",
+        "responses": {
+          "200": {
+            "description": "Webhook list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_TaskWebhookResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — requires admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "task-webhooks"
+        ],
+        "summary": "Create a new task webhook for the organization.",
+        "operationId": "create_webhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskWebhookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskWebhookResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — requires admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/task-webhooks/{webhook_id}": {
+      "get": {
+        "tags": [
+          "task-webhooks"
+        ],
+        "summary": "Get a single task webhook.",
+        "operationId": "get_webhook",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "description": "Webhook public ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskWebhookResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — requires admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Webhook not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "task-webhooks"
+        ],
+        "summary": "Delete a task webhook.",
+        "operationId": "delete_webhook",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "description": "Webhook public ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Webhook deleted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — requires admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Webhook not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "task-webhooks"
+        ],
+        "summary": "Update a task webhook.",
+        "operationId": "update_webhook",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "description": "Webhook public ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskWebhookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Updated webhook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskWebhookResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — requires admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Webhook not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -14964,6 +15425,16 @@
             "description": "Human-readable display name shown in UI.",
             "example": "Deep Research"
           },
+          "embedder_metadata": {
+            "type": "object",
+            "description": "Arbitrary key-value metadata injected into LLM requests for observability.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
           "initial_files": {
             "type": "array",
             "items": {
@@ -15873,6 +16344,30 @@
             "type": "string",
             "description": "Full SKILL.md content (YAML frontmatter + markdown body)",
             "example": "---\nname: pdf-processing\ndescription: Extract text from PDFs.\n---\n\n# PDF Processing\n\nUse pdfplumber..."
+          }
+        }
+      },
+      "CreateTaskWebhookRequest": {
+        "type": "object",
+        "description": "Request body for creating a task webhook.",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the webhook starts enabled. Defaults to true."
+          },
+          "secret": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional HMAC-SHA256 signing secret. When set, every delivery includes\nan `X-Everruns-Signature: sha256=<hex>` header."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL to POST task terminal-state events to."
           }
         }
       },
@@ -18157,6 +18652,20 @@
             "description": "Human-readable display name shown in UI.",
             "example": "Generic Harness"
           },
+          "embedder_metadata": {
+            "type": "object",
+            "description": "Arbitrary key-value metadata injected into LLM requests for observability.\nKeys from system context (session_id, org_id, etc.) always take precedence.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "example": {
+              "env": "production",
+              "team": "platform"
+            }
+          },
           "id": {
             "type": "string",
             "description": "Unique identifier for the harness (format: harness_{32-hex}).",
@@ -18309,6 +18818,212 @@
           "deleted"
         ],
         "example": "active"
+      },
+      "HealthCheckCaseResult": {
+        "type": "object",
+        "description": "Outcome of a single case after the agent ran and was scored.",
+        "required": [
+          "name",
+          "user_message",
+          "rubric",
+          "passed",
+          "score",
+          "judge_reason",
+          "deterministic_reason",
+          "turns",
+          "latency_ms"
+        ],
+        "properties": {
+          "deterministic_reason": {
+            "type": "string",
+            "description": "Deterministic-check explanation (completion, non-empty, turn bound)."
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Set when the case errored or timed out instead of completing."
+          },
+          "judge_reason": {
+            "type": "string",
+            "description": "LLM judge explanation."
+          },
+          "latency_ms": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean",
+            "description": "True only when both the deterministic checks and the LLM judge pass."
+          },
+          "rubric": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "format": "double",
+            "description": "LLM judge score, 0.0–1.0."
+          },
+          "session_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Public ID of the real session created for this case (browsable in UI)."
+          },
+          "turns": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "user_message": {
+            "type": "string"
+          }
+        }
+      },
+      "HealthCheckRun": {
+        "type": "object",
+        "description": "API view of a health check run.",
+        "required": [
+          "id",
+          "config_hash",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "completed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "config_hash": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error_message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Public ID (`healthcheck_…`)."
+          },
+          "model_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "results": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/HealthCheckCaseResult"
+            },
+            "description": "Per-case results (present once the run has produced any)."
+          },
+          "status": {
+            "$ref": "#/components/schemas/HealthCheckStatus"
+          },
+          "summary": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/HealthCheckSummary"
+              }
+            ]
+          }
+        }
+      },
+      "HealthCheckStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "running",
+          "completed",
+          "failed"
+        ]
+      },
+      "HealthCheckSummary": {
+        "type": "object",
+        "description": "Aggregate metrics across all cases in a run.",
+        "required": [
+          "total",
+          "passed",
+          "failed",
+          "errored",
+          "pass_rate",
+          "avg_score",
+          "avg_turns",
+          "total_input_tokens",
+          "total_output_tokens"
+        ],
+        "properties": {
+          "avg_score": {
+            "type": "number",
+            "format": "double"
+          },
+          "avg_turns": {
+            "type": "number",
+            "format": "double"
+          },
+          "errored": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "pass_rate": {
+            "type": "number",
+            "format": "double"
+          },
+          "passed": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "total_input_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "total_output_tokens": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
       },
       "HealthResponse": {
         "type": "object",
@@ -19835,6 +20550,20 @@
                   "description": "Human-readable display name shown in UI.",
                   "example": "Generic Harness"
                 },
+                "embedder_metadata": {
+                  "type": "object",
+                  "description": "Arbitrary key-value metadata injected into LLM requests for observability.\nKeys from system context (session_id, org_id, etc.) always take precedence.",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "example": {
+                    "env": "production",
+                    "team": "platform"
+                  }
+                },
                 "id": {
                   "type": "string",
                   "description": "Unique identifier for the harness (format: harness_{32-hex}).",
@@ -20746,6 +21475,57 @@
                 "version": {
                   "type": "string",
                   "description": "Semver string declared by the skill author. Free-form; sorted lexicographically when comparing."
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
+      "ListResponse_TaskWebhookResponse": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "A configured outbound webhook target.",
+              "required": [
+                "id",
+                "url",
+                "enabled",
+                "has_secret",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Whether this webhook is enabled."
+                },
+                "has_secret": {
+                  "type": "boolean",
+                  "description": "Whether a signing secret is configured (the secret itself is never returned)."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Public identifier (wh_<32-hex-chars>)."
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Target URL that receives POST requests."
                 }
               }
             },
@@ -21738,6 +22518,20 @@
                           "description": "Human-readable display name shown in UI.",
                           "example": "Generic Harness"
                         },
+                        "embedder_metadata": {
+                          "type": "object",
+                          "description": "Arbitrary key-value metadata injected into LLM requests for observability.\nKeys from system context (session_id, org_id, etc.) always take precedence.",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "example": {
+                            "env": "production",
+                            "team": "platform"
+                          }
+                        },
                         "id": {
                           "type": "string",
                           "description": "Unique identifier for the harness (format: harness_{32-hex}).",
@@ -22402,6 +23196,16 @@
         "type": "object",
         "description": "Request options applied to an LLM generation.\n\nThese fields capture request-side intent such as prompt caching or deferred\ntool loading. They complement `usage`, which captures what actually happened.",
         "properties": {
+          "metadata": {
+            "type": "object",
+            "description": "General request metadata passed to the LLM provider for tracking and observability.\nIncludes embedder-supplied labels merged with system tracking keys (session_id, turn_id, etc.).",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
           "prompt_cache": {
             "oneOf": [
               {
@@ -29025,6 +29829,44 @@
           "on_activity"
         ]
       },
+      "TaskWebhookResponse": {
+        "type": "object",
+        "description": "A configured outbound webhook target.",
+        "required": [
+          "id",
+          "url",
+          "enabled",
+          "has_secret",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this webhook is enabled."
+          },
+          "has_secret": {
+            "type": "boolean",
+            "description": "Whether a signing secret is configured (the secret itself is never returned)."
+          },
+          "id": {
+            "type": "string",
+            "description": "Public identifier (wh_<32-hex-chars>)."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "url": {
+            "type": "string",
+            "description": "Target URL that receives POST requests."
+          }
+        }
+      },
       "TasksListResponse": {
         "type": "object",
         "description": "Tasks list response",
@@ -30215,6 +31057,19 @@
             "description": "Human-readable display name.",
             "example": "Updated Research Harness"
           },
+          "embedder_metadata": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Replace the embedder metadata map entirely; omit to leave unchanged.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
           "initial_files": {
             "type": [
               "array",
@@ -31015,6 +31870,33 @@
                 "description": "Update status"
               }
             ]
+          }
+        }
+      },
+      "UpdateTaskWebhookRequest": {
+        "type": "object",
+        "description": "Request body for updating a task webhook.",
+        "properties": {
+          "enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Enable or disable the webhook."
+          },
+          "secret": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Replace the signing secret. Pass null to remove the existing secret."
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New target URL."
           }
         }
       },
@@ -32347,6 +33229,20 @@
                 "description": "Human-readable display name shown in UI.",
                 "example": "Generic Harness"
               },
+              "embedder_metadata": {
+                "type": "object",
+                "description": "Arbitrary key-value metadata injected into LLM requests for observability.\nKeys from system context (session_id, org_id, etc.) always take precedence.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "type": "string"
+                },
+                "example": {
+                  "env": "production",
+                  "team": "platform"
+                }
+              },
               "id": {
                 "type": "string",
                 "description": "Unique identifier for the harness (format: harness_{32-hex}).",
@@ -33244,6 +34140,20 @@
                     ],
                     "description": "Human-readable display name shown in UI.",
                     "example": "Generic Harness"
+                  },
+                  "embedder_metadata": {
+                    "type": "object",
+                    "description": "Arbitrary key-value metadata injected into LLM requests for observability.\nKeys from system context (session_id, org_id, etc.) always take precedence.",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "example": {
+                      "env": "production",
+                      "team": "platform"
+                    }
                   },
                   "id": {
                     "type": "string",
@@ -34388,6 +35298,10 @@
     {
       "name": "reporting",
       "description": "Org-scoped semantic reporting endpoints"
+    },
+    {
+      "name": "task-webhooks",
+      "description": "Outbound HTTP webhooks fired on terminal task transitions"
     }
   ]
 }

@@ -539,6 +539,72 @@ pub struct ResourceStats {
     pub last_execution_at: Option<String>,
 }
 
+/// Status of a health check run.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum HealthCheckStatus {
+    Pending,
+    Running,
+    Completed,
+    Failed,
+}
+
+/// Aggregate metrics across all cases in a health check run.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct HealthCheckSummary {
+    pub total: i32,
+    pub passed: i32,
+    pub failed: i32,
+    pub errored: i32,
+    pub pass_rate: f64,
+    pub avg_score: f64,
+    pub avg_turns: f64,
+    pub total_input_tokens: u64,
+    pub total_output_tokens: u64,
+}
+
+/// Outcome of a single case after the agent ran and was scored.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct HealthCheckCaseResult {
+    pub name: String,
+    pub user_message: String,
+    pub rubric: String,
+    pub passed: bool,
+    pub score: f64,
+    pub judge_reason: String,
+    pub deterministic_reason: String,
+    pub turns: i32,
+    pub latency_ms: u64,
+    #[serde(default)]
+    pub error: Option<String>,
+    #[serde(default)]
+    pub session_id: Option<String>,
+}
+
+/// API view of a behavioral health check run for an agent.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct HealthCheckRun {
+    pub id: String,
+    pub config_hash: String,
+    pub status: HealthCheckStatus,
+    pub created_at: String,
+    #[serde(default)]
+    pub agent_id: Option<String>,
+    #[serde(default)]
+    pub model_id: Option<String>,
+    #[serde(default)]
+    pub completed_at: Option<String>,
+    #[serde(default)]
+    pub error_message: Option<String>,
+    #[serde(default)]
+    pub summary: Option<HealthCheckSummary>,
+    #[serde(default)]
+    pub results: Option<Vec<HealthCheckCaseResult>>,
+}
+
 /// Starter file copied into a new session workspace
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]

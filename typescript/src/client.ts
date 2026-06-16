@@ -29,6 +29,7 @@ import {
   GuardrailsDryRunRequest,
   GuardrailsDryRunResponse,
   GrepResult,
+  HealthCheckRun,
   LedgerEntry,
   Message,
   CreateMessageRequest,
@@ -308,6 +309,23 @@ class AgentsClient {
   /** Get aggregate usage stats for an agent. */
   async stats(agentId: string): Promise<ResourceStats> {
     return this.client.fetch(`/agents/${agentId}/stats`);
+  }
+
+  /** List recent behavioral health check runs for an agent. */
+  async listHealthChecks(agentId: string): Promise<HealthCheckRun[]> {
+    return this.client.fetch(`/agents/${agentId}/health-checks`);
+  }
+
+  /** Trigger a behavioral health check for an agent. */
+  async triggerHealthCheck(agentId: string): Promise<HealthCheckRun> {
+    return this.client.fetch(`/agents/${agentId}/health-checks`, {
+      method: "POST",
+    });
+  }
+
+  /** Get a single health check run for an agent. */
+  async getHealthCheck(agentId: string, runId: string): Promise<HealthCheckRun> {
+    return this.client.fetch(`/agents/${agentId}/health-checks/${runId}`);
   }
 
   /** List saved versions for an agent. */

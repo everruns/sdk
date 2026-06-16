@@ -944,6 +944,80 @@ async def test_agent_stats():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_agent_health_checks():
+    run_json = {
+        "id": "healthcheck_123",
+        "config_hash": "abc123",
+        "status": "completed",
+        "created_at": "2026-05-01T00:00:00Z",
+        "agent_id": "agent_123",
+        "model_id": "gpt-4",
+        "completed_at": "2026-05-01T00:01:00Z",
+        "summary": {
+            "total": 2,
+            "passed": 2,
+            "failed": 0,
+            "errored": 0,
+            "pass_rate": 1.0,
+            "avg_score": 0.95,
+            "avg_turns": 1.5,
+            "total_input_tokens": 200,
+            "total_output_tokens": 100,
+        },
+        "results": [
+            {
+                "name": "greeting",
+                "user_message": "hi",
+                "rubric": "is polite",
+                "passed": True,
+                "score": 0.95,
+                "judge_reason": "polite",
+                "deterministic_reason": "completed",
+                "turns": 1,
+                "latency_ms": 1200,
+                "session_id": "session_1",
+            }
+        ],
+    }
+    base = "https://custom.example.com/api/v1/agents/agent_123/health-checks"
+    list_route = respx.get(base).mock(return_value=httpx.Response(200, json=[run_json]))
+    trigger_route = respx.post(base).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "id": "healthcheck_456",
+                "config_hash": "abc123",
+                "status": "pending",
+                "created_at": "2026-05-01T00:02:00Z",
+            },
+        )
+    )
+    get_route = respx.get(f"{base}/healthcheck_123").mock(
+        return_value=httpx.Response(200, json=run_json)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        runs = await client.agents.list_health_checks("agent_123")
+        triggered = await client.agents.trigger_health_check("agent_123")
+        run = await client.agents.get_health_check("agent_123", "healthcheck_123")
+    finally:
+        await client.close()
+
+    assert len(runs) == 1
+    assert runs[0].id == "healthcheck_123"
+    assert runs[0].status == "completed"
+    assert runs[0].summary.passed == 2
+    assert run.results[0].session_id == "session_1"
+    assert triggered.status == "pending"
+    assert triggered.summary is None
+    assert list_route.called
+    assert trigger_route.called
+    assert get_route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_agent_versions_methods():
     version_json = {
         "id": "agentver_123",
