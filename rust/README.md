@@ -139,8 +139,11 @@ The SDK uses personal access token authentication. Set the `EVERRUNS_API_KEY` en
 ```rust
 // From environment variable
 let client = Everruns::from_env()?;
+```
 
-// Explicit token and organization
+Or with an explicit token and organization:
+
+```rust
 let client = Everruns::builder()
     .api_key("evr_pat_...")
     .org_id("org_...")
