@@ -142,23 +142,20 @@ jobs:
           node-version: "22"
 
       # Install everruns-server (cached)
-      - name: Get everruns-server latest release tag
+      - name: Get everruns-server latest commit
         id: everruns-sha
         run: |
-          # Track the latest tagged release rather than main HEAD: main can
-          # contain broken intermediate commits, release tags are buildable.
-          TAG=$(git ls-remote --tags --refs https://github.com/everruns/everruns.git 'v*' \
-            | awk -F/ '{print $NF}' | sort -V | tail -1)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          SHA=$(git ls-remote https://github.com/everruns/everruns.git HEAD | cut -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
       - name: Cache everruns-server binary
         id: cache-server
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/everruns-server
-          key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.tag }}
+          key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
-        run: cargo install --debug --locked --git https://github.com/everruns/everruns --tag "${{ steps.everruns-sha.outputs.tag }}" everruns-server
+        run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server
 
       # Start server
       - name: Start everruns-server
@@ -236,23 +233,20 @@ jobs:
           cache: npm
           cache-dependency-path: typescript/package-lock.json
 
-      - name: Get everruns-server latest release tag
+      - name: Get everruns-server latest commit
         id: everruns-sha
         run: |
-          # Track the latest tagged release rather than main HEAD: main can
-          # contain broken intermediate commits, release tags are buildable.
-          TAG=$(git ls-remote --tags --refs https://github.com/everruns/everruns.git 'v*' \
-            | awk -F/ '{print $NF}' | sort -V | tail -1)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          SHA=$(git ls-remote https://github.com/everruns/everruns.git HEAD | cut -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
       - name: Cache everruns-server binary
         id: cache-server
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/everruns-server
-          key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.tag }}
+          key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
-        run: cargo install --debug --locked --git https://github.com/everruns/everruns --tag "${{ steps.everruns-sha.outputs.tag }}" everruns-server
+        run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server
 
       - name: Start everruns-server
         run: |
