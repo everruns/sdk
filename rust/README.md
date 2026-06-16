@@ -4,13 +4,13 @@ Rust SDK for the Everruns API.
 
 ## Installation
 
-\`\`\`bash
+```bash
 cargo add everruns-sdk
-\`\`\`
+```
 
 ## Quick Start
 
-\`\`\`rust
+```rust
 use everruns_sdk::{CreateSessionRequest, Everruns};
 
 #[tokio::main]
@@ -35,11 +35,11 @@ async fn main() -> Result<(), everruns_sdk::Error> {
 
     Ok(())
 }
-\`\`\`
+```
 
 ## Initial Files
 
-\`\`\`rust
+```rust
 use everruns_sdk::{CreateSessionRequest, InitialFile};
 
 let session = client
@@ -56,13 +56,13 @@ let session = client
             ]),
     )
     .await?;
-\`\`\`
+```
 
 Runnable example: [`examples/initial_files.rs`](examples/initial_files.rs)
 
 ## Agent Versions
 
-\`\`\`rust
+```rust
 use everruns_sdk::{AgentVersionChangeKind, CreateAgentVersionRequest};
 
 let version = client
@@ -80,13 +80,63 @@ let diff = client
     .agents()
     .diff_versions("agent_...", "agentver_1", &version.id)
     .await?;
-\`\`\`
+```
+
+## Workspaces
+
+Workspaces hold files shared across sessions.
+
+```rust
+use everruns_sdk::CreateWorkspaceRequest;
+
+let workspace = client
+    .workspaces()
+    .create(CreateWorkspaceRequest::new("team-docs"))
+    .await?;
+
+client
+    .workspace_files()
+    .create(&workspace.id, "/notes/welcome.md", "# Welcome\n", Some("text"))
+    .await?;
+let file = client
+    .workspace_files()
+    .read(&workspace.id, "/notes/welcome.md")
+    .await?;
+let files = client
+    .workspace_files()
+    .list(&workspace.id, None, Some(true))
+    .await?;
+```
+
+Runnable example: [`examples/workspaces.rs`](examples/workspaces.rs)
+
+## Memories
+
+Memories are long-term, searchable knowledge stores for agents.
+
+```rust
+use everruns_sdk::CreateMemoryRequest;
+
+let memory = client
+    .memories()
+    .create(CreateMemoryRequest::new("product-knowledge"))
+    .await?;
+
+client
+    .memories()
+    .create_file(&memory.id, "/facts/product.md", "# Product\n", Some("text"))
+    .await?;
+let results = client.memories().grep_files(&memory.id, "product", None).await?;
+client.memories().sync(&memory.id).await?;
+```
+
+Runnable example: [`examples/memories.rs`](examples/memories.rs)
 
 ## Authentication
 
-The SDK uses personal access token authentication. Set the \`EVERRUNS_API_KEY\` environment variable or pass the token explicitly. For personal access tokens with access to multiple organizations, set \`EVERRUNS_ORG_ID\` or pass \`org_id\` explicitly:
+The SDK uses personal access token authentication. Set the `EVERRUNS_API_KEY` environment variable or pass the token explicitly. For personal access tokens with access to multiple organizations, set `EVERRUNS_ORG_ID` or pass `org_id` explicitly:
 
-\`\`\`rust
+```rust
 // From environment variable
 let client = Everruns::from_env()?;
 
@@ -95,13 +145,13 @@ let client = Everruns::builder()
     .api_key("evr_pat_...")
     .org_id("org_...")
     .build()?;
-\`\`\`
+```
 
 ## Streaming Events
 
 The SDK supports SSE streaming with automatic reconnection:
 
-\`\`\`rust
+```rust
 use futures::StreamExt;
 use everruns_sdk::StreamOptions;
 
@@ -126,11 +176,11 @@ while let Some(event) = stream.next().await {
         _ => {}
     }
 }
-\`\`\`
+```
 
 ## Error Handling
 
-\`\`\`rust
+```rust
 use everruns_sdk::Error;
 
 match client.agents().get("invalid-id").await {
@@ -142,7 +192,7 @@ match client.agents().get("invalid-id").await {
     }
     Err(e) => eprintln!("Error: {}", e),
 }
-\`\`\`
+```
 
 ## License
 

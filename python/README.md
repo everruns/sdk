@@ -103,6 +103,44 @@ rollback = await client.agents.rollback_version(
 )
 ```
 
+## Workspaces
+
+Workspaces hold files shared across sessions.
+
+```python
+workspace = await client.workspaces.create(name="team-docs")
+
+await client.workspace_files.create(
+    workspace.id,
+    "/notes/welcome.md",
+    "# Welcome\n",
+    encoding="text",
+)
+file = await client.workspace_files.read(workspace.id, "/notes/welcome.md")
+files = await client.workspace_files.list(workspace.id, recursive=True)
+```
+
+Runnable example: [`examples/workspaces.py`](examples/workspaces.py)
+
+## Memories
+
+Memories are long-term, searchable knowledge stores for agents.
+
+```python
+memory = await client.memories.create(name="product-knowledge")
+
+await client.memories.create_file(
+    memory.id,
+    "/facts/product.md",
+    "# Product\n",
+    encoding="text",
+)
+results = await client.memories.grep_files(memory.id, "product")
+await client.memories.sync(memory.id)
+```
+
+Runnable example: [`examples/memories.py`](examples/memories.py)
+
 ## License
 
 MIT
