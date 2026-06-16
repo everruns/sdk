@@ -523,6 +523,27 @@ impl<'a> AgentsClient<'a> {
             .await
     }
 
+    /// List recent behavioral health check runs for an agent.
+    pub async fn list_health_checks(&self, id: &str) -> Result<Vec<HealthCheckRun>> {
+        self.client
+            .get(&format!("/agents/{}/health-checks", id))
+            .await
+    }
+
+    /// Trigger a behavioral health check for an agent.
+    pub async fn trigger_health_check(&self, id: &str) -> Result<HealthCheckRun> {
+        self.client
+            .post::<HealthCheckRun, _>(&format!("/agents/{}/health-checks", id), &())
+            .await
+    }
+
+    /// Get a single health check run for an agent.
+    pub async fn get_health_check(&self, id: &str, run_id: &str) -> Result<HealthCheckRun> {
+        self.client
+            .get(&format!("/agents/{}/health-checks/{}", id, run_id))
+            .await
+    }
+
     /// Create a new agent with a server-assigned ID.
     ///
     /// `name` is the addressable slug (e.g. `"customer-support"`), validated

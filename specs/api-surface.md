@@ -23,6 +23,9 @@ SDKs cover agents and sessions functionality. No durable execution endpoints.
 - `POST /v1/agents/{id}/versions/{version_id}/fork` - Create a new agent from a saved version
 - `POST /v1/agents/{id}/versions/{version_id}/rollback` - Restore an agent from a saved version
 - `POST /v1/agents/analyze` - Run advisory checks against an agent shape
+- `GET /v1/agents/{id}/health-checks` - List recent behavioral health check runs
+- `POST /v1/agents/{id}/health-checks` - Trigger a behavioral health check
+- `GET /v1/agents/{id}/health-checks/{run_id}` - Get a single health check run
 
 #### Agent Names
 
@@ -189,3 +192,12 @@ Server administration endpoints not exposed via SDK:
 
 ### Providers
 - `POST /v1/providers/{id}/sync-models` - Sync models
+
+### Task Webhooks
+Org-level outbound webhooks delivering durable task terminal-state events.
+Durable execution is out of SDK scope, so these are not exposed.
+- `GET /v1/task-webhooks` - List task webhooks
+- `POST /v1/task-webhooks` - Create task webhook
+- `GET /v1/task-webhooks/{webhook_id}` - Get task webhook
+- `PATCH /v1/task-webhooks/{webhook_id}` - Update task webhook
+- `DELETE /v1/task-webhooks/{webhook_id}` - Delete task webhook

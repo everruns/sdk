@@ -4,7 +4,7 @@ use everruns_sdk::{
     AgentVersionChangeKind, AnalyzeAgentRequest, ContentPart, CreateAgentRequest,
     CreateAgentVersionRequest, CreateBudgetRequest, CreateMemoryRequest, CreateSessionRequest,
     CreateWorkspaceRequest, Everruns, ForkAgentVersionRequest, GuardrailsDryRunRequest,
-    InitialFile, RollbackAgentVersionRequest, TopUpRequest, UpdateBudgetRequest,
+    HealthCheckStatus, InitialFile, RollbackAgentVersionRequest, TopUpRequest, UpdateBudgetRequest,
 };
 use std::sync::Mutex;
 use wiremock::{
@@ -505,6 +505,95 @@ async fn test_agent_stats() {
     assert_eq!(stats.execution_count, 7);
     assert_eq!(stats.avg_session_duration_ms, Some(3086));
     assert_eq!(stats.total_input_tokens, 100);
+}
+
+#[tokio::test]
+async fn test_agent_health_checks() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    let run_json = serde_json::json!({
+        "id": "healthcheck_123",
+        "config_hash": "abc123",
+        "status": "completed",
+        "created_at": "2026-05-01T00:00:00Z",
+        "agent_id": "agent_123",
+        "model_id": "gpt-4",
+        "completed_at": "2026-05-01T00:01:00Z",
+        "summary": {
+            "total": 2,
+            "passed": 2,
+            "failed": 0,
+            "errored": 0,
+            "pass_rate": 1.0,
+            "avg_score": 0.95,
+            "avg_turns": 1.5,
+            "total_input_tokens": 200,
+            "total_output_tokens": 100
+        },
+        "results": [{
+            "name": "greeting",
+            "user_message": "hi",
+            "rubric": "is polite",
+            "passed": true,
+            "score": 0.95,
+            "judge_reason": "polite",
+            "deterministic_reason": "completed",
+            "turns": 1,
+            "latency_ms": 1200,
+            "session_id": "session_1"
+        }]
+    });
+
+    Mock::given(method("GET"))
+        .and(path("/v1/agents/agent_123/health-checks"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!([run_json.clone()])),
+        )
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/v1/agents/agent_123/health-checks"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "id": "healthcheck_456",
+            "config_hash": "abc123",
+            "status": "pending",
+            "created_at": "2026-05-01T00:02:00Z"
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/v1/agents/agent_123/health-checks/healthcheck_123"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(run_json))
+        .mount(&server)
+        .await;
+
+    let runs = client
+        .agents()
+        .list_health_checks("agent_123")
+        .await
+        .expect("health checks should list");
+    let triggered = client
+        .agents()
+        .trigger_health_check("agent_123")
+        .await
+        .expect("health check should trigger");
+    let run = client
+        .agents()
+        .get_health_check("agent_123", "healthcheck_123")
+        .await
+        .expect("health check should fetch");
+
+    assert_eq!(runs.len(), 1);
+    assert_eq!(runs[0].id, "healthcheck_123");
+    assert_eq!(runs[0].status, HealthCheckStatus::Completed);
+    assert_eq!(runs[0].summary.as_ref().unwrap().passed, 2);
+    assert_eq!(
+        run.results.as_ref().unwrap()[0].session_id.as_deref(),
+        Some("session_1")
+    );
+    assert_eq!(triggered.status, HealthCheckStatus::Pending);
+    assert!(triggered.summary.is_none());
 }
 
 #[tokio::test]

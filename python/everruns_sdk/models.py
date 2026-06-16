@@ -256,6 +256,54 @@ class ResourceStats(BaseModel):
     last_execution_at: Optional[str] = None
 
 
+HealthCheckStatus = Literal["pending", "running", "completed", "failed"]
+
+
+class HealthCheckSummary(BaseModel):
+    """Aggregate metrics across all cases in a health check run."""
+
+    total: int
+    passed: int
+    failed: int
+    errored: int
+    pass_rate: float
+    avg_score: float
+    avg_turns: float
+    total_input_tokens: int
+    total_output_tokens: int
+
+
+class HealthCheckCaseResult(BaseModel):
+    """Outcome of a single case after the agent ran and was scored."""
+
+    name: str
+    user_message: str
+    rubric: str
+    passed: bool
+    score: float
+    judge_reason: str
+    deterministic_reason: str
+    turns: int
+    latency_ms: int
+    error: Optional[str] = None
+    session_id: Optional[str] = None
+
+
+class HealthCheckRun(BaseModel):
+    """API view of a behavioral health check run for an agent."""
+
+    id: str
+    config_hash: str
+    status: HealthCheckStatus
+    created_at: str
+    agent_id: Optional[str] = None
+    model_id: Optional[str] = None
+    completed_at: Optional[str] = None
+    error_message: Optional[str] = None
+    summary: Optional[HealthCheckSummary] = None
+    results: Optional[list[HealthCheckCaseResult]] = None
+
+
 class InitialFile(BaseModel):
     """Starter file copied into a new session workspace."""
 

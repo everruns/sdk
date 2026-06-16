@@ -205,6 +205,50 @@ export interface ResourceStats {
   last_execution_at?: string | null;
 }
 
+export type HealthCheckStatus = "pending" | "running" | "completed" | "failed";
+
+/** Aggregate metrics across all cases in a health check run. */
+export interface HealthCheckSummary {
+  total: number;
+  passed: number;
+  failed: number;
+  errored: number;
+  pass_rate: number;
+  avg_score: number;
+  avg_turns: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+}
+
+/** Outcome of a single case after the agent ran and was scored. */
+export interface HealthCheckCaseResult {
+  name: string;
+  user_message: string;
+  rubric: string;
+  passed: boolean;
+  score: number;
+  judge_reason: string;
+  deterministic_reason: string;
+  turns: number;
+  latency_ms: number;
+  error?: string | null;
+  session_id?: string | null;
+}
+
+/** API view of a behavioral health check run for an agent. */
+export interface HealthCheckRun {
+  id: string;
+  config_hash: string;
+  status: HealthCheckStatus;
+  created_at: string;
+  agent_id?: string | null;
+  model_id?: string | null;
+  completed_at?: string | null;
+  error_message?: string | null;
+  summary?: HealthCheckSummary | null;
+  results?: HealthCheckCaseResult[] | null;
+}
+
 export interface InitialFile {
   path: string;
   content: string;

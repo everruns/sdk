@@ -42,6 +42,7 @@ from everruns_sdk.models import (
     GuardrailExamplesResponse,
     GuardrailsDryRunRequest,
     GuardrailsDryRunResponse,
+    HealthCheckRun,
     InitialFile,
     LedgerEntry,
     ListResponse,
@@ -318,6 +319,21 @@ class AgentsClient:
         """Get aggregate usage stats for an agent."""
         resp = await self._client._get(f"/agents/{agent_id}/stats")
         return ResourceStats(**resp)
+
+    async def list_health_checks(self, agent_id: str) -> list[HealthCheckRun]:
+        """List recent behavioral health check runs for an agent."""
+        resp = await self._client._get(f"/agents/{agent_id}/health-checks")
+        return [HealthCheckRun(**run) for run in resp]
+
+    async def trigger_health_check(self, agent_id: str) -> HealthCheckRun:
+        """Trigger a behavioral health check for an agent."""
+        resp = await self._client._post(f"/agents/{agent_id}/health-checks", {})
+        return HealthCheckRun(**resp)
+
+    async def get_health_check(self, agent_id: str, run_id: str) -> HealthCheckRun:
+        """Get a single health check run for an agent."""
+        resp = await self._client._get(f"/agents/{agent_id}/health-checks/{run_id}")
+        return HealthCheckRun(**resp)
 
     async def list_versions(self, agent_id: str) -> list[AgentVersion]:
         """List saved versions for an agent."""
