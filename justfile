@@ -33,12 +33,12 @@ check-examples-rust:
 
 # Check Python examples
 check-examples-python:
-    cd python && uv run python -m py_compile examples/basic.py examples/initial_files.py
+    cd python && uv run python -m py_compile examples/basic.py examples/initial_files.py examples/workspaces.py examples/memories.py
 
 # Check TypeScript examples
 check-examples-typescript:
     cd typescript && npm run build
-    cd typescript && npx tsc --noEmit --ignoreConfig --types node examples/basic.ts examples/initial-files.ts
+    cd typescript && npx tsc --noEmit --ignoreConfig --types node examples/basic.ts examples/initial-files.ts examples/workspaces.ts examples/memories.ts
 
 # Lint all SDKs
 lint: lint-rust lint-python lint-typescript
