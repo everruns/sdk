@@ -67,12 +67,12 @@ jobs:
       - name: Install Python SDK deps
         run: cd python && uv sync --all-extras
       - name: Check Python examples syntax
-        run: cd python && uv run python -m py_compile examples/basic.py examples/initial_files.py
+        run: cd python && uv run python -m py_compile examples/basic.py examples/initial_files.py examples/workspaces.py examples/memories.py
 
       - name: Install TypeScript SDK deps
         run: cd typescript && npm ci
       - name: Check TypeScript examples compile
-        run: cd typescript && npx tsc --noEmit --ignoreConfig --types node examples/basic.ts examples/initial-files.ts
+        run: cd typescript && npx tsc --noEmit --ignoreConfig --types node examples/basic.ts examples/initial-files.ts examples/workspaces.ts examples/memories.ts
 
   check-cookbooks:
     runs-on: ubuntu-latest
