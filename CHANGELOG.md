@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.1.10] - 2026-06-19
+
+### Highlights
+
+- Workspaces and memories APIs across Rust, Python, and TypeScript SDKs
+- Agent behavioral health-check endpoints (list, trigger, get) across all SDKs
+- Agent analysis and guardrail helpers, plus session event-list filters
+- Refreshed generated schemas, dependency/security updates, and documentation
+
+### What's Changed
+
+* chore(rust): add authors to crate metadata ([#96](https://github.com/everruns/sdk/pull/96)) by @chaliy
+* ci: track everruns-server main HEAD again ([#95](https://github.com/everruns/sdk/pull/95)) by @chaliy
+* docs(rust,python,typescript): fix invalid variable redeclaration in auth examples ([#94](https://github.com/everruns/sdk/pull/94)) by @chaliy
+* docs(rust,python,typescript): document workspaces and memories APIs ([#93](https://github.com/everruns/sdk/pull/93)) by @chaliy
+* feat: adopt agent health-checks, refresh deps ([#92](https://github.com/everruns/sdk/pull/92)) by @chaliy
+* feat: adopt upstream workspace and memory APIs ([#91](https://github.com/everruns/sdk/pull/91)) by @chaliy
+* feat: adopt upstream API refresh ([#90](https://github.com/everruns/sdk/pull/90)) by @chaliy
+* fix(typescript): address code scanning alerts ([#89](https://github.com/everruns/sdk/pull/89)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.9...v0.1.10
+
 ## [0.1.9] - 2026-05-08
 
 ### Highlights
