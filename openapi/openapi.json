@@ -829,6 +829,48 @@
         }
       }
     },
+    "/v1/agents/{agent_id}/health-checks/latest": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "GET /v1/agents/{agent_id}/health-checks/latest - Latest run + stale flag",
+        "operationId": "get_latest_health_check",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Agent ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest health check run with stale-config flag",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestHealthCheckRun"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agents/{agent_id}/health-checks/{run_id}": {
       "get": {
         "tags": [
@@ -1808,18 +1850,8 @@
               }
             }
           },
-          "403": {
-            "description": "App is not published or channel disabled",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "404": {
-            "description": "App or channel not found",
+            "description": "App or channel not found, not published, or channel disabled (collapsed to a single generic 404 to prevent app-existence enumeration)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1874,6 +1906,540 @@
           },
           "404": {
             "description": "App or channel not found / unpublished / disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/api-endpoint-channels": {
+      "post": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "POST /v1/apps/{app_id}/api-endpoint-channels - Add an api_endpoint channel (returns plaintext key once).",
+        "operationId": "add_api_endpoint_channel",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddApiEndpointChannelHttpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "api_endpoint channel created. The `api_key` field is the plaintext key returned exactly once and never recoverable later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddApiEndpointChannelOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/api-endpoint-channels/{channel_id}/regenerate-key": {
+      "post": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "Regenerate an api_endpoint channel API key. Returns the new plaintext key exactly once and invalidates the previous key.",
+        "operationId": "regenerate_api_endpoint_key",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "api_endpoint channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API key rotated. The `api_key` field is the new plaintext key returned exactly once; the previous key is invalidated immediately.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegenerateApiEndpointApiKeyOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid app/channel ID or channel is not an api_endpoint channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App or api_endpoint channel not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/api/{channel_id}/sessions": {
+      "post": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "POST /v1/apps/{app_id}/api/{channel_id}/sessions",
+        "operationId": "create_session",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "api_endpoint channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Session created and message dispatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionRef"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App not published or channel disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App or channel not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-channel rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "GET /v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}",
+        "operationId": "get_session",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "api_endpoint channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Derived status and the agent's completed messages (no raw tool detail)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App not published or channel disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Channel or session not found / not owned by this channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-channel rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/cancel": {
+      "post": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "POST /v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/cancel",
+        "operationId": "cancel_session",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "api_endpoint channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "In-flight turn canceled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionRef"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App not published or channel disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Channel or session not found / not owned by this channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-channel rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/messages": {
+      "post": {
+        "tags": [
+          "apps"
+        ],
+        "summary": "POST /v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/messages",
+        "operationId": "post_message",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "description": "App ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel_id",
+            "in": "path",
+            "description": "api_endpoint channel ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Follow-up message dispatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionRef"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App not published or channel disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Channel or session not found / not owned by this channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-channel rate limit exceeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -2250,18 +2816,8 @@
               }
             }
           },
-          "403": {
-            "description": "App is not published or channel disabled",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "404": {
-            "description": "App or channel not found",
+            "description": "App or channel not found, not published, or channel disabled (collapsed to a single generic 404 to prevent app-existence enumeration)",
             "content": {
               "application/json": {
                 "schema": {
@@ -5772,6 +6328,441 @@
         }
       }
     },
+    "/v1/knowledge-bases/{kb_id}/okf_export": {
+      "get": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "description": "Export a knowledge base as an Open Knowledge Format (OKF) bundle (a gzipped tarball of markdown files with YAML frontmatter). See specs/okf-adoption.md.",
+        "operationId": "export_okf",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OKF bundle (.tar.gz)",
+            "content": {
+              "application/gzip": {}
+            }
+          },
+          "404": {
+            "description": "Knowledge base not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-bases/{kb_id}/okf_import": {
+      "post": {
+        "tags": [
+          "knowledge_bases"
+        ],
+        "description": "Import an Open Knowledge Format (OKF) bundle into a knowledge base. Idempotent: re-importing converges entries without duplicates. See specs/okf-adoption.md.",
+        "operationId": "import_okf",
+        "parameters": [
+          {
+            "name": "kb_id",
+            "in": "path",
+            "description": "Knowledge base ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportOkfBundleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Import summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkfImportSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid bundle or input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge base not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-indexes": {
+      "get": {
+        "tags": [
+          "knowledge_indexes"
+        ],
+        "description": "List knowledge indexes.",
+        "operationId": "list_indexes",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Substring filter applied to index name and description.",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "description": "When `true`, also returns archived knowledge indexes.",
+            "required": false,
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List knowledge indexes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_KnowledgeIndexResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge_indexes"
+        ],
+        "description": "Create a new knowledge index.",
+        "operationId": "create_index",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKnowledgeIndexRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Knowledge index created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeIndexResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate knowledge index name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-indexes/{index_id}": {
+      "get": {
+        "tags": [
+          "knowledge_indexes"
+        ],
+        "description": "Get a knowledge index by ID.",
+        "operationId": "get_index",
+        "parameters": [
+          {
+            "name": "index_id",
+            "in": "path",
+            "description": "Knowledge index ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Knowledge index found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeIndexResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge index not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "knowledge_indexes"
+        ],
+        "description": "Delete a knowledge index.",
+        "operationId": "delete_index",
+        "parameters": [
+          {
+            "name": "index_id",
+            "in": "path",
+            "description": "Knowledge index ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Knowledge index archived"
+          },
+          "404": {
+            "description": "Knowledge index not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "knowledge_indexes"
+        ],
+        "description": "Update a knowledge index. Only provided fields are modified.",
+        "operationId": "update_index",
+        "parameters": [
+          {
+            "name": "index_id",
+            "in": "path",
+            "description": "Knowledge index ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateKnowledgeIndexRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Knowledge index updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeIndexResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge index not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate knowledge index name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-indexes/{index_id}/documents": {
+      "get": {
+        "tags": [
+          "knowledge_indexes"
+        ],
+        "description": "List documents inside a knowledge index.",
+        "operationId": "list_documents",
+        "parameters": [
+          {
+            "name": "index_id",
+            "in": "path",
+            "description": "Knowledge index ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse_KnowledgeIndexDocumentResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge index not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge-indexes/{index_id}/sync": {
+      "post": {
+        "tags": [
+          "knowledge_indexes"
+        ],
+        "description": "Enqueue a manual sync of a knowledge index.",
+        "operationId": "sync_index",
+        "parameters": [
+          {
+            "name": "index_id",
+            "in": "path",
+            "description": "Knowledge index ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sync enqueued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeIndexResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Knowledge index is archived",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge index not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/mcp-servers": {
       "get": {
         "tags": [
@@ -7200,7 +8191,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeatureFlags"
+                  "$ref": "#/components/schemas/FeatureFlagMap"
                 }
               }
             }
@@ -7258,7 +8249,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeatureFlags"
+                  "$ref": "#/components/schemas/FeatureFlagMap"
                 }
               }
             }
@@ -7862,6 +8853,653 @@
         }
       }
     },
+    "/v1/plugin_marketplaces": {
+      "get": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "GET /v1/plugin_marketplaces",
+        "operationId": "list_plugin_marketplaces",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by name (case-insensitive substring match).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of plugin marketplaces"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "POST /v1/plugin_marketplaces",
+        "operationId": "create_plugin_marketplace",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePluginMarketplaceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Marketplace created"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Name already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plugin_marketplaces/{id}": {
+      "get": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "GET /v1/plugin_marketplaces/{id}",
+        "operationId": "get_plugin_marketplace",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Marketplace ID (plgmkt_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marketplace found"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "DELETE /v1/plugin_marketplaces/{id}",
+        "operationId": "delete_plugin_marketplace",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Marketplace ID (plgmkt_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Marketplace deleted"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "PATCH /v1/plugin_marketplaces/{id}",
+        "operationId": "update_plugin_marketplace",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Marketplace ID (plgmkt_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePluginMarketplaceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Marketplace updated"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plugin_marketplaces/{id}/plugins": {
+      "get": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "GET /v1/plugin_marketplaces/{id}/plugins",
+        "operationId": "get_marketplace_catalog",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Marketplace ID (plgmkt_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog entries"
+          },
+          "400": {
+            "description": "Marketplace not yet synced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plugin_marketplaces/{id}/sync": {
+      "post": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "POST /v1/plugin_marketplaces/{id}/sync",
+        "operationId": "sync_plugin_marketplace",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Marketplace ID (plgmkt_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marketplace synced"
+          },
+          "400": {
+            "description": "Sync not supported or source error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plugins": {
+      "get": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "GET /v1/plugins",
+        "operationId": "list_plugins",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by name (case-insensitive substring match).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of installed plugins"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "POST /v1/plugins",
+        "operationId": "install_plugin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallPluginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Plugin installed"
+          },
+          "400": {
+            "description": "Compilation or source error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Plugin already installed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plugins/{id}": {
+      "get": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "GET /v1/plugins/{id}",
+        "operationId": "get_plugin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Plugin install ID (plugin_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Installed plugin"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "DELETE /v1/plugins/{id}",
+        "operationId": "uninstall_plugin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Plugin install ID (plugin_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Plugin uninstalled"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "PATCH /v1/plugins/{id}",
+        "operationId": "patch_installed_plugin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Plugin install ID (plugin_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInstalledPluginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Plugin updated"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plugins/{id}/update": {
+      "post": {
+        "tags": [
+          "plugins"
+        ],
+        "summary": "POST /v1/plugins/{id}/update",
+        "operationId": "update_plugin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Plugin install ID (plugin_...)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plugin updated"
+          },
+          "400": {
+            "description": "No marketplace or source error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/providers": {
       "get": {
         "tags": [
@@ -7927,11 +9565,11 @@
         "operationId": "provider_config",
         "responses": {
           "200": {
-            "description": "Resource config for LLM providers",
+            "description": "Resource config for providers",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResourceConfigResponse"
+                  "$ref": "#/components/schemas/ProvidersConfigResponse"
                 }
               }
             }
@@ -8992,7 +10630,7 @@
           "sessions"
         ],
         "summary": "POST /v1/sessions/chat - Get or create global chat session",
-        "description": "Returns the user's singleton global chat session. Creates one if it doesn't exist.\nUses the Platform Chat harness and tags for per-user singleton management.",
+        "description": "Returns the user's singleton global chat session. Creates one if it doesn't exist.\nUses the Platform Chat harness and tags for per-user singleton management.\nGated by the `global_chat` feature flag; returns 404 when disabled.",
         "operationId": "get_or_create_chat_session",
         "requestBody": {
           "content": {
@@ -9024,6 +10662,9 @@
           "401": {
             "description": "Authentication required"
           },
+          "404": {
+            "description": "Platform Chat feature (global_chat) is disabled for the org"
+          },
           "500": {
             "description": "Internal server error"
           }
@@ -9035,7 +10676,7 @@
         "tags": [
           "voice"
         ],
-        "description": "Create a voice session for the user's global chat. Returns connection details for the realtime audio channel.",
+        "description": "Create a voice session for the user's Platform Chat. Returns connection details for the realtime audio channel. Requires both the `global_chat` and `voice` feature flags; returns 404 when either is disabled.",
         "operationId": "create_chat_voice_session",
         "requestBody": {
           "content": {
@@ -9057,6 +10698,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Platform Chat (global_chat) or voice feature is disabled for the org"
           }
         },
         "x-cost-tier": "paid"
@@ -9871,6 +11515,78 @@
             "description": "Internal server error"
           }
         }
+      }
+    },
+    "/v1/sessions/{session_id}/fork": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "POST /v1/sessions/{session_id}/fork - Fork a session into an independent copy",
+        "operationId": "fork_session",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session to fork",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForkSessionRequest"
+              },
+              "example": {
+                "tags": [
+                  "experiment"
+                ],
+                "title": "Branch: try the async rewrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Fork created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithUrls_Session"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parent session, agent, or harness not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Parent session is mid-turn and cannot be forked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "x-cost-tier": "paid"
       }
     },
     "/v1/sessions/{session_id}/git/branches": {
@@ -11774,6 +13490,70 @@
         }
       }
     },
+    "/v1/tasks": {
+      "get": {
+        "tags": [
+          "session-tasks"
+        ],
+        "summary": "List background tasks across every session in the caller's org.",
+        "operationId": "list_org_tasks",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Filter by state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "Filter by kind",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_after",
+            "in": "query",
+            "description": "Only tasks created at/after this RFC3339 timestamp",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max tasks, newest first (default 100, max 500)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Org tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionTask"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/users": {
       "get": {
         "tags": [
@@ -12440,6 +14220,56 @@
         }
       }
     },
+    "/v1/workspaces/{workspace_id}/fs/_/preview/{path}": {
+      "get": {
+        "tags": [
+          "workspace-filesystem"
+        ],
+        "summary": "GET /v1/workspaces/{workspace_id}/fs/_/preview/{path} - Sandboxed HTML render",
+        "description": "Serves an HTML file as a `text/html` document carrying a strict `sandbox`\nCSP (TM-WEB-010) so the file viewer can render it — with JavaScript — inside\nan iframe without exposing everruns cookies, storage, the parent DOM, or\ntop-frame navigation. Only `.html`/`.htm` files are eligible; everything else\nreturns 415 (use the download endpoint instead).",
+        "operationId": "preview_path",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "description": "Workspace ID (wsp_<32-hex>)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "HTML file path. Wildcard route: nested paths are literal `/`-separated segments, not a single URL-encoded value.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sandboxed HTML document",
+            "content": {
+              "text/html": {}
+            }
+          },
+          "400": {
+            "description": "Path points to a directory"
+          },
+          "404": {
+            "description": "File not found"
+          },
+          "415": {
+            "description": "File is not an HTML document"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v1/workspaces/{workspace_id}/fs/_/stat": {
       "post": {
         "tags": [
@@ -12857,6 +14687,53 @@
           }
         }
       },
+      "AddApiEndpointChannelHttpRequest": {
+        "type": "object",
+        "description": "Request body for the `add_api_endpoint_channel_http` operation.",
+        "properties": {
+          "auth": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AppEndpointAuthConfig",
+                "description": "Optional endpoint auth. Example shape is defined on `AppEndpointAuthConfig`."
+              }
+            ]
+          },
+          "enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether this resource is enabled.",
+            "example": true
+          },
+          "session_mode": {
+            "$ref": "#/components/schemas/InvocationSessionMode",
+            "description": "How invocations route into sessions (`shared_session` to reuse one\ndurable session, or `session_per_invocation` for a fresh session)."
+          }
+        }
+      },
+      "AddApiEndpointChannelOutput": {
+        "type": "object",
+        "description": "Output of [`AddApiEndpointChannelCmd`] — includes the plaintext API key\n(returned **once**, never persisted) plus the resulting [`AppChannel`].",
+        "required": [
+          "api_key",
+          "channel"
+        ],
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "description": "Plaintext API key. Persist this — it cannot be recovered later."
+          },
+          "channel": {
+            "$ref": "#/components/schemas/AppChannel",
+            "description": "The created api_endpoint channel."
+          }
+        }
+      },
       "Agent": {
         "type": "object",
         "description": "Agent configuration for agentic loop.\nAn agent defines the behavior and capabilities of an AI assistant.",
@@ -12989,6 +14866,14 @@
               }
             ]
           },
+          "parallel_tool_calls": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+            "example": true
+          },
           "root_agent_id": {
             "type": [
               "string",
@@ -13072,6 +14957,21 @@
           "ref": {
             "type": "string",
             "description": "Reference to the capability ID"
+          }
+        }
+      },
+      "AgentMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "text"
+        ],
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
           }
         }
       },
@@ -13936,6 +15836,10 @@
               ],
               "description": "Provider id used to resolve a user-scoped bearer token."
             },
+            "protocol_mode": {
+              "$ref": "#/components/schemas/McpProtocolMode",
+              "description": "Protocol-era adoption policy for the MCP client (`auto` negotiates)."
+            },
             "tool_discovery": {
               "type": "boolean",
               "description": "Whether to discover tool definitions live from this server."
@@ -14418,7 +16322,8 @@
           "schedule",
           "webhook",
           "a2a",
-          "fcp"
+          "fcp",
+          "api_endpoint"
         ],
         "example": "webhook"
       },
@@ -15150,6 +17055,14 @@
               }
             ]
           },
+          "parallel_tool_calls": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Request-level parallel tool calling preference (EVE-598). `true` signals\nthe provider that parallel tool calls are wanted; `false` requests at\nmost one tool call per turn and forces serial execution. Omit to use the\nprovider default.",
+            "example": true
+          },
           "system_prompt": {
             "type": "string",
             "description": "The system prompt that defines the agent's behavior and capabilities.\nThis is sent as the first message in every conversation.",
@@ -15380,8 +17293,7 @@
         "type": "object",
         "description": "Request to create a new harness",
         "required": [
-          "name",
-          "system_prompt"
+          "name"
         ],
         "properties": {
           "capabilities": {
@@ -15471,8 +17383,11 @@
             "example": "harness_01933b5a000070008000000000000602"
           },
           "system_prompt": {
-            "type": "string",
-            "description": "The system prompt defining the harness's base behavior.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Base system prompt defining the harness's behavior. Optional: omit (or\nsend an empty string) to contribute no base prompt, in which case the\neffective prompt comes from the parent harness, agent, session, and\ncapability layers.",
             "example": "You are a research assistant with deep analytical capabilities."
           },
           "tags": {
@@ -15538,6 +17453,14 @@
             "description": "Discriminator selecting the variant of this resource. One of `note`,\n`table`, `business`, `query`, `runbook`.",
             "example": "runbook"
           },
+          "resource": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional OKF resource URI identifying the underlying asset.",
+            "example": "https://console.cloud.google.com/bigquery?p=acme&d=sales&t=orders"
+          },
           "tags": {
             "type": [
               "array",
@@ -15556,6 +17479,44 @@
             "type": "string",
             "description": "Human-readable title. Safe to render in user-facing messages.",
             "example": "Refund a payment past 30 days"
+          }
+        }
+      },
+      "CreateKnowledgeIndexRequest": {
+        "type": "object",
+        "description": "Request body for the `create_knowledge_index` operation.",
+        "required": [
+          "name",
+          "embedding_model_id"
+        ],
+        "properties": {
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable description. Safe to render in user-facing messages.",
+            "example": "Synced product documentation"
+          },
+          "embedding_model_id": {
+            "type": "string",
+            "description": "Embedding model used to embed chunks. Required."
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name. Safe to render in user-facing messages.",
+            "example": "product-docs"
+          },
+          "source_config": {
+            "description": "Non-secret source coordinates. Never include credentials."
+          },
+          "source_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "External source type. One of `github`, `git`. Defaults to `github`.",
+            "example": "github"
           }
         }
       },
@@ -15614,6 +17575,17 @@
             "type": "string",
             "description": "The name of the MCP server. Must be unique.",
             "example": "atlassian-mcp-server"
+          },
+          "protocol_mode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/McpProtocolMode",
+                "description": "Protocol-era policy. Defaults to `auto` (negotiates legacy/current/RC)."
+              }
+            ]
           },
           "transport_type": {
             "$ref": "#/components/schemas/McpServerTransportType",
@@ -16007,6 +17979,32 @@
           }
         }
       },
+      "CreatePluginMarketplaceRequest": {
+        "type": "object",
+        "description": "Request body for creating a plugin marketplace.",
+        "required": [
+          "name",
+          "source_type",
+          "source"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique name within the org (kebab-case, e.g. `my-org-plugins`).",
+            "example": "everruns-plugins"
+          },
+          "source": {
+            "type": "string",
+            "description": "Source value. For `github`: `\"owner/repo\"`. For `url`: full HTTPS URL.\nFor `local_path` (dev only): absolute filesystem path.",
+            "example": "everruns/plugins"
+          },
+          "source_type": {
+            "type": "string",
+            "description": "Source type: `github`, `url`, or `local_path` (dev/test only).",
+            "example": "github"
+          }
+        }
+      },
       "CreateProviderRequest": {
         "type": "object",
         "description": "Request to create a new LLM provider",
@@ -16020,7 +18018,7 @@
               "string",
               "null"
             ],
-            "description": "API key for authenticating with the provider.\nWill be encrypted at rest if encryption is configured."
+            "description": "API key for authenticating with the provider.\nWill be encrypted at rest if encryption is configured.\n\nSingle-field convenience for simple providers and programmatic clients.\nMulti-field drivers (Bedrock, MAI) should send `credentials` instead."
           },
           "base_url": {
             "type": [
@@ -16030,6 +18028,19 @@
             "description": "Base URL for the provider's API. Required for custom endpoints.\nFor standard providers, this can be omitted to use the default URL.",
             "example": "https://api.openai.com/v1"
           },
+          "credentials": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Typed credential fields keyed by the driver's declared credential-schema\nfield names. Validated against the schema and assembled into the stored\ncredential document. Takes precedence over `api_key` when present.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
           "name": {
             "type": "string",
             "description": "Display name for the provider.",
@@ -16038,6 +18049,17 @@
           "provider_type": {
             "$ref": "#/components/schemas/DriverId",
             "description": "The type of LLM provider (e.g., openai, anthropic)."
+          },
+          "trace": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProviderTraceConfig",
+                "description": "Trace/observability link configuration. Stored as a per-provider override\nof the driver's default templates; omit to keep driver defaults."
+              }
+            ]
           }
         }
       },
@@ -16271,6 +18293,14 @@
               }
             ]
           },
+          "parallel_tool_calls": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Request-level parallel tool calling preference (EVE-598). `true` signals\nthe provider that parallel tool calls are wanted; `false` requests at\nmost one tool call per turn and forces serial execution. Omit to inherit\nthe agent/harness preference or the provider default.",
+            "example": true
+          },
           "system_prompt": {
             "type": [
               "string",
@@ -16387,6 +18417,27 @@
           "name": {
             "type": "string",
             "example": "team-research"
+          }
+        }
+      },
+      "CredentialFormSchema": {
+        "type": "object",
+        "description": "Describes the form fields and instructions for entering a credential.",
+        "required": [
+          "fields",
+          "instructions_markdown"
+        ],
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormField"
+            },
+            "description": "Input fields to render."
+          },
+          "instructions_markdown": {
+            "type": "string",
+            "description": "Markdown instructions shown above the form (how to get the key, etc.)."
           }
         }
       },
@@ -16753,9 +18804,32 @@
           }
         }
       },
+      "DriverCredentialInfo": {
+        "type": "object",
+        "description": "A driver's declared credential schema, so the Settings UI can render\ndiscrete typed inputs (multi-field AWS keys, Entra OAuth fields) instead of\none opaque password field.",
+        "required": [
+          "driver",
+          "credential_schema",
+          "supports_oauth"
+        ],
+        "properties": {
+          "credential_schema": {
+            "$ref": "#/components/schemas/CredentialFormSchema",
+            "description": "The fields and instructions to render for this driver's credential."
+          },
+          "driver": {
+            "type": "string",
+            "description": "Driver id (e.g. `openai`, `bedrock`, `mai`)."
+          },
+          "supports_oauth": {
+            "type": "boolean",
+            "description": "Whether the driver declares an interactive \"Connect with …\" OAuth flow."
+          }
+        }
+      },
       "DriverId": {
         "type": "string",
-        "description": "LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock. Any other string is treated as an embedder-defined external provider."
+        "description": "LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock, mai, fireworks. Any other string is treated as an embedder-defined external provider."
       },
       "EnqueueTaskOptions": {
         "type": "object",
@@ -17072,6 +19146,9 @@
             "$ref": "#/components/schemas/TranscriptRepairedData"
           },
           {
+            "$ref": "#/components/schemas/ToolCallRepairedData"
+          },
+          {
             "$ref": "#/components/schemas/LlmGenerationData"
           },
           {
@@ -17087,6 +19164,9 @@
             "$ref": "#/components/schemas/ReasonThinkingCompletedData"
           },
           {
+            "$ref": "#/components/schemas/TurnSealedData"
+          },
+          {
             "$ref": "#/components/schemas/TurnCancelledData"
           },
           {
@@ -17097,18 +19177,6 @@
           },
           {
             "$ref": "#/components/schemas/SessionIdledData"
-          },
-          {
-            "$ref": "#/components/schemas/SubagentEventData"
-          },
-          {
-            "$ref": "#/components/schemas/SubagentEventData"
-          },
-          {
-            "$ref": "#/components/schemas/SubagentEventData"
-          },
-          {
-            "$ref": "#/components/schemas/SubagentEventData"
           },
           {
             "$ref": "#/components/schemas/SessionTaskEventData"
@@ -17560,63 +19628,24 @@
           }
         }
       },
-      "FeatureFlags": {
+      "FeatureFlagMap": {
         "type": "object",
-        "description": "Feature flags exposed via `GET /v1/feature-flags` and consumed by the frontend.\n\nCurrently backed by environment variables and deployment grade.\nFuture: per-org flags, per-user flags, external providers.",
-        "required": [
-          "global_chat",
-          "notifications",
-          "mcp_endpoint",
-          "evals",
-          "app_budgets",
-          "agent_versions",
-          "voice",
-          "apps.detailV2",
-          "agent_delegation",
-          "observers"
-        ],
-        "properties": {
-          "agent_delegation": {
-            "type": "boolean",
-            "description": "Outbound agent delegation capabilities (`a2a_agent_delegation`, `agent_handoff`).\nExperimental: auto-enabled in dev, off in prod by default.\nWhen off, these capabilities are not registered and cannot be assigned to agents."
-          },
-          "agent_versions": {
-            "type": "boolean",
-            "description": "Immutable agent versions, snapshots, forks, and app version binding.\nExperimental."
-          },
-          "app_budgets": {
-            "type": "boolean",
-            "description": "App / channel scoped budgets and periodic budget resets (`5h`, `1d`, ...).\nExperimental."
-          },
-          "apps.detailV2": {
-            "type": "boolean",
-            "description": "Channels-first app detail page and full-page channel forms. Experimental."
-          },
-          "evals": {
-            "type": "boolean",
-            "description": "Evals (user-facing behavioral evals for agents). Experimental."
-          },
-          "global_chat": {
-            "type": "boolean",
-            "description": "Global chat (per-user singleton chat session). Experimental."
-          },
-          "mcp_endpoint": {
-            "type": "boolean",
-            "description": "MCP endpoint (POST /mcp — Everruns as an MCP server). Experimental."
-          },
-          "notifications": {
-            "type": "boolean",
-            "description": "In-app notifications (bell, toasts, notification SSE). Experimental."
-          },
-          "observers": {
-            "type": "boolean",
-            "description": "Observers (online scoring of production sessions). Experimental."
-          },
-          "voice": {
-            "type": "boolean",
-            "description": "Realtime voice endpoints and microphone controls. Experimental."
-          }
+        "description": "Untyped API representation of feature flags: a generic `{ \"<flag>\": bool }` map.\n\nDecision: the public API is intentionally untyped. The set of flags churns\nfrequently; encoding each flag as a named schema property would force a\n`docs/api/openapi.json` change on every add/remove. A generic string→bool map\nkeeps the API spec stable. The frontend layers its own typed view on top.",
+        "additionalProperties": {
+          "type": "boolean"
+        },
+        "propertyNames": {
+          "type": "string"
         }
+      },
+      "FieldType": {
+        "type": "string",
+        "description": "Input field type for rendering.",
+        "enum": [
+          "password",
+          "text",
+          "url"
+        ]
       },
       "FileInfo": {
         "type": "object",
@@ -17892,6 +19921,120 @@
             "type": "string",
             "description": "Human-readable name. Safe to render in user-facing messages.",
             "example": "support-agent-experimental"
+          }
+        }
+      },
+      "ForkSessionRequest": {
+        "type": "object",
+        "description": "Request to fork a session (specs/forking-sessions.md). Every field is\noptional; omitted fields inherit the parent session's value. Title defaults\nto \"{parent title} (fork)\" when omitted.",
+        "properties": {
+          "agent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Override the agent assigned to the fork.",
+            "example": "agent_01933b5a00007000800000000000001"
+          },
+          "locale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Override the locale (BCP 47).",
+            "example": "uk-UA"
+          },
+          "model_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Override the LLM model for the fork.",
+            "example": "model_01933b5a00007000800000000000001"
+          },
+          "system_prompt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Override the session-level system prompt."
+          },
+          "tags": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for the fork. Replaces (does not merge with) the parent's tags.",
+            "example": [
+              "experiment"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Title for the fork. Defaults to \"{parent title} (fork)\".",
+            "example": "Branch: try the async rewrite"
+          }
+        }
+      },
+      "FormField": {
+        "type": "object",
+        "description": "A single form field.",
+        "required": [
+          "name",
+          "label",
+          "field_type",
+          "required"
+        ],
+        "properties": {
+          "default_value": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Default value the UI pre-fills (e.g. an OAuth scope or AWS region). The\nstored credential omits unfilled optional fields, so drivers still apply\ntheir own defaults; this only seeds the form input."
+          },
+          "field_type": {
+            "$ref": "#/components/schemas/FieldType",
+            "description": "Input type."
+          },
+          "group": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Mutually-exclusive group label this field belongs to. Fields sharing a\nlabel are one alternative credential method (e.g. \"API key\" vs \"OAuth\");\nungrouped fields are always part of the credential. `None` for the\ncommon single-method case."
+          },
+          "help_text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Help text shown below the input."
+          },
+          "label": {
+            "type": "string",
+            "description": "Label shown next to the input."
+          },
+          "name": {
+            "type": "string",
+            "description": "Field name used as the key when submitting (e.g. \"api_key\")."
+          },
+          "placeholder": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Placeholder text inside the input."
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether the field is required."
           }
         }
       },
@@ -18591,7 +20734,6 @@
         "required": [
           "id",
           "name",
-          "system_prompt",
           "status",
           "created_at",
           "updated_at"
@@ -18703,6 +20845,14 @@
               }
             ]
           },
+          "parallel_tool_calls": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+            "example": true
+          },
           "parent_harness_id": {
             "type": [
               "string",
@@ -18716,8 +20866,11 @@
             "description": "Current lifecycle status of the harness."
           },
           "system_prompt": {
-            "type": "string",
-            "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "System prompt that defines the harness's base behavior.\n\nForms the foundation of the prompt stack. Optional: when absent the\nharness contributes no base prompt, so the effective prompt comes\nentirely from the parent harness (if any), the agent, the session, and\ncapability contributions. Empty/whitespace-only values normalize to\n`None`.",
             "example": "You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope."
           },
           "tags": {
@@ -18845,6 +20998,12 @@
             ],
             "description": "Set when the case errored or timed out instead of completing."
           },
+          "input_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Input tokens for this case: the agent session turns plus the judge call.",
+            "minimum": 0
+          },
           "judge_reason": {
             "type": "string",
             "description": "LLM judge explanation."
@@ -18856,6 +21015,12 @@
           },
           "name": {
             "type": "string"
+          },
+          "output_tokens": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Output tokens for this case: the agent session turns plus the judge call.",
+            "minimum": 0
           },
           "passed": {
             "type": "boolean",
@@ -19281,6 +21446,30 @@
           }
         }
       },
+      "ImportOkfBundleRequest": {
+        "type": "object",
+        "description": "Request body for `okf_import`.",
+        "properties": {
+          "bundle_base64": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A base64-encoded `.tar.gz` OKF bundle. Mutually exclusive with `files`."
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OkfFileInput"
+            },
+            "description": "Inline bundle files. Mutually exclusive with `bundle_base64`."
+          },
+          "prune": {
+            "type": "boolean",
+            "description": "When true, delete previously-imported entries absent from this bundle."
+          }
+        }
+      },
       "InitialFile": {
         "type": "object",
         "description": "Starter file copied into a new session from an agent or harness.",
@@ -19423,6 +21612,26 @@
           }
         }
       },
+      "InstallPluginRequest": {
+        "type": "object",
+        "description": "Request body for installing a plugin from a marketplace catalog entry.",
+        "required": [
+          "marketplace_id",
+          "plugin_name"
+        ],
+        "properties": {
+          "marketplace_id": {
+            "type": "string",
+            "description": "Public ID of the marketplace to install from.",
+            "example": "plgmkt_01933b5a000070008000000000000001"
+          },
+          "plugin_name": {
+            "type": "string",
+            "description": "Name of the plugin entry in the marketplace catalog.",
+            "example": "microsoft-docs"
+          }
+        }
+      },
       "InvocationSessionMode": {
         "type": "string",
         "description": "How app-triggered invocations route into sessions.",
@@ -19562,6 +21771,14 @@
             "type": "string",
             "description": "Discriminator selecting the variant of this resource."
           },
+          "resource": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional OKF resource URI identifying the underlying asset.",
+            "example": "https://console.cloud.google.com/bigquery?p=acme&d=sales&t=orders"
+          },
           "tags": {
             "type": "array",
             "items": {
@@ -19577,6 +21794,211 @@
             "type": "string",
             "format": "date-time",
             "description": "Timestamp when this resource was last updated (RFC 3339)."
+          }
+        }
+      },
+      "KnowledgeIndexDocumentResponse": {
+        "type": "object",
+        "description": "Response body for a knowledge index document.",
+        "required": [
+          "id",
+          "index_id",
+          "source_uri",
+          "chunk_count",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "chunk_count": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Denormalized chunk count for this document."
+          },
+          "content_hash": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Content hash driving incremental re-embedding."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this resource was created (RFC 3339)."
+          },
+          "id": {
+            "type": "string",
+            "description": "Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).",
+            "example": "kidoc_01933b5a000070008000000000000001"
+          },
+          "index_id": {
+            "type": "string",
+            "description": "Parent index's prefixed public identifier.",
+            "example": "kidx_01933b5a000070008000000000000001"
+          },
+          "last_seen_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp this document was last seen during a sync pass (RFC 3339)."
+          },
+          "mime_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Document MIME type, if known."
+          },
+          "size_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Document size in bytes, if known."
+          },
+          "source_uri": {
+            "type": "string",
+            "description": "Stable per-source locator (e.g. `github://owner/repo@main/docs/x.md`)."
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Document title, if known."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this resource was last updated (RFC 3339)."
+          }
+        }
+      },
+      "KnowledgeIndexResponse": {
+        "type": "object",
+        "description": "Response body for a knowledge index.",
+        "required": [
+          "id",
+          "name",
+          "source_type",
+          "source_config",
+          "embedding_model_id",
+          "status",
+          "sync_status",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "archived_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when this resource was archived, if any (RFC 3339)."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this resource was created (RFC 3339)."
+          },
+          "deleted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp when this resource was soft-deleted, if any (RFC 3339)."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable description. Safe to render in user-facing messages."
+          },
+          "embedding_model_id": {
+            "type": "string",
+            "description": "Embedding model used to embed chunks. Required."
+          },
+          "id": {
+            "type": "string",
+            "description": "Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).",
+            "example": "kidx_01933b5a000070008000000000000001"
+          },
+          "last_sync_error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Sanitized failure reason from the last failed sync, if any."
+          },
+          "last_synced_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp of the last successful sync, if any (RFC 3339)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name. Safe to render in user-facing messages."
+          },
+          "source_config": {
+            "description": "Non-secret source coordinates. Never holds credentials."
+          },
+          "source_type": {
+            "type": "string",
+            "description": "External source type. One of `github`, `git`."
+          },
+          "status": {
+            "type": "string",
+            "description": "Current lifecycle status."
+          },
+          "sync_status": {
+            "type": "string",
+            "description": "Syncout pipeline state. One of `idle`, `pending`, `syncing`, `synced`, `failed`."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when this resource was last updated (RFC 3339)."
+          },
+          "vector_dim": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Embedding dimension, recorded on first successful sync."
+          }
+        }
+      },
+      "LatestHealthCheckRun": {
+        "type": "object",
+        "description": "The most recent health-check run for an agent, paired with whether the\nagent's current resolved config differs from the config that run was\nexecuted against. Returned by the latest-run endpoint so the agent editor\ncan show prior results on mount without triggering a new run, and surface a\n\"config changed since last run\" hint. See specs/agent-checks.md and EVE-588.",
+        "required": [
+          "config_changed"
+        ],
+        "properties": {
+          "config_changed": {
+            "type": "boolean",
+            "description": "True when `run` exists but was executed against a different resolved\nconfig than the agent currently has (UI shows a re-run hint)."
+          },
+          "run": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/HealthCheckRun",
+                "description": "The latest run, or `None` if the agent has never been health-checked."
+              }
+            ]
           }
         }
       },
@@ -19824,6 +22246,28 @@
           }
         }
       },
+      "ListKnowledgeIndexesQuery": {
+        "type": "object",
+        "description": "Query parameters for `GET /v1/knowledge-indexes` — optional name/desc\nsearch plus a flag to include archived indexes.",
+        "properties": {
+          "include_archived": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "When `true`, also returns archived knowledge indexes.",
+            "example": false
+          },
+          "search": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Substring filter applied to index name and description.",
+            "example": "docs"
+          }
+        }
+      },
       "ListMemoriesQuery": {
         "type": "object",
         "description": "Query parameters for `GET /v1/memories` — optional name search and a\nflag to include archived memories in the listing.",
@@ -19982,6 +22426,14 @@
                       "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
                     }
                   ]
+                },
+                "parallel_tool_calls": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                  "example": true
                 },
                 "root_agent_id": {
                   "type": [
@@ -20489,7 +22941,6 @@
               "required": [
                 "id",
                 "name",
-                "system_prompt",
                 "status",
                 "created_at",
                 "updated_at"
@@ -20601,6 +23052,14 @@
                     }
                   ]
                 },
+                "parallel_tool_calls": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                  "example": true
+                },
                 "parent_harness_id": {
                   "type": [
                     "string",
@@ -20614,8 +23073,11 @@
                   "description": "Current lifecycle status of the harness."
                 },
                 "system_prompt": {
-                  "type": "string",
-                  "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack.",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "System prompt that defines the harness's base behavior.\n\nForms the foundation of the prompt stack. Optional: when absent the\nharness contributes no base prompt, so the effective prompt comes\nentirely from the parent harness (if any), the agent, the session, and\ncapability contributions. Empty/whitespace-only values normalize to\n`None`.",
                   "example": "You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope."
                 },
                 "tags": {
@@ -20806,6 +23268,14 @@
                   "type": "string",
                   "description": "Discriminator selecting the variant of this resource."
                 },
+                "resource": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Optional OKF resource URI identifying the underlying asset.",
+                  "example": "https://console.cloud.google.com/bigquery?p=acme&d=sales&t=orders"
+                },
                 "tags": {
                   "type": "array",
                   "items": {
@@ -20821,6 +23291,213 @@
                   "type": "string",
                   "format": "date-time",
                   "description": "Timestamp when this resource was last updated (RFC 3339)."
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
+      "ListResponse_KnowledgeIndexDocumentResponse": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Response body for a knowledge index document.",
+              "required": [
+                "id",
+                "index_id",
+                "source_uri",
+                "chunk_count",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "chunk_count": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Denormalized chunk count for this document."
+                },
+                "content_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Content hash driving incremental re-embedding."
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when this resource was created (RFC 3339)."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).",
+                  "example": "kidoc_01933b5a000070008000000000000001"
+                },
+                "index_id": {
+                  "type": "string",
+                  "description": "Parent index's prefixed public identifier.",
+                  "example": "kidx_01933b5a000070008000000000000001"
+                },
+                "last_seen_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp this document was last seen during a sync pass (RFC 3339)."
+                },
+                "mime_type": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Document MIME type, if known."
+                },
+                "size_bytes": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int64",
+                  "description": "Document size in bytes, if known."
+                },
+                "source_uri": {
+                  "type": "string",
+                  "description": "Stable per-source locator (e.g. `github://owner/repo@main/docs/x.md`)."
+                },
+                "title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Document title, if known."
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when this resource was last updated (RFC 3339)."
+                }
+              }
+            },
+            "description": "Array of items returned by the list operation."
+          }
+        }
+      },
+      "ListResponse_KnowledgeIndexResponse": {
+        "type": "object",
+        "description": "Response wrapper for list endpoints.\nAll list endpoints return responses wrapped in a `data` field.",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "Response body for a knowledge index.",
+              "required": [
+                "id",
+                "name",
+                "source_type",
+                "source_config",
+                "embedding_model_id",
+                "status",
+                "sync_status",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "archived_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when this resource was archived, if any (RFC 3339)."
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when this resource was created (RFC 3339)."
+                },
+                "deleted_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp when this resource was soft-deleted, if any (RFC 3339)."
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Human-readable description. Safe to render in user-facing messages."
+                },
+                "embedding_model_id": {
+                  "type": "string",
+                  "description": "Embedding model used to embed chunks. Required."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).",
+                  "example": "kidx_01933b5a000070008000000000000001"
+                },
+                "last_sync_error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Sanitized failure reason from the last failed sync, if any."
+                },
+                "last_synced_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp of the last successful sync, if any (RFC 3339)."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Human-readable name. Safe to render in user-facing messages."
+                },
+                "source_config": {
+                  "description": "Non-secret source coordinates. Never holds credentials."
+                },
+                "source_type": {
+                  "type": "string",
+                  "description": "External source type. One of `github`, `git`."
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Current lifecycle status."
+                },
+                "sync_status": {
+                  "type": "string",
+                  "description": "Syncout pipeline state. One of `idle`, `pending`, `syncing`, `synced`, `failed`."
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when this resource was last updated (RFC 3339)."
+                },
+                "vector_dim": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32",
+                  "description": "Embedding dimension, recorded on first successful sync."
                 }
               }
             },
@@ -20914,6 +23591,10 @@
                     "null"
                   ],
                   "description": "Stable provider id used for user-scoped OAuth connections."
+                },
+                "protocol_mode": {
+                  "$ref": "#/components/schemas/McpProtocolMode",
+                  "description": "Protocol-era adoption policy for the MCP client (`auto` negotiates)."
                 },
                 "status": {
                   "$ref": "#/components/schemas/McpServerStatus",
@@ -21211,6 +23892,7 @@
               "required": [
                 "id",
                 "name",
+                "default_provider_per_service",
                 "created_at",
                 "updated_at"
               ],
@@ -21240,6 +23922,16 @@
                     "null"
                   ],
                   "description": "Default LLM model for the organization."
+                },
+                "default_provider_per_service": {
+                  "type": "object",
+                  "description": "Org-level default provider per service (EVE-569), keyed by service kind.\nEmpty when no org defaults are configured.",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "type": "string"
+                  }
                 },
                 "id": {
                   "type": "string",
@@ -21999,6 +24691,10 @@
                       ],
                       "description": "Stable provider id used for user-scoped OAuth connections."
                     },
+                    "protocol_mode": {
+                      "$ref": "#/components/schemas/McpProtocolMode",
+                      "description": "Protocol-era adoption policy for the MCP client (`auto` negotiates)."
+                    },
                     "status": {
                       "$ref": "#/components/schemas/McpServerStatus",
                       "description": "Current lifecycle status of the MCP server."
@@ -22395,6 +25091,17 @@
                       "$ref": "#/components/schemas/ProviderStatus",
                       "description": "Current lifecycle status of this provider."
                     },
+                    "trace": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "$ref": "#/components/schemas/ProviderTraceConfig",
+                          "description": "Resolved trace/observability link configuration: the driver's default\ntemplates overlaid with this provider's stored overrides. `None` when the\ndriver exposes no dashboard and the org configured nothing."
+                        }
+                      ]
+                    },
                     "updated_at": {
                       "type": "string",
                       "format": "date-time",
@@ -22457,7 +25164,6 @@
                       "required": [
                         "id",
                         "name",
-                        "system_prompt",
                         "status",
                         "created_at",
                         "updated_at"
@@ -22569,6 +25275,14 @@
                             }
                           ]
                         },
+                        "parallel_tool_calls": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ],
+                          "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                          "example": true
+                        },
                         "parent_harness_id": {
                           "type": [
                             "string",
@@ -22582,8 +25296,11 @@
                           "description": "Current lifecycle status of the harness."
                         },
                         "system_prompt": {
-                          "type": "string",
-                          "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack.",
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "System prompt that defines the harness's base behavior.\n\nForms the foundation of the prompt stack. Optional: when absent the\nharness contributes no base prompt, so the effective prompt comes\nentirely from the parent harness (if any), the agent, the session, and\ncapability contributions. Empty/whitespace-only values normalize to\n`None`.",
                           "example": "You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope."
                         },
                         "tags": {
@@ -23459,6 +26176,17 @@
           }
         }
       },
+      "McpProtocolMode": {
+        "type": "string",
+        "description": "Per-server policy for which MCP protocol era the client uses.\n\n`Auto` (the default) probes the server and adapts — it tries the stateless\nRC path first and transparently falls back to the stateful handshake when a\nserver demands it, so a single configuration speaks to legacy, current, and\nRC servers without operator action. The pinned variants skip negotiation\nwhen an operator knows a server's era (or to work around a server that\nmis-signals it).",
+        "enum": [
+          "auto",
+          "legacy",
+          "stable",
+          "rc"
+        ],
+        "example": "auto"
+      },
       "McpServer": {
         "type": "object",
         "description": "MCP Server configuration.\nRepresents a remote MCP server that can provide tools and resources.",
@@ -23536,6 +26264,10 @@
               "null"
             ],
             "description": "Stable provider id used for user-scoped OAuth connections."
+          },
+          "protocol_mode": {
+            "$ref": "#/components/schemas/McpProtocolMode",
+            "description": "Protocol-era adoption policy for the MCP client (`auto` negotiates)."
           },
           "status": {
             "$ref": "#/components/schemas/McpServerStatus",
@@ -23953,6 +26685,19 @@
               "null"
             ],
             "description": "Cryptographic signature for thinking content (Anthropic Claude)\nRequired when sending thinking back in subsequent API calls."
+          }
+        }
+      },
+      "MessageBody": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message text dispatched to the agent.",
+            "example": "Summarize the latest support tickets."
           }
         }
       },
@@ -24631,6 +27376,62 @@
           ]
         }
       },
+      "OkfFileInput": {
+        "type": "object",
+        "description": "A single inline bundle file, for callers that send files as JSON rather\nthan a tarball.",
+        "required": [
+          "path",
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Raw markdown file content (frontmatter + body)."
+          },
+          "path": {
+            "type": "string",
+            "description": "Bundle-relative path, e.g. `tables/orders.md`."
+          }
+        }
+      },
+      "OkfImportSummary": {
+        "type": "object",
+        "description": "Outcome of an import run.",
+        "required": [
+          "created",
+          "updated",
+          "skipped",
+          "pruned",
+          "warnings"
+        ],
+        "properties": {
+          "created": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pruned": {
+            "type": "integer",
+            "description": "Entries removed because `prune` was set and they were absent from the bundle.",
+            "minimum": 0
+          },
+          "skipped": {
+            "type": "integer",
+            "description": "Documents skipped (e.g. oversized body); see `warnings`.",
+            "minimum": 0
+          },
+          "updated": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Non-fatal issues (broken docs, oversized bodies). OKF consumers degrade gracefully."
+          }
+        }
+      },
       "OrgFeatureFlagSetting": {
         "type": "object",
         "required": [
@@ -24689,6 +27490,7 @@
         "required": [
           "id",
           "name",
+          "default_provider_per_service",
           "created_at",
           "updated_at"
         ],
@@ -24718,6 +27520,16 @@
               "null"
             ],
             "description": "Default LLM model for the organization."
+          },
+          "default_provider_per_service": {
+            "type": "object",
+            "description": "Org-level default provider per service (EVE-569), keyed by service kind.\nEmpty when no org defaults are configured.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
           },
           "id": {
             "type": "string",
@@ -24997,6 +27809,22 @@
                   "description": "Timestamp when the session finished (completed or failed).",
                   "example": "2026-05-25T10:14:32Z"
                 },
+                "forked_from_sequence": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "int32",
+                  "description": "Parent event sequence the fork was taken at (the fork point). NULL unless\nthis session is a fork.",
+                  "example": 42
+                },
+                "forked_from_session_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Session this one was forked from. NULL for sessions that were not forked.\nDistinct from `parent_session_id` (subagent nesting): forking is a\nuser-initiated \"branch from here\" relationship."
+                },
                 "harness_id": {
                   "type": "string",
                   "description": "ID of the harness for this session (format: harness_{32-hex}).",
@@ -25101,6 +27929,14 @@
                   "type": "string",
                   "description": "Owning principal for this session.",
                   "example": "principal_01933b5a000070008000000000000001"
+                },
+                "parallel_tool_calls": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                  "example": true
                 },
                 "parent_session_id": {
                   "type": [
@@ -25621,6 +28457,14 @@
                             }
                           ]
                         },
+                        "parallel_tool_calls": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ],
+                          "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                          "example": true
+                        },
                         "root_agent_id": {
                           "type": [
                             "string",
@@ -25888,6 +28732,22 @@
                       "description": "Timestamp when the session finished (completed or failed).",
                       "example": "2026-05-25T10:14:32Z"
                     },
+                    "forked_from_sequence": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "format": "int32",
+                      "description": "Parent event sequence the fork was taken at (the fork point). NULL unless\nthis session is a fork.",
+                      "example": 42
+                    },
+                    "forked_from_session_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Session this one was forked from. NULL for sessions that were not forked.\nDistinct from `parent_session_id` (subagent nesting): forking is a\nuser-initiated \"branch from here\" relationship."
+                    },
                     "harness_id": {
                       "type": "string",
                       "description": "ID of the harness for this session (format: harness_{32-hex}).",
@@ -25992,6 +28852,14 @@
                       "type": "string",
                       "description": "Owning principal for this session.",
                       "example": "principal_01933b5a000070008000000000000001"
+                    },
+                    "parallel_tool_calls": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ],
+                      "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                      "example": true
                     },
                     "parent_session_id": {
                       "type": [
@@ -26578,9 +29446,6 @@
       "PreviewHarnessRequest": {
         "type": "object",
         "description": "Request to preview harness shape with capabilities applied",
-        "required": [
-          "system_prompt"
-        ],
         "properties": {
           "capabilities": {
             "type": "array",
@@ -26614,8 +29479,11 @@
             "example": "harness_01933b5a000070008000000000000602"
           },
           "system_prompt": {
-            "type": "string",
-            "description": "System prompt to render as the base prompt for the preview.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "System prompt to render as the base prompt for the preview. Optional:\nomit to preview a harness that contributes no base prompt of its own.",
             "example": "You are a research assistant."
           }
         }
@@ -26780,6 +29648,17 @@
             "$ref": "#/components/schemas/ProviderStatus",
             "description": "Current lifecycle status of this provider."
           },
+          "trace": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProviderTraceConfig",
+                "description": "Resolved trace/observability link configuration: the driver's default\ntemplates overlaid with this provider's stored overrides. `None` when the\ndriver exposes no dashboard and the org configured nothing."
+              }
+            ]
+          },
           "updated_at": {
             "type": "string",
             "format": "date-time",
@@ -26794,6 +29673,60 @@
           "active",
           "disabled"
         ]
+      },
+      "ProviderTraceConfig": {
+        "type": "object",
+        "description": "Configuration for linking from the chat UI to a provider's observability\ndashboard (\"trace\"/\"logs\").\n\nThis is provider-agnostic: any driver with a dashboard can supply default\ntemplates (see [`DriverId::default_trace_templates`]), and an org enables\nlinks per provider once it has confirmed logging is on for that account.\nURL templates support the `{response_id}`, `{session_id}`, `{turn_id}` and\n`{model}` placeholders, so the same mechanism works for OpenRouter today and\nfor third-party observability backends (Langfuse, Helicone, ...) via an\noverride.",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether trace links should be shown for this provider. Defaults to\n`false`: vendors typically do not retain trace content unless logging is\nexplicitly enabled, so the org opts in once that is set up."
+          },
+          "generation_url_template": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "URL template for a single generation's trace, e.g.\n`\"https://openrouter.ai/logs?id={response_id}\"`."
+          },
+          "session_url_template": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "URL template for a session's grouped trace, e.g.\n`\"https://openrouter.ai/logs\"`."
+          }
+        }
+      },
+      "ProvidersConfigResponse": {
+        "type": "object",
+        "description": "Provider resource config: caller policies plus the credential schemas the UI\nrenders per driver.",
+        "required": [
+          "policies",
+          "drivers"
+        ],
+        "properties": {
+          "drivers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DriverCredentialInfo"
+            },
+            "description": "Per-driver credential schemas, ordered by driver id."
+          },
+          "policies": {
+            "type": "object",
+            "description": "Map of policy ID → whether the caller satisfies it.",
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          }
+        }
       },
       "ReasonCompletedData": {
         "type": "object",
@@ -27119,6 +30052,24 @@
           "channel": {
             "$ref": "#/components/schemas/AppChannel",
             "description": "The updated A2A channel."
+          }
+        }
+      },
+      "RegenerateApiEndpointApiKeyOutput": {
+        "type": "object",
+        "description": "Output of [`RegenerateApiEndpointApiKeyCmd`] — includes the newly generated\nplaintext API key (returned **once**, never persisted) plus the updated\n[`AppChannel`].",
+        "required": [
+          "api_key",
+          "channel"
+        ],
+        "properties": {
+          "api_key": {
+            "type": "string",
+            "description": "New plaintext API key. Persist this — it cannot be recovered later.\nThe previous key is invalidated immediately."
+          },
+          "channel": {
+            "$ref": "#/components/schemas/AppChannel",
+            "description": "The updated api_endpoint channel."
           }
         }
       },
@@ -28352,6 +31303,22 @@
             "description": "Timestamp when the session finished (completed or failed).",
             "example": "2026-05-25T10:14:32Z"
           },
+          "forked_from_sequence": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Parent event sequence the fork was taken at (the fork point). NULL unless\nthis session is a fork.",
+            "example": 42
+          },
+          "forked_from_session_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Session this one was forked from. NULL for sessions that were not forked.\nDistinct from `parent_session_id` (subagent nesting): forking is a\nuser-initiated \"branch from here\" relationship."
+          },
           "harness_id": {
             "type": "string",
             "description": "ID of the harness for this session (format: harness_{32-hex}).",
@@ -28456,6 +31423,14 @@
             "type": "string",
             "description": "Owning principal for this session.",
             "example": "principal_01933b5a000070008000000000000001"
+          },
+          "parallel_tool_calls": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+            "example": true
           },
           "parent_session_id": {
             "type": [
@@ -28736,6 +31711,27 @@
           }
         }
       },
+      "SessionRef": {
+        "type": "object",
+        "required": [
+          "session_id",
+          "status"
+        ],
+        "properties": {
+          "created_session": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
       "SessionResourceEntry": {
         "type": "object",
         "description": "A resource registered in the session resource registry.",
@@ -28883,15 +31879,26 @@
         }
       },
       "SessionStatus": {
-        "type": "string",
-        "description": "Session execution status.\n- `started`: Session just created, no turn executed yet\n- `active`: A turn is currently running\n- `idle`: Turn completed, session waiting for next input\n- `paused`: Budget limit reached, waiting for user to increase limit or resume",
-        "enum": [
-          "started",
-          "active",
-          "idle",
-          "waitingfortoolresults",
-          "paused"
-        ]
+        "type": "object",
+        "required": [
+          "session_id",
+          "status",
+          "messages"
+        ],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentMessage"
+            }
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
       },
       "SessionTask": {
         "type": "object",
@@ -29337,48 +32344,6 @@
         "properties": {
           "path": {
             "type": "string"
-          }
-        }
-      },
-      "SubagentEventData": {
-        "type": "object",
-        "description": "Data for subagent lifecycle events (spawned, completed, failed, cancelled).",
-        "required": [
-          "subagent_session_id",
-          "subagent_name",
-          "task",
-          "status"
-        ],
-        "properties": {
-          "error": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Error message (only for failed)"
-          },
-          "result": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Result summary (only for completed/failed)"
-          },
-          "status": {
-            "type": "string",
-            "description": "Subagent status (spawning, running, completed, failed, cancelled)"
-          },
-          "subagent_name": {
-            "type": "string",
-            "description": "Human-readable subagent name"
-          },
-          "subagent_session_id": {
-            "type": "string",
-            "description": "The subagent's child session ID"
-          },
-          "task": {
-            "type": "string",
-            "description": "Task description"
           }
         }
       },
@@ -29903,7 +32868,7 @@
       },
       "TokenUsage": {
         "type": "object",
-        "description": "Token usage statistics\n\nTracks token consumption per LLM call including cache tokens for cost optimization.\nCache tokens are provider-specific:\n- OpenAI: `cache_read_tokens` from prompt_tokens_details.cached_tokens\n- Anthropic: `cache_read_tokens` from cache_read_input_tokens,\n  `cache_creation_tokens` from cache_creation_input_tokens",
+        "description": "Token usage statistics\n\nTracks token consumption per LLM call including cache tokens for cost\noptimization.\n\n# Disjoint bucket convention\n\nPrompt token buckets are **disjoint** (non-overlapping). Drivers normalize\nprovider wire formats at the boundary so this holds for every provider:\n\n```text\ntotal_prompt = input_tokens + cache_read_tokens + cache_creation_tokens\n```\n\n- `input_tokens` — non-cached prompt tokens only.\n- `cache_read_tokens` — tokens served from cache, never counted in\n  `input_tokens`.\n- `cache_creation_tokens` — tokens written to cache, never counted in\n  `input_tokens`.\n\nInclusive providers (OpenAI Responses / Chat Completions, Gemini) report a\nprompt count that *includes* cached reads; their drivers subtract the cached\nsubset so the value stored here is the non-cached remainder. Anthropic /\nBedrock already report disjoint buckets. Cost is therefore uniform across\nproviders (`input·in + cache_read·cr + cache_creation·cw + output·out`);\nconsumers must not re-derive a non-cached input by subtracting cache reads.",
         "required": [
           "input_tokens",
           "output_tokens"
@@ -29923,7 +32888,7 @@
               "null"
             ],
             "format": "int32",
-            "description": "Number of tokens written to cache (Anthropic-specific)",
+            "description": "Number of tokens written to cache, disjoint from `input_tokens`",
             "minimum": 0
           },
           "cache_read_tokens": {
@@ -29932,8 +32897,16 @@
               "null"
             ],
             "format": "int32",
-            "description": "Number of tokens read from cache (reduces cost)",
+            "description": "Number of tokens read from cache (reduces cost), disjoint from `input_tokens`",
             "minimum": 0
+          },
+          "effective_cost_usd": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "Best-effort USD cost for already-aggregated usage. Per-generation usage\nleaves this unset and derives the effective cost from actual/estimated."
           },
           "estimated_cost_usd": {
             "type": [
@@ -29946,7 +32919,7 @@
           "input_tokens": {
             "type": "integer",
             "format": "int32",
-            "description": "Number of input/prompt tokens",
+            "description": "Number of non-cached prompt tokens (cached reads/writes are tracked\nseparately; see the disjoint bucket convention on the struct)",
             "minimum": 0
           },
           "output_tokens": {
@@ -29995,6 +32968,35 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "ToolCallRepairedData": {
+        "type": "object",
+        "description": "Data for the `tool.call_repaired` event (EVE-600).\n\nEmitted once per malformed tool call handled by the opt-in\n`tool_call_repair` capability. `outcome` is the stable label\n(`local-salvage` | `re-prompt` | `gave-up`).",
+        "required": [
+          "turn_id",
+          "tool_call_id",
+          "tool_name",
+          "outcome"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "description": "Stable outcome label: `local-salvage`, `re-prompt`, or `gave-up`."
+          },
+          "tool_call_id": {
+            "type": "string",
+            "description": "The tool call ID that was inspected/repaired."
+          },
+          "tool_name": {
+            "type": "string",
+            "description": "The tool name the malformed call targeted."
+          },
+          "turn_id": {
+            "type": "string",
+            "description": "Turn this repair belongs to.",
+            "example": "turn_01933b5a00007000800000000000001"
           }
         }
       },
@@ -30696,6 +33698,52 @@
           }
         }
       },
+      "TurnSealedData": {
+        "type": "object",
+        "description": "Data for turn.sealed event (EVE-534).\n\nA sealed turn was deliberately stopped to prevent waste. It is observably\ndistinct from `turn.completed` (success) and `turn.failed` (error). The\n`reason` is the stable wire form of `everruns_core::turn::SealReason`\n(`\"no_progress\"` or `\"budget\"`).",
+        "required": [
+          "turn_id",
+          "reason"
+        ],
+        "properties": {
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable detail for operators (optional)."
+          },
+          "iterations": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Iterations completed before the turn was sealed (if known).",
+            "minimum": 0
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the turn was sealed: `\"no_progress\"` (crash-loop with no forward\nprogress) or `\"budget\"` (work budget exhausted)."
+          },
+          "turn_id": {
+            "type": "string",
+            "description": "Turn identifier",
+            "example": "turn_01933b5a00007000800000000000001"
+          },
+          "usage": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TokenUsage",
+                "description": "Aggregated token usage before sealing, if available."
+              }
+            ]
+          }
+        }
+      },
       "TurnStartedData": {
         "type": "object",
         "description": "Data for turn.started event",
@@ -30825,6 +33873,14 @@
                 "description": "Network access list controlling which hosts/URLs this agent's sessions can reach.\nSend `{}` (empty object) to clear restrictions. Omit to leave unchanged.\nExample shape is defined on `NetworkAccessList`."
               }
             ]
+          },
+          "parallel_tool_calls": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Request-level parallel tool calling preference (EVE-598). `true` signals\nthe provider that parallel tool calls are wanted; `false` requests at\nmost one tool call per turn and forces serial execution. Omit to leave\nunchanged.",
+            "example": true
           },
           "status": {
             "oneOf": [
@@ -31158,6 +34214,19 @@
           }
         }
       },
+      "UpdateInstalledPluginRequest": {
+        "type": "object",
+        "description": "Request body for updating an installed plugin (status only; use POST .../update for recompile).",
+        "properties": {
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "New lifecycle status: `active` or `disabled`."
+          }
+        }
+      },
       "UpdateKnowledgeBaseRequest": {
         "type": "object",
         "description": "Request body for the `update_knowledge_base` operation.",
@@ -31206,6 +34275,13 @@
             "description": "Discriminator selecting the variant of this resource. One of `note`,\n`table`, `business`, `query`, `runbook`.",
             "example": "runbook"
           },
+          "resource": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional OKF resource URI. Set to null to clear."
+          },
           "tags": {
             "type": [
               "array",
@@ -31228,6 +34304,37 @@
             ],
             "description": "Human-readable title. Safe to render in user-facing messages.",
             "example": "Refund a payment past 60 days"
+          }
+        }
+      },
+      "UpdateKnowledgeIndexRequest": {
+        "type": "object",
+        "description": "Request body for the `update_knowledge_index` operation.",
+        "properties": {
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable description. Set to null to clear."
+          },
+          "embedding_model_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Embedding model used to embed chunks. Required; cannot be cleared."
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable name. Safe to render in user-facing messages.",
+            "example": "product-docs-v2"
+          },
+          "source_config": {
+            "description": "Non-secret source coordinates. Never include credentials."
           }
         }
       },
@@ -31285,6 +34392,17 @@
             ],
             "description": "The name of the MCP server.",
             "example": "updated-mcp-server"
+          },
+          "protocol_mode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/McpProtocolMode",
+                "description": "Protocol-era policy (`auto`, `legacy`, `stable`, `rc`)."
+              }
+            ]
           },
           "status": {
             "oneOf": [
@@ -31481,6 +34599,19 @@
             "description": "Default LLM model for this organization. Must be an enabled model.",
             "example": "model_01933b5a00007000800000000000001"
           },
+          "default_provider_per_service": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Org-level default provider per service (EVE-569). Maps a service kind\n(`chat`, `embeddings`, `realtime`, `images`, `rerank`) to the provider id\nused as that service's default, consulted after an explicit binding and\nbefore the single-active-provider fallback. When present it **replaces**\nthe whole map; each referenced provider must exist in the org.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
           "name": {
             "type": [
               "string",
@@ -31624,6 +34755,24 @@
           }
         }
       },
+      "UpdatePluginMarketplaceRequest": {
+        "type": "object",
+        "description": "Request body for updating a plugin marketplace.",
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "UpdateProfileRequest": {
         "type": "object",
         "description": "Request to update current user's profile",
@@ -31647,7 +34796,7 @@
               "string",
               "null"
             ],
-            "description": "API key for authenticating with the provider.\nWill be encrypted at rest if encryption is configured."
+            "description": "API key for authenticating with the provider.\nWill be encrypted at rest if encryption is configured.\n\nSingle-field convenience for simple providers and programmatic clients.\nMulti-field drivers (Bedrock, MAI) should send `credentials` instead."
           },
           "base_url": {
             "type": [
@@ -31656,6 +34805,19 @@
             ],
             "description": "Base URL for the provider's API.",
             "example": "https://api.openai.com/v1"
+          },
+          "credentials": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Typed credential fields keyed by the driver's declared credential-schema\nfield names. Validated against the schema and assembled into the stored\ncredential document. Takes precedence over `api_key` when present.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
           },
           "name": {
             "type": [
@@ -31684,6 +34846,17 @@
               {
                 "$ref": "#/components/schemas/ProviderStatus",
                 "description": "The status of the provider. Set to \"inactive\" to disable."
+              }
+            ]
+          },
+          "trace": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProviderTraceConfig",
+                "description": "Trace/observability link configuration override. Merged into the\nprovider's stored settings, preserving other settings keys."
               }
             ]
           }
@@ -32272,6 +35445,14 @@
             "description": "Provider-side realtime model identifier. When omitted the server picks the agent's configured default.",
             "example": "gpt-realtime"
           },
+          "provider_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Realtime provider binding: the prefixed public id of the provider\nconnection to route this voice connection through (e.g. `prov_…`). Lets\nan org with more than one realtime-capable provider pick which one serves\nthe connection. When omitted, the server resolves the org's default (or\nsingle) realtime provider. The bound provider's driver MUST declare the\nrealtime service, otherwise the request is rejected with 400.",
+            "example": "prov_01h…"
+          },
           "reasoning_effort": {
             "type": [
               "string",
@@ -32590,6 +35771,14 @@
                     "description": "Network access list controlling which hosts/URLs agent sessions can reach.\nMerged with harness and session layers (allowed: intersect, blocked: union)."
                   }
                 ]
+              },
+              "parallel_tool_calls": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                "example": true
               },
               "root_agent_id": {
                 "type": [
@@ -33168,7 +36357,6 @@
             "required": [
               "id",
               "name",
-              "system_prompt",
               "status",
               "created_at",
               "updated_at"
@@ -33280,6 +36468,14 @@
                   }
                 ]
               },
+              "parallel_tool_calls": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                "example": true
+              },
               "parent_harness_id": {
                 "type": [
                   "string",
@@ -33293,8 +36489,11 @@
                 "description": "Current lifecycle status of the harness."
               },
               "system_prompt": {
-                "type": "string",
-                "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack.",
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "System prompt that defines the harness's base behavior.\n\nForms the foundation of the prompt stack. Optional: when absent the\nharness contributes no base prompt, so the effective prompt comes\nentirely from the parent harness (if any), the agent, the session, and\ncapability contributions. Empty/whitespace-only values normalize to\n`None`.",
                 "example": "You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope."
               },
               "tags": {
@@ -33427,6 +36626,10 @@
                   "null"
                 ],
                 "description": "Stable provider id used for user-scoped OAuth connections."
+              },
+              "protocol_mode": {
+                "$ref": "#/components/schemas/McpProtocolMode",
+                "description": "Protocol-era adoption policy for the MCP client (`auto` negotiates)."
               },
               "status": {
                 "$ref": "#/components/schemas/McpServerStatus",
@@ -33785,6 +36988,17 @@
                 "$ref": "#/components/schemas/ProviderStatus",
                 "description": "Current lifecycle status of this provider."
               },
+              "trace": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ProviderTraceConfig",
+                    "description": "Resolved trace/observability link configuration: the driver's default\ntemplates overlaid with this provider's stored overrides. `None` when the\ndriver exposes no dashboard and the org configured nothing."
+                  }
+                ]
+              },
               "updated_at": {
                 "type": "string",
                 "format": "date-time",
@@ -33960,6 +37174,14 @@
                       }
                     ]
                   },
+                  "parallel_tool_calls": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                    "example": true
+                  },
                   "root_agent_id": {
                     "type": [
                       "string",
@@ -34080,7 +37302,6 @@
                 "required": [
                   "id",
                   "name",
-                  "system_prompt",
                   "status",
                   "created_at",
                   "updated_at"
@@ -34192,6 +37413,14 @@
                       }
                     ]
                   },
+                  "parallel_tool_calls": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                    "example": true
+                  },
                   "parent_harness_id": {
                     "type": [
                       "string",
@@ -34205,8 +37434,11 @@
                     "description": "Current lifecycle status of the harness."
                   },
                   "system_prompt": {
-                    "type": "string",
-                    "description": "System prompt that defines the harness's base behavior.\nForms the foundation of the prompt stack.",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "System prompt that defines the harness's base behavior.\n\nForms the foundation of the prompt stack. Optional: when absent the\nharness contributes no base prompt, so the effective prompt comes\nentirely from the parent harness (if any), the agent, the session, and\ncapability contributions. Empty/whitespace-only values normalize to\n`None`.",
                     "example": "You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope."
                   },
                   "tags": {
@@ -34393,6 +37625,22 @@
                 "description": "Timestamp when the session finished (completed or failed).",
                 "example": "2026-05-25T10:14:32Z"
               },
+              "forked_from_sequence": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32",
+                "description": "Parent event sequence the fork was taken at (the fork point). NULL unless\nthis session is a fork.",
+                "example": 42
+              },
+              "forked_from_session_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Session this one was forked from. NULL for sessions that were not forked.\nDistinct from `parent_session_id` (subagent nesting): forking is a\nuser-initiated \"branch from here\" relationship."
+              },
               "harness_id": {
                 "type": "string",
                 "description": "ID of the harness for this session (format: harness_{32-hex}).",
@@ -34497,6 +37745,14 @@
                 "type": "string",
                 "description": "Owning principal for this session.",
                 "example": "principal_01933b5a000070008000000000000001"
+              },
+              "parallel_tool_calls": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Request-level parallel tool calling preference (EVE-598).\n\n`None` (default) preserves provider defaults. `Some(true)` signals the\nprovider that parallel tool calls are wanted; `Some(false)` requests at\nmost one tool call per turn and forces serial execution. Merged across\nharness/agent/session layers (overlay wins).",
+                "example": true
               },
               "parent_session_id": {
                 "type": [
@@ -35270,6 +38526,10 @@
     {
       "name": "knowledge_bases",
       "description": "Knowledge base and entry management endpoints"
+    },
+    {
+      "name": "knowledge_indexes",
+      "description": "Knowledge index and document management endpoints"
     },
     {
       "name": "images",
