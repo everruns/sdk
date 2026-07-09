@@ -863,7 +863,10 @@ describe("Everruns", () => {
     const synced = await client.memories.sync("mem_123");
     const files = await client.memories.listFiles("mem_123");
     const file = await client.memories.readFile("mem_123", "/notes.md");
-    const downloaded = await client.memories.downloadFile("mem_123", "/notes.md");
+    const downloaded = await client.memories.downloadFile(
+      "mem_123",
+      "/notes.md",
+    );
     await client.memories.createFile("mem_123", "/new.md", {
       content: "new",
       encoding: "text",
@@ -1233,6 +1236,211 @@ describe("validateAgentName", () => {
     );
     expect(() => validateAgentName("")).toThrow("must match pattern");
   });
+});
+
+describe("Agents create/apply with harness fields (EVE-686)", () => {
+  function agentFetchMock() {
+    return vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: "agent_123",
+        name: "customer-support",
+        systemPrompt: "You are helpful.",
+        harnessId: "harness_abc",
+        parallelToolCalls: true,
+        status: "active",
+        createdAt: "2026-03-13T00:00:00Z",
+        updatedAt: "2026-03-13T00:00:00Z",
+      }),
+    });
+  }
+
+  it("should carry harness_id and parallel_tool_calls in create body", async () => {
+    const fetchMock = agentFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    await client.agents.create({
+      name: "customer-support",
+      systemPrompt: "You are helpful.",
+      harnessId: "harness_abc",
+      parallelToolCalls: true,
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      name: "customer-support",
+      system_prompt: "You are helpful.",
+      harness_id: "harness_abc",
+      parallel_tool_calls: true,
+    });
+    expect(body.harness_name).toBeUndefined();
+  });
+
+  it("should carry harness_name in create body", async () => {
+    const fetchMock = agentFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    await client.agents.create({
+      name: "customer-support",
+      systemPrompt: "You are helpful.",
+      harnessName: "deep-research",
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body).toMatchObject({ harness_name: "deep-research" });
+    expect(body.harness_id).toBeUndefined();
+  });
+
+  it("should carry parallel_tool_calls false in create body", async () => {
+    const fetchMock = agentFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    await client.agents.create({
+      name: "customer-support",
+      systemPrompt: "You are helpful.",
+      parallelToolCalls: false,
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.parallel_tool_calls).toBe(false);
+  });
+
+  it("should carry harness fields in apply body", async () => {
+    const fetchMock = agentFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    await client.agents.apply("agent_deadbeef", {
+      name: "customer-support",
+      systemPrompt: "You are helpful.",
+      harnessName: "deep-research",
+      parallelToolCalls: true,
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      id: "agent_deadbeef",
+      harness_name: "deep-research",
+      parallel_tool_calls: true,
+    });
+  });
+
+  it("should reject specifying both harnessId and harnessName on create", async () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await expect(
+      client.agents.create({
+        name: "customer-support",
+        systemPrompt: "You are helpful.",
+        harnessId: "harness_abc",
+        harnessName: "deep-research",
+      }),
+    ).rejects.toThrow("Cannot specify both harnessId and harnessName");
+  });
+
+  it("should reject specifying both harnessId and harnessName on apply", async () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await expect(
+      client.agents.apply("agent_deadbeef", {
+        name: "customer-support",
+        systemPrompt: "You are helpful.",
+        harnessId: "harness_abc",
+        harnessName: "deep-research",
+      }),
+    ).rejects.toThrow("Cannot specify both harnessId and harnessName");
+  });
+
+  it("should reject invalid harnessName on create", async () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await expect(
+      client.agents.create({
+        name: "customer-support",
+        systemPrompt: "You are helpful.",
+        harnessName: "Invalid_Name",
+      }),
+    ).rejects.toThrow("must match pattern");
+  });
+
+  it("should reject invalid harnessName on applyByName", async () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await expect(
+      client.agents.applyByName({
+        name: "customer-support",
+        systemPrompt: "You are helpful.",
+        harnessName: "Invalid_Name",
+      }),
+    ).rejects.toThrow("must match pattern");
+  });
+
+  // NOTE: response-field parsing (agent.harnessId etc.) is intentionally not
+  // asserted here. The API returns snake_case (harness_id) and the client casts
+  // response.json() directly to the camelCase-typed Agent with no transform, so
+  // multi-word response fields are undefined at runtime. This is a pre-existing,
+  // systemic, TypeScript-only issue (affects systemPrompt/createdAt/etc. too),
+  // out of scope for this adoption and tracked as a separate follow-up.
+});
+
+describe("Sessions create with agentName and parallelToolCalls (EVE-686)", () => {
+  function sessionFetchMock() {
+    return vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: "session_123",
+        harnessId: "harness_123",
+        agentId: "agent_123",
+        parallelToolCalls: true,
+        forkedFromSessionId: "session_parent",
+        forkedFromSequence: 42,
+        status: "active",
+        createdAt: "2026-03-13T00:00:00Z",
+        updatedAt: "2026-03-13T00:00:00Z",
+      }),
+    });
+  }
+
+  it("should carry agent_name and parallel_tool_calls in body", async () => {
+    const fetchMock = sessionFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    await client.sessions.create({
+      agentName: "customer-support",
+      parallelToolCalls: true,
+    });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      agent_name: "customer-support",
+      parallel_tool_calls: true,
+    });
+    expect(body.agent_id).toBeUndefined();
+  });
+
+  it("should reject specifying both agentId and agentName", async () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await expect(
+      client.sessions.create({
+        agentId: "agent_123",
+        agentName: "customer-support",
+      }),
+    ).rejects.toThrow("Cannot specify both agentId and agentName");
+  });
+
+  it("should reject invalid agentName", async () => {
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await expect(
+      client.sessions.create({ agentName: "Invalid_Name" }),
+    ).rejects.toThrow("must match pattern");
+  });
+
+  // NOTE: see the agent-response note above — snake_case response fields
+  // (parallel_tool_calls, forked_from_session_id, forked_from_sequence) are not
+  // mapped to the camelCase-typed Session at runtime. Pre-existing TS-only issue,
+  // tracked separately; not asserted here to avoid false confidence.
 });
 
 describe("CreateAgentRequest with displayName", () => {

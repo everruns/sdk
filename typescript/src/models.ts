@@ -61,6 +61,10 @@ export interface Agent {
   displayName?: string | null;
   systemPrompt: string;
   model?: string;
+  /** Harness ID backing this agent. */
+  harnessId: string;
+  /** Whether the agent may request multiple tool calls in parallel. */
+  parallelToolCalls?: boolean;
   capabilities?: AgentCapabilityConfig[];
   tools?: ToolDefinition[];
   initialFiles?: InitialFile[];
@@ -139,6 +143,16 @@ export interface CreateAgentRequest {
   capabilities?: AgentCapabilityConfig[];
   tools?: ToolDefinition[];
   initialFiles?: InitialFile[];
+  /** Harness ID backing this agent. Cannot be used together with harnessName. */
+  harnessId?: string;
+  /**
+   * Human-readable harness name (e.g. "generic", "deep-research").
+   * Preferred over harnessId. Must match [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
+   * Mutually exclusive with harnessId.
+   */
+  harnessName?: string;
+  /** Whether the agent may request multiple tool calls in parallel. */
+  parallelToolCalls?: boolean;
 }
 
 /**
@@ -178,6 +192,12 @@ export interface Session {
   tools?: ToolDefinition[];
   createdAt: string;
   updatedAt: string;
+  /** Whether the agent may request multiple tool calls in parallel. */
+  parallelToolCalls?: boolean;
+  /** Session this session was forked from, if any. */
+  forkedFromSessionId?: string | null;
+  /** Sequence number at which this session was forked from its parent, if any. */
+  forkedFromSequence?: number | null;
   /** Number of active (enabled) schedules for this session */
   activeScheduleCount?: number | null;
   /** Aggregated UI features from all active capabilities */
@@ -265,6 +285,12 @@ export interface CreateSessionRequest {
    */
   harnessName?: string;
   agentId?: string;
+  /**
+   * Human-readable agent name (e.g. "customer-support").
+   * Preferred over agentId. Must match [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
+   * Cannot be used together with agentId.
+   */
+  agentName?: string;
   title?: string;
   locale?: string;
   modelId?: string;
@@ -272,6 +298,8 @@ export interface CreateSessionRequest {
   capabilities?: AgentCapabilityConfig[];
   tools?: ToolDefinition[];
   initialFiles?: InitialFile[];
+  /** Whether the agent may request multiple tool calls in parallel. */
+  parallelToolCalls?: boolean;
 }
 
 /** Addressable name validation pattern: lowercase alphanumeric segments separated by hyphens */

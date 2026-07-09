@@ -48,6 +48,17 @@ The optional `display_name` field provides a human-readable label for UI renderi
 When `id` is omitted, the server auto-generates one (plain create).
 Agent create/update payloads also support optional `initial_files` starter files that are copied into each new session for that agent.
 
+#### Harness Ownership
+
+Each agent owns a harness. Agent create/update payloads accept harness identification via one of two mutually-exclusive parameters (same rules as sessions):
+
+- **`harness_name`** (preferred): human-readable name like `generic` or `deep-research`. Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 chars. Client-side validated.
+- **`harness_id`**: opaque ID (format: `harness_<32-hex>`). Use `generate_harness_id()` to create one.
+
+If neither is provided on create, the server defaults to the org's `generic` harness. Providing both raises a client-side validation error. Agent responses expose the resolved `harness_id`. A session created from an agent (no explicit harness) runs on the agent's harness.
+
+Agent create/update also accept optional `parallel_tool_calls`.
+
 ### Sessions
 - `POST /v1/sessions` - Create session (harness_id optional, defaults to Generic harness)
 - `GET /v1/sessions` - List sessions (supports `search` query param)
@@ -70,8 +81,14 @@ Sessions accept harness identification via one of two parameters (mutually exclu
 
 If neither is provided, the server defaults to the Generic harness.
 Providing both `harness_id` and `harness_name` raises a client-side validation error.
-Agent is optional on session creation — sessions can run without an agent.
-Session create/update payloads support optional `title`, `locale`, `model_id`, `tags`, `capabilities`, `tools`, and `initial_files` starter files.
+
+Agent is optional on session creation — sessions can run without an agent. The agent is identified by one of two mutually-exclusive parameters:
+
+- **`agent_id`**: opaque ID (format: `agent_<32-hex>`).
+- **`agent_name`**: the agent's addressable slug. Client-side validated; providing both `agent_id` and `agent_name` raises a client-side validation error.
+
+When an agent is given without an explicit harness, the session runs on the agent's harness (agent-first creation).
+Session create/update payloads support optional `title`, `locale`, `model_id`, `tags`, `capabilities`, `tools`, `parallel_tool_calls`, and `initial_files` starter files.
 
 ### Capabilities
 - `GET /v1/capabilities` - List available capabilities (supports `search`, `offset`, `limit`)

@@ -426,6 +426,9 @@ class AgentsClient:
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
         tools: Optional[list[ToolDefinition]] = None,
         initial_files: Optional[list[InitialFile]] = None,
+        harness_id: Optional[str] = None,
+        harness_name: Optional[str] = None,
+        parallel_tool_calls: Optional[bool] = None,
     ) -> Agent:
         """Create a new agent with a server-assigned ID.
 
@@ -441,17 +444,32 @@ class AgentsClient:
             capabilities: Capabilities to enable.
             tools: Client-side tools to expose to the agent.
             initial_files: Starter files copied into each new session for this agent.
+            harness_id: Harness ID (format: ``harness_<32-hex>``). Optional;
+                server defaults to the Generic harness if omitted.
+            harness_name: Human-readable harness name (e.g. ``generic``,
+                ``deep-research``). Preferred over ``harness_id``.
+                Must match ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 characters.
+                Cannot be used together with ``harness_id``.
+            parallel_tool_calls: Whether the agent may issue tool calls in parallel.
 
         Raises:
-            ValueError: If ``name`` fails validation.
+            ValueError: If ``name`` fails validation, if both ``harness_id`` and
+                ``harness_name`` are provided, or if ``harness_name`` fails validation.
         """
         validate_agent_name(name)
+        if harness_id is not None and harness_name is not None:
+            raise ValueError("Cannot specify both harness_id and harness_name")
+        if harness_name is not None:
+            validate_harness_name(harness_name)
         req = CreateAgentRequest(
             name=name,
             display_name=display_name,
             system_prompt=system_prompt,
             description=description,
             default_model_id=default_model_id,
+            harness_id=harness_id,
+            harness_name=harness_name,
+            parallel_tool_calls=parallel_tool_calls,
             tags=tags or [],
             capabilities=capabilities or [],
             tools=tools or [],
@@ -473,6 +491,9 @@ class AgentsClient:
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
         tools: Optional[list[ToolDefinition]] = None,
         initial_files: Optional[list[InitialFile]] = None,
+        harness_id: Optional[str] = None,
+        harness_name: Optional[str] = None,
+        parallel_tool_calls: Optional[bool] = None,
     ) -> Agent:
         """Create or update an agent with a client-supplied ID (upsert).
 
@@ -492,11 +513,23 @@ class AgentsClient:
             capabilities: Capabilities to enable.
             tools: Client-side tools to expose to the agent.
             initial_files: Starter files copied into each new session for this agent.
+            harness_id: Harness ID (format: ``harness_<32-hex>``). Optional;
+                server defaults to the Generic harness if omitted.
+            harness_name: Human-readable harness name (e.g. ``generic``,
+                ``deep-research``). Preferred over ``harness_id``.
+                Must match ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 characters.
+                Cannot be used together with ``harness_id``.
+            parallel_tool_calls: Whether the agent may issue tool calls in parallel.
 
         Raises:
-            ValueError: If ``name`` fails validation.
+            ValueError: If ``name`` fails validation, if both ``harness_id`` and
+                ``harness_name`` are provided, or if ``harness_name`` fails validation.
         """
         validate_agent_name(name)
+        if harness_id is not None and harness_name is not None:
+            raise ValueError("Cannot specify both harness_id and harness_name")
+        if harness_name is not None:
+            validate_harness_name(harness_name)
         req = CreateAgentRequest(
             id=id,
             name=name,
@@ -504,6 +537,9 @@ class AgentsClient:
             system_prompt=system_prompt,
             description=description,
             default_model_id=default_model_id,
+            harness_id=harness_id,
+            harness_name=harness_name,
+            parallel_tool_calls=parallel_tool_calls,
             tags=tags or [],
             capabilities=capabilities or [],
             tools=tools or [],
@@ -524,6 +560,9 @@ class AgentsClient:
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
         tools: Optional[list[ToolDefinition]] = None,
         initial_files: Optional[list[InitialFile]] = None,
+        harness_id: Optional[str] = None,
+        harness_name: Optional[str] = None,
+        parallel_tool_calls: Optional[bool] = None,
     ) -> Agent:
         """Create or update an agent by name (upsert).
 
@@ -541,17 +580,32 @@ class AgentsClient:
             capabilities: Capabilities to enable.
             tools: Client-side tools to expose to the agent.
             initial_files: Starter files copied into each new session for this agent.
+            harness_id: Harness ID (format: ``harness_<32-hex>``). Optional;
+                server defaults to the Generic harness if omitted.
+            harness_name: Human-readable harness name (e.g. ``generic``,
+                ``deep-research``). Preferred over ``harness_id``.
+                Must match ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 characters.
+                Cannot be used together with ``harness_id``.
+            parallel_tool_calls: Whether the agent may issue tool calls in parallel.
 
         Raises:
-            ValueError: If ``name`` fails validation.
+            ValueError: If ``name`` fails validation, if both ``harness_id`` and
+                ``harness_name`` are provided, or if ``harness_name`` fails validation.
         """
         validate_agent_name(name)
+        if harness_id is not None and harness_name is not None:
+            raise ValueError("Cannot specify both harness_id and harness_name")
+        if harness_name is not None:
+            validate_harness_name(harness_name)
         req = CreateAgentRequest(
             name=name,
             display_name=display_name,
             system_prompt=system_prompt,
             description=description,
             default_model_id=default_model_id,
+            harness_id=harness_id,
+            harness_name=harness_name,
+            parallel_tool_calls=parallel_tool_calls,
             tags=tags or [],
             capabilities=capabilities or [],
             tools=tools or [],
@@ -646,9 +700,11 @@ class SessionsClient:
         *,
         harness_name: Optional[str] = None,
         agent_id: Optional[str] = None,
+        agent_name: Optional[str] = None,
         title: Optional[str] = None,
         locale: Optional[str] = None,
         model_id: Optional[str] = None,
+        parallel_tool_calls: Optional[bool] = None,
         tags: Optional[list[str]] = None,
         capabilities: Optional[list[AgentCapabilityConfig]] = None,
         tools: Optional[list[ToolDefinition]] = None,
@@ -664,9 +720,13 @@ class SessionsClient:
                 Must match ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 characters.
                 Cannot be used together with ``harness_id``.
             agent_id: Agent ID (optional).
+            agent_name: Human-readable agent name. Preferred over ``agent_id``.
+                Must match ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 characters.
+                Cannot be used together with ``agent_id``.
             title: Human-readable title.
             locale: Session locale (BCP 47, for example ``uk-UA``).
             model_id: LLM model ID override.
+            parallel_tool_calls: Whether the agent may issue tool calls in parallel.
             tags: Tags for organizing sessions.
             capabilities: Session-level capabilities (additive to agent capabilities).
             tools: Session-level client-side tools.
@@ -674,19 +734,26 @@ class SessionsClient:
 
         Raises:
             ValueError: If both ``harness_id`` and ``harness_name`` are provided,
-                or if ``harness_name`` fails validation.
+                if both ``agent_id`` and ``agent_name`` are provided, or if
+                ``harness_name`` or ``agent_name`` fails validation.
         """
         if harness_id is not None and harness_name is not None:
             raise ValueError("Cannot specify both harness_id and harness_name")
         if harness_name is not None:
             validate_harness_name(harness_name)
+        if agent_id is not None and agent_name is not None:
+            raise ValueError("Cannot specify both agent_id and agent_name")
+        if agent_name is not None:
+            validate_agent_name(agent_name)
         req = CreateSessionRequest(
             harness_id=harness_id,
             harness_name=harness_name,
             agent_id=agent_id,
+            agent_name=agent_name,
             title=title,
             locale=locale,
             model_id=model_id,
+            parallel_tool_calls=parallel_tool_calls,
             tags=tags or [],
             capabilities=capabilities or [],
             tools=tools or [],

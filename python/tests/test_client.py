@@ -349,6 +349,7 @@ def test_agent_deserialization_with_capabilities():
         id="agent_123",
         name="Test Agent",
         system_prompt="You are helpful.",
+        harness_id="harness_abc123",
         status="active",
         capabilities=[{"ref": "current_time"}, {"ref": "web_fetch", "config": {"timeout": 30}}],
         created_at="2024-01-01T00:00:00Z",
@@ -367,6 +368,7 @@ def test_agent_deserialization_without_capabilities():
         id="agent_123",
         name="Test Agent",
         system_prompt="You are helpful.",
+        harness_id="harness_abc123",
         status="active",
         created_at="2024-01-01T00:00:00Z",
         updated_at="2024-01-01T00:00:00Z",
@@ -794,6 +796,7 @@ async def test_create_agent_with_initial_files():
                 "id": "agent_123",
                 "name": "starter-agent",
                 "system_prompt": "You keep files ready.",
+                "harness_id": "harness_123",
                 "initial_files": [
                     {
                         "path": "/workspace/README.md",
@@ -882,6 +885,7 @@ async def test_import_agent_from_example():
                 "name": "dad-jokes-agent",
                 "description": "Cracks jokes",
                 "system_prompt": "Tell dad jokes.",
+                "harness_id": "harness_123",
                 "default_model_id": None,
                 "tags": [],
                 "capabilities": [],
@@ -1039,6 +1043,7 @@ async def test_agent_versions_methods():
         "name": "forked-agent",
         "description": "Forked",
         "system_prompt": "Help.",
+        "harness_id": "harness_123",
         "default_model_id": None,
         "tags": [],
         "capabilities": [],
@@ -2221,3 +2226,263 @@ def test_budget_model_without_optional_fields():
     assert budget.soft_limit is None
     assert budget.period is None
     assert budget.metadata is None
+
+
+# --- EVE-686: harness/agent binding + parallel_tool_calls on agents & sessions ---
+
+
+def _agent_response(**overrides):
+    """Build a minimal Agent JSON payload for mocked agent responses."""
+    payload = {
+        "id": "agent_123",
+        "name": "helper",
+        "system_prompt": "You are helpful.",
+        "harness_id": "harness_default",
+        "status": "active",
+        "created_at": "2026-06-01T00:00:00Z",
+        "updated_at": "2026-06-01T00:00:00Z",
+    }
+    payload.update(overrides)
+    return payload
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_agent_with_harness_id():
+    """agents.create includes harness_id in the request body."""
+    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+        return_value=httpx.Response(201, json=_agent_response(harness_id="harness_abc"))
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.agents.create("helper", "You are helpful.", harness_id="harness_abc")
+    finally:
+        await client.close()
+
+    body = json.loads(route.calls[0].request.content)
+    assert body["harness_id"] == "harness_abc"
+    assert "harness_name" not in body
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_agent_with_harness_name():
+    """agents.create includes harness_name in the request body."""
+    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+        return_value=httpx.Response(201, json=_agent_response())
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.agents.create("helper", "You are helpful.", harness_name="deep-research")
+    finally:
+        await client.close()
+
+    body = json.loads(route.calls[0].request.content)
+    assert body["harness_name"] == "deep-research"
+    assert "harness_id" not in body
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_agent_with_parallel_tool_calls():
+    """agents.create includes parallel_tool_calls in the request body."""
+    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+        return_value=httpx.Response(201, json=_agent_response(parallel_tool_calls=True))
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        agent = await client.agents.create("helper", "You are helpful.", parallel_tool_calls=True)
+    finally:
+        await client.close()
+
+    body = json.loads(route.calls[0].request.content)
+    assert body["parallel_tool_calls"] is True
+    assert agent.parallel_tool_calls is True
+
+
+@pytest.mark.asyncio
+async def test_create_agent_harness_id_and_name_both_raises():
+    """agents.create rejects passing both harness_id and harness_name."""
+    client = Everruns(api_key="evr_test_key")
+    try:
+        with pytest.raises(ValueError, match="Cannot specify both harness_id and harness_name"):
+            await client.agents.create(
+                "helper",
+                "You are helpful.",
+                harness_id="harness_abc",
+                harness_name="generic",
+            )
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+async def test_create_agent_invalid_harness_name_raises():
+    """agents.create validates harness_name."""
+    client = Everruns(api_key="evr_test_key")
+    try:
+        with pytest.raises(ValueError, match="must match pattern"):
+            await client.agents.create("helper", "You are helpful.", harness_name="Bad_Name")
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_apply_agent_with_harness_name():
+    """agents.apply includes harness_name in the request body."""
+    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+        return_value=httpx.Response(201, json=_agent_response())
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.agents.apply(
+            "agent_00000000000000000000000000000000",
+            "helper",
+            "You are helpful.",
+            harness_name="deep-research",
+            parallel_tool_calls=False,
+        )
+    finally:
+        await client.close()
+
+    body = json.loads(route.calls[0].request.content)
+    assert body["harness_name"] == "deep-research"
+    assert body["parallel_tool_calls"] is False
+
+
+@pytest.mark.asyncio
+async def test_apply_by_name_harness_id_and_name_both_raises():
+    """agents.apply_by_name rejects passing both harness_id and harness_name."""
+    client = Everruns(api_key="evr_test_key")
+    try:
+        with pytest.raises(ValueError, match="Cannot specify both harness_id and harness_name"):
+            await client.agents.apply_by_name(
+                "helper",
+                "You are helpful.",
+                harness_id="harness_abc",
+                harness_name="generic",
+            )
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_session_with_agent_name():
+    """sessions.create includes agent_name in the request body."""
+    route = respx.post("https://custom.example.com/api/v1/sessions").mock(
+        return_value=httpx.Response(
+            201,
+            json={
+                "id": "session_1",
+                "organization_id": "org_123",
+                "harness_id": "harness_1",
+                "status": "started",
+                "created_at": "2026-06-01T00:00:00Z",
+                "updated_at": "2026-06-01T00:00:00Z",
+            },
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.sessions.create(agent_name="customer-support", parallel_tool_calls=True)
+    finally:
+        await client.close()
+
+    body = json.loads(route.calls[0].request.content)
+    assert body["agent_name"] == "customer-support"
+    assert body["parallel_tool_calls"] is True
+    assert "agent_id" not in body
+
+
+@pytest.mark.asyncio
+async def test_create_session_agent_id_and_name_both_raises():
+    """sessions.create rejects passing both agent_id and agent_name."""
+    client = Everruns(api_key="evr_test_key")
+    try:
+        with pytest.raises(ValueError, match="Cannot specify both agent_id and agent_name"):
+            await client.sessions.create(agent_id="agent_abc", agent_name="customer-support")
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+async def test_create_session_invalid_agent_name_raises():
+    """sessions.create validates agent_name."""
+    client = Everruns(api_key="evr_test_key")
+    try:
+        with pytest.raises(ValueError, match="must match pattern"):
+            await client.sessions.create(agent_name="Bad_Name")
+    finally:
+        await client.close()
+
+
+def test_agent_deserialization_with_harness_id():
+    """Agent model parses harness_id and parallel_tool_calls."""
+    from everruns_sdk.models import Agent
+
+    agent = Agent(
+        id="agent_123",
+        name="Test Agent",
+        system_prompt="You are helpful.",
+        harness_id="harness_abc123",
+        parallel_tool_calls=True,
+        status="active",
+        created_at="2024-01-01T00:00:00Z",
+        updated_at="2024-01-01T00:00:00Z",
+    )
+    assert agent.harness_id == "harness_abc123"
+    assert agent.parallel_tool_calls is True
+
+
+def test_session_deserialization_with_fork_fields():
+    """Session model parses parallel_tool_calls and fork provenance fields."""
+    from everruns_sdk.models import Session
+
+    session = Session(
+        id="session_456",
+        organization_id="org_789",
+        harness_id="harness_abc123",
+        parallel_tool_calls=False,
+        forked_from_session_id="session_parent",
+        forked_from_sequence=7,
+        status="active",
+        created_at="2024-01-01T00:00:00Z",
+        updated_at="2024-01-01T00:00:00Z",
+    )
+    assert session.parallel_tool_calls is False
+    assert session.forked_from_session_id == "session_parent"
+    assert session.forked_from_sequence == 7
+
+
+def test_create_agent_request_with_harness_and_parallel():
+    """CreateAgentRequest serializes harness + parallel_tool_calls fields."""
+    from everruns_sdk.models import CreateAgentRequest
+
+    req = CreateAgentRequest(
+        name="helper",
+        system_prompt="You are helpful.",
+        harness_name="deep-research",
+        parallel_tool_calls=True,
+    )
+    data = req.model_dump(exclude_none=True)
+    assert data["harness_name"] == "deep-research"
+    assert data["parallel_tool_calls"] is True
+    assert "harness_id" not in data
+
+
+def test_create_session_request_with_agent_name():
+    """CreateSessionRequest serializes agent_name + parallel_tool_calls."""
+    from everruns_sdk.models import CreateSessionRequest
+
+    req = CreateSessionRequest(agent_name="customer-support", parallel_tool_calls=True)
+    data = req.model_dump(exclude_none=True)
+    assert data["agent_name"] == "customer-support"
+    assert data["parallel_tool_calls"] is True
+    assert "agent_id" not in data

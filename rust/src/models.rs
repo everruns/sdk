@@ -181,12 +181,18 @@ pub struct Agent {
     pub system_prompt: String,
     #[serde(default)]
     pub default_model_id: Option<String>,
+    /// Harness this agent is bound to.
+    #[serde(default)]
+    pub harness_id: String,
     #[serde(default)]
     pub tags: Vec<String>,
     #[serde(default)]
     pub capabilities: Vec<AgentCapabilityConfig>,
     #[serde(default)]
     pub initial_files: Vec<InitialFile>,
+    /// Whether the model may request multiple tool calls in parallel.
+    #[serde(default)]
+    pub parallel_tool_calls: Option<bool>,
     pub status: AgentStatus,
     pub created_at: String,
     pub updated_at: String,
@@ -365,6 +371,17 @@ pub struct CreateAgentRequest {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_model_id: Option<String>,
+    /// Harness ID to bind this agent to.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub harness_id: Option<String>,
+    /// Harness name to bind this agent to (preferred over `harness_id`).
+    /// Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 characters.
+    /// Cannot be used together with `harness_id`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub harness_name: Option<String>,
+    /// Whether the model may request multiple tool calls in parallel.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parallel_tool_calls: Option<bool>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -385,6 +402,9 @@ impl CreateAgentRequest {
             system_prompt: system_prompt.into(),
             description: None,
             default_model_id: None,
+            harness_id: None,
+            harness_name: None,
+            parallel_tool_calls: None,
             tags: vec![],
             capabilities: vec![],
             tools: vec![],
@@ -413,6 +433,26 @@ impl CreateAgentRequest {
     /// Set the default model ID
     pub fn default_model_id(mut self, model_id: impl Into<String>) -> Self {
         self.default_model_id = Some(model_id.into());
+        self
+    }
+
+    /// Set the harness ID
+    pub fn harness_id(mut self, harness_id: impl Into<String>) -> Self {
+        self.harness_id = Some(harness_id.into());
+        self
+    }
+
+    /// Set the harness name (preferred over `harness_id`).
+    /// Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 characters.
+    /// Cannot be used together with `harness_id`.
+    pub fn harness_name(mut self, harness_name: impl Into<String>) -> Self {
+        self.harness_name = Some(harness_name.into());
+        self
+    }
+
+    /// Set whether the model may request multiple tool calls in parallel.
+    pub fn parallel_tool_calls(mut self, parallel_tool_calls: bool) -> Self {
+        self.parallel_tool_calls = Some(parallel_tool_calls);
         self
     }
 
@@ -490,6 +530,15 @@ pub struct Session {
     /// Whether this session is pinned by the current user
     #[serde(default)]
     pub is_pinned: Option<bool>,
+    /// Whether the model may request multiple tool calls in parallel.
+    #[serde(default)]
+    pub parallel_tool_calls: Option<bool>,
+    /// Session this one was forked from, if any.
+    #[serde(default)]
+    pub forked_from_session_id: Option<String>,
+    /// Sequence number in the source session this fork branched from.
+    #[serde(default)]
+    pub forked_from_sequence: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -692,12 +741,20 @@ pub struct CreateSessionRequest {
     pub harness_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
+    /// Agent name to bind this session to (preferred over `agent_id`).
+    /// Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 characters.
+    /// Cannot be used together with `agent_id`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub model_id: Option<String>,
+    /// Whether the model may request multiple tool calls in parallel.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parallel_tool_calls: Option<bool>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -721,9 +778,11 @@ impl CreateSessionRequest {
             harness_id: None,
             harness_name: None,
             agent_id: None,
+            agent_name: None,
             title: None,
             locale: None,
             model_id: None,
+            parallel_tool_calls: None,
             tags: vec![],
             capabilities: vec![],
             tools: vec![],
@@ -748,6 +807,20 @@ impl CreateSessionRequest {
     /// Set the agent ID
     pub fn agent_id(mut self, agent_id: impl Into<String>) -> Self {
         self.agent_id = Some(agent_id.into());
+        self
+    }
+
+    /// Set the agent name (preferred over `agent_id`).
+    /// Must match `[a-z0-9]+(-[a-z0-9]+)*`, max 64 characters.
+    /// Cannot be used together with `agent_id`.
+    pub fn agent_name(mut self, agent_name: impl Into<String>) -> Self {
+        self.agent_name = Some(agent_name.into());
+        self
+    }
+
+    /// Set whether the model may request multiple tool calls in parallel.
+    pub fn parallel_tool_calls(mut self, parallel_tool_calls: bool) -> Self {
+        self.parallel_tool_calls = Some(parallel_tool_calls);
         self
     }
 

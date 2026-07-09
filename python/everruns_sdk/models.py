@@ -111,6 +111,8 @@ class Agent(BaseModel):
     description: Optional[str] = None
     system_prompt: str
     default_model_id: Optional[str] = None
+    harness_id: str
+    parallel_tool_calls: Optional[bool] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
     tools: list[ToolDefinition] = Field(default_factory=list)
@@ -200,6 +202,9 @@ class CreateAgentRequest(BaseModel):
     system_prompt: str
     description: Optional[str] = None
     default_model_id: Optional[str] = None
+    harness_id: Optional[str] = None
+    harness_name: Optional[str] = None
+    parallel_tool_calls: Optional[bool] = None
     tags: list[str] = Field(default_factory=list)
     capabilities: list[AgentCapabilityConfig] = Field(default_factory=list)
     tools: list[ToolDefinition] = Field(default_factory=list)
@@ -213,6 +218,9 @@ class Session(BaseModel):
     organization_id: str
     harness_id: str
     agent_id: Optional[str] = None
+    parallel_tool_calls: Optional[bool] = None
+    forked_from_session_id: Optional[str] = None
+    forked_from_sequence: Optional[int] = None
     title: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     locale: Optional[str] = None
@@ -319,6 +327,8 @@ class CreateSessionRequest(BaseModel):
     harness_id: Optional[str] = None
     harness_name: Optional[str] = None
     agent_id: Optional[str] = None
+    agent_name: Optional[str] = None
+    parallel_tool_calls: Optional[bool] = None
     title: Optional[str] = None
     locale: Optional[str] = None
     model_id: Optional[str] = None

@@ -266,6 +266,7 @@ class AgentsClient {
   /** Create a new agent with a server-assigned ID. */
   async create(request: CreateAgentRequest): Promise<Agent> {
     validateAgentName(request.name);
+    validateAgentHarness(request);
     return this.client.fetch("/agents", {
       method: "POST",
       body: JSON.stringify(toAgentBody(request)),
@@ -282,6 +283,7 @@ class AgentsClient {
    */
   async apply(id: string, request: CreateAgentRequest): Promise<Agent> {
     validateAgentName(request.name);
+    validateAgentHarness(request);
     return this.client.fetch("/agents", {
       method: "POST",
       body: JSON.stringify({ ...toAgentBody(request), id }),
@@ -296,6 +298,7 @@ class AgentsClient {
    */
   async applyByName(request: CreateAgentRequest): Promise<Agent> {
     validateAgentName(request.name);
+    validateAgentHarness(request);
     return this.client.fetch("/agents", {
       method: "POST",
       body: JSON.stringify(toAgentBody(request)),
@@ -324,7 +327,10 @@ class AgentsClient {
   }
 
   /** Get a single health check run for an agent. */
-  async getHealthCheck(agentId: string, runId: string): Promise<HealthCheckRun> {
+  async getHealthCheck(
+    agentId: string,
+    runId: string,
+  ): Promise<HealthCheckRun> {
     return this.client.fetch(`/agents/${agentId}/health-checks/${runId}`);
   }
 
@@ -462,6 +468,12 @@ class SessionsClient {
     if (request.harnessName) {
       validateHarnessName(request.harnessName);
     }
+    if (request.agentId && request.agentName) {
+      throw new Error("Cannot specify both agentId and agentName");
+    }
+    if (request.agentName) {
+      validateAgentName(request.agentName);
+    }
     const body: Record<string, unknown> = {};
     if (request.harnessId) {
       body.harness_id = request.harnessId;
@@ -471,6 +483,9 @@ class SessionsClient {
     }
     if (request.agentId) {
       body.agent_id = request.agentId;
+    }
+    if (request.agentName) {
+      body.agent_name = request.agentName;
     }
     if (request.title) {
       body.title = request.title;
@@ -497,6 +512,9 @@ class SessionsClient {
         encoding: file.encoding,
         is_readonly: file.isReadonly,
       }));
+    }
+    if (request.parallelToolCalls !== undefined) {
+      body.parallel_tool_calls = request.parallelToolCalls;
     }
     return this.client.fetch("/sessions", {
       method: "POST",
@@ -1248,6 +1266,15 @@ class ConnectionsClient {
 }
 
 /** Build the JSON body for agent creation from a CreateAgentRequest. */
+function validateAgentHarness(request: CreateAgentRequest): void {
+  if (request.harnessId && request.harnessName) {
+    throw new Error("Cannot specify both harnessId and harnessName");
+  }
+  if (request.harnessName) {
+    validateHarnessName(request.harnessName);
+  }
+}
+
 function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
   const body: Record<string, unknown> = {
     name: request.name,
@@ -1273,6 +1300,15 @@ function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
       encoding: file.encoding,
       is_readonly: file.isReadonly,
     }));
+  }
+  if (request.harnessId !== undefined) {
+    body.harness_id = request.harnessId;
+  }
+  if (request.harnessName !== undefined) {
+    body.harness_name = request.harnessName;
+  }
+  if (request.parallelToolCalls !== undefined) {
+    body.parallel_tool_calls = request.parallelToolCalls;
   }
   return body;
 }

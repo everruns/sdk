@@ -224,9 +224,7 @@ async fn test_idle_timeout_triggers_reconnect_on_silent_connection() {
                     tokio::time::sleep(Duration::from_secs(300)).await;
                 } else {
                     // Second connection: send connected + business event
-                    let event_json = format!(
-                        r#"{{"id":"evt_idle_1","type":"session.idled","ts":"2024-01-01T00:00:00Z","session_id":"sess_idle","data":{{}}}}"#
-                    );
+                    let event_json = r#"{"id":"evt_idle_1","type":"session.idled","ts":"2024-01-01T00:00:00Z","session_id":"sess_idle","data":{}}"#.to_string();
                     let event = format!("event: session.idled\ndata: {}\n\n", event_json);
                     let response = format!(
                         "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\n\r\n{}{}",

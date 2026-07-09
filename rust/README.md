@@ -37,6 +37,29 @@ async fn main() -> Result<(), everruns_sdk::Error> {
 }
 ```
 
+## Agent Harness
+
+Each agent owns a harness. Set it with `.harness_name(...)` (preferred) or `.harness_id(...)` (mutually exclusive) on `CreateAgentRequest`; omit both to default to the org's `generic` harness. A session created from the agent runs on the agent's harness.
+
+```rust
+use everruns_sdk::{CreateAgentRequest, CreateSessionRequest};
+
+// Create an agent on a specific harness
+let agent = client
+    .agents()
+    .create_with_options(
+        CreateAgentRequest::new("researcher", "You do deep research.")
+            .harness_name("deep-research"),
+    )
+    .await?;
+
+// Agent-first session: runs on the agent's harness
+let session = client
+    .sessions()
+    .create_with_options(CreateSessionRequest::new().agent_name("researcher"))
+    .await?;
+```
+
 ## Initial Files
 
 ```rust

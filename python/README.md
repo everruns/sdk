@@ -41,6 +41,22 @@ async def main():
 asyncio.run(main())
 ```
 
+## Agent Harness
+
+Each agent owns a harness. Set it on create/update with `harness_name` (preferred) or `harness_id` (mutually exclusive); omit both to default to the org's `generic` harness. A session created from the agent runs on the agent's harness.
+
+```python
+# Create an agent on a specific harness
+agent = await client.agents.create(
+    name="researcher",
+    system_prompt="You do deep research.",
+    harness_name="deep-research",
+)
+
+# Agent-first session: no harness needed — it runs on the agent's harness
+session = await client.sessions.create(agent_name="researcher")
+```
+
 ## Initial Files
 
 ```python
