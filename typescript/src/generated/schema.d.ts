@@ -219,6 +219,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agents/{agent_id}/health-checks/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /v1/agents/{agent_id}/health-checks/latest - Latest run + stale flag */
+        get: operations["get_latest_health_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/agents/{agent_id}/health-checks/{run_id}": {
         parameters: {
             query?: never;
@@ -472,6 +489,108 @@ export interface paths {
         get: operations["agent_card"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/apps/{app_id}/api-endpoint-channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /v1/apps/{app_id}/api-endpoint-channels - Add an api_endpoint channel (returns plaintext key once). */
+        post: operations["add_api_endpoint_channel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/apps/{app_id}/api-endpoint-channels/{channel_id}/regenerate-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Regenerate an api_endpoint channel API key. Returns the new plaintext key exactly once and invalidates the previous key. */
+        post: operations["regenerate_api_endpoint_key"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/apps/{app_id}/api/{channel_id}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /v1/apps/{app_id}/api/{channel_id}/sessions */
+        post: operations["create_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /v1/apps/{app_id}/api/{channel_id}/sessions/{session_id} */
+        get: operations["get_session"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/cancel */
+        post: operations["cancel_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /v1/apps/{app_id}/api/{channel_id}/sessions/{session_id}/messages */
+        post: operations["post_message"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1539,6 +1658,111 @@ export interface paths {
         patch: operations["update_entry"];
         trace?: never;
     };
+    "/v1/knowledge-bases/{kb_id}/okf_export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Export a knowledge base as an Open Knowledge Format (OKF) bundle (a gzipped tarball of markdown files with YAML frontmatter). See specs/okf-adoption.md. */
+        get: operations["export_okf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/knowledge-bases/{kb_id}/okf_import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Import an Open Knowledge Format (OKF) bundle into a knowledge base. Idempotent: re-importing converges entries without duplicates. See specs/okf-adoption.md. */
+        post: operations["import_okf"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/knowledge-indexes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List knowledge indexes. */
+        get: operations["list_indexes"];
+        put?: never;
+        /** @description Create a new knowledge index. */
+        post: operations["create_index"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/knowledge-indexes/{index_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get a knowledge index by ID. */
+        get: operations["get_index"];
+        put?: never;
+        post?: never;
+        /** @description Delete a knowledge index. */
+        delete: operations["delete_index"];
+        options?: never;
+        head?: never;
+        /** @description Update a knowledge index. Only provided fields are modified. */
+        patch: operations["update_index"];
+        trace?: never;
+    };
+    "/v1/knowledge-indexes/{index_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List documents inside a knowledge index. */
+        get: operations["list_documents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/knowledge-indexes/{index_id}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Enqueue a manual sync of a knowledge index. */
+        post: operations["sync_index"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/mcp-servers": {
         parameters: {
             query?: never;
@@ -1862,6 +2086,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/orgs/{org}/onboarding/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /v1/orgs/:org/onboarding/complete - Mark the org's onboarding wizard as
+         *     finished (or skipped). Idempotent: the timestamp is set only when NULL.
+         * @description Authz mirrors the org-scoped mutations above (admin+), but resolves
+         *     membership/role from the DB rather than the auth token — a brand-new org may
+         *     not yet appear in the caller's token, and onboarding completion is exactly
+         *     that just-created case.
+         */
+        post: operations["complete_org_onboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/payments/accounts": {
         parameters: {
             query?: never;
@@ -1951,6 +2199,131 @@ export interface paths {
         head?: never;
         /** @description Update a payment policy. Only provided fields are modified. */
         patch: operations["update_payment_policy"];
+        trace?: never;
+    };
+    "/v1/plugin_marketplaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /v1/plugin_marketplaces */
+        get: operations["list_plugin_marketplaces"];
+        put?: never;
+        /** POST /v1/plugin_marketplaces */
+        post: operations["create_plugin_marketplace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/plugin_marketplaces/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /v1/plugin_marketplaces/{id} */
+        get: operations["get_plugin_marketplace"];
+        put?: never;
+        post?: never;
+        /** DELETE /v1/plugin_marketplaces/{id} */
+        delete: operations["delete_plugin_marketplace"];
+        options?: never;
+        head?: never;
+        /** PATCH /v1/plugin_marketplaces/{id} */
+        patch: operations["update_plugin_marketplace"];
+        trace?: never;
+    };
+    "/v1/plugin_marketplaces/{id}/plugins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /v1/plugin_marketplaces/{id}/plugins */
+        get: operations["get_marketplace_catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/plugin_marketplaces/{id}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /v1/plugin_marketplaces/{id}/sync */
+        post: operations["sync_plugin_marketplace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/plugins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /v1/plugins */
+        get: operations["list_plugins"];
+        put?: never;
+        /** POST /v1/plugins */
+        post: operations["install_plugin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/plugins/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /v1/plugins/{id} */
+        get: operations["get_plugin"];
+        put?: never;
+        post?: never;
+        /** DELETE /v1/plugins/{id} */
+        delete: operations["uninstall_plugin"];
+        options?: never;
+        head?: never;
+        /** PATCH /v1/plugins/{id} */
+        patch: operations["patch_installed_plugin"];
+        trace?: never;
+    };
+    "/v1/plugins/{id}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /v1/plugins/{id}/update */
+        post: operations["update_plugin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/providers": {
@@ -2274,6 +2647,7 @@ export interface paths {
          * POST /v1/sessions/chat - Get or create global chat session
          * @description Returns the user's singleton global chat session. Creates one if it doesn't exist.
          *     Uses the Platform Chat harness and tags for per-user singleton management.
+         *     Gated by the `global_chat` feature flag; returns 404 when disabled.
          */
         post: operations["get_or_create_chat_session"];
         delete?: never;
@@ -2291,7 +2665,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Create a voice session for the user's global chat. Returns connection details for the realtime audio channel. */
+        /** @description Create a voice session for the user's Platform Chat. Returns connection details for the realtime audio channel. Requires both the `global_chat` and `voice` feature flags; returns 404 when either is disabled. */
         post: operations["create_chat_voice_session"];
         delete?: never;
         options?: never;
@@ -2489,14 +2863,37 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Export session messages as a JSONL file
-         * @description Returns all materialized messages (user, agent) as newline-delimited JSON.
-         *     Delta events are excluded. Each line is a complete JSON object representing one message.
-         *     The response includes `Content-Disposition: attachment` for browser download.
+         * Export session messages as a JSONL file (default) or as an ATIF trajectory
+         * @description Default (`format=jsonl`): all materialized messages (user, agent) as
+         *     newline-delimited JSON, one complete JSON object per line; delta events are
+         *     excluded. `format=atif` returns a single ATIF-v1.7 trajectory JSON document
+         *     folded from the session's event log (see `specs/atif-adoption.md`); when
+         *     image content parts were flattened to `"[image]"` markers, the response
+         *     carries an `X-Atif-Images-Omitted` header with the total count, and
+         *     documents over the 50 MiB `ATIF_EXPORT_MAX_BYTES` cap are rejected with
+         *     413. The response includes `Content-Disposition: attachment` for browser
+         *     download.
          */
         get: operations["export_session_jsonl"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sessions/{session_id}/fork": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /v1/sessions/{session_id}/fork - Fork a session into an independent copy */
+        post: operations["fork_session"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3087,6 +3484,23 @@ export interface paths {
         patch: operations["update_webhook"];
         trace?: never;
     };
+    "/v1/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List background tasks across every session in the caller's org. */
+        get: operations["list_org_tasks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/users": {
         parameters: {
             query?: never;
@@ -3294,6 +3708,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/fs/_/preview/{path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /v1/workspaces/{workspace_id}/fs/_/preview/{path} - Sandboxed HTML render
+         * @description Serves an HTML file as a `text/html` document carrying a strict `sandbox`
+         *     CSP (TM-WEB-010) so the file viewer can render it — with JavaScript — inside
+         *     an iframe without exposing everruns cookies, storage, the parent DOM, or
+         *     top-frame navigation. Only `.html`/`.htm` files are eligible; everything else
+         *     returns 415 (use the download endpoint instead).
+         */
+        get: operations["preview_path"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/fs/_/stat": {
         parameters: {
             query?: never;
@@ -3400,6 +3838,30 @@ export interface components {
             /** @description The created A2A channel. */
             channel: components["schemas"]["AppChannel"];
         };
+        /** @description Request body for the `add_api_endpoint_channel_http` operation. */
+        AddApiEndpointChannelHttpRequest: {
+            auth?: null | components["schemas"]["AppEndpointAuthConfig"];
+            /**
+             * @description Whether this resource is enabled.
+             * @example true
+             */
+            enabled?: boolean | null;
+            /**
+             * @description How invocations route into sessions (`shared_session` to reuse one
+             *     durable session, or `session_per_invocation` for a fresh session).
+             */
+            session_mode?: components["schemas"]["InvocationSessionMode"];
+        };
+        /**
+         * @description Output of [`AddApiEndpointChannelCmd`] — includes the plaintext API key
+         *     (returned **once**, never persisted) plus the resulting [`AppChannel`].
+         */
+        AddApiEndpointChannelOutput: {
+            /** @description Plaintext API key. Persist this — it cannot be recovered later. */
+            api_key: string;
+            /** @description The created api_endpoint channel. */
+            channel: components["schemas"]["AppChannel"];
+        };
         /**
          * @description Agent configuration for agentic loop.
          *     An agent defines the behavior and capabilities of an AI assistant.
@@ -3461,6 +3923,11 @@ export interface components {
              */
             forked_from_version_id?: string | null;
             /**
+             * @description Harness that supplies the base execution environment for this agent.
+             * @example harness_01933b5a00007000800000000000001
+             */
+            harness_id: string;
+            /**
              * @description External identifier (agent_<32-hex>). Shown as "id" in API.
              *     Client-supplied or auto-generated.
              * @example agent_01933b5a000070008000000000000001
@@ -3481,6 +3948,16 @@ export interface components {
              */
             name: string;
             network_access?: null | components["schemas"]["NetworkAccessList"];
+            /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
             /**
              * @description Root agent lineage identifier for grouping fork families.
              * @example agent_01933b5a00007000800000000000001
@@ -3531,6 +4008,10 @@ export interface components {
             config?: unknown;
             /** @description Reference to the capability ID */
             ref: string;
+        };
+        AgentMessage: {
+            role: string;
+            text: string;
         };
         /** @description Response showing the final agent shape after applying capabilities */
         AgentPreviewResponse: {
@@ -3922,7 +4403,7 @@ export interface components {
             channel_id: string;
             /** @description Human-readable channel name when set. */
             channel_name?: string | null;
-            /** @description Channel kind (slack, ag_ui, webhook, a2a, fcp). */
+            /** @description Channel kind (slack, ag_ui, webhook, a2a, fcp, public_chat). */
             channel_type: components["schemas"]["ChannelType"];
             /**
              * Format: date-time
@@ -3974,6 +4455,8 @@ export interface components {
                 };
                 /** @description Provider id used to resolve a user-scoped bearer token. */
                 oauth_provider_id?: string | null;
+                /** @description Protocol-era adoption policy for the MCP client (`auto` negotiates). */
+                protocol_mode?: components["schemas"]["McpProtocolMode"];
                 /** @description Whether to discover tool definitions live from this server. */
                 tool_discovery?: boolean;
                 /** @description MCP transport type. Only remote HTTP is supported today. */
@@ -4258,7 +4741,7 @@ export interface components {
          * @example webhook
          * @enum {string}
          */
-        ChannelType: "slack" | "ag_ui" | "schedule" | "webhook" | "a2a" | "fcp";
+        ChannelType: "slack" | "ag_ui" | "schedule" | "webhook" | "a2a" | "fcp" | "api_endpoint" | "public_chat";
         /** @description Response for agent name availability check. */
         CheckAgentNameResponse: {
             /** @description Whether the name is available for use. */
@@ -4604,6 +5087,17 @@ export interface components {
              */
             display_name?: string | null;
             /**
+             * @description Harness ID used as this agent's base execution environment. If omitted,
+             *     the org's built-in `generic` harness is used.
+             * @example harness_01933b5a00007000800000000000001
+             */
+            harness_id?: string | null;
+            /**
+             * @description Addressable harness name. Alternative to `harness_id`.
+             * @example generic
+             */
+            harness_name?: string | null;
+            /**
              * @description Client-supplied agent ID (format: agent_{32-hex}).
              *     If not provided, one is auto-generated.
              * @example agent_01933b5a00007000800000000000001
@@ -4633,6 +5127,14 @@ export interface components {
              */
             name: string;
             network_access?: null | components["schemas"]["NetworkAccessList"];
+            /**
+             * @description Request-level parallel tool calling preference (EVE-598). `true` signals
+             *     the provider that parallel tool calls are wanted; `false` requests at
+             *     most one tool call per turn and forces serial execution. Omit to use the
+             *     provider default.
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
             /**
              * @description The system prompt that defines the agent's behavior and capabilities.
              *     This is sent as the first message in every conversation.
@@ -4824,10 +5326,13 @@ export interface components {
              */
             parent_harness_id?: string | null;
             /**
-             * @description The system prompt defining the harness's base behavior.
+             * @description Base system prompt defining the harness's behavior. Optional: omit (or
+             *     send an empty string) to contribute no base prompt, in which case the
+             *     effective prompt comes from the parent harness, agent, session, and
+             *     capability layers.
              * @example You are a research assistant with deep analytical capabilities.
              */
-            system_prompt: string;
+            system_prompt?: string | null;
             /**
              * @description Tags for organizing harnesses.
              * @example [
@@ -4866,6 +5371,11 @@ export interface components {
              */
             kind?: string | null;
             /**
+             * @description Optional OKF resource URI identifying the underlying asset.
+             * @example https://console.cloud.google.com/bigquery?p=acme&d=sales&t=orders
+             */
+            resource?: string | null;
+            /**
              * @description Free-form tags attached to this resource.
              * @example [
              *       "billing",
@@ -4878,6 +5388,28 @@ export interface components {
              * @example Refund a payment past 30 days
              */
             title: string;
+        };
+        /** @description Request body for the `create_knowledge_index` operation. */
+        CreateKnowledgeIndexRequest: {
+            /**
+             * @description Human-readable description. Safe to render in user-facing messages.
+             * @example Synced product documentation
+             */
+            description?: string | null;
+            /** @description Embedding model used to embed chunks. Required. */
+            embedding_model_id: string;
+            /**
+             * @description Human-readable name. Safe to render in user-facing messages.
+             * @example product-docs
+             */
+            name: string;
+            /** @description Non-secret source coordinates. Never include credentials. */
+            source_config?: unknown;
+            /**
+             * @description External source type. One of `github`, `git`. Defaults to `github`.
+             * @example github
+             */
+            source_type?: string | null;
         };
         /** @description Request to create a new MCP server */
         CreateMcpServerRequest: {
@@ -4906,6 +5438,7 @@ export interface components {
              * @example atlassian-mcp-server
              */
             name: string;
+            protocol_mode?: null | components["schemas"]["McpProtocolMode"];
             /**
              * @description Transport type. Currently only "http" is supported.
              *     Example shape is defined on `McpServerTransportType`.
@@ -5138,11 +5671,33 @@ export interface components {
              */
             subject_type: string;
         };
+        /** @description Request body for creating a plugin marketplace. */
+        CreatePluginMarketplaceRequest: {
+            /**
+             * @description Unique name within the org (kebab-case, e.g. `my-org-plugins`).
+             * @example everruns-plugins
+             */
+            name: string;
+            /**
+             * @description Source value. For `github`: `"owner/repo"`. For `url`: full HTTPS URL.
+             *     For `local_path` (dev only): absolute filesystem path.
+             * @example everruns/plugins
+             */
+            source: string;
+            /**
+             * @description Source type: `github`, `url`, or `local_path` (dev/test only).
+             * @example github
+             */
+            source_type: string;
+        };
         /** @description Request to create a new LLM provider */
         CreateProviderRequest: {
             /**
              * @description API key for authenticating with the provider.
              *     Will be encrypted at rest if encryption is configured.
+             *
+             *     Single-field convenience for simple providers and programmatic clients.
+             *     Multi-field drivers (Bedrock, MAI) should send `credentials` instead.
              */
             api_key?: string | null;
             /**
@@ -5152,12 +5707,21 @@ export interface components {
              */
             base_url?: string | null;
             /**
+             * @description Typed credential fields keyed by the driver's declared credential-schema
+             *     field names. Validated against the schema and assembled into the stored
+             *     credential document. Takes precedence over `api_key` when present.
+             */
+            credentials?: {
+                [key: string]: string;
+            } | null;
+            /**
              * @description Display name for the provider.
              * @example OpenAI Production
              */
             name: string;
             /** @description The type of LLM provider (e.g., openai, anthropic). */
             provider_type: components["schemas"]["DriverId"];
+            trace?: null | components["schemas"]["ProviderTraceConfig"];
         };
         /** @description Request body for the `create_saved_report` operation. */
         CreateSavedReportRequest: {
@@ -5234,6 +5798,8 @@ export interface components {
         CreateSessionRequest: {
             /**
              * @description ID of the agent to work in this session (optional, format: agent_{32-hex}).
+             *     When supplied without a harness, the session inherits the agent's harness.
+             *     Mutually exclusive with `agent_name`.
              * @example agent_01933b5a00007000800000000000001
              */
             agent_id?: string | null;
@@ -5242,6 +5808,13 @@ export interface components {
              * @example identity_01933b5a00007000800000000000001
              */
             agent_identity_id?: string | null;
+            /**
+             * @description Name of the agent to work in this session (optional).
+             *     Alternative to `agent_id` — looked up by name within the org.
+             *     Mutually exclusive with `agent_id`.
+             * @example support
+             */
+            agent_name?: string | null;
             /**
              * @description Session-level capabilities (additive to agent capabilities).
              *     Applied after agent capabilities when building RuntimeAgent.
@@ -5259,8 +5832,9 @@ export interface components {
             capabilities?: components["schemas"]["AgentCapabilityConfig"][];
             /**
              * @description ID of the harness for this session (format: harness_{32-hex}).
-             *     If omitted, the org default harness is used. New orgs default that to Generic.
-             *     Mutually exclusive with `harness_name`.
+             *     If omitted, the harness is derived from the agent (when one is supplied),
+             *     else the org default harness, else the built-in fallback. New orgs default
+             *     that to Generic. Mutually exclusive with `harness_name`.
              * @example harness_01933b5a00007000800000000000001
              */
             harness_id?: string | null;
@@ -5313,6 +5887,14 @@ export interface components {
              */
             model_id?: string | null;
             network_access?: null | components["schemas"]["NetworkAccessList"];
+            /**
+             * @description Request-level parallel tool calling preference (EVE-598). `true` signals
+             *     the provider that parallel tool calls are wanted; `false` requests at
+             *     most one tool call per turn and forces serial execution. Omit to inherit
+             *     the agent/harness preference or the provider default.
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
             /**
              * @description Optional session-level system prompt override.
              *     Prepended to the agent's system prompt when building RuntimeAgent.
@@ -5396,6 +5978,13 @@ export interface components {
             description?: string | null;
             /** @example team-research */
             name: string;
+        };
+        /** @description Describes the form fields and instructions for entering a credential. */
+        CredentialFormSchema: {
+            /** @description Input fields to render. */
+            fields: components["schemas"]["FormField"][];
+            /** @description Markdown instructions shown above the form (how to get the key, etc.). */
+            instructions_markdown: string;
         };
         /** @description Database info response. */
         DatabaseInfoResponse: {
@@ -5615,7 +6204,20 @@ export interface components {
             /** @description Total number of items matching the query, across all pages. */
             total: number;
         };
-        /** @description LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock. Any other string is treated as an embedder-defined external provider. */
+        /**
+         * @description A driver's declared credential schema, so the Settings UI can render
+         *     discrete typed inputs (multi-field AWS keys, Entra OAuth fields) instead of
+         *     one opaque password field.
+         */
+        DriverCredentialInfo: {
+            /** @description The fields and instructions to render for this driver's credential. */
+            credential_schema: components["schemas"]["CredentialFormSchema"];
+            /** @description Driver id (e.g. `openai`, `bedrock`, `mai`). */
+            driver: string;
+            /** @description Whether the driver declares an interactive "Connect with …" OAuth flow. */
+            supports_oauth: boolean;
+        };
+        /** @description LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock, mai, fireworks. Any other string is treated as an embedder-defined external provider. */
         DriverId: string;
         /** @description Options for enqueuing a standalone task */
         EnqueueTaskOptions: {
@@ -5803,7 +6405,7 @@ export interface components {
          *       }
          *     }
          */
-        EventData: components["schemas"]["InputMessageData"] | components["schemas"]["OutputMessageDeltaData"] | components["schemas"]["OutputMessageStartedData"] | components["schemas"]["OutputMessageReplacedData"] | components["schemas"]["OutputMessageCompletedData"] | components["schemas"]["TurnStartedData"] | components["schemas"]["TurnCompletedData"] | components["schemas"]["TurnFailedData"] | components["schemas"]["ReasonStartedData"] | components["schemas"]["ReasonCompletedData"] | components["schemas"]["ReasonRecoveredData"] | components["schemas"]["CapabilityUsageData"] | components["schemas"]["ActStartedData"] | components["schemas"]["ActCompletedData"] | components["schemas"]["ToolStartedData"] | components["schemas"]["ToolCompletedData"] | components["schemas"]["ToolProgressData"] | components["schemas"]["ToolOutputDeltaData"] | components["schemas"]["ToolCallRequestedData"] | components["schemas"]["TranscriptRepairedData"] | components["schemas"]["LlmGenerationData"] | components["schemas"]["ReasonThinkingDeltaData"] | components["schemas"]["ReasonItemData"] | components["schemas"]["ReasonThinkingStartedData"] | components["schemas"]["ReasonThinkingCompletedData"] | components["schemas"]["TurnCancelledData"] | components["schemas"]["SessionStartedData"] | components["schemas"]["SessionActivatedData"] | components["schemas"]["SessionIdledData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["SubagentEventData"] | components["schemas"]["SessionTaskEventData"] | components["schemas"]["SessionTaskEventData"] | components["schemas"]["TaskMessageEventData"] | components["schemas"]["TaskMessageEventData"] | components["schemas"]["ContextCompactingData"] | components["schemas"]["ContextCompactedData"] | components["schemas"]["FileWrittenData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["VoiceSessionStartedData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceSessionEndedData"] | components["schemas"]["VoiceSessionFailedData"];
+        EventData: components["schemas"]["InputMessageData"] | components["schemas"]["OutputMessageDeltaData"] | components["schemas"]["OutputMessageStartedData"] | components["schemas"]["OutputMessageReplacedData"] | components["schemas"]["OutputMessageCompletedData"] | components["schemas"]["TurnStartedData"] | components["schemas"]["TurnCompletedData"] | components["schemas"]["TurnFailedData"] | components["schemas"]["ReasonStartedData"] | components["schemas"]["ReasonCompletedData"] | components["schemas"]["ReasonRecoveredData"] | components["schemas"]["CapabilityUsageData"] | components["schemas"]["ActStartedData"] | components["schemas"]["ActCompletedData"] | components["schemas"]["ToolStartedData"] | components["schemas"]["ToolCompletedData"] | components["schemas"]["ToolProgressData"] | components["schemas"]["ToolOutputDeltaData"] | components["schemas"]["ToolCallRequestedData"] | components["schemas"]["TranscriptRepairedData"] | components["schemas"]["ToolCallRepairedData"] | components["schemas"]["LlmGenerationData"] | components["schemas"]["ReasonThinkingDeltaData"] | components["schemas"]["ReasonItemData"] | components["schemas"]["ReasonThinkingStartedData"] | components["schemas"]["ReasonThinkingCompletedData"] | components["schemas"]["TurnSealedData"] | components["schemas"]["TurnCancelledData"] | components["schemas"]["SessionStartedData"] | components["schemas"]["SessionActivatedData"] | components["schemas"]["SessionIdledData"] | components["schemas"]["SessionTaskEventData"] | components["schemas"]["SessionTaskEventData"] | components["schemas"]["TaskMessageEventData"] | components["schemas"]["TaskMessageEventData"] | components["schemas"]["ContextCompactingData"] | components["schemas"]["ContextCompactedData"] | components["schemas"]["FileWrittenData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["BudgetEventData"] | components["schemas"]["VoiceSessionStartedData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceTranscriptData"] | components["schemas"]["VoiceSessionEndedData"] | components["schemas"]["VoiceSessionFailedData"];
         /**
          * @description One row of `EventsSummaryResult.by_type` — the per-event-type count
          *     produced by the events summary query.
@@ -6064,43 +6666,21 @@ export interface components {
             updated_at: string;
         };
         /**
-         * @description Feature flags exposed via `GET /v1/feature-flags` and consumed by the frontend.
+         * @description Untyped API representation of feature flags: a generic `{ "<flag>": bool }` map.
          *
-         *     Currently backed by environment variables and deployment grade.
-         *     Future: per-org flags, per-user flags, external providers.
+         *     Decision: the public API is intentionally untyped. The set of flags churns
+         *     frequently; encoding each flag as a named schema property would force a
+         *     `docs/api/openapi.json` change on every add/remove. A generic string→bool map
+         *     keeps the API spec stable. The frontend layers its own typed view on top.
          */
-        FeatureFlags: {
-            /**
-             * @description Outbound agent delegation capabilities (`a2a_agent_delegation`, `agent_handoff`).
-             *     Experimental: auto-enabled in dev, off in prod by default.
-             *     When off, these capabilities are not registered and cannot be assigned to agents.
-             */
-            agent_delegation: boolean;
-            /**
-             * @description Immutable agent versions, snapshots, forks, and app version binding.
-             *     Experimental.
-             */
-            agent_versions: boolean;
-            /**
-             * @description App / channel scoped budgets and periodic budget resets (`5h`, `1d`, ...).
-             *     Experimental.
-             */
-            app_budgets: boolean;
-            /** @description Channels-first app detail page and full-page channel forms. Experimental. */
-            "apps.detailV2": boolean;
-            /** @description Evals (user-facing behavioral evals for agents). Experimental. */
-            evals: boolean;
-            /** @description Global chat (per-user singleton chat session). Experimental. */
-            global_chat: boolean;
-            /** @description MCP endpoint (POST /mcp — Everruns as an MCP server). Experimental. */
-            mcp_endpoint: boolean;
-            /** @description In-app notifications (bell, toasts, notification SSE). Experimental. */
-            notifications: boolean;
-            /** @description Observers (online scoring of production sessions). Experimental. */
-            observers: boolean;
-            /** @description Realtime voice endpoints and microphone controls. Experimental. */
-            voice: boolean;
+        FeatureFlagMap: {
+            [key: string]: boolean;
         };
+        /**
+         * @description Input field type for rendering.
+         * @enum {string}
+         */
+        FieldType: "password" | "text" | "url";
         /** @description File metadata without content */
         FileInfo: {
             /**
@@ -6252,6 +6832,70 @@ export interface components {
              * @example support-agent-experimental
              */
             name: string;
+        };
+        /**
+         * @description Request to fork a session (specs/forking-sessions.md). Every field is
+         *     optional; omitted fields inherit the parent session's value. Title defaults
+         *     to "{parent title} (fork)" when omitted.
+         */
+        ForkSessionRequest: {
+            /**
+             * @description Override the agent assigned to the fork.
+             * @example agent_01933b5a00007000800000000000001
+             */
+            agent_id?: string | null;
+            /**
+             * @description Override the locale (BCP 47).
+             * @example uk-UA
+             */
+            locale?: string | null;
+            /**
+             * @description Override the LLM model for the fork.
+             * @example model_01933b5a00007000800000000000001
+             */
+            model_id?: string | null;
+            /** @description Override the session-level system prompt. */
+            system_prompt?: string | null;
+            /**
+             * @description Tags for the fork. Replaces (does not merge with) the parent's tags.
+             * @example [
+             *       "experiment"
+             *     ]
+             */
+            tags?: string[] | null;
+            /**
+             * @description Title for the fork. Defaults to "{parent title} (fork)".
+             * @example Branch: try the async rewrite
+             */
+            title?: string | null;
+        };
+        /** @description A single form field. */
+        FormField: {
+            /**
+             * @description Default value the UI pre-fills (e.g. an OAuth scope or AWS region). The
+             *     stored credential omits unfilled optional fields, so drivers still apply
+             *     their own defaults; this only seeds the form input.
+             */
+            default_value?: string | null;
+            /** @description Input type. */
+            field_type: components["schemas"]["FieldType"];
+            /**
+             * @description Mutually-exclusive group label this field belongs to. Fields sharing a
+             *     label are one alternative credential method (e.g. "API key" vs "OAuth");
+             *     ungrouped fields are always part of the credential. `None` for the
+             *     common single-method case.
+             */
+            group?: string | null;
+            /** @description Help text shown below the input. */
+            help_text?: string | null;
+            /** @description Label shown next to the input. */
+            label: string;
+            /** @description Field name used as the key when submitting (e.g. "api_key"). */
+            name: string;
+            /** @description Placeholder text inside the input. */
+            placeholder?: string | null;
+            /** @description Whether the field is required. */
+            required: boolean;
         };
         /** @description Request body for the `get_or_create_chat_session` operation. */
         GetOrCreateChatSessionRequest: {
@@ -6655,6 +7299,16 @@ export interface components {
             name: string;
             network_access?: null | components["schemas"]["NetworkAccessList"];
             /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
+            /**
              * @description Optional parent harness that this harness inherits from.
              * @example harness_01933b5a000070008000000000000602
              */
@@ -6663,10 +7317,15 @@ export interface components {
             status: components["schemas"]["HarnessStatus"];
             /**
              * @description System prompt that defines the harness's base behavior.
-             *     Forms the foundation of the prompt stack.
+             *
+             *     Forms the foundation of the prompt stack. Optional: when absent the
+             *     harness contributes no base prompt, so the effective prompt comes
+             *     entirely from the parent harness (if any), the agent, the session, and
+             *     capability contributions. Empty/whitespace-only values normalize to
+             *     `None`.
              * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
              */
-            system_prompt: string;
+            system_prompt?: string | null;
             /**
              * @description Tags for organizing and filtering harnesses.
              * @example [
@@ -6723,11 +7382,21 @@ export interface components {
             deterministic_reason: string;
             /** @description Set when the case errored or timed out instead of completing. */
             error?: string | null;
+            /**
+             * Format: int32
+             * @description Input tokens for this case: the agent session turns plus the judge call.
+             */
+            input_tokens?: number;
             /** @description LLM judge explanation. */
             judge_reason: string;
             /** Format: int64 */
             latency_ms: number;
             name: string;
+            /**
+             * Format: int32
+             * @description Output tokens for this case: the agent session turns plus the judge call.
+             */
+            output_tokens?: number;
             /** @description True only when both the deterministic checks and the LLM judge pass. */
             passed: boolean;
             rubric: string;
@@ -6939,6 +7608,15 @@ export interface components {
             /** Format: int64 */
             size_bytes: number;
         };
+        /** @description Request body for `okf_import`. */
+        ImportOkfBundleRequest: {
+            /** @description A base64-encoded `.tar.gz` OKF bundle. Mutually exclusive with `files`. */
+            bundle_base64?: string | null;
+            /** @description Inline bundle files. Mutually exclusive with `bundle_base64`. */
+            files?: components["schemas"]["OkfFileInput"][];
+            /** @description When true, delete previously-imported entries absent from this bundle. */
+            prune?: boolean;
+        };
         /** @description Starter file copied into a new session from an agent or harness. */
         InitialFile: {
             /** @description File content: plain text or base64-encoded binary. */
@@ -6991,6 +7669,19 @@ export interface components {
         InputMessageData: {
             /** @description The user message */
             message: components["schemas"]["Message"];
+        };
+        /** @description Request body for installing a plugin from a marketplace catalog entry. */
+        InstallPluginRequest: {
+            /**
+             * @description Public ID of the marketplace to install from.
+             * @example plgmkt_01933b5a000070008000000000000001
+             */
+            marketplace_id: string;
+            /**
+             * @description Name of the plugin entry in the marketplace catalog.
+             * @example microsoft-docs
+             */
+            plugin_name: string;
         };
         /**
          * @description How app-triggered invocations route into sessions.
@@ -7065,6 +7756,11 @@ export interface components {
             kb_id: string;
             /** @description Discriminator selecting the variant of this resource. */
             kind: string;
+            /**
+             * @description Optional OKF resource URI identifying the underlying asset.
+             * @example https://console.cloud.google.com/bigquery?p=acme&d=sales&t=orders
+             */
+            resource?: string | null;
             /** @description Free-form tags attached to this resource. */
             tags: string[];
             /** @description Human-readable title. Safe to render in user-facing messages. */
@@ -7074,6 +7770,121 @@ export interface components {
              * @description Timestamp when this resource was last updated (RFC 3339).
              */
             updated_at: string;
+        };
+        /** @description Response body for a knowledge index document. */
+        KnowledgeIndexDocumentResponse: {
+            /**
+             * Format: int32
+             * @description Denormalized chunk count for this document.
+             */
+            chunk_count: number;
+            /** @description Content hash driving incremental re-embedding. */
+            content_hash?: string | null;
+            /**
+             * Format: date-time
+             * @description Timestamp when this resource was created (RFC 3339).
+             */
+            created_at: string;
+            /**
+             * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+             * @example kidoc_01933b5a000070008000000000000001
+             */
+            id: string;
+            /**
+             * @description Parent index's prefixed public identifier.
+             * @example kidx_01933b5a000070008000000000000001
+             */
+            index_id: string;
+            /**
+             * Format: date-time
+             * @description Timestamp this document was last seen during a sync pass (RFC 3339).
+             */
+            last_seen_at?: string | null;
+            /** @description Document MIME type, if known. */
+            mime_type?: string | null;
+            /**
+             * Format: int64
+             * @description Document size in bytes, if known.
+             */
+            size_bytes?: number | null;
+            /** @description Stable per-source locator (e.g. `github://owner/repo@main/docs/x.md`). */
+            source_uri: string;
+            /** @description Document title, if known. */
+            title?: string | null;
+            /**
+             * Format: date-time
+             * @description Timestamp when this resource was last updated (RFC 3339).
+             */
+            updated_at: string;
+        };
+        /** @description Response body for a knowledge index. */
+        KnowledgeIndexResponse: {
+            /**
+             * Format: date-time
+             * @description Timestamp when this resource was archived, if any (RFC 3339).
+             */
+            archived_at?: string | null;
+            /**
+             * Format: date-time
+             * @description Timestamp when this resource was created (RFC 3339).
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+             */
+            deleted_at?: string | null;
+            /** @description Human-readable description. Safe to render in user-facing messages. */
+            description?: string | null;
+            /** @description Embedding model used to embed chunks. Required. */
+            embedding_model_id: string;
+            /**
+             * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+             * @example kidx_01933b5a000070008000000000000001
+             */
+            id: string;
+            /** @description Sanitized failure reason from the last failed sync, if any. */
+            last_sync_error?: string | null;
+            /**
+             * Format: date-time
+             * @description Timestamp of the last successful sync, if any (RFC 3339).
+             */
+            last_synced_at?: string | null;
+            /** @description Human-readable name. Safe to render in user-facing messages. */
+            name: string;
+            /** @description Non-secret source coordinates. Never holds credentials. */
+            source_config: unknown;
+            /** @description External source type. One of `github`, `git`. */
+            source_type: string;
+            /** @description Current lifecycle status. */
+            status: string;
+            /** @description Syncout pipeline state. One of `idle`, `pending`, `syncing`, `synced`, `failed`. */
+            sync_status: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when this resource was last updated (RFC 3339).
+             */
+            updated_at: string;
+            /**
+             * Format: int32
+             * @description Embedding dimension, recorded on first successful sync.
+             */
+            vector_dim?: number | null;
+        };
+        /**
+         * @description The most recent health-check run for an agent, paired with whether the
+         *     agent's current resolved config differs from the config that run was
+         *     executed against. Returned by the latest-run endpoint so the agent editor
+         *     can show prior results on mount without triggering a new run, and surface a
+         *     "config changed since last run" hint. See specs/agent-checks.md and EVE-588.
+         */
+        LatestHealthCheckRun: {
+            /**
+             * @description True when `run` exists but was executed against a different resolved
+             *     config than the agent currently has (UI shows a re-run hint).
+             */
+            config_changed: boolean;
+            run?: null | components["schemas"]["HealthCheckRun"];
         };
         /** @description A lifecycle-managed external resource owned by a session-capable workflow. */
         LeasedResource: {
@@ -7250,6 +8061,22 @@ export interface components {
             search?: string | null;
         };
         /**
+         * @description Query parameters for `GET /v1/knowledge-indexes` — optional name/desc
+         *     search plus a flag to include archived indexes.
+         */
+        ListKnowledgeIndexesQuery: {
+            /**
+             * @description When `true`, also returns archived knowledge indexes.
+             * @example false
+             */
+            include_archived?: boolean | null;
+            /**
+             * @description Substring filter applied to index name and description.
+             * @example docs
+             */
+            search?: string | null;
+        };
+        /**
          * @description Query parameters for `GET /v1/memories` — optional name search and a
          *     flag to include archived memories in the listing.
          */
@@ -7320,6 +8147,11 @@ export interface components {
                  */
                 forked_from_version_id?: string | null;
                 /**
+                 * @description Harness that supplies the base execution environment for this agent.
+                 * @example harness_01933b5a00007000800000000000001
+                 */
+                harness_id: string;
+                /**
                  * @description External identifier (agent_<32-hex>). Shown as "id" in API.
                  *     Client-supplied or auto-generated.
                  * @example agent_01933b5a000070008000000000000001
@@ -7340,6 +8172,16 @@ export interface components {
                  */
                 name: string;
                 network_access?: null | components["schemas"]["NetworkAccessList"];
+                /**
+                 * @description Request-level parallel tool calling preference (EVE-598).
+                 *
+                 *     `None` (default) preserves provider defaults. `Some(true)` signals the
+                 *     provider that parallel tool calls are wanted; `Some(false)` requests at
+                 *     most one tool call per turn and forces serial execution. Merged across
+                 *     harness/agent/session layers (overlay wins).
+                 * @example true
+                 */
+                parallel_tool_calls?: boolean | null;
                 /**
                  * @description Root agent lineage identifier for grouping fork families.
                  * @example agent_01933b5a00007000800000000000001
@@ -7722,6 +8564,16 @@ export interface components {
                 name: string;
                 network_access?: null | components["schemas"]["NetworkAccessList"];
                 /**
+                 * @description Request-level parallel tool calling preference (EVE-598).
+                 *
+                 *     `None` (default) preserves provider defaults. `Some(true)` signals the
+                 *     provider that parallel tool calls are wanted; `Some(false)` requests at
+                 *     most one tool call per turn and forces serial execution. Merged across
+                 *     harness/agent/session layers (overlay wins).
+                 * @example true
+                 */
+                parallel_tool_calls?: boolean | null;
+                /**
                  * @description Optional parent harness that this harness inherits from.
                  * @example harness_01933b5a000070008000000000000602
                  */
@@ -7730,10 +8582,15 @@ export interface components {
                 status: components["schemas"]["HarnessStatus"];
                 /**
                  * @description System prompt that defines the harness's base behavior.
-                 *     Forms the foundation of the prompt stack.
+                 *
+                 *     Forms the foundation of the prompt stack. Optional: when absent the
+                 *     harness contributes no base prompt, so the effective prompt comes
+                 *     entirely from the parent harness (if any), the agent, the session, and
+                 *     capability contributions. Empty/whitespace-only values normalize to
+                 *     `None`.
                  * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
                  */
-                system_prompt: string;
+                system_prompt?: string | null;
                 /**
                  * @description Tags for organizing and filtering harnesses.
                  * @example [
@@ -7834,6 +8691,11 @@ export interface components {
                 kb_id: string;
                 /** @description Discriminator selecting the variant of this resource. */
                 kind: string;
+                /**
+                 * @description Optional OKF resource URI identifying the underlying asset.
+                 * @example https://console.cloud.google.com/bigquery?p=acme&d=sales&t=orders
+                 */
+                resource?: string | null;
                 /** @description Free-form tags attached to this resource. */
                 tags: string[];
                 /** @description Human-readable title. Safe to render in user-facing messages. */
@@ -7843,6 +8705,118 @@ export interface components {
                  * @description Timestamp when this resource was last updated (RFC 3339).
                  */
                 updated_at: string;
+            }[];
+        };
+        /**
+         * @description Response wrapper for list endpoints.
+         *     All list endpoints return responses wrapped in a `data` field.
+         */
+        ListResponse_KnowledgeIndexDocumentResponse: {
+            /** @description Array of items returned by the list operation. */
+            data: {
+                /**
+                 * Format: int32
+                 * @description Denormalized chunk count for this document.
+                 */
+                chunk_count: number;
+                /** @description Content hash driving incremental re-embedding. */
+                content_hash?: string | null;
+                /**
+                 * Format: date-time
+                 * @description Timestamp when this resource was created (RFC 3339).
+                 */
+                created_at: string;
+                /**
+                 * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+                 * @example kidoc_01933b5a000070008000000000000001
+                 */
+                id: string;
+                /**
+                 * @description Parent index's prefixed public identifier.
+                 * @example kidx_01933b5a000070008000000000000001
+                 */
+                index_id: string;
+                /**
+                 * Format: date-time
+                 * @description Timestamp this document was last seen during a sync pass (RFC 3339).
+                 */
+                last_seen_at?: string | null;
+                /** @description Document MIME type, if known. */
+                mime_type?: string | null;
+                /**
+                 * Format: int64
+                 * @description Document size in bytes, if known.
+                 */
+                size_bytes?: number | null;
+                /** @description Stable per-source locator (e.g. `github://owner/repo@main/docs/x.md`). */
+                source_uri: string;
+                /** @description Document title, if known. */
+                title?: string | null;
+                /**
+                 * Format: date-time
+                 * @description Timestamp when this resource was last updated (RFC 3339).
+                 */
+                updated_at: string;
+            }[];
+        };
+        /**
+         * @description Response wrapper for list endpoints.
+         *     All list endpoints return responses wrapped in a `data` field.
+         */
+        ListResponse_KnowledgeIndexResponse: {
+            /** @description Array of items returned by the list operation. */
+            data: {
+                /**
+                 * Format: date-time
+                 * @description Timestamp when this resource was archived, if any (RFC 3339).
+                 */
+                archived_at?: string | null;
+                /**
+                 * Format: date-time
+                 * @description Timestamp when this resource was created (RFC 3339).
+                 */
+                created_at: string;
+                /**
+                 * Format: date-time
+                 * @description Timestamp when this resource was soft-deleted, if any (RFC 3339).
+                 */
+                deleted_at?: string | null;
+                /** @description Human-readable description. Safe to render in user-facing messages. */
+                description?: string | null;
+                /** @description Embedding model used to embed chunks. Required. */
+                embedding_model_id: string;
+                /**
+                 * @description Prefixed public identifier. See [ID Schema](https://docs.everruns.com/advanced/id-schema/).
+                 * @example kidx_01933b5a000070008000000000000001
+                 */
+                id: string;
+                /** @description Sanitized failure reason from the last failed sync, if any. */
+                last_sync_error?: string | null;
+                /**
+                 * Format: date-time
+                 * @description Timestamp of the last successful sync, if any (RFC 3339).
+                 */
+                last_synced_at?: string | null;
+                /** @description Human-readable name. Safe to render in user-facing messages. */
+                name: string;
+                /** @description Non-secret source coordinates. Never holds credentials. */
+                source_config: unknown;
+                /** @description External source type. One of `github`, `git`. */
+                source_type: string;
+                /** @description Current lifecycle status. */
+                status: string;
+                /** @description Syncout pipeline state. One of `idle`, `pending`, `syncing`, `synced`, `failed`. */
+                sync_status: string;
+                /**
+                 * Format: date-time
+                 * @description Timestamp when this resource was last updated (RFC 3339).
+                 */
+                updated_at: string;
+                /**
+                 * Format: int32
+                 * @description Embedding dimension, recorded on first successful sync.
+                 */
+                vector_dim?: number | null;
             }[];
         };
         /**
@@ -7895,6 +8869,8 @@ export interface components {
                 name: string;
                 /** @description Stable provider id used for user-scoped OAuth connections. */
                 oauth_provider_id?: string | null;
+                /** @description Protocol-era adoption policy for the MCP client (`auto` negotiates). */
+                protocol_mode?: components["schemas"]["McpProtocolMode"];
                 /** @description Current lifecycle status of the MCP server. */
                 status: components["schemas"]["McpServerStatus"];
                 /** @description Transport type (currently only HTTP supported). */
@@ -8063,10 +9039,24 @@ export interface components {
                 default_harness_id?: string | null;
                 /** @description Default LLM model for the organization. */
                 default_model_id?: string | null;
+                /**
+                 * @description Org-level default provider per service (EVE-569), keyed by service kind.
+                 *     Empty when no org defaults are configured.
+                 */
+                default_provider_per_service: {
+                    [key: string]: string;
+                };
                 /** @description External identifier (org_<32-hex-chars>) */
                 id: string;
                 /** @description Display name */
                 name: string;
+                /**
+                 * Format: date-time
+                 * @description When the org's creator finished or skipped the setup wizard. `null` means
+                 *     onboarding is still incomplete, which the UI uses to resume the user at
+                 *     `/orgs/{id}/setup`. Seeded/default and externally-synced orgs are complete.
+                 */
+                onboarding_completed_at?: string | null;
                 /**
                  * Format: date-time
                  * @description When the organization was last updated
@@ -8451,6 +9441,8 @@ export interface components {
                 name: string;
                 /** @description Stable provider id used for user-scoped OAuth connections. */
                 oauth_provider_id?: string | null;
+                /** @description Protocol-era adoption policy for the MCP client (`auto` negotiates). */
+                protocol_mode?: components["schemas"]["McpProtocolMode"];
                 /** @description Current lifecycle status of the MCP server. */
                 status: components["schemas"]["McpServerStatus"];
                 /** @description Transport type (currently only HTTP supported). */
@@ -8661,6 +9653,7 @@ export interface components {
                 provider_type: components["schemas"]["DriverId"];
                 /** @description Current lifecycle status of this provider. */
                 status: components["schemas"]["ProviderStatus"];
+                trace?: null | components["schemas"]["ProviderTraceConfig"];
                 /**
                  * Format: date-time
                  * @description Timestamp when this provider was last updated (RFC 3339).
@@ -8759,6 +9752,16 @@ export interface components {
                 name: string;
                 network_access?: null | components["schemas"]["NetworkAccessList"];
                 /**
+                 * @description Request-level parallel tool calling preference (EVE-598).
+                 *
+                 *     `None` (default) preserves provider defaults. `Some(true)` signals the
+                 *     provider that parallel tool calls are wanted; `Some(false)` requests at
+                 *     most one tool call per turn and forces serial execution. Merged across
+                 *     harness/agent/session layers (overlay wins).
+                 * @example true
+                 */
+                parallel_tool_calls?: boolean | null;
+                /**
                  * @description Optional parent harness that this harness inherits from.
                  * @example harness_01933b5a000070008000000000000602
                  */
@@ -8767,10 +9770,15 @@ export interface components {
                 status: components["schemas"]["HarnessStatus"];
                 /**
                  * @description System prompt that defines the harness's base behavior.
-                 *     Forms the foundation of the prompt stack.
+                 *
+                 *     Forms the foundation of the prompt stack. Optional: when absent the
+                 *     harness contributes no base prompt, so the effective prompt comes
+                 *     entirely from the parent harness (if any), the agent, the session, and
+                 *     capability contributions. Empty/whitespace-only values normalize to
+                 *     `None`.
                  * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
                  */
-                system_prompt: string;
+                system_prompt?: string | null;
                 /**
                  * @description Tags for organizing and filtering harnesses.
                  * @example [
@@ -9203,6 +10211,19 @@ export interface components {
             retryable: boolean;
         };
         /**
+         * @description Per-server policy for which MCP protocol era the client uses.
+         *
+         *     `Auto` (the default) probes the server and adapts — it tries the stateless
+         *     RC path first and transparently falls back to the stateful handshake when a
+         *     server demands it, so a single configuration speaks to legacy, current, and
+         *     RC servers without operator action. The pinned variants skip negotiation
+         *     when an operator knows a server's era (or to work around a server that
+         *     mis-signals it).
+         * @example auto
+         * @enum {string}
+         */
+        McpProtocolMode: "auto" | "legacy" | "stable" | "rc";
+        /**
          * @description MCP Server configuration.
          *     Represents a remote MCP server that can provide tools and resources.
          */
@@ -9250,6 +10271,8 @@ export interface components {
             name: string;
             /** @description Stable provider id used for user-scoped OAuth connections. */
             oauth_provider_id?: string | null;
+            /** @description Protocol-era adoption policy for the MCP client (`auto` negotiates). */
+            protocol_mode?: components["schemas"]["McpProtocolMode"];
             /** @description Current lifecycle status of the MCP server. */
             status: components["schemas"]["McpServerStatus"];
             /** @description Transport type (currently only HTTP supported). */
@@ -9440,6 +10463,13 @@ export interface components {
              *     Required when sending thinking back in subsequent API calls.
              */
             thinking_signature?: string | null;
+        };
+        MessageBody: {
+            /**
+             * @description Message text dispatched to the agent.
+             * @example Summarize the latest support tickets.
+             */
+            message: string;
         };
         /**
          * @description Message role in the conversation
@@ -9836,6 +10866,27 @@ export interface components {
             /** @description Blocked host patterns. Always denied, even if matched by `allowed`. */
             blocked?: string[];
         };
+        /**
+         * @description A single inline bundle file, for callers that send files as JSON rather
+         *     than a tarball.
+         */
+        OkfFileInput: {
+            /** @description Raw markdown file content (frontmatter + body). */
+            content: string;
+            /** @description Bundle-relative path, e.g. `tables/orders.md`. */
+            path: string;
+        };
+        /** @description Outcome of an import run. */
+        OkfImportSummary: {
+            created: number;
+            /** @description Entries removed because `prune` was set and they were absent from the bundle. */
+            pruned: number;
+            /** @description Documents skipped (e.g. oversized body); see `warnings`. */
+            skipped: number;
+            updated: number;
+            /** @description Non-fatal issues (broken docs, oversized bodies). OKF consumers degrade gracefully. */
+            warnings: string[];
+        };
         OrgFeatureFlagSetting: {
             description: string;
             /** @description Effective value (`system_enabled && org_enabled`). */
@@ -9864,10 +10915,24 @@ export interface components {
             default_harness_id?: string | null;
             /** @description Default LLM model for the organization. */
             default_model_id?: string | null;
+            /**
+             * @description Org-level default provider per service (EVE-569), keyed by service kind.
+             *     Empty when no org defaults are configured.
+             */
+            default_provider_per_service: {
+                [key: string]: string;
+            };
             /** @description External identifier (org_<32-hex-chars>) */
             id: string;
             /** @description Display name */
             name: string;
+            /**
+             * Format: date-time
+             * @description When the org's creator finished or skipped the setup wizard. `null` means
+             *     onboarding is still incomplete, which the UI uses to resume the user at
+             *     `/orgs/{id}/setup`. Seeded/default and externally-synced orgs are complete.
+             */
+            onboarding_completed_at?: string | null;
             /**
              * Format: date-time
              * @description When the organization was last updated
@@ -10032,6 +11097,19 @@ export interface components {
                  */
                 finished_at?: string | null;
                 /**
+                 * Format: int32
+                 * @description Parent event sequence the fork was taken at (the fork point). NULL unless
+                 *     this session is a fork.
+                 * @example 42
+                 */
+                forked_from_sequence?: number | null;
+                /**
+                 * @description Session this one was forked from. NULL for sessions that were not forked.
+                 *     Distinct from `parent_session_id` (subagent nesting): forking is a
+                 *     user-initiated "branch from here" relationship.
+                 */
+                forked_from_session_id?: string | null;
+                /**
                  * @description ID of the harness for this session (format: harness_{32-hex}).
                  * @example harness_01933b5a00007000800000000000001
                  */
@@ -10098,8 +11176,18 @@ export interface components {
                  */
                 owner_principal_id: string;
                 /**
+                 * @description Request-level parallel tool calling preference (EVE-598).
+                 *
+                 *     `None` (default) preserves provider defaults. `Some(true)` signals the
+                 *     provider that parallel tool calls are wanted; `Some(false)` requests at
+                 *     most one tool call per turn and forces serial execution. Merged across
+                 *     harness/agent/session layers (overlay wins).
+                 * @example true
+                 */
+                parallel_tool_calls?: boolean | null;
+                /**
                  * @description Parent session that spawned this subagent. NULL for top-level sessions.
-                 *     Used as the nesting guard in spawn_subagent.
+                 *     Used to compute governed subagent delegation depth.
                  */
                 parent_session_id?: string | null;
                 /**
@@ -10408,6 +11496,11 @@ export interface components {
                  */
                 forked_from_version_id?: string | null;
                 /**
+                 * @description Harness that supplies the base execution environment for this agent.
+                 * @example harness_01933b5a00007000800000000000001
+                 */
+                harness_id: string;
+                /**
                  * @description External identifier (agent_<32-hex>). Shown as "id" in API.
                  *     Client-supplied or auto-generated.
                  * @example agent_01933b5a000070008000000000000001
@@ -10428,6 +11521,16 @@ export interface components {
                  */
                 name: string;
                 network_access?: null | components["schemas"]["NetworkAccessList"];
+                /**
+                 * @description Request-level parallel tool calling preference (EVE-598).
+                 *
+                 *     `None` (default) preserves provider defaults. `Some(true)` signals the
+                 *     provider that parallel tool calls are wanted; `Some(false)` requests at
+                 *     most one tool call per turn and forces serial execution. Merged across
+                 *     harness/agent/session layers (overlay wins).
+                 * @example true
+                 */
+                parallel_tool_calls?: boolean | null;
                 /**
                  * @description Root agent lineage identifier for grouping fork families.
                  * @example agent_01933b5a00007000800000000000001
@@ -10581,6 +11684,19 @@ export interface components {
                  */
                 finished_at?: string | null;
                 /**
+                 * Format: int32
+                 * @description Parent event sequence the fork was taken at (the fork point). NULL unless
+                 *     this session is a fork.
+                 * @example 42
+                 */
+                forked_from_sequence?: number | null;
+                /**
+                 * @description Session this one was forked from. NULL for sessions that were not forked.
+                 *     Distinct from `parent_session_id` (subagent nesting): forking is a
+                 *     user-initiated "branch from here" relationship.
+                 */
+                forked_from_session_id?: string | null;
+                /**
                  * @description ID of the harness for this session (format: harness_{32-hex}).
                  * @example harness_01933b5a00007000800000000000001
                  */
@@ -10647,8 +11763,18 @@ export interface components {
                  */
                 owner_principal_id: string;
                 /**
+                 * @description Request-level parallel tool calling preference (EVE-598).
+                 *
+                 *     `None` (default) preserves provider defaults. `Some(true)` signals the
+                 *     provider that parallel tool calls are wanted; `Some(false)` requests at
+                 *     most one tool call per turn and forces serial execution. Merged across
+                 *     harness/agent/session layers (overlay wins).
+                 * @example true
+                 */
+                parallel_tool_calls?: boolean | null;
+                /**
                  * @description Parent session that spawned this subagent. NULL for top-level sessions.
-                 *     Used as the nesting guard in spawn_subagent.
+                 *     Used to compute governed subagent delegation depth.
                  */
                 parent_session_id?: string | null;
                 /**
@@ -11028,10 +12154,11 @@ export interface components {
              */
             parent_harness_id?: string | null;
             /**
-             * @description System prompt to render as the base prompt for the preview.
+             * @description System prompt to render as the base prompt for the preview. Optional:
+             *     omit to preview a harness that contributes no base prompt of its own.
              * @example You are a research assistant.
              */
-            system_prompt: string;
+            system_prompt?: string | null;
         };
         /**
          * @description Class of principal that can hold permissions or own resources. `system`
@@ -11121,6 +12248,7 @@ export interface components {
             provider_type: components["schemas"]["DriverId"];
             /** @description Current lifecycle status of this provider. */
             status: components["schemas"]["ProviderStatus"];
+            trace?: null | components["schemas"]["ProviderTraceConfig"];
             /**
              * Format: date-time
              * @description Timestamp when this provider was last updated (RFC 3339).
@@ -11132,6 +12260,48 @@ export interface components {
          * @enum {string}
          */
         ProviderStatus: "active" | "disabled";
+        /**
+         * @description Configuration for linking from the chat UI to a provider's observability
+         *     dashboard ("trace"/"logs").
+         *
+         *     This is provider-agnostic: any driver with a dashboard can supply default
+         *     templates (see [`DriverId::default_trace_templates`]), and an org enables
+         *     links per provider once it has confirmed logging is on for that account.
+         *     URL templates support the `{response_id}`, `{session_id}`, `{turn_id}` and
+         *     `{model}` placeholders, so the same mechanism works for OpenRouter today and
+         *     for third-party observability backends (Langfuse, Helicone, ...) via an
+         *     override.
+         */
+        ProviderTraceConfig: {
+            /**
+             * @description Whether trace links should be shown for this provider. Defaults to
+             *     `false`: vendors typically do not retain trace content unless logging is
+             *     explicitly enabled, so the org opts in once that is set up.
+             */
+            enabled: boolean;
+            /**
+             * @description URL template for a single generation's trace, e.g.
+             *     `"https://openrouter.ai/logs?id={response_id}"`.
+             */
+            generation_url_template?: string | null;
+            /**
+             * @description URL template for a session's grouped trace, e.g.
+             *     `"https://openrouter.ai/logs"`.
+             */
+            session_url_template?: string | null;
+        };
+        /**
+         * @description Provider resource config: caller policies plus the credential schemas the UI
+         *     renders per driver.
+         */
+        ProvidersConfigResponse: {
+            /** @description Per-driver credential schemas, ordered by driver id. */
+            drivers: components["schemas"]["DriverCredentialInfo"][];
+            /** @description Map of policy ID → whether the caller satisfies it. */
+            policies: {
+                [key: string]: boolean;
+            };
+        };
         /** @description Data for reason.completed event */
         ReasonCompletedData: {
             /**
@@ -11303,6 +12473,20 @@ export interface components {
              */
             api_key: string;
             /** @description The updated A2A channel. */
+            channel: components["schemas"]["AppChannel"];
+        };
+        /**
+         * @description Output of [`RegenerateApiEndpointApiKeyCmd`] — includes the newly generated
+         *     plaintext API key (returned **once**, never persisted) plus the updated
+         *     [`AppChannel`].
+         */
+        RegenerateApiEndpointApiKeyOutput: {
+            /**
+             * @description New plaintext API key. Persist this — it cannot be recovered later.
+             *     The previous key is invalidated immediately.
+             */
+            api_key: string;
+            /** @description The updated api_endpoint channel. */
             channel: components["schemas"]["AppChannel"];
         };
         /**
@@ -12154,6 +13338,19 @@ export interface components {
              */
             finished_at?: string | null;
             /**
+             * Format: int32
+             * @description Parent event sequence the fork was taken at (the fork point). NULL unless
+             *     this session is a fork.
+             * @example 42
+             */
+            forked_from_sequence?: number | null;
+            /**
+             * @description Session this one was forked from. NULL for sessions that were not forked.
+             *     Distinct from `parent_session_id` (subagent nesting): forking is a
+             *     user-initiated "branch from here" relationship.
+             */
+            forked_from_session_id?: string | null;
+            /**
              * @description ID of the harness for this session (format: harness_{32-hex}).
              * @example harness_01933b5a00007000800000000000001
              */
@@ -12220,8 +13417,18 @@ export interface components {
              */
             owner_principal_id: string;
             /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
+            /**
              * @description Parent session that spawned this subagent. NULL for top-level sessions.
-             *     Used as the nesting guard in spawn_subagent.
+             *     Used to compute governed subagent delegation depth.
              */
             parent_session_id?: string | null;
             /**
@@ -12373,6 +13580,11 @@ export interface components {
             turn_id: string;
             usage?: null | components["schemas"]["TokenUsage"];
         };
+        SessionRef: {
+            created_session?: boolean | null;
+            session_id: string;
+            status: string;
+        };
         /** @description A resource registered in the session resource registry. */
         SessionResourceEntry: {
             /** Format: date-time */
@@ -12456,15 +13668,11 @@ export interface components {
              */
             waiting_for_tool_results: number;
         };
-        /**
-         * @description Session execution status.
-         *     - `started`: Session just created, no turn executed yet
-         *     - `active`: A turn is currently running
-         *     - `idle`: Turn completed, session waiting for next input
-         *     - `paused`: Budget limit reached, waiting for user to increase limit or resume
-         * @enum {string}
-         */
-        SessionStatus: "started" | "active" | "idle" | "waitingfortoolresults" | "paused";
+        SessionStatus: {
+            messages: components["schemas"]["AgentMessage"][];
+            session_id: string;
+            status: string;
+        };
         /** @description A unit of background work owned by a session. */
         SessionTask: {
             artifacts?: components["schemas"]["TaskArtifact"][];
@@ -12662,21 +13870,6 @@ export interface components {
         };
         StatRequest: {
             path: string;
-        };
-        /** @description Data for subagent lifecycle events (spawned, completed, failed, cancelled). */
-        SubagentEventData: {
-            /** @description Error message (only for failed) */
-            error?: string | null;
-            /** @description Result summary (only for completed/failed) */
-            result?: string | null;
-            /** @description Subagent status (spawning, running, completed, failed, cancelled) */
-            status: string;
-            /** @description Human-readable subagent name */
-            subagent_name: string;
-            /** @description The subagent's child session ID */
-            subagent_session_id: string;
-            /** @description Task description */
-            task: string;
         };
         /** @description Request to submit client-side tool results */
         SubmitToolResultsRequest: {
@@ -12902,11 +14095,30 @@ export interface components {
         /**
          * @description Token usage statistics
          *
-         *     Tracks token consumption per LLM call including cache tokens for cost optimization.
-         *     Cache tokens are provider-specific:
-         *     - OpenAI: `cache_read_tokens` from prompt_tokens_details.cached_tokens
-         *     - Anthropic: `cache_read_tokens` from cache_read_input_tokens,
-         *       `cache_creation_tokens` from cache_creation_input_tokens
+         *     Tracks token consumption per LLM call including cache tokens for cost
+         *     optimization.
+         *
+         *     # Disjoint bucket convention
+         *
+         *     Prompt token buckets are **disjoint** (non-overlapping). Drivers normalize
+         *     provider wire formats at the boundary so this holds for every provider:
+         *
+         *     ```text
+         *     total_prompt = input_tokens + cache_read_tokens + cache_creation_tokens
+         *     ```
+         *
+         *     - `input_tokens` — non-cached prompt tokens only.
+         *     - `cache_read_tokens` — tokens served from cache, never counted in
+         *       `input_tokens`.
+         *     - `cache_creation_tokens` — tokens written to cache, never counted in
+         *       `input_tokens`.
+         *
+         *     Inclusive providers (OpenAI Responses / Chat Completions, Gemini) report a
+         *     prompt count that *includes* cached reads; their drivers subtract the cached
+         *     subset so the value stored here is the non-cached remainder. Anthropic /
+         *     Bedrock already report disjoint buckets. Cost is therefore uniform across
+         *     providers (`input·in + cache_read·cr + cache_creation·cw + output·out`);
+         *     consumers must not re-derive a non-cached input by subtracting cache reads.
          */
         TokenUsage: {
             /**
@@ -12918,14 +14130,20 @@ export interface components {
             actual_cost_usd?: number | null;
             /**
              * Format: int32
-             * @description Number of tokens written to cache (Anthropic-specific)
+             * @description Number of tokens written to cache, disjoint from `input_tokens`
              */
             cache_creation_tokens?: number | null;
             /**
              * Format: int32
-             * @description Number of tokens read from cache (reduces cost)
+             * @description Number of tokens read from cache (reduces cost), disjoint from `input_tokens`
              */
             cache_read_tokens?: number | null;
+            /**
+             * Format: double
+             * @description Best-effort USD cost for already-aggregated usage. Per-generation usage
+             *     leaves this unset and derives the effective cost from actual/estimated.
+             */
+            effective_cost_usd?: number | null;
             /**
              * Format: double
              * @description Estimated cost of this generation in USD, derived from the model's static
@@ -12936,7 +14154,8 @@ export interface components {
             estimated_cost_usd?: number | null;
             /**
              * Format: int32
-             * @description Number of input/prompt tokens
+             * @description Number of non-cached prompt tokens (cached reads/writes are tracked
+             *     separately; see the disjoint bucket convention on the struct)
              */
             input_tokens: number;
             /**
@@ -12959,6 +14178,26 @@ export interface components {
             arguments: unknown;
             id: string;
             name: string;
+        };
+        /**
+         * @description Data for the `tool.call_repaired` event (EVE-600).
+         *
+         *     Emitted once per malformed tool call handled by the opt-in
+         *     `tool_call_repair` capability. `outcome` is the stable label
+         *     (`local-salvage` | `re-prompt` | `gave-up`).
+         */
+        ToolCallRepairedData: {
+            /** @description Stable outcome label: `local-salvage`, `re-prompt`, or `gave-up`. */
+            outcome: string;
+            /** @description The tool call ID that was inspected/repaired. */
+            tool_call_id: string;
+            /** @description The tool name the malformed call targeted. */
+            tool_name: string;
+            /**
+             * @description Turn this repair belongs to.
+             * @example turn_01933b5a00007000800000000000001
+             */
+            turn_id: string;
         };
         /**
          * @description Data for tool.call_requested event
@@ -13301,6 +14540,34 @@ export interface components {
              */
             turn_id: string;
         };
+        /**
+         * @description Data for turn.sealed event (EVE-534).
+         *
+         *     A sealed turn was deliberately stopped to prevent waste. It is observably
+         *     distinct from `turn.completed` (success) and `turn.failed` (error). The
+         *     `reason` is the stable wire form of `everruns_core::turn::SealReason`
+         *     (`"no_progress"` or `"budget"`).
+         */
+        TurnSealedData: {
+            /** @description Human-readable detail for operators (optional). */
+            detail?: string | null;
+            /**
+             * Format: int32
+             * @description Iterations completed before the turn was sealed (if known).
+             */
+            iterations?: number | null;
+            /**
+             * @description Why the turn was sealed: `"no_progress"` (crash-loop with no forward
+             *     progress) or `"budget"` (work budget exhausted).
+             */
+            reason: string;
+            /**
+             * @description Turn identifier
+             * @example turn_01933b5a00007000800000000000001
+             */
+            turn_id: string;
+            usage?: null | components["schemas"]["TokenUsage"];
+        };
         /** @description Data for turn.started event */
         TurnStartedData: {
             /** @description Input message content (for observability) */
@@ -13349,6 +14616,16 @@ export interface components {
              */
             display_name?: string | null;
             /**
+             * @description Harness ID used as this agent's base execution environment. Omit to leave unchanged.
+             * @example harness_01933b5a00007000800000000000001
+             */
+            harness_id?: string | null;
+            /**
+             * @description Addressable harness name. Alternative to `harness_id`; omit to leave unchanged.
+             * @example generic
+             */
+            harness_name?: string | null;
+            /**
              * @description Starter files copied into each new session for this agent.
              * @example [
              *       {
@@ -13370,6 +14647,14 @@ export interface components {
              */
             name?: string | null;
             network_access?: null | components["schemas"]["NetworkAccessList"];
+            /**
+             * @description Request-level parallel tool calling preference (EVE-598). `true` signals
+             *     the provider that parallel tool calls are wanted; `false` requests at
+             *     most one tool call per turn and forces serial execution. Omit to leave
+             *     unchanged.
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
             status?: null | components["schemas"]["AgentStatus"];
             /**
              * @description The system prompt that defines the agent's behavior and capabilities.
@@ -13534,6 +14819,11 @@ export interface components {
              */
             tags?: string[] | null;
         };
+        /** @description Request body for updating an installed plugin (status only; use POST .../update for recompile). */
+        UpdateInstalledPluginRequest: {
+            /** @description New lifecycle status: `active` or `disabled`. */
+            status?: string | null;
+        };
         /** @description Request body for the `update_knowledge_base` operation. */
         UpdateKnowledgeBaseRequest: {
             /** @description Human-readable description. Safe to render in user-facing messages. */
@@ -13559,6 +14849,8 @@ export interface components {
              * @example runbook
              */
             kind?: string | null;
+            /** @description Optional OKF resource URI. Set to null to clear. */
+            resource?: string | null;
             /**
              * @description Free-form tags attached to this resource.
              * @example [
@@ -13573,6 +14865,20 @@ export interface components {
              * @example Refund a payment past 60 days
              */
             title?: string | null;
+        };
+        /** @description Request body for the `update_knowledge_index` operation. */
+        UpdateKnowledgeIndexRequest: {
+            /** @description Human-readable description. Set to null to clear. */
+            description?: string | null;
+            /** @description Embedding model used to embed chunks. Required; cannot be cleared. */
+            embedding_model_id?: string | null;
+            /**
+             * @description Human-readable name. Safe to render in user-facing messages.
+             * @example product-docs-v2
+             */
+            name?: string | null;
+            /** @description Non-secret source coordinates. Never include credentials. */
+            source_config?: unknown;
         };
         /** @description Request to update an MCP server. Only provided fields will be updated. */
         UpdateMcpServerRequest: {
@@ -13601,6 +14907,7 @@ export interface components {
              * @example updated-mcp-server
              */
             name?: string | null;
+            protocol_mode?: null | components["schemas"]["McpProtocolMode"];
             status?: null | components["schemas"]["McpServerStatus"];
             transport_type?: null | components["schemas"]["McpServerTransportType"];
             /**
@@ -13690,6 +14997,16 @@ export interface components {
              * @example model_01933b5a00007000800000000000001
              */
             default_model_id?: string | null;
+            /**
+             * @description Org-level default provider per service (EVE-569). Maps a service kind
+             *     (`chat`, `embeddings`, `realtime`, `images`, `rerank`) to the provider id
+             *     used as that service's default, consulted after an explicit binding and
+             *     before the single-active-provider fallback. When present it **replaces**
+             *     the whole map; each referenced provider must exist in the org.
+             */
+            default_provider_per_service?: {
+                [key: string]: string;
+            } | null;
             /**
              * @description The display name of the organization.
              * @example Acme Corporation
@@ -13781,6 +15098,11 @@ export interface components {
              */
             status?: string | null;
         };
+        /** @description Request body for updating a plugin marketplace. */
+        UpdatePluginMarketplaceRequest: {
+            name?: string | null;
+            status?: string | null;
+        };
         /** @description Request to update current user's profile */
         UpdateProfileRequest: {
             /**
@@ -13794,6 +15116,9 @@ export interface components {
             /**
              * @description API key for authenticating with the provider.
              *     Will be encrypted at rest if encryption is configured.
+             *
+             *     Single-field convenience for simple providers and programmatic clients.
+             *     Multi-field drivers (Bedrock, MAI) should send `credentials` instead.
              */
             api_key?: string | null;
             /**
@@ -13802,12 +15127,21 @@ export interface components {
              */
             base_url?: string | null;
             /**
+             * @description Typed credential fields keyed by the driver's declared credential-schema
+             *     field names. Validated against the schema and assembled into the stored
+             *     credential document. Takes precedence over `api_key` when present.
+             */
+            credentials?: {
+                [key: string]: string;
+            } | null;
+            /**
              * @description Display name for the provider.
              * @example OpenAI Development
              */
             name?: string | null;
             provider_type?: null | components["schemas"]["DriverId"];
             status?: null | components["schemas"]["ProviderStatus"];
+            trace?: null | components["schemas"]["ProviderTraceConfig"];
         };
         /** @description Request body for the `update_saved_report` operation. */
         UpdateSavedReportRequest: {
@@ -14088,6 +15422,16 @@ export interface components {
              */
             model?: string | null;
             /**
+             * @description Realtime provider binding: the prefixed public id of the provider
+             *     connection to route this voice connection through (e.g. `prov_…`). Lets
+             *     an org with more than one realtime-capable provider pick which one serves
+             *     the connection. When omitted, the server resolves the org's default (or
+             *     single) realtime provider. The bound provider's driver MUST declare the
+             *     realtime service, otherwise the request is rejected with 400.
+             * @example prov_01h…
+             */
+            provider_id?: string | null;
+            /**
              * @description Reasoning effort hint passed through to the realtime model. One of `low`, `medium`, `high`.
              *     When omitted the server picks the provider's default.
              * @example medium
@@ -14250,6 +15594,11 @@ export interface components {
              */
             forked_from_version_id?: string | null;
             /**
+             * @description Harness that supplies the base execution environment for this agent.
+             * @example harness_01933b5a00007000800000000000001
+             */
+            harness_id: string;
+            /**
              * @description External identifier (agent_<32-hex>). Shown as "id" in API.
              *     Client-supplied or auto-generated.
              * @example agent_01933b5a000070008000000000000001
@@ -14270,6 +15619,16 @@ export interface components {
              */
             name: string;
             network_access?: null | components["schemas"]["NetworkAccessList"];
+            /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
             /**
              * @description Root agent lineage identifier for grouping fork families.
              * @example agent_01933b5a00007000800000000000001
@@ -14715,6 +16074,16 @@ export interface components {
             name: string;
             network_access?: null | components["schemas"]["NetworkAccessList"];
             /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
+            /**
              * @description Optional parent harness that this harness inherits from.
              * @example harness_01933b5a000070008000000000000602
              */
@@ -14723,10 +16092,15 @@ export interface components {
             status: components["schemas"]["HarnessStatus"];
             /**
              * @description System prompt that defines the harness's base behavior.
-             *     Forms the foundation of the prompt stack.
+             *
+             *     Forms the foundation of the prompt stack. Optional: when absent the
+             *     harness contributes no base prompt, so the effective prompt comes
+             *     entirely from the parent harness (if any), the agent, the session, and
+             *     capability contributions. Empty/whitespace-only values normalize to
+             *     `None`.
              * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
              */
-            system_prompt: string;
+            system_prompt?: string | null;
             /**
              * @description Tags for organizing and filtering harnesses.
              * @example [
@@ -14809,6 +16183,8 @@ export interface components {
             name: string;
             /** @description Stable provider id used for user-scoped OAuth connections. */
             oauth_provider_id?: string | null;
+            /** @description Protocol-era adoption policy for the MCP client (`auto` negotiates). */
+            protocol_mode?: components["schemas"]["McpProtocolMode"];
             /** @description Current lifecycle status of the MCP server. */
             status: components["schemas"]["McpServerStatus"];
             /** @description Transport type (currently only HTTP supported). */
@@ -15025,6 +16401,7 @@ export interface components {
             provider_type: components["schemas"]["DriverId"];
             /** @description Current lifecycle status of this provider. */
             status: components["schemas"]["ProviderStatus"];
+            trace?: null | components["schemas"]["ProviderTraceConfig"];
             /**
              * Format: date-time
              * @description Timestamp when this provider was last updated (RFC 3339).
@@ -15111,6 +16488,11 @@ export interface components {
              */
             forked_from_version_id?: string | null;
             /**
+             * @description Harness that supplies the base execution environment for this agent.
+             * @example harness_01933b5a00007000800000000000001
+             */
+            harness_id: string;
+            /**
              * @description External identifier (agent_<32-hex>). Shown as "id" in API.
              *     Client-supplied or auto-generated.
              * @example agent_01933b5a000070008000000000000001
@@ -15131,6 +16513,16 @@ export interface components {
              */
             name: string;
             network_access?: null | components["schemas"]["NetworkAccessList"];
+            /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
             /**
              * @description Root agent lineage identifier for grouping fork families.
              * @example agent_01933b5a00007000800000000000001
@@ -15270,6 +16662,16 @@ export interface components {
             name: string;
             network_access?: null | components["schemas"]["NetworkAccessList"];
             /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
+            /**
              * @description Optional parent harness that this harness inherits from.
              * @example harness_01933b5a000070008000000000000602
              */
@@ -15278,10 +16680,15 @@ export interface components {
             status: components["schemas"]["HarnessStatus"];
             /**
              * @description System prompt that defines the harness's base behavior.
-             *     Forms the foundation of the prompt stack.
+             *
+             *     Forms the foundation of the prompt stack. Optional: when absent the
+             *     harness contributes no base prompt, so the effective prompt comes
+             *     entirely from the parent harness (if any), the agent, the session, and
+             *     capability contributions. Empty/whitespace-only values normalize to
+             *     `None`.
              * @example You are an Everruns agent. Be concise, cite sources when possible, and decline tasks outside your assigned scope.
              */
-            system_prompt: string;
+            system_prompt?: string | null;
             /**
              * @description Tags for organizing and filtering harnesses.
              * @example [
@@ -15395,6 +16802,19 @@ export interface components {
              */
             finished_at?: string | null;
             /**
+             * Format: int32
+             * @description Parent event sequence the fork was taken at (the fork point). NULL unless
+             *     this session is a fork.
+             * @example 42
+             */
+            forked_from_sequence?: number | null;
+            /**
+             * @description Session this one was forked from. NULL for sessions that were not forked.
+             *     Distinct from `parent_session_id` (subagent nesting): forking is a
+             *     user-initiated "branch from here" relationship.
+             */
+            forked_from_session_id?: string | null;
+            /**
              * @description ID of the harness for this session (format: harness_{32-hex}).
              * @example harness_01933b5a00007000800000000000001
              */
@@ -15461,8 +16881,18 @@ export interface components {
              */
             owner_principal_id: string;
             /**
+             * @description Request-level parallel tool calling preference (EVE-598).
+             *
+             *     `None` (default) preserves provider defaults. `Some(true)` signals the
+             *     provider that parallel tool calls are wanted; `Some(false)` requests at
+             *     most one tool call per turn and forces serial execution. Merged across
+             *     harness/agent/session layers (overlay wins).
+             * @example true
+             */
+            parallel_tool_calls?: boolean | null;
+            /**
              * @description Parent session that spawned this subagent. NULL for top-level sessions.
-             *     Used as the nesting guard in spawn_subagent.
+             *     Used to compute governed subagent delegation depth.
              */
             parent_session_id?: string | null;
             /**
@@ -16518,6 +17948,38 @@ export interface operations {
             };
         };
     };
+    get_latest_health_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent ID */
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Latest health check run with stale-config flag */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LatestHealthCheckRun"];
+                };
+            };
+            /** @description Agent not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     get_health_check: {
         parameters: {
             query?: never;
@@ -17261,16 +18723,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description App is not published or channel disabled */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description App or channel not found */
+            /** @description App or channel not found, not published, or channel disabled (collapsed to a single generic 404 to prevent app-existence enumeration) */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17313,6 +18766,388 @@ export interface operations {
             };
             /** @description App or channel not found / unpublished / disabled */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    add_api_endpoint_channel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description App ID */
+                app_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddApiEndpointChannelHttpRequest"];
+            };
+        };
+        responses: {
+            /** @description api_endpoint channel created. The `api_key` field is the plaintext key returned exactly once and never recoverable later. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddApiEndpointChannelOutput"];
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description App not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    regenerate_api_endpoint_key: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description App ID */
+                app_id: string;
+                /** @description api_endpoint channel ID */
+                channel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description API key rotated. The `api_key` field is the new plaintext key returned exactly once; the previous key is invalidated immediately. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegenerateApiEndpointApiKeyOutput"];
+                };
+            };
+            /** @description Invalid app/channel ID or channel is not an api_endpoint channel */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description App or api_endpoint channel not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description App ID */
+                app_id: string;
+                /** @description api_endpoint channel ID */
+                channel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageBody"];
+            };
+        };
+        responses: {
+            /** @description Session created and message dispatched */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionRef"];
+                };
+            };
+            /** @description Missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description App not published or channel disabled */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description App or channel not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Per-channel rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description App ID */
+                app_id: string;
+                /** @description api_endpoint channel ID */
+                channel_id: string;
+                /** @description Session ID */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Derived status and the agent's completed messages (no raw tool detail) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionStatus"];
+                };
+            };
+            /** @description Missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description App not published or channel disabled */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Channel or session not found / not owned by this channel */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Per-channel rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    cancel_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description App ID */
+                app_id: string;
+                /** @description api_endpoint channel ID */
+                channel_id: string;
+                /** @description Session ID */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description In-flight turn canceled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionRef"];
+                };
+            };
+            /** @description Missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description App not published or channel disabled */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Channel or session not found / not owned by this channel */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Per-channel rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    post_message: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description App ID */
+                app_id: string;
+                /** @description api_endpoint channel ID */
+                channel_id: string;
+                /** @description Session ID */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageBody"];
+            };
+        };
+        responses: {
+            /** @description Follow-up message dispatched */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionRef"];
+                };
+            };
+            /** @description Missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description App not published or channel disabled */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Channel or session not found / not owned by this channel */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Per-channel rate limit exceeded */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -17651,16 +19486,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description App is not published or channel disabled */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description App or channel not found */
+            /** @description App or channel not found, not published, or channel disabled (collapsed to a single generic 404 to prevent app-existence enumeration) */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20464,6 +22290,339 @@ export interface operations {
             };
         };
     };
+    export_okf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Knowledge base ID */
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OKF bundle (.tar.gz) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/gzip": unknown;
+                };
+            };
+            /** @description Knowledge base not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    import_okf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Knowledge base ID */
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportOkfBundleRequest"];
+            };
+        };
+        responses: {
+            /** @description Import summary */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkfImportSummary"];
+                };
+            };
+            /** @description Invalid bundle or input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Knowledge base not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_indexes: {
+        parameters: {
+            query?: {
+                /** @description Substring filter applied to index name and description. */
+                search?: string | null;
+                /** @description When `true`, also returns archived knowledge indexes. */
+                include_archived?: boolean | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List knowledge indexes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListResponse_KnowledgeIndexResponse"];
+                };
+            };
+        };
+    };
+    create_index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateKnowledgeIndexRequest"];
+            };
+        };
+        responses: {
+            /** @description Knowledge index created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeIndexResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Duplicate knowledge index name */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Knowledge index ID */
+                index_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Knowledge index found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeIndexResponse"];
+                };
+            };
+            /** @description Knowledge index not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    delete_index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Knowledge index ID */
+                index_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Knowledge index archived */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Knowledge index not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Knowledge index ID */
+                index_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateKnowledgeIndexRequest"];
+            };
+        };
+        responses: {
+            /** @description Knowledge index updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeIndexResponse"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Knowledge index not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Duplicate knowledge index name */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_documents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Knowledge index ID */
+                index_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List documents */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListResponse_KnowledgeIndexDocumentResponse"];
+                };
+            };
+            /** @description Knowledge index not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    sync_index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Knowledge index ID */
+                index_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync enqueued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeIndexResponse"];
+                };
+            };
+            /** @description Knowledge index is archived */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Knowledge index not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     list_mcp_servers: {
         parameters: {
             query?: {
@@ -21567,7 +23726,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FeatureFlags"];
+                    "application/json": components["schemas"]["FeatureFlagMap"];
                 };
             };
             /** @description Organization not found */
@@ -21603,7 +23762,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FeatureFlags"];
+                    "application/json": components["schemas"]["FeatureFlagMap"];
                 };
             };
             /** @description Invalid flag */
@@ -21654,6 +23813,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgFeatureFlagsSettingsResponse"];
+                };
+            };
+            /** @description Organization not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    complete_org_onboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Organization public ID */
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Onboarding marked complete */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationResponse"];
+                };
+            };
+            /** @description Not an admin of the organization */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Organization not found */
@@ -22024,6 +24224,568 @@ export interface operations {
             };
         };
     };
+    list_plugin_marketplaces: {
+        parameters: {
+            query?: {
+                /** @description Search by name (case-insensitive substring match). */
+                search?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of plugin marketplaces */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_plugin_marketplace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePluginMarketplaceRequest"];
+            };
+        };
+        responses: {
+            /** @description Marketplace created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_plugin_marketplace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Marketplace ID (plgmkt_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marketplace found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    delete_plugin_marketplace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Marketplace ID (plgmkt_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marketplace deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_plugin_marketplace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Marketplace ID (plgmkt_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePluginMarketplaceRequest"];
+            };
+        };
+        responses: {
+            /** @description Marketplace updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_marketplace_catalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Marketplace ID (plgmkt_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalog entries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Marketplace not yet synced */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    sync_plugin_marketplace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Marketplace ID (plgmkt_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marketplace synced */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sync not supported or source error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_plugins: {
+        parameters: {
+            query?: {
+                /** @description Search by name (case-insensitive substring match). */
+                search?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of installed plugins */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    install_plugin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InstallPluginRequest"];
+            };
+        };
+        responses: {
+            /** @description Plugin installed */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Compilation or source error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Plugin already installed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_plugin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plugin install ID (plugin_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Installed plugin */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    uninstall_plugin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plugin install ID (plugin_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Plugin uninstalled */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    patch_installed_plugin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plugin install ID (plugin_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInstalledPluginRequest"];
+            };
+        };
+        responses: {
+            /** @description Plugin updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_plugin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plugin install ID (plugin_...) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Plugin updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No marketplace or source error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     list_providers: {
         parameters: {
             query?: never;
@@ -22091,13 +24853,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Resource config for LLM providers */
+            /** @description Resource config for providers */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ResourceConfigResponse"];
+                    "application/json": components["schemas"]["ProvidersConfigResponse"];
                 };
             };
         };
@@ -23018,6 +25780,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Platform Chat feature (global_chat) is disabled for the org */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Internal server error */
             500: {
                 headers: {
@@ -23048,6 +25817,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["VoiceSessionResponse_VoiceCallResponse"];
                 };
+            };
+            /** @description Platform Chat (global_chat) or voice feature is disabled for the org */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -23622,7 +26398,14 @@ export interface operations {
     };
     export_session_jsonl: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Output format: jsonl (default) or atif */
+                format?: string;
+                /** @description ATIF only: return byte-bounded segments linked by continued_trajectory_ref instead of one document */
+                segmented?: boolean;
+                /** @description ATIF segmented export: opaque continuation cursor from the previous segment */
+                cursor?: string;
+            };
             header?: never;
             path: {
                 /** @description Session ID (prefixed, e.g., session_...) */
@@ -23632,7 +26415,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description JSONL file with one message per line */
+            /** @description JSONL file with one message per line, or one ATIF trajectory JSON document (with X-Atif-Images-Omitted header when image parts were flattened to markers). With segmented=true, one ATIF segment linked forward by continued_trajectory_ref. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -23641,7 +26424,7 @@ export interface operations {
                     "application/x-ndjson": unknown;
                 };
             };
-            /** @description Invalid ID format */
+            /** @description Invalid ID format, or malformed/foreign segmented-export cursor */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -23661,6 +26444,75 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description ATIF document exceeds the 50 MiB export cap; retry with segmented=true for a recoverable chunked export */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    fork_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Session to fork */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                /**
+                 * @example {
+                 *       "tags": [
+                 *         "experiment"
+                 *       ],
+                 *       "title": "Branch: try the async rewrite"
+                 *     }
+                 */
+                "application/json": components["schemas"]["ForkSessionRequest"];
+            };
+        };
+        responses: {
+            /** @description Fork created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WithUrls_Session"];
+                };
+            };
+            /** @description Parent session, agent, or harness not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Parent session is mid-turn and cannot be forked */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
             /** @description Internal server error */
             500: {
@@ -25220,6 +28072,37 @@ export interface operations {
             };
         };
     };
+    list_org_tasks: {
+        parameters: {
+            query?: {
+                /** @description Filter by state */
+                state?: string;
+                /** @description Filter by kind */
+                kind?: string;
+                /** @description Only tasks created at/after this RFC3339 timestamp */
+                created_after?: string;
+                /** @description Only tasks whose owning session's delegation-tree root is this session */
+                root_session_id?: string;
+                /** @description Max tasks, newest first (default 100, max 500) */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Org tasks */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionTask"][];
+                };
+            };
+        };
+    };
     list_users: {
         parameters: {
             query?: {
@@ -25833,6 +28716,59 @@ export interface operations {
             };
             /** @description Destination exists */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    preview_path: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Workspace ID (wsp_<32-hex>) */
+                workspace_id: string;
+                /** @description HTML file path. Wildcard route: nested paths are literal `/`-separated segments, not a single URL-encoded value. */
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sandboxed HTML document */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": unknown;
+                };
+            };
+            /** @description Path points to a directory */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File is not an HTML document */
+            415: {
                 headers: {
                     [name: string]: unknown;
                 };
