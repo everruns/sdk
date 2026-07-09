@@ -648,6 +648,123 @@ fn test_create_agent_request_without_display_name() {
     assert!(raw.get("display_name").is_none());
 }
 
+/// Test CreateAgentRequest serialization with harness_id and parallel_tool_calls
+#[test]
+fn test_create_agent_request_with_harness_id_and_parallel_tool_calls() {
+    let req = CreateAgentRequest::new("customer-support", "You are helpful.")
+        .harness_id("harness_abc123")
+        .parallel_tool_calls(true);
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["harness_id"], "harness_abc123");
+    assert_eq!(raw["parallel_tool_calls"], true);
+    assert!(raw.get("harness_name").is_none());
+}
+
+/// Test CreateAgentRequest serialization with harness_name
+#[test]
+fn test_create_agent_request_with_harness_name() {
+    let req = CreateAgentRequest::new("customer-support", "You are helpful.")
+        .harness_name("deep-research");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["harness_name"], "deep-research");
+    assert!(raw.get("harness_id").is_none());
+}
+
+/// Test CreateAgentRequest omits harness/parallel fields when unset
+#[test]
+fn test_create_agent_request_omits_harness_and_parallel_when_unset() {
+    let req = CreateAgentRequest::new("customer-support", "You are helpful.");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert!(raw.get("harness_id").is_none());
+    assert!(raw.get("harness_name").is_none());
+    assert!(raw.get("parallel_tool_calls").is_none());
+}
+
+/// Test CreateSessionRequest serialization with agent_name and parallel_tool_calls
+#[test]
+fn test_create_session_request_with_agent_name_and_parallel_tool_calls() {
+    let req = CreateSessionRequest::new()
+        .agent_name("customer-support")
+        .parallel_tool_calls(false);
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["agent_name"], "customer-support");
+    assert_eq!(raw["parallel_tool_calls"], false);
+    assert!(raw.get("agent_id").is_none());
+}
+
+/// Test CreateSessionRequest without agent_name omits it
+#[test]
+fn test_create_session_request_without_agent_name() {
+    let req = CreateSessionRequest::new().agent_id("agent_abc123");
+    let serialized = serde_json::to_string(&req).expect("should serialize");
+    let raw: serde_json::Value = serde_json::from_str(&serialized).unwrap();
+    assert_eq!(raw["agent_id"], "agent_abc123");
+    assert!(raw.get("agent_name").is_none());
+    assert!(raw.get("parallel_tool_calls").is_none());
+}
+
+/// Test Session deserializes forward-compat fields (parallel_tool_calls, fork lineage)
+#[test]
+fn test_session_deserializes_fork_and_parallel_fields() {
+    let json = r#"{
+        "id": "session_123",
+        "organization_id": "org_123",
+        "harness_id": "harness_123",
+        "status": "started",
+        "created_at": "2026-03-13T00:00:00Z",
+        "updated_at": "2026-03-13T00:00:00Z",
+        "parallel_tool_calls": true,
+        "forked_from_session_id": "session_parent",
+        "forked_from_sequence": 7
+    }"#;
+    let session: Session = serde_json::from_str(json).expect("Session should deserialize");
+    assert_eq!(session.parallel_tool_calls, Some(true));
+    assert_eq!(
+        session.forked_from_session_id.as_deref(),
+        Some("session_parent")
+    );
+    assert_eq!(session.forked_from_sequence, Some(7));
+}
+
+/// Test Session tolerates missing forward-compat fields
+#[test]
+fn test_session_deserializes_without_optional_fields() {
+    let json = r#"{
+        "id": "session_123",
+        "organization_id": "org_123",
+        "harness_id": "harness_123",
+        "status": "started",
+        "created_at": "2026-03-13T00:00:00Z",
+        "updated_at": "2026-03-13T00:00:00Z"
+    }"#;
+    let session: Session = serde_json::from_str(json).expect("Session should deserialize");
+    assert_eq!(session.parallel_tool_calls, None);
+    assert_eq!(session.forked_from_session_id, None);
+    assert_eq!(session.forked_from_sequence, None);
+}
+
+/// Test Agent deserializes harness_id and parallel_tool_calls
+#[test]
+fn test_agent_deserializes_harness_and_parallel_fields() {
+    let json = r#"{
+        "id": "agent_123",
+        "name": "customer-support",
+        "system_prompt": "You are helpful.",
+        "harness_id": "harness_abc123",
+        "parallel_tool_calls": false,
+        "status": "active",
+        "created_at": "2026-03-13T00:00:00Z",
+        "updated_at": "2026-03-13T00:00:00Z"
+    }"#;
+    let agent: Agent = serde_json::from_str(json).expect("Agent should deserialize");
+    assert_eq!(agent.harness_id, "harness_abc123");
+    assert_eq!(agent.parallel_tool_calls, Some(false));
+}
+
 /// Test that Event serialization preserves the "type" field name (not "event_type")
 #[test]
 fn test_event_type_field_rename() {

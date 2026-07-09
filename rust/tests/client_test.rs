@@ -383,6 +383,164 @@ async fn test_agent_versions_methods() {
 }
 
 #[tokio::test]
+async fn test_create_agent_rejects_both_harness_id_and_harness_name() {
+    let client = Everruns::new("evr_test_key").expect("client");
+    let result = client
+        .agents()
+        .create_with_options(
+            CreateAgentRequest::new("customer-support", "You are helpful.")
+                .harness_id("harness_abc123")
+                .harness_name("deep-research"),
+        )
+        .await;
+
+    let err = result.expect_err("should reject conflicting harness fields");
+    assert!(
+        err.to_string()
+            .contains("Cannot specify both harness_id and harness_name")
+    );
+}
+
+#[tokio::test]
+async fn test_apply_agent_rejects_both_harness_id_and_harness_name() {
+    let client = Everruns::new("evr_test_key").expect("client");
+    let result = client
+        .agents()
+        .apply_with_options(
+            "agent_123",
+            CreateAgentRequest::new("customer-support", "You are helpful.")
+                .harness_id("harness_abc123")
+                .harness_name("deep-research"),
+        )
+        .await;
+
+    let err = result.expect_err("should reject conflicting harness fields");
+    assert!(
+        err.to_string()
+            .contains("Cannot specify both harness_id and harness_name")
+    );
+}
+
+#[tokio::test]
+async fn test_create_agent_rejects_invalid_harness_name() {
+    let client = Everruns::new("evr_test_key").expect("client");
+    let result = client
+        .agents()
+        .create_with_options(
+            CreateAgentRequest::new("customer-support", "You are helpful.")
+                .harness_name("Invalid Name"),
+        )
+        .await;
+
+    assert!(result.is_err());
+}
+
+#[tokio::test]
+async fn test_create_session_rejects_both_agent_id_and_agent_name() {
+    let client = Everruns::new("evr_test_key").expect("client");
+    let result = client
+        .sessions()
+        .create_with_options(
+            CreateSessionRequest::new()
+                .agent_id("agent_123")
+                .agent_name("customer-support"),
+        )
+        .await;
+
+    let err = result.expect_err("should reject conflicting agent fields");
+    assert!(
+        err.to_string()
+            .contains("Cannot specify both agent_id and agent_name")
+    );
+}
+
+#[tokio::test]
+async fn test_create_session_rejects_invalid_agent_name() {
+    let client = Everruns::new("evr_test_key").expect("client");
+    let result = client
+        .sessions()
+        .create_with_options(CreateSessionRequest::new().agent_name("Invalid Name"))
+        .await;
+
+    assert!(result.is_err());
+}
+
+#[tokio::test]
+async fn test_create_agent_serializes_harness_name_into_body() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/agents"))
+        .and(body_json(serde_json::json!({
+            "name": "customer-support",
+            "system_prompt": "You are helpful.",
+            "harness_name": "deep-research",
+            "parallel_tool_calls": true
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "agent_123",
+            "name": "customer-support",
+            "system_prompt": "You are helpful.",
+            "harness_id": "harness_abc123",
+            "parallel_tool_calls": true,
+            "status": "active",
+            "created_at": "2026-03-13T00:00:00Z",
+            "updated_at": "2026-03-13T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let agent = client
+        .agents()
+        .create_with_options(
+            CreateAgentRequest::new("customer-support", "You are helpful.")
+                .harness_name("deep-research")
+                .parallel_tool_calls(true),
+        )
+        .await
+        .expect("agent creation should succeed");
+
+    assert_eq!(agent.harness_id, "harness_abc123");
+    assert_eq!(agent.parallel_tool_calls, Some(true));
+}
+
+#[tokio::test]
+async fn test_create_session_serializes_agent_name_into_body() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/sessions"))
+        .and(body_json(serde_json::json!({
+            "agent_name": "customer-support",
+            "parallel_tool_calls": false
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
+            "id": "session_123",
+            "organization_id": "org_123",
+            "harness_id": "harness_123",
+            "status": "started",
+            "created_at": "2026-03-13T00:00:00Z",
+            "updated_at": "2026-03-13T00:00:00Z"
+        })))
+        .mount(&server)
+        .await;
+
+    let session = client
+        .sessions()
+        .create_with_options(
+            CreateSessionRequest::new()
+                .agent_name("customer-support")
+                .parallel_tool_calls(false),
+        )
+        .await
+        .expect("session creation should succeed");
+
+    assert_eq!(session.id, "session_123");
+}
+
+#[tokio::test]
 async fn test_fork_agent_version_validates_agent_name() {
     let client = Everruns::new("evr_test_key").expect("client");
     let result = client

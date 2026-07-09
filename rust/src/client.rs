@@ -425,6 +425,21 @@ impl Everruns {
     }
 }
 
+/// Validate harness binding on an agent create/apply request.
+///
+/// Mirrors the harness mutual-exclusion + name validation used on session create.
+fn validate_agent_harness(req: &CreateAgentRequest) -> Result<()> {
+    if req.harness_id.is_some() && req.harness_name.is_some() {
+        return Err(Error::Validation(
+            "Cannot specify both harness_id and harness_name".to_string(),
+        ));
+    }
+    if let Some(ref name) = req.harness_name {
+        validate_harness_name(name)?;
+    }
+    Ok(())
+}
+
 /// Client for agent operations
 pub struct AgentsClient<'a> {
     client: &'a Everruns,
@@ -557,6 +572,7 @@ impl<'a> AgentsClient<'a> {
     /// Create an agent with full options
     pub async fn create_with_options(&self, req: CreateAgentRequest) -> Result<Agent> {
         validate_agent_name(&req.name)?;
+        validate_agent_harness(&req)?;
         self.client.post("/agents", &req).await
     }
 
@@ -577,6 +593,7 @@ impl<'a> AgentsClient<'a> {
     /// The `id` parameter is set on the request, overriding any existing value.
     pub async fn apply_with_options(&self, id: &str, req: CreateAgentRequest) -> Result<Agent> {
         validate_agent_name(&req.name)?;
+        validate_agent_harness(&req)?;
         let req = req.id(id);
         self.client.post("/agents", &req).await
     }
@@ -594,6 +611,7 @@ impl<'a> AgentsClient<'a> {
     /// Create or update an agent by name with full options (upsert).
     pub async fn apply_by_name_with_options(&self, req: CreateAgentRequest) -> Result<Agent> {
         validate_agent_name(&req.name)?;
+        validate_agent_harness(&req)?;
         self.client.post("/agents", &req).await
     }
 
@@ -673,6 +691,14 @@ impl<'a> SessionsClient<'a> {
         }
         if let Some(ref name) = req.harness_name {
             validate_harness_name(name)?;
+        }
+        if req.agent_id.is_some() && req.agent_name.is_some() {
+            return Err(Error::Validation(
+                "Cannot specify both agent_id and agent_name".to_string(),
+            ));
+        }
+        if let Some(ref name) = req.agent_name {
+            validate_agent_name(name)?;
         }
         self.client.post("/sessions", &req).await
     }

@@ -69,10 +69,12 @@ fn test_stream_options_default_idle_timeout() {
 fn test_idle_timeout_constant_above_heartbeat_interval() {
     // Server heartbeats every 30s. Idle timeout must be above that.
     assert_eq!(DEFAULT_IDLE_TIMEOUT_SECS, 45);
-    assert!(
-        DEFAULT_IDLE_TIMEOUT_SECS > 30,
-        "idle timeout must be above heartbeat interval"
-    );
+    const {
+        assert!(
+            DEFAULT_IDLE_TIMEOUT_SECS > 30,
+            "idle timeout must be above heartbeat interval"
+        )
+    };
 }
 
 #[test]
@@ -105,11 +107,13 @@ fn test_read_timeout_above_heartbeat_interval() {
     // above that to avoid false positives, but close enough to quickly
     // detect stalled connections.
     assert_eq!(READ_TIMEOUT_SECS, 45);
-    assert!(READ_TIMEOUT_SECS > 30, "must be above heartbeat interval");
-    assert!(
-        READ_TIMEOUT_SECS < 300,
-        "must be under server cycle interval"
-    );
+    const {
+        assert!(READ_TIMEOUT_SECS > 30, "must be above heartbeat interval");
+        assert!(
+            READ_TIMEOUT_SECS < 300,
+            "must be under server cycle interval"
+        );
+    };
 }
 
 #[cfg(test)]
