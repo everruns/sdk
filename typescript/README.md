@@ -34,6 +34,22 @@ console.log(event.type, event.data);
 }
 ```
 
+## Agent Harness
+
+Each agent owns a harness. Set it on create/update with `harnessName` (preferred) or `harnessId` (mutually exclusive); omit both to default to the org's `generic` harness. A session created from the agent runs on the agent's harness.
+
+```typescript
+// Create an agent on a specific harness
+const agent = await client.agents.create({
+  name: "researcher",
+  systemPrompt: "You do deep research.",
+  harnessName: "deep-research",
+});
+
+// Agent-first session: runs on the agent's harness
+const session = await client.sessions.create({ agentName: "researcher" });
+```
+
 ## Initial Files
 
 ```typescript
