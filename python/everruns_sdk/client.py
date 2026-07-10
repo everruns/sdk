@@ -28,6 +28,7 @@ from everruns_sdk.models import (
     Controls,
     CreateAgentRequest,
     CreateAgentVersionRequest,
+    CreateHarnessRequest,
     CreateMemoryFileRequest,
     CreateMemoryRequest,
     CreateMessageRequest,
@@ -42,6 +43,9 @@ from everruns_sdk.models import (
     GuardrailExamplesResponse,
     GuardrailsDryRunRequest,
     GuardrailsDryRunResponse,
+    Harness,
+    HarnessExample,
+    HarnessStatus,
     HealthCheckRun,
     InitialFile,
     LedgerEntry,
@@ -52,6 +56,8 @@ from everruns_sdk.models import (
     MemoryGrepResult,
     Message,
     MessageInput,
+    ModelWithProvider,
+    NetworkAccessList,
     ResourceStats,
     ResumeSessionResponse,
     RollbackAgentVersionRequest,
@@ -61,6 +67,7 @@ from everruns_sdk.models import (
     SubmitToolResultsRequest,
     SubmitToolResultsResponse,
     ToolDefinition,
+    UpdateHarnessRequest,
     UpdateMemoryFileRequest,
     UpdateMemoryRequest,
     UpdateWorkspaceRequest,
@@ -178,6 +185,16 @@ class Everruns:
     def capabilities(self) -> CapabilitiesClient:
         """Get the capabilities client."""
         return CapabilitiesClient(self)
+
+    @property
+    def harnesses(self) -> "HarnessesClient":
+        """Get the harnesses client."""
+        return HarnessesClient(self)
+
+    @property
+    def models(self) -> "ModelsClient":
+        """Get the models client."""
+        return ModelsClient(self)
 
     @property
     def workspaces(self) -> "WorkspacesClient":
@@ -1647,3 +1664,153 @@ class ConnectionsClient:
             provider: Provider name (e.g. "daytona").
         """
         await self._client._delete(f"/user/connections/{provider}")
+
+
+class HarnessesClient:
+    """Client for harness operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def list(self) -> list[Harness]:
+        """List all harnesses."""
+        resp = await self._client._get("/harnesses")
+        return [Harness(**h) for h in resp.get("data", [])]
+
+    async def search(self, query: str) -> list[Harness]:
+        """List harnesses matching a search query.
+
+        Args:
+            query: Case-insensitive name/description search.
+        """
+        path = _with_query("/harnesses", {"search": query})
+        resp = await self._client._get(path)
+        return [Harness(**h) for h in resp.get("data", [])]
+
+    async def get(self, id: str) -> Harness:
+        """Get a harness by ID."""
+        resp = await self._client._get(f"/harnesses/{id}")
+        return Harness(**resp)
+
+    async def create(
+        self,
+        name: str,
+        system_prompt: str,
+        *,
+        display_name: Optional[str] = None,
+        description: Optional[str] = None,
+        default_model_id: Optional[str] = None,
+        capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        initial_files: Optional[list[InitialFile]] = None,
+        network_access: Optional[NetworkAccessList] = None,
+        parent_harness_id: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+    ) -> Harness:
+        """Create a new harness with a server-assigned ID.
+
+        Args:
+            name: Addressable name, unique per org
+                (format: ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 chars).
+            system_prompt: System prompt defining harness behavior.
+            display_name: Human-readable display name shown in UI.
+            description: Human-readable description.
+            default_model_id: Default LLM model ID.
+            capabilities: Capabilities to enable.
+            initial_files: Starter files copied into each new session for this harness.
+            network_access: Network access list controlling reachable hosts/URLs.
+            parent_harness_id: Parent harness ID to inherit configuration from.
+            tags: Tags for organizing harnesses.
+
+        Raises:
+            ValueError: If ``name`` fails validation.
+        """
+        validate_harness_name(name)
+        req = CreateHarnessRequest(
+            name=name,
+            system_prompt=system_prompt,
+            display_name=display_name,
+            description=description,
+            default_model_id=default_model_id,
+            network_access=network_access,
+            parent_harness_id=parent_harness_id,
+            capabilities=capabilities or [],
+            initial_files=initial_files or [],
+            tags=tags or [],
+        )
+        resp = await self._client._post("/harnesses", req.model_dump(exclude_none=True))
+        return Harness(**resp)
+
+    async def update(
+        self,
+        id: str,
+        *,
+        name: Optional[str] = None,
+        system_prompt: Optional[str] = None,
+        display_name: Optional[str] = None,
+        description: Optional[str] = None,
+        default_model_id: Optional[str] = None,
+        capabilities: Optional[list[AgentCapabilityConfig]] = None,
+        initial_files: Optional[list[InitialFile]] = None,
+        network_access: Optional[NetworkAccessList] = None,
+        parent_harness_id: Optional[str] = None,
+        tags: Optional[list[str]] = None,
+        status: Optional[HarnessStatus] = None,
+    ) -> Harness:
+        """Update a harness. Only provided fields are updated.
+
+        Args:
+            id: Harness ID.
+            name: Addressable name, unique per org
+                (format: ``[a-z0-9]+(-[a-z0-9]+)*``, max 64 chars).
+            system_prompt: System prompt defining harness behavior.
+            display_name: Human-readable display name shown in UI.
+            description: Human-readable description.
+            default_model_id: Default LLM model ID.
+            capabilities: Capabilities to enable.
+            initial_files: Starter files copied into each new session for this harness.
+            network_access: Network access list controlling reachable hosts/URLs.
+            parent_harness_id: Parent harness ID to inherit configuration from.
+            tags: Tags for organizing harnesses.
+            status: Harness status (``active``, ``archived``, ``deleted``).
+        """
+        req = UpdateHarnessRequest(
+            name=name,
+            system_prompt=system_prompt,
+            display_name=display_name,
+            description=description,
+            default_model_id=default_model_id,
+            capabilities=capabilities,
+            initial_files=initial_files,
+            network_access=network_access,
+            parent_harness_id=parent_harness_id,
+            tags=tags,
+            status=status,
+        )
+        resp = await self._client._patch(f"/harnesses/{id}", req.model_dump(exclude_none=True))
+        return Harness(**resp)
+
+    async def delete(self, id: str) -> None:
+        """Delete (archive) a harness."""
+        await self._client._delete(f"/harnesses/{id}")
+
+    async def list_examples(self) -> list[HarnessExample]:
+        """List built-in harness examples."""
+        resp = await self._client._get("/harness-examples")
+        return [HarnessExample(**e) for e in resp]
+
+
+class ModelsClient:
+    """Client for model operations."""
+
+    def __init__(self, client: Everruns):
+        self._client = client
+
+    async def list(self) -> list[ModelWithProvider]:
+        """List all available models."""
+        resp = await self._client._get("/models")
+        return [ModelWithProvider(**m) for m in resp.get("data", [])]
+
+    async def get(self, id: str) -> ModelWithProvider:
+        """Get a specific model by ID."""
+        resp = await self._client._get(f"/models/{id}")
+        return ModelWithProvider(**resp)

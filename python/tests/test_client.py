@@ -13,6 +13,7 @@ from everruns_sdk import (
     ContentPart,
     Everruns,
     InitialFile,
+    NetworkAccessList,
     ValidationError,
 )
 
@@ -2486,3 +2487,253 @@ def test_create_session_request_with_agent_name():
     assert data["agent_name"] == "customer-support"
     assert data["parallel_tool_calls"] is True
     assert "agent_id" not in data
+
+
+def test_harnesses_subclient():
+    """Test that harnesses sub-client is available."""
+    client = Everruns(api_key="evr_test_key")
+    assert client.harnesses is not None
+
+
+def test_models_subclient():
+    """Test that models sub-client is available."""
+    client = Everruns(api_key="evr_test_key")
+    assert client.models is not None
+
+
+_HARNESS_JSON = {
+    "id": "harness_abc123",
+    "name": "deep-research",
+    "display_name": "Deep Research",
+    "description": "Research harness",
+    "system_prompt": "You research.",
+    "status": "active",
+    "capabilities": [{"ref": "web_search"}],
+    "tags": ["research"],
+    "created_at": "2026-06-13T00:00:00Z",
+    "updated_at": "2026-06-13T00:00:00Z",
+}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_list():
+    route = respx.get("https://custom.example.com/api/v1/harnesses").mock(
+        return_value=httpx.Response(
+            200,
+            json={"data": [_HARNESS_JSON], "total": 1, "offset": 0, "limit": 0},
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        harnesses = await client.harnesses.list()
+    finally:
+        await client.close()
+
+    assert route.called
+    assert len(harnesses) == 1
+    assert harnesses[0].id == "harness_abc123"
+    assert harnesses[0].name == "deep-research"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_search():
+    route = respx.get("https://custom.example.com/api/v1/harnesses?search=research").mock(
+        return_value=httpx.Response(
+            200,
+            json={"data": [_HARNESS_JSON], "total": 1, "offset": 0, "limit": 0},
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        harnesses = await client.harnesses.search("research")
+    finally:
+        await client.close()
+
+    assert route.called
+    assert harnesses[0].name == "deep-research"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_get():
+    route = respx.get("https://custom.example.com/api/v1/harnesses/harness_abc123").mock(
+        return_value=httpx.Response(200, json=_HARNESS_JSON)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        harness = await client.harnesses.get("harness_abc123")
+    finally:
+        await client.close()
+
+    assert route.called
+    assert harness.id == "harness_abc123"
+    assert harness.status == "active"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_create():
+    route = respx.post("https://custom.example.com/api/v1/harnesses").mock(
+        return_value=httpx.Response(201, json=_HARNESS_JSON)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        harness = await client.harnesses.create(
+            "deep-research",
+            "You research.",
+            display_name="Deep Research",
+            description="Research harness",
+            capabilities=[],
+            network_access=NetworkAccessList(allowed=["example.com"]),
+            tags=["research"],
+        )
+    finally:
+        await client.close()
+
+    assert harness.id == "harness_abc123"
+    body = json.loads(route.calls.last.request.content)
+    assert body["name"] == "deep-research"
+    assert body["system_prompt"] == "You research."
+    assert body["display_name"] == "Deep Research"
+    assert body["network_access"] == {"allowed": ["example.com"], "blocked": []}
+    assert body["tags"] == ["research"]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_create_validates_name():
+    client = Everruns(api_key="evr_test_key")
+    try:
+        with pytest.raises(ValueError):
+            await client.harnesses.create("Invalid Name", "prompt")
+    finally:
+        await client.close()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_update():
+    route = respx.patch("https://custom.example.com/api/v1/harnesses/harness_abc123").mock(
+        return_value=httpx.Response(200, json=_HARNESS_JSON)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        harness = await client.harnesses.update(
+            "harness_abc123",
+            description="Updated",
+            status="archived",
+        )
+    finally:
+        await client.close()
+
+    assert harness.id == "harness_abc123"
+    body = json.loads(route.calls.last.request.content)
+    assert body == {"description": "Updated", "status": "archived"}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_delete():
+    route = respx.delete("https://custom.example.com/api/v1/harnesses/harness_abc123").mock(
+        return_value=httpx.Response(204)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        result = await client.harnesses.delete("harness_abc123")
+    finally:
+        await client.close()
+
+    assert route.called
+    assert result is None
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_harnesses_list_examples():
+    example_json = {
+        "name": "deep-research",
+        "display_name": "Deep Research",
+        "description": "Research harness",
+        "dev_only": False,
+        "capabilities": [{"ref": "web_search"}],
+        "tags": ["research"],
+    }
+    route = respx.get("https://custom.example.com/api/v1/harness-examples").mock(
+        return_value=httpx.Response(200, json=[example_json])
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        examples = await client.harnesses.list_examples()
+    finally:
+        await client.close()
+
+    assert route.called
+    assert len(examples) == 1
+    assert examples[0].name == "deep-research"
+    assert examples[0].dev_only is False
+
+
+_MODEL_JSON = {
+    "id": "model_1",
+    "model_id": "gpt-4o",
+    "display_name": "GPT-4o",
+    "capabilities": ["chat"],
+    "enabled": True,
+    "healthy": True,
+    "is_favorite": False,
+    "provider_id": "prov_1",
+    "provider_name": "OpenAI",
+    "provider_type": "openai",
+    "source": "predefined",
+    "created_at": "2026-06-13T00:00:00Z",
+    "updated_at": "2026-06-13T00:00:00Z",
+}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_models_list():
+    route = respx.get("https://custom.example.com/api/v1/models").mock(
+        return_value=httpx.Response(
+            200,
+            json={"data": [_MODEL_JSON], "total": 1, "offset": 0, "limit": 0},
+        )
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        models = await client.models.list()
+    finally:
+        await client.close()
+
+    assert route.called
+    assert len(models) == 1
+    assert models[0].id == "model_1"
+    assert models[0].model_id == "gpt-4o"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_models_get():
+    route = respx.get("https://custom.example.com/api/v1/models/model_1").mock(
+        return_value=httpx.Response(200, json=_MODEL_JSON)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        model = await client.models.get("model_1")
+    finally:
+        await client.close()
+
+    assert route.called
+    assert model.id == "model_1"
+    assert model.display_name == "GPT-4o"
