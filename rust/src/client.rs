@@ -181,6 +181,16 @@ impl Everruns {
         CapabilitiesClient { client: self }
     }
 
+    /// Get the harnesses client
+    pub fn harnesses(&self) -> HarnessesClient<'_> {
+        HarnessesClient { client: self }
+    }
+
+    /// Get the models client
+    pub fn models(&self) -> ModelsClient<'_> {
+        ModelsClient { client: self }
+    }
+
     /// Get the workspaces client
     pub fn workspaces(&self) -> WorkspacesClient<'_> {
         WorkspacesClient { client: self }
@@ -1048,6 +1058,78 @@ impl<'a> CapabilitiesClient<'a> {
         self.client
             .post("/capabilities/guardrails/dry-run", &req)
             .await
+    }
+}
+
+/// Client for harness operations
+pub struct HarnessesClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> HarnessesClient<'a> {
+    /// List all harnesses
+    pub async fn list(&self) -> Result<ListResponse<Harness>> {
+        self.client.get("/harnesses").await
+    }
+
+    /// List harnesses matching a search query (case-insensitive name/description match)
+    pub async fn search(&self, query: &str) -> Result<ListResponse<Harness>> {
+        let mut url = self.client.url("/harnesses");
+        url.query_pairs_mut().append_pair("search", query);
+        self.client.get_url(url).await
+    }
+
+    /// Get a harness by ID
+    pub async fn get(&self, id: &str) -> Result<Harness> {
+        self.client.get(&format!("/harnesses/{}", id)).await
+    }
+
+    /// Create a new harness with a server-assigned ID.
+    ///
+    /// `name` is the addressable slug, validated against
+    /// `[a-z0-9]+(-[a-z0-9]+)*`, max 64 chars.
+    pub async fn create(&self, name: &str, system_prompt: &str) -> Result<Harness> {
+        validate_harness_name(name)?;
+        let req = CreateHarnessRequest::new(name).system_prompt(system_prompt);
+        self.client.post("/harnesses", &req).await
+    }
+
+    /// Create a harness with full options
+    pub async fn create_with_options(&self, req: CreateHarnessRequest) -> Result<Harness> {
+        validate_harness_name(&req.name)?;
+        self.client.post("/harnesses", &req).await
+    }
+
+    /// Update a harness
+    pub async fn update(&self, id: &str, req: UpdateHarnessRequest) -> Result<Harness> {
+        self.client.patch(&format!("/harnesses/{}", id), &req).await
+    }
+
+    /// Delete (archive) a harness
+    pub async fn delete(&self, id: &str) -> Result<()> {
+        self.client.delete(&format!("/harnesses/{}", id)).await
+    }
+
+    /// List built-in harness examples
+    pub async fn list_examples(&self) -> Result<Vec<HarnessExample>> {
+        self.client.get("/harness-examples").await
+    }
+}
+
+/// Client for model operations
+pub struct ModelsClient<'a> {
+    client: &'a Everruns,
+}
+
+impl<'a> ModelsClient<'a> {
+    /// List all available models
+    pub async fn list(&self) -> Result<ListResponse<ModelWithProvider>> {
+        self.client.get("/models").await
+    }
+
+    /// Get a specific model by ID
+    pub async fn get(&self, id: &str) -> Result<ModelWithProvider> {
+        self.client.get(&format!("/models/{}", id)).await
     }
 }
 
