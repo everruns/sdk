@@ -60,6 +60,24 @@ let session = client
     .await?;
 ```
 
+## Harnesses & Models
+
+Discover and manage harnesses, and browse available models to choose a `default_model_id`.
+
+```rust
+// Browse harnesses, then create one
+let harnesses = client.harnesses().list().await?; // or .search("research")
+let harness = client.harnesses().get(&harnesses.data[0].id).await?;
+let custom = client
+    .harnesses()
+    .create("my-harness", "Base instructions for every session.")
+    .await?;
+let examples = client.harnesses().list_examples().await?;
+
+// List models to pick a default for an agent
+let models = client.models().list().await?;
+```
+
 ## Initial Files
 
 ```rust

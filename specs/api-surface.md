@@ -59,6 +59,28 @@ If neither is provided on create, the server defaults to the org's `generic` har
 
 Agent create/update also accept optional `parallel_tool_calls`.
 
+### Harnesses
+
+Harnesses are the reusable runtime configuration that agents and sessions reference. The SDK exposes discovery and management so callers can pick a harness by id/name for `harness_id`/`harness_name`.
+
+- `GET /v1/harnesses` - List harnesses (supports `search` query param)
+- `GET /v1/harnesses/{id}` - Get harness
+- `POST /v1/harnesses` - Create harness (plain create; `name` is an addressable slug, client-validated)
+- `PATCH /v1/harnesses/{id}` - Update harness
+- `DELETE /v1/harnesses/{id}` - Archive harness
+- `GET /v1/harness-examples` - List built-in harness examples
+
+Not exposed (admin/advisory): `POST /v1/harnesses/import`, `POST /v1/harnesses/preview`, `POST /v1/harnesses/{id}/copy`, `GET /v1/harnesses/{id}/stats`, `GET /v1/harnesses/check-name`, `GET /v1/harnesses/config`.
+
+### Models
+
+Read-only discovery so callers can choose a `default_model_id`.
+
+- `GET /v1/models` - List available models (with provider metadata)
+- `GET /v1/models/{id}` - Get a model
+
+Not exposed (org admin): `PATCH`/`DELETE /v1/models/{id}`, `GET /v1/models/config`.
+
 ### Sessions
 - `POST /v1/sessions` - Create session (harness_id optional, defaults to Generic harness)
 - `GET /v1/sessions` - List sessions (supports `search` query param)
