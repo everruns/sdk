@@ -9,6 +9,21 @@ permissions:
   contents: read
 
 jobs:
+  check-generated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - run: uv sync --project python --all-extras
+      - run: npm ci --prefix typescript
+      - run: python3 scripts/generate.py --check
+
   test-rust:
     runs-on: ubuntu-latest
     steps:

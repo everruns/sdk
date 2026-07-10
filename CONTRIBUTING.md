@@ -71,5 +71,12 @@ just coverage          # Generate coverage reports
 When OpenAPI spec changes:
 
 ```bash
-just generate          # Regenerate all SDK types
+just generate          # Regenerate public SDK models
+just generate-check    # Verify generated public models are current
+just sync-openapi      # Fetch upstream OpenAPI and regenerate public models
 ```
+
+The shared generator reads `openapi/openapi.json` and
+`codegen/sdk-models.json`, validates SDK vendor extensions, and writes the
+public model module for each language. HTTP clients, SSE handling, auth, and
+errors remain hand-written.

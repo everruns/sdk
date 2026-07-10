@@ -1,16 +1,22 @@
 # Everruns SDK - Task automation
 
+uv := `if command -v uv >/dev/null 2>&1; then command -v uv; else printf 'python3 -m uv'; fi`
+
 default:
     @just --list
 
 # Setup all SDKs
 setup:
     cd rust && cargo build
-    cd python && uv sync --all-extras
+    cd python && {{uv}} sync --all-extras
     cd typescript && npm ci
 
 # Run all tests
-test: test-rust test-python test-typescript check-examples
+test: test-generate test-rust test-python test-typescript check-examples
+
+# Test repo-level generation helpers
+test-generate:
+    python3 scripts/test_generate.py
 
 # Test Rust SDK
 test-rust:
@@ -18,7 +24,7 @@ test-rust:
 
 # Test Python SDK
 test-python:
-    cd python && uv run pytest
+    cd python && {{uv}} run pytest
 
 # Test TypeScript SDK
 test-typescript:
@@ -33,7 +39,7 @@ check-examples-rust:
 
 # Check Python examples
 check-examples-python:
-    cd python && uv run python -m py_compile examples/basic.py examples/initial_files.py examples/workspaces.py examples/memories.py
+    cd python && {{uv}} run python -m py_compile examples/basic.py examples/initial_files.py examples/workspaces.py examples/memories.py
 
 # Check TypeScript examples
 check-examples-typescript:
@@ -50,8 +56,8 @@ lint-rust:
 
 # Lint Python
 lint-python:
-    cd python && uv run ruff check .
-    cd python && uv run ruff format --check .
+    cd python && {{uv}} run ruff check .
+    cd python && {{uv}} run ruff format --check .
 
 # Lint TypeScript
 lint-typescript:
@@ -60,21 +66,25 @@ lint-typescript:
 # Auto-fix formatting across all SDKs
 fmt:
     cd rust && cargo fmt
-    cd python && uv run ruff format .
+    cd python && {{uv}} run ruff format .
     cd typescript && npx prettier --write "src/**/*.ts"
 
-# Generate types from OpenAPI spec
+# Generate public SDK models from OpenAPI spec
 generate:
-    cd rust && cargo build
-    mkdir -p python/everruns_sdk/_generated
-    cd python && uvx --from datamodel-code-generator datamodel-codegen --input ../openapi/openapi.json --output everruns_sdk/_generated/models.py
-    mkdir -p typescript/src/generated
-    cd typescript && npx openapi-typescript ../openapi/openapi.json -o src/generated/schema.d.ts
+    python3 scripts/generate.py
+
+# Verify generated public models are current
+generate-check:
+    python3 scripts/generate.py --check
+
+# Sync OpenAPI from upstream and regenerate public models
+sync-openapi:
+    python3 scripts/generate.py --sync-openapi
 
 # Run coverage for all SDKs
 coverage:
     cd rust && cargo llvm-cov --lcov --output-path lcov.info
-    cd python && uv run pytest --cov=everruns_sdk --cov-report=xml
+    cd python && {{uv}} run pytest --cov=everruns_sdk --cov-report=xml
     cd typescript && npm test -- --coverage
 
 # Pre-push checks (~30s): lint + commit attribution
@@ -92,7 +102,7 @@ pre-pr: lint test
 # Dry-run publish
 publish-dry-run:
     cd rust && cargo publish --dry-run
-    cd python && uv build
+    cd python && {{uv}} build
     cd typescript && npm run build
 
 # Check all cookbooks compile
@@ -104,8 +114,8 @@ check-cookbook-rust:
 
 # Check Python cookbook
 check-cookbook-python:
-    cd cookbook/python && uv sync
-    cd cookbook/python && uv run python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('src/**/*.py', recursive=True)]"
+    cd cookbook/python && {{uv}} sync
+    cd cookbook/python && {{uv}} run python -c "import py_compile, glob; [py_compile.compile(f, doraise=True) for f in glob.glob('src/**/*.py', recursive=True)]"
 
 # Check TypeScript cookbook
 check-cookbook-typescript:
@@ -122,8 +132,8 @@ lint-cookbook-rust:
 
 # Lint Python cookbook
 lint-cookbook-python:
-    cd cookbook/python && uv sync
-    cd cookbook/python && uv run ruff check . && uv run ruff format --check .
+    cd cookbook/python && {{uv}} sync
+    cd cookbook/python && {{uv}} run ruff check . && {{uv}} run ruff format --check .
 
 # Lint TypeScript cookbook
 lint-cookbook-typescript:
@@ -136,7 +146,7 @@ run-cookbook-rust:
 
 # Run Python cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
 run-cookbook-python:
-    cd cookbook/python && uv run python src/main.py
+    cd cookbook/python && {{uv}} run python src/main.py
 
 # Run TypeScript cookbook (requires EVERRUNS_API_KEY, EVERRUNS_API_URL)
 run-cookbook-typescript:

@@ -36,7 +36,7 @@ Fix root cause. Unsure: read more code; if stuck, ask w/ short options. Unrecogn
 
 Source location: `docs/api/openapi.json` in everruns/everruns repo.
 
-To update: `curl -s "https://raw.githubusercontent.com/everruns/everruns/main/docs/api/openapi.json" > openapi/openapi.json`
+To update and regenerate all public SDK models: `just sync-openapi`
 
 ### GitHub API Access
 
@@ -73,7 +73,9 @@ just lint                     # Run all linters
 just test-rust          # cd rust && cargo test
 just test-python        # cd python && uv run pytest
 just test-typescript    # cd typescript && npm test
-just generate           # Regenerate types from OpenAPI
+just generate           # Regenerate public models from local OpenAPI
+just generate-check     # Verify generated public models are current
+just sync-openapi       # Sync upstream OpenAPI and regenerate models
 ```
 
 ### Rust

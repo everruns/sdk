@@ -17,30 +17,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch latest OpenAPI spec
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install generator formatters
         run: |
-          curl -sSL -o openapi/openapi.json \
-            https://raw.githubusercontent.com/everruns/everruns/main/docs/api/openapi.json
+          uv sync --project python --all-extras
+          npm ci --prefix typescript
+
+      - name: Sync OpenAPI and regenerate public SDK models
+        run: python3 scripts/generate.py --sync-openapi
 
       - name: Check for changes
         id: diff
         run: |
-          if git diff --quiet openapi/; then
+          if git diff --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Regenerate SDK types
-        if: steps.diff.outputs.changed == 'true'
-        run: |
-          echo "TODO: Run type generation"
-
       - name: Create PR
         if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          title: "chore: sync OpenAPI spec"
+          title: "chore: sync OpenAPI spec and generated SDK models"
           branch: chore/sync-openapi
+          commit-message: "chore: sync OpenAPI spec and generated SDK models"
+          author: "Mykhailo Chalyi <mike@chaliy.name>"
+          committer: "Mykhailo Chalyi <mike@chaliy.name>"
           body: |
-            Auto-generated PR to sync OpenAPI spec changes from main repo.
+            Auto-generated PR to sync OpenAPI spec changes from the main repo and refresh generated public SDK models.
