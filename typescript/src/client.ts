@@ -29,6 +29,10 @@ import {
   GuardrailsDryRunRequest,
   GuardrailsDryRunResponse,
   GrepResult,
+  Harness,
+  CreateHarnessRequest,
+  UpdateHarnessRequest,
+  HarnessExample,
   HealthCheckRun,
   LedgerEntry,
   Message,
@@ -40,6 +44,7 @@ import {
   MemoryFile,
   MemoryFileInfo,
   MemoryGrepResult,
+  ModelWithProvider,
   ResourceStats,
   ResumeSessionResponse,
   RollbackAgentVersionRequest,
@@ -81,6 +86,8 @@ export class Everruns {
   readonly messages: MessagesClient;
   readonly events: EventsClient;
   readonly capabilities: CapabilitiesClient;
+  readonly harnesses: HarnessesClient;
+  readonly models: ModelsClient;
   readonly workspaces: WorkspacesClient;
   readonly workspaceFiles: WorkspaceFilesClient;
   readonly memories: MemoriesClient;
@@ -112,6 +119,8 @@ export class Everruns {
     this.messages = new MessagesClient(this);
     this.events = new EventsClient(this);
     this.capabilities = new CapabilitiesClient(this);
+    this.harnesses = new HarnessesClient(this);
+    this.models = new ModelsClient(this);
     this.workspaces = new WorkspacesClient(this);
     this.workspaceFiles = new WorkspaceFilesClient(this);
     this.memories = new MemoriesClient(this);
@@ -818,6 +827,66 @@ class CapabilitiesClient {
   }
 }
 
+class HarnessesClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** List harnesses. */
+  async list(): Promise<ListResponse<Harness>> {
+    return this.client.fetch("/harnesses");
+  }
+
+  /** Search harnesses by query. */
+  async search(query: string): Promise<ListResponse<Harness>> {
+    return this.client.fetch(`/harnesses?search=${encodeURIComponent(query)}`);
+  }
+
+  /** Get a harness by ID. */
+  async get(id: string): Promise<Harness> {
+    return this.client.fetch(`/harnesses/${id}`);
+  }
+
+  /** Create a new harness. */
+  async create(request: CreateHarnessRequest): Promise<Harness> {
+    validateHarnessName(request.name);
+    return this.client.fetch("/harnesses", {
+      method: "POST",
+      body: JSON.stringify(toHarnessBody(request)),
+    });
+  }
+
+  /** Update a harness. Only provided fields are updated. */
+  async update(id: string, request: UpdateHarnessRequest): Promise<Harness> {
+    return this.client.fetch(`/harnesses/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(toHarnessBody(request)),
+    });
+  }
+
+  /** Delete a harness. */
+  async delete(id: string): Promise<void> {
+    await this.client.fetch(`/harnesses/${id}`, { method: "DELETE" });
+  }
+
+  /** List built-in harness examples. */
+  async listExamples(): Promise<HarnessExample[]> {
+    return this.client.fetch("/harness-examples");
+  }
+}
+
+class ModelsClient {
+  constructor(private readonly client: Everruns) {}
+
+  /** List available models. */
+  async list(): Promise<ListResponse<ModelWithProvider>> {
+    return this.client.fetch("/models");
+  }
+
+  /** Get a specific model by ID. */
+  async get(id: string): Promise<ModelWithProvider> {
+    return this.client.fetch(`/models/${id}`);
+  }
+}
+
 class WorkspacesClient {
   constructor(private readonly client: Everruns) {}
 
@@ -1309,6 +1378,52 @@ function toAgentBody(request: CreateAgentRequest): Record<string, unknown> {
   }
   if (request.parallelToolCalls !== undefined) {
     body.parallel_tool_calls = request.parallelToolCalls;
+  }
+  return body;
+}
+
+/** Build the JSON body for harness create/update from a camelCase request. */
+function toHarnessBody(
+  request: CreateHarnessRequest | UpdateHarnessRequest,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (request.name !== undefined) {
+    body.name = request.name;
+  }
+  if (request.systemPrompt !== undefined) {
+    body.system_prompt = request.systemPrompt;
+  }
+  if (request.displayName !== undefined) {
+    body.display_name = request.displayName;
+  }
+  if (request.description !== undefined) {
+    body.description = request.description;
+  }
+  if (request.defaultModelId !== undefined) {
+    body.default_model_id = request.defaultModelId;
+  }
+  if (request.capabilities !== undefined) {
+    body.capabilities = request.capabilities;
+  }
+  if (request.initialFiles != null) {
+    body.initial_files = request.initialFiles.map((file) => ({
+      path: file.path,
+      content: file.content,
+      encoding: file.encoding,
+      is_readonly: file.isReadonly,
+    }));
+  }
+  if (request.networkAccess !== undefined) {
+    body.network_access = request.networkAccess;
+  }
+  if (request.parentHarnessId !== undefined) {
+    body.parent_harness_id = request.parentHarnessId;
+  }
+  if (request.tags !== undefined) {
+    body.tags = request.tags;
+  }
+  if ("status" in request && request.status !== undefined) {
+    body.status = request.status;
   }
   return body;
 }
