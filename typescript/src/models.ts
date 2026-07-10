@@ -1,78 +1,59 @@
-/**
- * Core data models for Everruns API.
- */
+/** Public data models generated from the Everruns OpenAPI document. */
 
-export interface AgentCapabilityConfig {
-  /** Reference to the capability ID */
-  ref: string;
-  /** Per-agent configuration for this capability (capability-specific) */
-  config?: Record<string, unknown>;
-}
+// Regenerate with `just generate`. Do not edit by hand.
 
-export interface ClientSideTool {
-  type: "client_side";
-  name: string;
-  description: string;
-  parameters: unknown;
-  display_name?: string | null;
-  category?: string | null;
-  hints?: Record<string, unknown>;
-  deferrable?: Record<string, unknown>;
-}
-
-export interface BuiltinTool {
-  type: "builtin";
-  name: string;
-  description: string;
-  parameters: unknown;
-  display_name?: string | null;
-  category?: string | null;
-  hints?: Record<string, unknown>;
-  deferrable?: Record<string, unknown>;
-  policy?: "auto" | "requires_approval" | "client_side";
-}
-
-export type ToolDefinition = ClientSideTool | BuiltinTool;
-
-export interface CapabilityInfo {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  category?: string | null;
-  dependencies?: string[];
-  icon?: string | null;
-  isMcp?: boolean;
-  /** Human-readable display name for UI rendering */
-  displayName?: string | null;
-  /** UI feature strings this capability contributes to */
-  features?: string[];
-  /** Whether this is an Agent Skill capability */
-  isSkill?: boolean;
-  /** Risk level for approval requirements (TM-AGENT-005) */
-  riskLevel?: "low" | "medium" | "high" | null;
-}
-
+/** Agent configuration for agentic loop. */
 export interface Agent {
-  id: string;
-  /** Addressable name, unique per org (e.g. "customer-support"). */
-  name: string;
-  /** Human-readable display name shown in UI. Falls back to name when absent. */
-  displayName?: string | null;
-  systemPrompt: string;
-  model?: string;
-  /** Harness ID backing this agent. */
-  harnessId: string;
-  /** Whether the agent may request multiple tool calls in parallel. */
-  parallelToolCalls?: boolean;
   capabilities?: AgentCapabilityConfig[];
-  tools?: ToolDefinition[];
-  initialFiles?: InitialFile[];
   createdAt: string;
+  model?: string | null;
+  displayName?: string | null;
+  harnessId: string;
+  id: string;
+  initialFiles?: InitialFile[];
+  name: string;
+  parallelToolCalls?: boolean | null;
+  systemPrompt: string;
+  tools?: ToolDefinition[];
   updatedAt: string;
 }
 
+/** Response from on-demand agent analysis (built-in rules + LLM checkers) */
+export interface AgentAnalysisResponse {
+  findings: Finding[];
+}
+
+/** Per-agent capability configuration */
+export interface AgentCapabilityConfig {
+  config?: unknown;
+  ref: string;
+}
+
+export type AgentStatus = "active" | "archived" | "deleted";
+
+/** Immutable snapshot of an Agent's authored and resolved runtime config. */
+export interface AgentVersion {
+  agent_id: string;
+  authored_config: Record<string, unknown>;
+  change_kind: AgentVersionChangeKind;
+  config_hash: string;
+  created_at: string;
+  created_by_principal_id?: string | null;
+  id: string;
+  is_published: boolean;
+  parent_version_id?: string | null;
+  resolved_config: Record<string, unknown>;
+  semver_major: number;
+  semver_minor: number;
+  semver_patch: number;
+  source_version_id?: string | null;
+  summary?: string | null;
+  version: string;
+  version_number: number;
+}
+
 export type AgentVersionChangeKind =
+  | "auto"
   | "manual"
   | "patch"
   | "minor"
@@ -81,520 +62,245 @@ export type AgentVersionChangeKind =
   | "rollback"
   | "fork";
 
-export interface AgentVersion {
-  id: string;
-  agent_id: string;
-  version_number: number;
-  semver_major: number;
-  semver_minor: number;
-  semver_patch: number;
-  version: string;
-  change_kind: AgentVersionChangeKind;
-  config_hash: string;
-  authored_config: Record<string, unknown>;
-  resolved_config: Record<string, unknown>;
-  created_at: string;
-  created_by_principal_id?: string | null;
-  parent_version_id?: string | null;
-  source_version_id?: string | null;
-  summary?: string | null;
-}
-
+/** Response body for agent version diff. */
 export interface AgentVersionDiffResponse {
-  from_version_id: string;
-  to_version_id: string;
   authored_diff: unknown;
+  from_version_id: unknown;
   resolved_diff: unknown;
+  to_version_id: unknown;
 }
 
+/** Budget — a spending cap for a subject in a currency. */
+export interface Budget {
+  balance: number;
+  createdAt: string;
+  currency: string;
+  id: string;
+  limit: number;
+  metadata?: unknown;
+  organizationId: string;
+  period?: BudgetPeriod | null;
+  periodStartedAt?: string | null;
+  softLimit?: number | null;
+  status: BudgetStatus;
+  subjectId: string;
+  subjectType: unknown;
+  updatedAt: string;
+}
+
+/** Result of checking all budgets for a session. */
+export interface BudgetCheckResult {
+  action: string;
+  balance?: number | null;
+  budgetId?: string | null;
+  currency?: string | null;
+  errorCode?: string | null;
+  errorFields?: Record<string, unknown> | null;
+  message?: string | null;
+}
+
+/** Budget period configuration for recurring budgets. */
+export interface BudgetPeriod {
+  seconds?: number;
+  type: "duration" | "rolling" | "calendar";
+  window?: string;
+  unit?: string;
+}
+
+export type BudgetStatus = "active" | "paused" | "exhausted" | "disabled";
+
+/** Built-in tool configuration */
+export interface BuiltinTool {
+  category?: string | null;
+  deferrable?: unknown;
+  description: string;
+  display_name?: string | null;
+  full_parameters?: unknown;
+  hints?: unknown;
+  name: string;
+  parameters: unknown;
+  policy?: unknown;
+}
+
+/** Public capability information (without internal details) */
+export interface CapabilityInfo {
+  agentCount?: number;
+  category?: string | null;
+  configSchema?: Record<string, unknown>;
+  configUiSchema?: Record<string, unknown>;
+  dependencies?: string[];
+  description: string;
+  docsSlug?: string | null;
+  features?: string[];
+  harnessCount?: number;
+  icon?: string | null;
+  id: string;
+  isGuardrail?: boolean;
+  isMcp?: boolean;
+  isSkill?: boolean;
+  localizations?: Record<string, unknown>;
+  name: string;
+  riskLevel?: unknown;
+  status: string;
+  systemPrompt?: string | null;
+  toolDefinitions?: Record<string, unknown>[];
+}
+
+/** Client-side tool - executed by the client, not the server */
+export interface ClientSideTool {
+  category?: string | null;
+  deferrable?: unknown;
+  description: string;
+  display_name?: string | null;
+  full_parameters?: unknown;
+  hints?: unknown;
+  name: string;
+  parameters: unknown;
+}
+
+/** A single tool result from the client */
+export interface ClientToolResult {
+  error?: string | null;
+  result?: unknown;
+  tool_call_id: string;
+}
+
+export interface Connection {
+  provider: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A part of message content - can be text, image, image_file, tool_call, or tool_result */
+export interface ContentPart {
+  text?: string;
+  type: "text" | "image" | "image_file" | "tool_call" | "tool_result";
+  base64?: string | null;
+  media_type?: string | null;
+  url?: string | null;
+  filename?: string | null;
+  image_id?: string;
+  arguments?: unknown;
+  id?: string;
+  name?: string;
+  error?: string | null;
+  result?: unknown;
+  tool_call_id?: string;
+}
+
+/** Runtime controls for message processing */
+export interface Controls {
+  errorDisclosure?: string | null;
+  hints?: Record<string, unknown> | null;
+  locale?: string | null;
+  modelId?: string | null;
+  reasoning?: unknown | null;
+}
+
+/** Request to copy a file */
+export interface CopyFileRequest {
+  dstPath: string;
+  srcPath: string;
+}
+
+/** Request to create a new agent */
+export interface CreateAgentRequest {
+  capabilities?: AgentCapabilityConfig[];
+  model?: string | null;
+  description?: string | null;
+  displayName?: string | null;
+  harnessId?: string | null;
+  harnessName?: string | null;
+  id?: string | null;
+  initialFiles?: InitialFile[];
+  maxIterations?: number | null;
+  mcpServers?: unknown;
+  name: string;
+  networkAccess?: unknown | null;
+  parallelToolCalls?: boolean | null;
+  systemPrompt: string;
+  tags?: string[];
+  tools?: ToolDefinition[];
+}
+
+/** Request body for the `create_agent_version` operation. */
 export interface CreateAgentVersionRequest {
   changeKind?: AgentVersionChangeKind | null;
   summary?: string | null;
 }
 
-export interface SetDefaultAgentVersionRequest {
-  versionId: string;
+/** Request body for creating a spending budget. */
+export interface CreateBudgetRequest {
+  currency: string;
+  limit: number;
+  metadata?: unknown;
+  period?: BudgetPeriod | null;
+  softLimit?: number | null;
+  subjectId: string;
+  subjectType: string;
 }
 
-export interface ForkAgentVersionRequest {
-  name: string;
-  displayName?: string | null;
-  description?: string | null;
-}
-
-export interface RollbackAgentVersionRequest {
-  saveVersion?: boolean;
-  summary?: string | null;
-}
-
-export interface CreateAgentRequest {
-  /** Client-supplied agent ID (format: agent_{32-hex}). Auto-generated if omitted. */
-  id?: string;
-  /**
-   * Addressable name, unique per org.
-   * Format: [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
-   * When a name matches an existing agent, the endpoint has upsert semantics.
-   */
-  name: string;
-  /** Human-readable display name shown in UI. Falls back to name when absent. */
-  displayName?: string;
-  systemPrompt: string;
-  model?: string;
-  capabilities?: AgentCapabilityConfig[];
-  tools?: ToolDefinition[];
-  initialFiles?: InitialFile[];
-  /** Harness ID backing this agent. Cannot be used together with harnessName. */
-  harnessId?: string;
-  /**
-   * Human-readable harness name (e.g. "generic", "deep-research").
-   * Preferred over harnessId. Must match [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
-   * Mutually exclusive with harnessId.
-   */
-  harnessName?: string;
-  /** Whether the agent may request multiple tool calls in parallel. */
-  parallelToolCalls?: boolean;
-}
-
-/**
- * Generate a random agent ID in the format `agent_<32-hex>`.
- */
-export function generateAgentId(): string {
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  const hex = Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return `agent_${hex}`;
-}
-
-/**
- * Generate a random harness ID in the format `harness_<32-hex>`.
- */
-export function generateHarnessId(): string {
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  const hex = Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return `harness_${hex}`;
-}
-
-export interface Session {
-  id: string;
-  harnessId: string;
-  agentId?: string | null;
-  status: "started" | "active" | "idle" | "waitingfortoolresults";
-  title?: string | null;
-  tags?: string[];
-  locale?: string | null;
-  modelId?: string | null;
-  capabilities?: AgentCapabilityConfig[];
-  tools?: ToolDefinition[];
-  createdAt: string;
-  updatedAt: string;
-  /** Whether the agent may request multiple tool calls in parallel. */
-  parallelToolCalls?: boolean;
-  /** Session this session was forked from, if any. */
-  forkedFromSessionId?: string | null;
-  /** Sequence number at which this session was forked from its parent, if any. */
-  forkedFromSequence?: number | null;
-  /** Number of active (enabled) schedules for this session */
-  activeScheduleCount?: number | null;
-  /** Aggregated UI features from all active capabilities */
-  features?: string[];
-  /** Whether this session is pinned by the current user */
-  isPinned?: boolean | null;
-}
-
-/** Aggregate usage statistics for an agent or harness. */
-export interface ResourceStats {
-  session_count: number;
-  active_session_count: number;
-  idle_session_count: number;
-  started_session_count: number;
-  waiting_for_tool_results_session_count: number;
-  execution_count: number;
-  total_session_duration_ms: number;
-  avg_session_duration_ms?: number | null;
-  total_input_tokens: number;
-  total_output_tokens: number;
-  total_cache_read_tokens: number;
-  total_cache_creation_tokens: number;
-  first_session_at?: string | null;
-  last_session_at?: string | null;
-  last_execution_at?: string | null;
-}
-
-export type HealthCheckStatus = "pending" | "running" | "completed" | "failed";
-
-/** Aggregate metrics across all cases in a health check run. */
-export interface HealthCheckSummary {
-  total: number;
-  passed: number;
-  failed: number;
-  errored: number;
-  pass_rate: number;
-  avg_score: number;
-  avg_turns: number;
-  total_input_tokens: number;
-  total_output_tokens: number;
-}
-
-/** Outcome of a single case after the agent ran and was scored. */
-export interface HealthCheckCaseResult {
-  name: string;
-  user_message: string;
-  rubric: string;
-  passed: boolean;
-  score: number;
-  judge_reason: string;
-  deterministic_reason: string;
-  turns: number;
-  latency_ms: number;
-  error?: string | null;
-  session_id?: string | null;
-}
-
-/** API view of a behavioral health check run for an agent. */
-export interface HealthCheckRun {
-  id: string;
-  config_hash: string;
-  status: HealthCheckStatus;
-  created_at: string;
-  agent_id?: string | null;
-  model_id?: string | null;
-  completed_at?: string | null;
-  error_message?: string | null;
-  summary?: HealthCheckSummary | null;
-  results?: HealthCheckCaseResult[] | null;
-}
-
-export interface InitialFile {
-  path: string;
-  content: string;
-  encoding?: "text" | "base64";
-  isReadonly?: boolean;
-}
-
-export interface CreateSessionRequest {
-  harnessId?: string;
-  /**
-   * Human-readable harness name (e.g. "generic", "deep-research").
-   * Preferred over harnessId. Must match [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
-   * Cannot be used together with harnessId.
-   */
-  harnessName?: string;
-  agentId?: string;
-  /**
-   * Human-readable agent name (e.g. "customer-support").
-   * Preferred over agentId. Must match [a-z0-9]+(-[a-z0-9]+)*, max 64 chars.
-   * Cannot be used together with agentId.
-   */
-  agentName?: string;
-  title?: string;
-  locale?: string;
-  modelId?: string;
-  tags?: string[];
-  capabilities?: AgentCapabilityConfig[];
-  tools?: ToolDefinition[];
-  initialFiles?: InitialFile[];
-  /** Whether the agent may request multiple tool calls in parallel. */
-  parallelToolCalls?: boolean;
-}
-
-/** Addressable name validation pattern: lowercase alphanumeric segments separated by hyphens */
-const ADDRESSABLE_NAME_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const ADDRESSABLE_NAME_MAX_LENGTH = 64;
-
-function validateAddressableName(name: string, label: string): void {
-  if (name.length > ADDRESSABLE_NAME_MAX_LENGTH) {
-    throw new Error(
-      `${label} must be at most ${ADDRESSABLE_NAME_MAX_LENGTH} characters, got ${name.length}`,
-    );
-  }
-  if (!ADDRESSABLE_NAME_PATTERN.test(name)) {
-    throw new Error(
-      `${label} must match pattern [a-z0-9]+(-[a-z0-9]+)*, got "${name}"`,
-    );
-  }
-}
-
-/**
- * Validate a harness name.
- *
- * @param name - The harness name to validate
- * @throws Error if the name is invalid
- */
-export function validateHarnessName(name: string): void {
-  validateAddressableName(name, "harness_name");
-}
-
-/**
- * Validate an agent name.
- *
- * @param name - The agent name to validate
- * @throws Error if the name is invalid
- */
-export function validateAgentName(name: string): void {
-  validateAddressableName(name, "agent_name");
-}
-
-/** External actor identity for messages from external channels (Slack, Discord, etc.) */
-export interface ExternalActor {
-  /** Opaque actor identifier from the source channel */
-  actorId: string;
-  /** Source channel identifier (e.g. "slack", "discord") */
-  source: string;
-  /** Resolved display name (falls back to actorId if absent) */
-  actorName?: string | null;
-  /** Channel-specific metadata */
-  metadata?: Record<string, string> | null;
-}
-
-export interface Message {
-  id: string;
-  sessionId: string;
-  role: "user" | "assistant" | "tool_result";
-  content: ContentPart[];
-  createdAt: string;
-  /** External actor identity (for messages from external channels) */
-  externalActor?: ExternalActor | null;
-  /** Execution phase for multi-step tool-calling flows */
-  phase?: "Commentary" | "FinalAnswer" | null;
-}
-
-export interface ContentPart {
-  type: "text" | "image" | "image_file" | "tool_call" | "tool_result";
-  text?: string;
-  imageUrl?: string;
-  imageId?: string;
-  /** Tool call ID (for tool_call parts) */
-  id?: string;
-  /** Tool name (for tool_call parts) */
-  name?: string;
-  /** Tool arguments (for tool_call parts) */
-  arguments?: Record<string, unknown>;
-  /** Tool call ID this result corresponds to (for tool_result parts) */
-  tool_call_id?: string;
-  /** Tool result value (for tool_result parts) */
-  result?: unknown;
-  /** Error message (for tool_result parts) */
-  error?: string;
-}
-
-/** Extracted tool call information */
-export interface ToolCallInfo {
-  id: string;
-  name: string;
-  arguments: Record<string, unknown>;
-}
-
-/** Create a tool result content part with a successful result */
-export function toolResult(toolCallId: string, result: unknown): ContentPart {
-  return { type: "tool_result", tool_call_id: toolCallId, result };
-}
-
-/** Create a tool result content part with an error */
-export function toolError(toolCallId: string, error: string): ContentPart {
-  return { type: "tool_result", tool_call_id: toolCallId, error };
-}
-
-/** A single tool result from the client. */
-export interface ClientToolResult {
-  tool_call_id: string;
-  result?: unknown;
-  error?: string;
-}
-
-/** Response from submitting tool results. */
-export interface SubmitToolResultsResponse {
-  accepted: number;
-  status: string;
-}
-
-/** Extract tool calls from `tool.call_requested` or message event data. */
-export function extractToolCalls(
-  data: Record<string, unknown>,
-): ToolCallInfo[] {
-  const requested = data.tool_calls;
-  if (Array.isArray(requested)) {
-    return requested
-      .filter((call) => {
-        const c = call as Record<string, unknown>;
-        return typeof c.id === "string" && typeof c.name === "string";
-      })
-      .map((call) => {
-        const c = call as Record<string, unknown>;
-        return {
-          id: c.id as string,
-          name: c.name as string,
-          arguments: (c.arguments as Record<string, unknown>) ?? {},
-        };
-      });
-  }
-
-  const message = data.message as { content?: unknown[] } | undefined;
-  const content = message?.content;
-  if (!Array.isArray(content)) return [];
-
-  const calls: ToolCallInfo[] = [];
-  for (const part of content) {
-    const p = part as Record<string, unknown>;
-    if (
-      p.type === "tool_call" &&
-      typeof p.id === "string" &&
-      typeof p.name === "string"
-    ) {
-      calls.push({
-        id: p.id,
-        name: p.name,
-        arguments: (p.arguments as Record<string, unknown>) ?? {},
-      });
-    }
-  }
-  return calls;
-}
-
-export interface MessageInput {
-  role: "user" | "tool_result";
-  content: ContentPart[];
-}
-
-export interface Controls {
-  modelId?: string;
-}
-
-export interface CreateMessageRequest {
-  message: MessageInput;
-  controls?: Controls;
-  /** External actor identity (for messages from external channels like Slack) */
-  externalActor?: ExternalActor;
-}
-
-export interface Event {
-  id: string;
-  type: string;
-  data: Record<string, unknown>;
-  createdAt: string;
-}
-
-/** Options for filtering and pagination on event list endpoints */
-export interface ListEventsOptions {
-  /** Return events after this event ID */
-  sinceId?: string;
-  /** Positive type filter */
-  types?: string[];
-  /** Event types to exclude */
-  exclude?: string[];
-  /** Max events to return (backward pagination, 1-1000) */
-  limit?: number;
-  /** Cursor for backward pagination: only return events with sequence < this value */
-  beforeSequence?: number;
-  /** Forward cursor: only return events with sequence > this value */
-  afterSequence?: number;
-  /** Anchor event ID for centered windows */
-  around?: string;
-  /** Events to return on each side of around */
-  window?: number;
-  /** Lower created_at bound, RFC 3339 */
-  fromTs?: string;
-  /** Upper created_at bound, RFC 3339 */
-  toTs?: string;
-  /** Filter by turn ID */
-  turnId?: string;
-  /** Filter by execution ID */
-  execId?: string;
-  /** Filter by trace ID */
-  traceId?: string;
-  /** Tag any-match filter */
-  tags?: string[];
-  /** Filter tool events by tool name */
-  toolName?: string;
-  /** Full-text search query */
-  q?: string;
-  /** Return newest first when true */
-  orderDesc?: boolean;
-}
-
-// --- Workspace Models ---
-
-/** Workspace resource */
-export interface Workspace {
-  id: string;
-  name: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  description?: string | null;
-  archived_at?: string | null;
-  deleted_at?: string | null;
-}
-
-/** Request to create a workspace */
-export interface CreateWorkspaceRequest {
-  name: string;
-  description?: string;
-}
-
-/** Request to update a workspace */
-export interface UpdateWorkspaceRequest {
-  name?: string;
-  description?: string | null;
-  status?: string;
-}
-
-// --- Workspace Filesystem Models ---
-
-/** File metadata without content */
-export interface FileInfo {
-  id: string;
-  session_id: string;
-  path: string;
-  name: string;
-  is_directory: boolean;
-  is_readonly: boolean;
-  size_bytes: number;
-  created_at: string;
-  updated_at: string;
-}
-
-/** Complete file with content */
-export interface SessionFile {
-  id: string;
-  session_id: string;
-  path: string;
-  name: string;
-  is_directory: boolean;
-  is_readonly: boolean;
-  size_bytes: number;
-  created_at: string;
-  updated_at: string;
+/** Request to create a file */
+export interface CreateFileRequest {
   content?: string | null;
   encoding?: string | null;
+  isDirectory?: boolean | null;
+  isReadonly?: boolean | null;
 }
 
-/** File stat information */
-export interface FileStat {
-  path: string;
+export interface CreateMemoryFileRequest {
+  content?: string | null;
+  encoding?: string | null;
+  isDirectory?: boolean | null;
+}
+
+/** Request body for the `create_memory` operation. */
+export interface CreateMemoryRequest {
+  description?: string | null;
   name: string;
-  is_directory: boolean;
-  is_readonly: boolean;
-  size_bytes: number;
-  created_at: string;
-  updated_at: string;
+  source?: CreateMemorySourceRequest | null;
 }
 
-/** Single grep match */
-export interface GrepMatch {
-  path: string;
-  line_number: number;
-  line: string;
+export type CreateMemorySourceRequest =
+  | (GitHubMemorySourceRequest & { type: "github" })
+  | (GitMemorySourceRequest & { type: "git" });
+
+/** Request to create a message */
+export interface CreateMessageRequest {
+  addressedParticipantId?: string | null;
+  controls?: Controls | null;
+  externalActor?: ExternalActor | null;
+  message: MessageInput;
+  metadata?: Record<string, unknown> | null;
+  tags?: string[] | null;
 }
 
-/** Grep result for a file */
-export interface GrepResult {
-  path: string;
-  matches: GrepMatch[];
+/** Request to create a session */
+export interface CreateSessionRequest {
+  agentId?: string | null;
+  agentIdentityId?: string | null;
+  agentName?: string | null;
+  capabilities?: AgentCapabilityConfig[];
+  harnessId?: string | null;
+  harnessName?: string | null;
+  hints?: Record<string, unknown> | null;
+  initialFiles?: InitialFile[];
+  locale?: string | null;
+  maxIterations?: number | null;
+  mcpServers?: unknown;
+  modelId?: string | null;
+  networkAccess?: unknown | null;
+  parallelToolCalls?: boolean | null;
+  systemPrompt?: string | null;
+  tags?: string[];
+  title?: string | null;
+  tools?: ToolDefinition[];
+  workspaceId?: string | null;
+}
+
+export interface CreateWorkspaceRequest {
+  description?: string | null;
+  name: string;
 }
 
 /** Response for delete operation */
@@ -602,261 +308,528 @@ export interface DeleteFileResponse {
   deleted: boolean;
 }
 
-// --- Memory Models ---
-
-/** Workspace memory resource */
-export interface Memory {
+/** Standard event following the Everruns event protocol. */
+export interface Event {
+  data: Record<string, unknown>;
   id: string;
-  name: string;
-  source_type: string;
-  source: Record<string, unknown>;
-  is_readonly: boolean;
-  sync_status: string;
-  status: string;
+  createdAt: string;
+  type: string;
+}
+
+/** Context for event correlation and tracing */
+export interface EventContext {
+  execId?: string | null;
+  inputMessageId?: string | null;
+  parentSpanId?: string | null;
+  spanId?: string | null;
+  traceId?: string | null;
+  turnId?: string | null;
+}
+
+/** External actor identity for messages originating from external channels */
+export interface ExternalActor {
+  actorId: string;
+  actorName?: string | null;
+  metadata?: Record<string, string> | null;
+  source: string;
+}
+
+/** File metadata without content */
+export interface FileInfo {
   created_at: string;
+  id: string;
+  is_directory: boolean;
+  is_readonly: boolean;
+  name: string;
+  path: string;
+  session_id: string;
+  size_bytes: number;
   updated_at: string;
+}
+
+/** File stat information */
+export interface FileStat {
+  created_at: string;
+  is_directory: boolean;
+  is_readonly: boolean;
+  name: string;
+  path: string;
+  size_bytes: number;
+  updated_at: string;
+}
+
+/** A single advisory finding about an agent configuration. */
+export interface Finding {
+  category: unknown;
+  fix?: string | null;
+  location?: FindingLocation | null;
+  message: string;
+  rule_id: string;
+  severity: unknown;
+  source: unknown;
+}
+
+/** Pointer to the config field (and optional byte span within it) a finding */
+export interface FindingLocation {
+  end?: number | null;
+  field: string;
+  start?: number | null;
+}
+
+/** Request body for the `fork_agent_version` operation. */
+export interface ForkAgentVersionRequest {
+  name: string;
+  displayName?: string | null;
   description?: string | null;
+}
+
+/** Request body for GitHub memory source. */
+export interface GitHubMemorySourceRequest {
+  branch?: string | null;
+  repository: string;
+  root_folder?: string | null;
+  sync_interval_secs?: number | null;
+}
+
+/** Request body for git memory source. */
+export interface GitMemorySourceRequest {
+  branch?: string | null;
+  root_folder?: string | null;
+  sync_interval_secs?: number | null;
+  url: string;
+}
+
+/** Grep match result */
+export interface GrepMatch {
+  line: string;
+  line_number: number;
+  path: string;
+}
+
+export interface GrepRequest {
+  pathPattern?: string | null;
+  pattern: string;
+}
+
+/** Grep result for a file */
+export interface GrepResult {
+  matches: GrepMatch[];
+  path: string;
+}
+
+export type GuardrailAction = "block" | "log";
+
+/** A read-only, adoptable guardrails preset from the gallery. Adopt by */
+export interface GuardrailExample {
+  check_types: string[];
+  config: Record<string, unknown>;
+  data_egress: string;
+  description: string;
+  display_name: string;
+  name: string;
+  stages: string[];
+  tags: string[];
+}
+
+/** Response for the `list_guardrail_examples` operation. */
+export interface GuardrailExamplesResponse {
+  examples: GuardrailExample[];
+}
+
+export type GuardrailStage = "output" | "tool_use" | "tool_output";
+
+/** One triggered check from a guardrails dry run. */
+export interface GuardrailsDryRunHit {
+  action: GuardrailAction;
+  check_id: string;
+  check_index: number;
+  matched?: string | null;
+  reason_code: string;
+  replacement?: string | null;
+  rule_type: string;
+  stage: GuardrailStage;
+}
+
+/** Request body for the `dry_run_guardrails` operation: evaluate a */
+export interface GuardrailsDryRunRequest {
+  config: Record<string, unknown>;
+  stage: GuardrailStage;
+  text: string;
+  toolName?: string | null;
+}
+
+/** Response for the `dry_run_guardrails` operation. */
+export interface GuardrailsDryRunResponse {
+  blocked: boolean;
+  hits: GuardrailsDryRunHit[];
+}
+
+/** Outcome of a single case after the agent ran and was scored. */
+export interface HealthCheckCaseResult {
+  deterministic_reason: string;
+  error?: string | null;
+  input_tokens?: number;
+  judge_reason: string;
+  latency_ms: number;
+  name: string;
+  output_tokens?: number;
+  passed: boolean;
+  rubric: string;
+  score: number;
+  session_id?: string | null;
+  turns: number;
+  user_message: string;
+}
+
+/** API view of a health check run. */
+export interface HealthCheckRun {
+  agent_id?: string | null;
+  completed_at?: string | null;
+  config_hash: string;
+  created_at: string;
+  error_message?: string | null;
+  id: string;
+  model_id?: string | null;
+  results?: HealthCheckCaseResult[] | null;
+  status: HealthCheckStatus;
+  summary?: HealthCheckSummary | null;
+}
+
+export type HealthCheckStatus = "pending" | "running" | "completed" | "failed";
+
+/** Aggregate metrics across all cases in a run. */
+export interface HealthCheckSummary {
+  avg_score: number;
+  avg_turns: number;
+  errored: number;
+  failed: number;
+  pass_rate: number;
+  passed: number;
+  total: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+}
+
+/** Starter file copied into a new session from an agent or harness. */
+export interface InitialFile {
+  content: string;
+  encoding?: string;
+  isReadonly?: boolean;
+  path: string;
+}
+
+/** Immutable ledger entry recording resource consumption or credit against a budget. */
+export interface LedgerEntry {
+  amount: number;
+  budgetId: string;
+  createdAt: string;
+  description?: string | null;
+  id: string;
+  meterSource: string;
+  refId?: string | null;
+  refType?: string | null;
+  sessionId?: string | null;
+}
+
+/** Response body for memory. */
+export interface Memory {
+  archived_at?: string | null;
+  created_at: string;
+  deleted_at?: string | null;
+  description?: string | null;
+  id: string;
+  is_readonly: boolean;
   last_sync_error?: string | null;
   last_synced_at?: string | null;
-  archived_at?: string | null;
-  deleted_at?: string | null;
-}
-
-export interface GitHubMemorySourceRequest {
-  type: "github";
-  repository: string;
-  branch?: string | null;
-  root_folder?: string | null;
-  sync_interval_secs?: number | null;
-}
-
-export interface GitMemorySourceRequest {
-  type: "git";
-  url: string;
-  branch?: string | null;
-  root_folder?: string | null;
-  sync_interval_secs?: number | null;
-}
-
-export type CreateMemorySourceRequest =
-  | GitHubMemorySourceRequest
-  | GitMemorySourceRequest;
-
-/** Request to create a memory */
-export interface CreateMemoryRequest {
   name: string;
-  description?: string | null;
-  source?: CreateMemorySourceRequest | null;
-}
-
-/** Request to update a memory */
-export interface UpdateMemoryRequest {
-  name?: string | null;
-  description?: string | null;
-  source?: CreateMemorySourceRequest | null;
-}
-
-/** Memory file metadata */
-export interface MemoryFileInfo {
-  path: string;
-  is_directory: boolean;
-  size_bytes: number;
-  created_at: string;
+  source: unknown;
+  source_type: string;
+  status: string;
+  sync_status: string;
   updated_at: string;
-  content_hash?: string | null;
 }
 
-/** Memory file content */
 export interface MemoryFile {
-  path: string;
   content: string;
-  encoding: string;
-  size_bytes: number;
-  created_at: string;
-  updated_at: string;
   content_hash?: string | null;
+  created_at: string;
+  encoding: string;
+  path: string;
+  size_bytes: number;
+  updated_at: string;
 }
 
-/** Request to create a memory file or directory */
-export interface CreateMemoryFileRequest {
-  content?: string;
-  encoding?: string;
-  isDirectory?: boolean;
+export interface MemoryFileInfo {
+  content_hash?: string | null;
+  created_at: string;
+  is_directory: boolean;
+  path: string;
+  size_bytes: number;
+  updated_at: string;
 }
 
-/** Request to update a memory file */
-export interface UpdateMemoryFileRequest {
-  content?: string;
-  encoding?: string;
-}
-
-/** Memory grep result entry */
 export interface MemoryGrepResult {
   path: string;
   size_bytes: number;
 }
 
-// --- Agent Analysis and Guardrail Models ---
-
-export interface AnalyzeAgentRequest {
-  systemPrompt: string;
-  capabilities?: AgentCapabilityConfig[];
-  tools?: Record<string, unknown>[];
-  mcpServers?: Record<string, unknown>;
-}
-
-export interface FindingLocation {
-  field: string;
-  start?: number | null;
-  end?: number | null;
-}
-
-export interface Finding {
-  rule_id: string;
-  severity: string;
-  category: string;
-  source: string;
-  message: string;
-  location?: FindingLocation | null;
-  fix?: string | null;
-}
-
-export interface AgentAnalysisResponse {
-  findings: Finding[];
-}
-
-export type GuardrailStage = "output" | "tool_use" | "tool_output";
-export type GuardrailAction = "block" | "log";
-
-export interface GuardrailsDryRunRequest {
-  config: Record<string, unknown>;
-  stage: GuardrailStage;
-  text: string;
-  toolName?: string;
-}
-
-export interface GuardrailsDryRunHit {
-  check_index: number;
-  check_id: string;
-  stage: GuardrailStage;
-  rule_type: string;
-  action: GuardrailAction;
-  reason_code: string;
-  matched?: string | null;
-  replacement?: string | null;
-}
-
-export interface GuardrailsDryRunResponse {
-  hits: GuardrailsDryRunHit[];
-  blocked: boolean;
-}
-
-export interface GuardrailExample {
-  name: string;
-  display_name: string;
-  description: string;
-  tags: string[];
-  check_types: string[];
-  stages: string[];
-  data_egress: string;
-  config: Record<string, unknown>;
-}
-
-export interface GuardrailExamplesResponse {
-  examples: GuardrailExample[];
-}
-
-// --- Budget Models ---
-
-/** Budget period configuration for recurring budgets */
-export interface BudgetPeriod {
-  type: "rolling" | "calendar";
-  /** Window duration for rolling periods (e.g. "24h") */
-  window?: string;
-  /** Calendar unit for calendar periods (e.g. "month") */
-  unit?: string;
-}
-
-/** Budget — a spending cap for a subject in a currency */
-export interface Budget {
+/** A message in the conversation */
+export interface Message {
+  content: ContentPart[];
+  controls?: Controls | null;
+  createdAt: string;
+  externalActor?: ExternalActor | null;
   id: string;
-  organizationId: string;
-  subjectType: string;
-  subjectId: string;
-  currency: string;
-  limit: number;
-  softLimit?: number | null;
-  balance: number;
-  period?: BudgetPeriod | null;
   metadata?: Record<string, unknown> | null;
-  status: "active" | "paused" | "exhausted" | "disabled";
-  createdAt: string;
-  updatedAt: string;
+  phase?: unknown | null;
+  role: "user" | "assistant" | "tool_result";
+  thinkingSignature?: string | null;
 }
 
-/** Request to create a budget */
-export interface CreateBudgetRequest {
-  subjectType: string;
-  subjectId: string;
-  currency: string;
-  limit: number;
-  softLimit?: number;
-  period?: BudgetPeriod;
-  metadata?: Record<string, unknown>;
+export type MessageRole = "system" | "user" | "agent" | "tool_result";
+
+/** Request to move/rename a file */
+export interface MoveFileRequest {
+  dstPath: string;
+  srcPath: string;
 }
 
-/** Request to update a budget */
-export interface UpdateBudgetRequest {
-  limit?: number;
-  softLimit?: number | null;
-  status?: string;
-  metadata?: Record<string, unknown>;
+/** Response body for resource stats. */
+export interface ResourceStats {
+  active_session_count: number;
+  avg_session_duration_ms?: number | null;
+  execution_count: number;
+  first_session_at?: string | null;
+  idle_session_count: number;
+  last_execution_at?: string | null;
+  last_session_at?: string | null;
+  session_count: number;
+  started_session_count: number;
+  total_actual_cost_usd: number;
+  total_cache_creation_tokens: number;
+  total_cache_read_tokens: number;
+  total_cost_usd: number;
+  total_estimated_cost_usd: number;
+  total_input_tokens: number;
+  total_output_tokens: number;
+  total_session_duration_ms: number;
+  waiting_for_tool_results_session_count: number;
 }
 
-/** Request to top up a budget */
-export interface TopUpRequest {
-  amount: number;
-  description?: string;
-}
-
-/** Ledger entry recording resource consumption or credit */
-export interface LedgerEntry {
-  id: string;
-  budgetId: string;
-  amount: number;
-  meterSource: string;
-  refType?: string | null;
-  refId?: string | null;
-  sessionId?: string | null;
-  description?: string | null;
-  createdAt: string;
-}
-
-/** Result of checking all budgets for a session */
-export interface BudgetCheckResult {
-  action: string;
-  message?: string | null;
-  budgetId?: string | null;
-  balance?: number | null;
-  currency?: string | null;
-}
-
-/** Response from session resume endpoint */
+/** Result of resuming budgets paused for a session. */
 export interface ResumeSessionResponse {
   resumedBudgets: number;
   sessionId: string;
 }
 
-// --- Connections Models ---
-
-/** A user connection to an external provider */
-export interface Connection {
-  provider: string;
-  createdAt: string;
-  updatedAt: string;
+/** Request body for the `rollback_agent_version` operation. */
+export interface RollbackAgentVersionRequest {
+  saveVersion?: boolean;
+  summary?: string | null;
 }
 
-/** Paginated list response */
+/** Session - instance of agentic loop execution. */
+export interface Session {
+  activeScheduleCount?: number | null;
+  agentId?: string | null;
+  agentIdentityId?: string | null;
+  agentVersionId?: string | null;
+  blueprintConfig?: Record<string, unknown> | null;
+  blueprintId?: string | null;
+  capabilities?: AgentCapabilityConfig[];
+  createdAt: string;
+  effectiveOwner?: unknown | null;
+  features?: string[];
+  finishedAt?: string | null;
+  forkedFromSequence?: number | null;
+  forkedFromSessionId?: string | null;
+  harnessId: string;
+  hints?: Record<string, unknown> | null;
+  id: string;
+  initialFiles?: InitialFile[];
+  isPinned?: boolean | null;
+  locale?: string | null;
+  maxIterations?: number | null;
+  mcpServers?: unknown;
+  modelId?: string | null;
+  networkAccess?: unknown | null;
+  outputPreview?: string | null;
+  owner?: unknown | null;
+  ownerPrincipalId: string;
+  parallelToolCalls?: boolean | null;
+  parentSessionId?: string | null;
+  preview?: string | null;
+  resolvedOwnerUserId?: string | null;
+  startedAt?: string | null;
+  status: SessionStatus;
+  systemPrompt?: string | null;
+  tags?: string[];
+  title?: string | null;
+  tools?: ToolDefinition[];
+  updatedAt: string;
+  workspaceId: string;
+}
+
+/** Complete file with content */
+export interface SessionFile {
+  content?: string | null;
+  created_at: string;
+  encoding?: string;
+  id: string;
+  is_directory: boolean;
+  is_readonly: boolean;
+  name: string;
+  path: string;
+  session_id: string;
+  size_bytes: number;
+  updated_at: string;
+}
+
+export type SessionStatus =
+  | "started"
+  | "active"
+  | "idle"
+  | "waitingfortoolresults";
+
+/** Request body for the `set_default_agent_version` operation. */
+export interface SetDefaultAgentVersionRequest {
+  versionId: string;
+}
+
+export interface StatRequest {
+  path: string;
+}
+
+/** Request to submit client-side tool results */
+export interface SubmitToolResultsRequest {
+  toolResults: ClientToolResult[];
+}
+
+/** Response from submitting tool results */
+export interface SubmitToolResultsResponse {
+  accepted: number;
+  status: string;
+}
+
+/** Token usage statistics */
+export interface TokenUsage {
+  actualCostUsd?: number | null;
+  cacheCreationTokens?: number | null;
+  cacheReadTokens?: number | null;
+  effectiveCostUsd?: number | null;
+  estimatedCostUsd?: number | null;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export type ToolDefinition =
+  | (BuiltinTool & { type: "builtin" })
+  | (ClientSideTool & { type: "client_side" });
+
+export interface TopUpRequest {
+  amount: number;
+  description?: string | null;
+}
+
+/** Request body for changing a spending budget. */
+export interface UpdateBudgetRequest {
+  limit?: number | null;
+  metadata?: unknown;
+  softLimit?: number | null;
+  status?: string | null;
+}
+
+/** Request to update a file */
+export interface UpdateFileRequest {
+  content?: string | null;
+  encoding?: string | null;
+  isReadonly?: boolean | null;
+}
+
+export interface UpdateMemoryFileRequest {
+  content?: string | null;
+  encoding?: string | null;
+}
+
+/** Request body for the `update_memory` operation. */
+export interface UpdateMemoryRequest {
+  description?: string | null;
+  name?: string | null;
+  source?: CreateMemorySourceRequest | null;
+}
+
+export interface UpdateWorkspaceRequest {
+  description?: string | null;
+  name?: string | null;
+  status?: string | null;
+}
+
+export interface Workspace {
+  archived_at?: string | null;
+  created_at: string;
+  deleted_at?: string | null;
+  description?: string | null;
+  id: string;
+  name: string;
+  status: string;
+  updated_at: string;
+}
+
+/** Request to preview the final agent shape with capabilities applied */
+export interface AnalyzeAgentRequest {
+  capabilities?: AgentCapabilityConfig[];
+  mcpServers?: unknown;
+  systemPrompt: string;
+  tools?: Record<string, unknown>[];
+}
+
+export interface ListEventsOptions {
+  sinceId?: string;
+  types?: string[];
+  exclude?: string[];
+  limit?: number;
+  beforeSequence?: number;
+  afterSequence?: number;
+  around?: string;
+  window?: number;
+  fromTs?: string;
+  toTs?: string;
+  turnId?: string;
+  execId?: string;
+  traceId?: string;
+  tags?: string[];
+  toolName?: string;
+  q?: string;
+  orderDesc?: boolean;
+}
+
+export interface MessageInput {
+  role: "user" | "tool_result";
+  content: ContentPart[];
+}
+
+export interface SetConnectionRequest {
+  apiKey: string;
+}
+
+export interface SetSecretsRequest {
+  secrets: Record<string, string>;
+}
+
+export interface StreamOptions {
+  sinceId?: string;
+  types?: string[];
+  exclude?: string[];
+  maxRetries?: number;
+  idleTimeoutMs?: number;
+}
+
+export interface ToolCallInfo {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
 export interface ListResponse<T> {
   data: T[];
   total: number;
@@ -864,17 +837,65 @@ export interface ListResponse<T> {
   limit: number;
 }
 
-export interface StreamOptions {
-  /** Resume from this event ID */
-  sinceId?: string;
-  /** Positive type filter: only return events matching these types */
-  types?: string[];
-  /** Event types to exclude from the stream (applied after `types` filter) */
-  exclude?: string[];
-  /** Maximum number of reconnection attempts (undefined = unlimited) */
-  maxRetries?: number;
-  /** Idle timeout in ms for detecting half-open connections.
-   * When no chunks arrive within this duration, the stream reconnects.
-   * Default: 45000 (1.5× the server's 30s heartbeat interval). */
-  idleTimeoutMs?: number;
+export function generateAgentId(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return `agent_${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+}
+
+export function generateHarnessId(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return `harness_${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+}
+
+const ADDRESSABLE_NAME_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+function validateAddressableName(name: string, label: string): void {
+  if (name.length > 64)
+    throw new Error(
+      `${label} must be at most 64 characters, got ${name.length}`,
+    );
+  if (!ADDRESSABLE_NAME_PATTERN.test(name))
+    throw new Error(
+      `${label} must match pattern [a-z0-9]+(-[a-z0-9]+)*, got "${name}"`,
+    );
+}
+
+export function validateHarnessName(name: string): void {
+  validateAddressableName(name, "harness_name");
+}
+
+export function validateAgentName(name: string): void {
+  validateAddressableName(name, "agent_name");
+}
+
+export function toolResult(toolCallId: string, result: unknown): ContentPart {
+  return { type: "tool_result", tool_call_id: toolCallId, result };
+}
+
+export function toolError(toolCallId: string, error: string): ContentPart {
+  return { type: "tool_result", tool_call_id: toolCallId, error };
+}
+
+export function extractToolCalls(
+  data: Record<string, unknown>,
+): ToolCallInfo[] {
+  let requested = data.tool_calls;
+  if (!Array.isArray(requested))
+    requested =
+      (data.message as { content?: unknown[] } | undefined)?.content ?? [];
+  if (!Array.isArray(requested)) return [];
+  return requested.flatMap((value) => {
+    const call = value as Record<string, unknown>;
+    if (call.type !== undefined && call.type !== "tool_call") return [];
+    if (typeof call.id !== "string" || typeof call.name !== "string") return [];
+    return [
+      {
+        id: call.id,
+        name: call.name,
+        arguments: (call.arguments as Record<string, unknown>) ?? {},
+      },
+    ];
+  });
 }

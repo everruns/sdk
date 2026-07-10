@@ -14,6 +14,10 @@ echo ""
 
 STEP=0
 TOTAL=4
+UV_CMD="$(command -v uv || true)"
+if [ -z "$UV_CMD" ]; then
+  UV_CMD="python3 -m uv"
+fi
 
 # 1. Rust formatting + clippy
 STEP=$((STEP + 1))
@@ -37,7 +41,7 @@ fi
 STEP=$((STEP + 1))
 echo "$STEP/$TOTAL Python linting"
 if [ -d "$PROJECT_ROOT/python" ]; then
-  if (cd "$PROJECT_ROOT/python" && uv run ruff check . 2>/dev/null && uv run ruff format --check . 2>/dev/null); then
+  if (cd "$PROJECT_ROOT/python" && $UV_CMD run ruff check . 2>/dev/null && $UV_CMD run ruff format --check . 2>/dev/null); then
     pass "ruff check + format"
   else
     fail "ruff — run: cd python && uv run ruff format . && uv run ruff check --fix ."

@@ -17,9 +17,9 @@ Everruns SDKs provide typed clients for the Everruns API across multiple languag
 
 | Language | Type Generator | HTTP Library | SSE Library |
 |----------|----------------|--------------|-------------|
-| Rust | progenitor | reqwest | reqwest-eventsource |
-| Python | datamodel-codegen | httpx | httpx-sse |
-| TypeScript | openapi-typescript | fetch/undici | eventsource-parser |
+| Rust | shared repo generator | reqwest | reqwest-eventsource |
+| Python | shared repo generator | httpx | httpx-sse |
+| TypeScript | shared repo generator | fetch/undici | eventsource-parser |
 
 ## SDK Structure (per language)
 
@@ -34,6 +34,22 @@ Everruns SDKs provide typed clients for the Everruns API across multiple languag
 ├── examples/
 └── tests/
 ```
+
+## Generation Workflow
+
+`scripts/generate.py` is the repo-level entry point for regenerating the public
+model modules in Rust, Python, and TypeScript. `scripts/sdk_codegen.py` builds a
+shared model representation from `openapi/openapi.json` and
+`codegen/sdk-models.json`, validates `x-sdk-response-wrapper` metadata, and emits
+the language-specific public types, builders, validators, and model helpers.
+
+There is one model layer per SDK. Generated models are written directly to
+`rust/src/models.rs`, `python/everruns_sdk/models.py`, and
+`typescript/src/models.ts`; no separate internal OpenAPI model layer exists.
+
+Run `just generate` after changing `openapi/openapi.json`. Run
+`just generate-check` in CI or before PRs to verify generated files are current.
+Run `just sync-openapi` to fetch the upstream OpenAPI mirror and regenerate.
 
 ## URL Joining
 

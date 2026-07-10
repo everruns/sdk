@@ -55,7 +55,7 @@ Proposals must include the recommended SDK surface, impacted specs, target-langu
 
 - Fetch the current upstream OpenAPI file from `https://raw.githubusercontent.com/everruns/everruns/main/docs/api/openapi.json`.
 - Compare it to the local mirror before generating or coding.
-- Regenerate types after any OpenAPI change with `just generate`.
+- Regenerate public SDK models after any OpenAPI change with `just generate`.
 - Treat generated diffs as inputs to implementation, not as complete adoption.
 
 ### Upstream Delta Analysis

@@ -1,0 +1,272 @@
+{
+  "models": [
+    "Agent",
+    "AgentAnalysisResponse",
+    "AgentCapabilityConfig",
+    "AgentStatus",
+    "AgentVersion",
+    "AgentVersionChangeKind",
+    "AgentVersionDiffResponse",
+    "Budget",
+    "BudgetCheckResult",
+    "BudgetPeriod",
+    "BudgetStatus",
+    "BuiltinTool",
+    "CapabilityInfo",
+    "ClientSideTool",
+    "ClientToolResult",
+    "Connection",
+    "ContentPart",
+    "Controls",
+    "CopyFileRequest",
+    "CreateAgentRequest",
+    "CreateAgentVersionRequest",
+    "CreateBudgetRequest",
+    "CreateFileRequest",
+    "CreateMemoryFileRequest",
+    "CreateMemoryRequest",
+    "CreateMemorySourceRequest",
+    "CreateMessageRequest",
+    "CreateSessionRequest",
+    "CreateWorkspaceRequest",
+    "DeleteFileResponse",
+    "Event",
+    "EventContext",
+    "ExternalActor",
+    "FileInfo",
+    "FileStat",
+    "Finding",
+    "FindingLocation",
+    "ForkAgentVersionRequest",
+    "GitHubMemorySourceRequest",
+    "GitMemorySourceRequest",
+    "GrepMatch",
+    "GrepRequest",
+    "GrepResult",
+    "GuardrailAction",
+    "GuardrailExample",
+    "GuardrailExamplesResponse",
+    "GuardrailStage",
+    "GuardrailsDryRunHit",
+    "GuardrailsDryRunRequest",
+    "GuardrailsDryRunResponse",
+    "HealthCheckCaseResult",
+    "HealthCheckRun",
+    "HealthCheckStatus",
+    "HealthCheckSummary",
+    "InitialFile",
+    "LedgerEntry",
+    "Memory",
+    "MemoryFile",
+    "MemoryFileInfo",
+    "MemoryGrepResult",
+    "Message",
+    "MessageRole",
+    "MoveFileRequest",
+    "ResourceStats",
+    "ResumeSessionResponse",
+    "RollbackAgentVersionRequest",
+    "Session",
+    "SessionFile",
+    "SessionStatus",
+    "SetDefaultAgentVersionRequest",
+    "StatRequest",
+    "SubmitToolResultsRequest",
+    "SubmitToolResultsResponse",
+    "TokenUsage",
+    "ToolDefinition",
+    "TopUpRequest",
+    "UpdateBudgetRequest",
+    "UpdateFileRequest",
+    "UpdateMemoryFileRequest",
+    "UpdateMemoryRequest",
+    "UpdateWorkspaceRequest",
+    "Workspace"
+  ],
+  "aliases": {
+    "AnalyzeAgentRequest": "PreviewAgentRequest"
+  },
+  "referenceAliases": {
+    "InputMessage": "MessageInput"
+  },
+  "schemaOverrides": {
+    "Connection": {
+      "type": "object",
+      "required": ["provider", "created_at", "updated_at"],
+      "properties": {
+        "provider": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "SessionStatus": {
+      "type": "string",
+      "enum": ["started", "active", "idle", "waitingfortoolresults"]
+    }
+  },
+  "compatibilityOptionalFields": [
+    "AgentVersion.is_published",
+    "ResourceStats.total_actual_cost_usd",
+    "ResourceStats.total_cost_usd",
+    "ResourceStats.total_estimated_cost_usd",
+    "Session.owner_principal_id",
+    "Session.workspace_id"
+  ],
+  "fieldOrders": {
+    "ForkAgentVersionRequest": ["name", "display_name", "description"]
+  },
+  "syntheticSchemas": {
+    "ListEventsOptions": {
+      "type": "object",
+      "properties": {
+        "since_id": { "type": "string" },
+        "types": { "type": "array", "items": { "type": "string" } },
+        "exclude": { "type": "array", "items": { "type": "string" } },
+        "limit": { "type": "integer", "format": "int32" },
+        "before_sequence": { "type": "integer", "format": "int64" },
+        "after_sequence": { "type": "integer", "format": "int64" },
+        "around": { "type": "string" },
+        "window": { "type": "integer", "format": "int32" },
+        "from_ts": { "type": "string" },
+        "to_ts": { "type": "string" },
+        "turn_id": { "type": "string" },
+        "exec_id": { "type": "string" },
+        "trace_id": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "tool_name": { "type": "string" },
+        "q": { "type": "string" },
+        "order_desc": { "type": "boolean" }
+      }
+    },
+    "MessageInput": {
+      "type": "object",
+      "required": ["role", "content"],
+      "properties": {
+        "role": { "type": "string", "enum": ["user", "tool_result"] },
+        "content": { "type": "array", "items": { "$ref": "#/components/schemas/ContentPart" } }
+      }
+    },
+    "SetConnectionRequest": {
+      "type": "object",
+      "required": ["api_key"],
+      "properties": { "api_key": { "type": "string" } }
+    },
+    "SetSecretsRequest": {
+      "type": "object",
+      "required": ["secrets"],
+      "properties": {
+        "secrets": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "StreamOptions": {
+      "type": "object",
+      "properties": {
+        "since_id": { "type": "string" },
+        "types": { "type": "array", "items": { "type": "string" } },
+        "exclude": { "type": "array", "items": { "type": "string" } },
+        "max_retries": { "type": "integer", "format": "int32" },
+        "idle_timeout_ms": { "type": "integer", "format": "int32" }
+      }
+    },
+    "ToolCallInfo": {
+      "type": "object",
+      "required": ["id", "name", "arguments"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "arguments": { "type": "object" }
+      }
+    }
+  },
+  "typescript": {
+    "snakeCaseModels": [
+      "AgentVersion",
+      "AgentVersionDiffResponse",
+      "BuiltinTool",
+      "ClientSideTool",
+      "ClientToolResult",
+      "ContentPart",
+      "FileInfo",
+      "FileStat",
+      "Finding",
+      "GitHubMemorySourceRequest",
+      "GitMemorySourceRequest",
+      "GrepMatch",
+      "GuardrailExample",
+      "GuardrailsDryRunHit",
+      "HealthCheckCaseResult",
+      "HealthCheckRun",
+      "HealthCheckSummary",
+      "Memory",
+      "MemoryFile",
+      "MemoryFileInfo",
+      "MemoryGrepResult",
+      "ResourceStats",
+      "SessionFile",
+      "Workspace"
+    ],
+    "fieldRenames": {
+      "Agent.default_model_id": "model",
+      "CreateAgentRequest.default_model_id": "model",
+      "Event.ts": "createdAt",
+      "GuardrailsDryRunHit.tool_name": "toolName"
+    },
+    "omitFields": {
+      "Agent": [
+        "archived_at",
+        "default_version_id",
+        "deleted_at",
+        "description",
+        "forked_from_agent_id",
+        "forked_from_version_id",
+        "max_iterations",
+        "mcpServers",
+        "network_access",
+        "root_agent_id",
+        "status",
+        "tags",
+        "usage"
+      ],
+      "Event": ["context", "metadata", "sequence", "session_id", "tags"],
+      "Message": ["sequence", "tags", "thinking"],
+      "Session": ["organization_id", "usage"]
+    },
+    "typeOverrides": {
+      "Event.data": "Record<string, unknown>",
+      "Message.role": "\"user\" | \"assistant\" | \"tool_result\""
+    }
+  },
+  "python": {
+    "defaultValues": {
+      "CapabilityInfo.is_mcp": false,
+      "CapabilityInfo.is_skill": false
+    }
+  },
+  "rust": {
+    "defaultFields": [
+      "Agent.harness_id",
+      "CapabilityInfo.is_mcp",
+      "CapabilityInfo.is_skill"
+    ],
+    "fieldRenames": {
+      "AgentCapabilityConfig.ref": "capability_ref",
+      "Event.type": "event_type"
+    },
+    "typeOverrides": {
+      "CapabilityInfo.risk_level": "String",
+      "CreateMemoryRequest.source": "serde_json::Value",
+      "GuardrailsDryRunHit.action": "String",
+      "GuardrailsDryRunHit.stage": "String",
+      "GuardrailsDryRunRequest.stage": "String",
+      "Message.phase": "String",
+      "MessageInput.role": "MessageRole",
+      "UpdateMemoryRequest.source": "serde_json::Value"
+    },
+    "doubleOptionFields": ["UpdateBudgetRequest.soft_limit"],
+    "newtypeUnions": ["ToolDefinition"],
+    "unionOmitFields": {
+      "ContentPart.image": ["media_type"],
+      "ContentPart.image_file": ["filename"]
+    }
+  }
+}

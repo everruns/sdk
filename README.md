@@ -216,6 +216,7 @@ Each SDK also has basic examples:
 
 ```bash
 just setup    # Install dependencies for all SDKs
+just generate # Regenerate public models from OpenAPI
 just test     # Run all tests
 just lint     # Run all linters
 ```

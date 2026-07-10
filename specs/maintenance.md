@@ -64,7 +64,7 @@ curl -s "https://raw.githubusercontent.com/everruns/everruns/main/docs/api/opena
 
 If spec changed:
 1. Diff against current: `git diff openapi/openapi.json`
-2. Regenerate types: `just generate`
+2. Regenerate public SDK models: `just generate`
 3. Check for new endpoints not yet covered by SDKs
 4. Update `specs/api-surface.md` if new endpoints added
 
