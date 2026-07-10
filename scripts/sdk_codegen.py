@@ -342,6 +342,17 @@ class Emitter:
         names = list(order) + [name for name in properties if name not in order]
         return [(name, properties[name]) for name in names if name in properties]
 
+    def is_scalar_alias(self, schema: Mapping[str, Any]) -> bool:
+        """A top-level schema that is a bare scalar (e.g. an open string id type)
+        with no enum/properties/composition. It must become a type alias, not an
+        empty object — otherwise it serializes as `{}` and fails to (de)serialize
+        the real scalar wire value."""
+        if schema.get("enum") or schema.get("properties"):
+            return False
+        if any(key in schema for key in ("oneOf", "allOf", "anyOf", "additionalProperties")):
+            return False
+        return schema.get("type") in ("string", "integer", "number", "boolean")
+
 
 class PythonEmitter(Emitter):
     flatten_models = {"BudgetPeriod", "ContentPart", "ToolDefinition"}
@@ -504,6 +515,8 @@ class PythonEmitter(Emitter):
             if schema.get("enum") and schema.get("type") == "string":
                 values = ", ".join(repr(value) for value in schema["enum"])
                 lines.extend([f"{model.name} = Literal[{values}]", ""])
+            elif self.is_scalar_alias(schema):
+                deferred_aliases.extend([f"{model.name} = {self.type_expr(schema)}", ""])
             elif "oneOf" in schema:
                 choices: list[str] = []
                 for choice in schema["oneOf"]:
@@ -676,6 +689,8 @@ class TypeScriptEmitter(Emitter):
             if schema.get("enum") and schema.get("type") == "string":
                 values = " | ".join(json.dumps(value) for value in schema["enum"])
                 lines.extend([f"export type {model.name} = {values};", ""])
+            elif self.is_scalar_alias(schema):
+                lines.extend([f"export type {model.name} = {self.type_expr(schema)};", ""])
             elif "oneOf" in schema:
                 choices: list[str] = []
                 for choice in schema["oneOf"]:
@@ -1118,6 +1133,8 @@ class RustEmitter(Emitter):
                 lines.append(f"/// {description}")
             if schema.get("enum") and schema.get("type") == "string":
                 lines.extend(self.emit_enum(model, schema))
+            elif self.is_scalar_alias(schema):
+                lines.append(f"pub type {model.name} = {self.type_expr(schema)};")
             elif "oneOf" in schema:
                 lines.extend(self.emit_union(model, schema))
             else:

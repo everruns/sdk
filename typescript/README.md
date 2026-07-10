@@ -50,6 +50,24 @@ const agent = await client.agents.create({
 const session = await client.sessions.create({ agentName: "researcher" });
 ```
 
+## Harnesses & Models
+
+Discover and manage harnesses, and browse available models to choose a `defaultModelId`.
+
+```typescript
+// Browse harnesses, then create one
+const harnesses = await client.harnesses.list(); // or .search("research")
+const harness = await client.harnesses.get(harnesses.data[0].id);
+const custom = await client.harnesses.create({
+  name: "my-harness",
+  systemPrompt: "Base instructions for every session.",
+});
+const examples = await client.harnesses.listExamples();
+
+// List models to pick a default for an agent
+const models = await client.models.list();
+```
+
 ## Initial Files
 
 ```typescript

@@ -2517,3 +2517,276 @@ describe("Session budget shortcuts", () => {
     );
   });
 });
+
+describe("HarnessesClient", () => {
+  const harnessJson = {
+    id: "harness_123",
+    name: "deep-research",
+    status: "active",
+    created_at: "2026-07-01T00:00:00Z",
+    updated_at: "2026-07-01T00:00:00Z",
+  };
+
+  it("should list harnesses", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [harnessJson],
+        total: 1,
+        offset: 0,
+        limit: 25,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.harnesses.list();
+
+    expect(response.data).toHaveLength(1);
+    expect(response.total).toBe(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/harnesses",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should search harnesses", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [harnessJson],
+        total: 1,
+        offset: 0,
+        limit: 25,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.harnesses.search("deep research");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/harnesses?search=deep%20research",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should get a harness by ID", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => harnessJson,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const harness = await client.harnesses.get("harness_123");
+
+    expect(harness.id).toBe("harness_123");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/harnesses/harness_123",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should create a harness with a snake_case body", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => harnessJson,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.harnesses.create({
+      name: "deep-research",
+      systemPrompt: "You research deeply.",
+      displayName: "Deep Research",
+      description: "A research harness",
+      defaultModelId: "model_123",
+      capabilities: [{ ref: "web_search" }],
+      initialFiles: [
+        {
+          path: "/workspace/README.md",
+          content: "# hi\n",
+          encoding: "text",
+          isReadonly: true,
+        },
+      ],
+      networkAccess: { allowed: ["example.com"] },
+      parentHarnessId: "harness_parent",
+      tags: ["research"],
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/harnesses",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          name: "deep-research",
+          system_prompt: "You research deeply.",
+          display_name: "Deep Research",
+          description: "A research harness",
+          default_model_id: "model_123",
+          capabilities: [{ ref: "web_search" }],
+          initial_files: [
+            {
+              path: "/workspace/README.md",
+              content: "# hi\n",
+              encoding: "text",
+              is_readonly: true,
+            },
+          ],
+          network_access: { allowed: ["example.com"] },
+          parent_harness_id: "harness_parent",
+          tags: ["research"],
+        }),
+      }),
+    );
+  });
+
+  it("should reject an invalid harness name on create", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await expect(
+      client.harnesses.create({ name: "Invalid_Name" }),
+    ).rejects.toThrow("must match pattern");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("should update a harness with a snake_case body", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => harnessJson,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.harnesses.update("harness_123", {
+      displayName: "Renamed",
+      defaultModelId: "model_456",
+      status: "archived",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/harnesses/harness_123",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({
+          display_name: "Renamed",
+          default_model_id: "model_456",
+          status: "archived",
+        }),
+      }),
+    );
+  });
+
+  it("should delete a harness", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: async () => undefined,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.harnesses.delete("harness_123");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/harnesses/harness_123",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("should list harness examples", async () => {
+    const example = {
+      name: "deep-research",
+      display_name: "Deep Research",
+      description: "Research harness",
+      dev_only: false,
+      capabilities: [],
+      tags: ["research"],
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [example],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const examples = await client.harnesses.listExamples();
+
+    expect(examples).toHaveLength(1);
+    expect(examples[0].name).toBe("deep-research");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/harness-examples",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+});
+
+describe("ModelsClient", () => {
+  const modelJson = {
+    id: "model_123",
+    model_id: "gpt-4",
+    display_name: "GPT-4",
+    provider_id: "provider_1",
+    provider_name: "OpenAI",
+    provider_type: "openai",
+    source: "builtin",
+    capabilities: [],
+    enabled: true,
+    healthy: true,
+    is_favorite: false,
+    created_at: "2026-07-01T00:00:00Z",
+    updated_at: "2026-07-01T00:00:00Z",
+  };
+
+  it("should list models", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [modelJson],
+        total: 1,
+        offset: 0,
+        limit: 25,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const response = await client.models.list();
+
+    expect(response.data).toHaveLength(1);
+    expect(response.data[0].id).toBe("model_123");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/models",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+
+  it("should get a model by ID", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => modelJson,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const model = await client.models.get("model_123");
+
+    expect(model.id).toBe("model_123");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://custom.example.com/api/v1/models/model_123",
+      expect.objectContaining({ headers: expect.any(Object) }),
+    );
+  });
+});

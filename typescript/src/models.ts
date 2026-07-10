@@ -203,6 +203,14 @@ export interface CopyFileRequest {
   srcPath: string;
 }
 
+/** A pricing tier that activates above a context token threshold. */
+export interface CostTier {
+  aboveTokens: number;
+  cacheRead?: number | null;
+  input: number;
+  output: number;
+}
+
 /** Request to create a new agent */
 export interface CreateAgentRequest {
   capabilities?: AgentCapabilityConfig[];
@@ -216,7 +224,7 @@ export interface CreateAgentRequest {
   maxIterations?: number | null;
   mcpServers?: unknown;
   name: string;
-  networkAccess?: unknown | null;
+  networkAccess?: NetworkAccessList | null;
   parallelToolCalls?: boolean | null;
   systemPrompt: string;
   tags?: string[];
@@ -246,6 +254,22 @@ export interface CreateFileRequest {
   encoding?: string | null;
   isDirectory?: boolean | null;
   isReadonly?: boolean | null;
+}
+
+/** Request to create a new harness */
+export interface CreateHarnessRequest {
+  capabilities?: AgentCapabilityConfig[];
+  defaultModelId?: string | null;
+  description?: string | null;
+  displayName?: string | null;
+  embedderMetadata?: Record<string, string>;
+  initialFiles?: InitialFile[];
+  mcpServers?: unknown;
+  name: string;
+  networkAccess?: NetworkAccessList | null;
+  parentHarnessId?: string | null;
+  systemPrompt?: string | null;
+  tags?: string[];
 }
 
 export interface CreateMemoryFileRequest {
@@ -289,7 +313,7 @@ export interface CreateSessionRequest {
   maxIterations?: number | null;
   mcpServers?: unknown;
   modelId?: string | null;
-  networkAccess?: unknown | null;
+  networkAccess?: NetworkAccessList | null;
   parallelToolCalls?: boolean | null;
   systemPrompt?: string | null;
   tags?: string[];
@@ -307,6 +331,8 @@ export interface CreateWorkspaceRequest {
 export interface DeleteFileResponse {
   deleted: boolean;
 }
+
+export type DriverId = string;
 
 /** Standard event following the Everruns event protocol. */
 export interface Event {
@@ -464,6 +490,43 @@ export interface GuardrailsDryRunResponse {
   hits: GuardrailsDryRunHit[];
 }
 
+/** Harness configuration for sessions. */
+export interface Harness {
+  archivedAt?: string | null;
+  capabilities?: AgentCapabilityConfig[];
+  createdAt: string;
+  defaultModelId?: string | null;
+  deletedAt?: string | null;
+  description?: string | null;
+  displayName?: string | null;
+  embedderMetadata?: Record<string, string>;
+  id: string;
+  initialFiles?: InitialFile[];
+  isBuiltIn?: boolean;
+  mcpServers?: unknown;
+  name: string;
+  networkAccess?: NetworkAccessList | null;
+  parallelToolCalls?: boolean | null;
+  parentHarnessId?: string | null;
+  status: HarnessStatus;
+  systemPrompt?: string | null;
+  tags?: string[];
+  updatedAt: string;
+}
+
+/** A read-only harness example defined in code. */
+export interface HarnessExample {
+  capabilities: AgentCapabilityConfig[];
+  description: string;
+  devOnly: boolean;
+  displayName: string;
+  name: string;
+  parentName?: string | null;
+  tags: string[];
+}
+
+export type HarnessStatus = "active" | "archived" | "deleted";
+
 /** Outcome of a single case after the agent ran and was scored. */
 export interface HealthCheckCaseResult {
   deterministic_reason: string;
@@ -588,10 +651,116 @@ export interface Message {
 
 export type MessageRole = "system" | "user" | "agent" | "tool_result";
 
+export type Modality = "text" | "image" | "audio" | "video" | "pdf";
+
+/** Cost information for the model (per million tokens) */
+export interface ModelCost {
+  cacheRead?: number | null;
+  costTiers?: CostTier[];
+  input: number;
+  output: number;
+}
+
+/** Token limits for the model */
+export interface ModelLimits {
+  context: number;
+  input?: number | null;
+  maxMedia?: number | null;
+  output: number;
+}
+
+/** Model modalities for input and output */
+export interface ModelModalities {
+  input: Modality[];
+  output: Modality[];
+}
+
+/** LLM Model Profile describing model capabilities */
+export interface ModelProfile {
+  attachment: boolean;
+  cost?: ModelCost | null;
+  description?: string | null;
+  family: string;
+  knowledge?: string | null;
+  lastUpdated?: string | null;
+  limits?: ModelLimits | null;
+  modalities?: ModelModalities | null;
+  name: string;
+  openWeights: boolean;
+  reasoning: boolean;
+  reasoningEffort?: ReasoningEffortConfig | null;
+  releaseDate?: string | null;
+  structuredOutput: boolean;
+  supportedParameters?: string[];
+  supportsPhases?: boolean;
+  temperature: boolean;
+  toolCall: boolean;
+  toolSearch?: boolean;
+}
+
+export type ModelSource = "manual" | "discovered" | "predefined";
+
+export type ModelVendor =
+  | "openai"
+  | "anthropic"
+  | "google"
+  | "nvidia"
+  | "qwen"
+  | "microsoft"
+  | "minimax"
+  | "moonshot"
+  | "xai"
+  | "llmsim";
+
+/** LLM Model with provider info */
+export interface ModelWithProvider {
+  capabilities: string[];
+  createdAt: string;
+  displayName: string;
+  enabled: boolean;
+  healthy: boolean;
+  id: string;
+  isFavorite: boolean;
+  modelId: string;
+  modelVendor?: ModelVendor | null;
+  profile?: ModelProfile | null;
+  providerId: string;
+  providerName: string;
+  providerType: DriverId;
+  source: ModelSource;
+  updatedAt: string;
+}
+
 /** Request to move/rename a file */
 export interface MoveFileRequest {
   dstPath: string;
   srcPath: string;
+}
+
+/** Network access list controlling which hosts/URLs an agent session can reach. */
+export interface NetworkAccessList {
+  allowed?: string[];
+  blocked?: string[];
+}
+
+export type ReasoningEffort =
+  | "none"
+  | "minimal"
+  | "low"
+  | "medium"
+  | "high"
+  | "xhigh";
+
+/** Reasoning effort configuration for a model */
+export interface ReasoningEffortConfig {
+  default: ReasoningEffort;
+  values: ReasoningEffortValue[];
+}
+
+/** Named reasoning effort value for UI display */
+export interface ReasoningEffortValue {
+  name: string;
+  value: ReasoningEffort;
 }
 
 /** Response body for resource stats. */
@@ -652,7 +821,7 @@ export interface Session {
   maxIterations?: number | null;
   mcpServers?: unknown;
   modelId?: string | null;
-  networkAccess?: unknown | null;
+  networkAccess?: NetworkAccessList | null;
   outputPreview?: string | null;
   owner?: unknown | null;
   ownerPrincipalId: string;
@@ -744,6 +913,23 @@ export interface UpdateFileRequest {
   content?: string | null;
   encoding?: string | null;
   isReadonly?: boolean | null;
+}
+
+/** Request to update a harness. Only provided fields will be updated. */
+export interface UpdateHarnessRequest {
+  capabilities?: AgentCapabilityConfig[] | null;
+  defaultModelId?: string | null;
+  description?: string | null;
+  displayName?: string | null;
+  embedderMetadata?: Record<string, string> | null;
+  initialFiles?: InitialFile[] | null;
+  mcpServers?: unknown | null;
+  name?: string | null;
+  networkAccess?: NetworkAccessList | null;
+  parentHarnessId?: string | null;
+  status?: HarnessStatus | null;
+  systemPrompt?: string | null;
+  tags?: string[] | null;
 }
 
 export interface UpdateMemoryFileRequest {

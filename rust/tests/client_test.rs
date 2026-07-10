@@ -2,9 +2,10 @@
 
 use everruns_sdk::{
     AgentVersionChangeKind, AnalyzeAgentRequest, ContentPart, CreateAgentRequest,
-    CreateAgentVersionRequest, CreateBudgetRequest, CreateMemoryRequest, CreateSessionRequest,
-    CreateWorkspaceRequest, Everruns, ForkAgentVersionRequest, GuardrailsDryRunRequest,
-    HealthCheckStatus, InitialFile, RollbackAgentVersionRequest, TopUpRequest, UpdateBudgetRequest,
+    CreateAgentVersionRequest, CreateBudgetRequest, CreateHarnessRequest, CreateMemoryRequest,
+    CreateSessionRequest, CreateWorkspaceRequest, Everruns, ForkAgentVersionRequest,
+    GuardrailsDryRunRequest, HarnessStatus, HealthCheckStatus, InitialFile,
+    RollbackAgentVersionRequest, TopUpRequest, UpdateBudgetRequest, UpdateHarnessRequest,
 };
 use std::sync::Mutex;
 use wiremock::{
@@ -2021,4 +2022,294 @@ async fn test_session_export() {
 
     assert!(result.contains("msg_001"));
     assert!(result.contains("msg_002"));
+}
+
+// --- Harness Tests ---
+
+fn harness_json() -> serde_json::Value {
+    serde_json::json!({
+        "id": "harness_123",
+        "name": "deep-research",
+        "display_name": "Deep Research",
+        "description": "Research harness",
+        "system_prompt": "You research deeply.",
+        "capabilities": [],
+        "initial_files": [],
+        "tags": [],
+        "status": "active",
+        "created_at": "2026-07-01T00:00:00Z",
+        "updated_at": "2026-07-01T00:00:00Z"
+    })
+}
+
+#[tokio::test]
+async fn test_harnesses_list() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/harnesses"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [harness_json()],
+            "total": 1,
+            "offset": 0,
+            "limit": 100
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client.harnesses().list().await.expect("harnesses list");
+
+    assert_eq!(response.data.len(), 1);
+    assert_eq!(response.data[0].id, "harness_123");
+    assert_eq!(response.data[0].status, HarnessStatus::Active);
+}
+
+#[tokio::test]
+async fn test_harnesses_search() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/harnesses"))
+        .and(query_param("search", "research"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [harness_json()],
+            "total": 1,
+            "offset": 0,
+            "limit": 100
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client
+        .harnesses()
+        .search("research")
+        .await
+        .expect("harnesses search");
+
+    assert_eq!(response.data.len(), 1);
+    assert_eq!(response.data[0].name, "deep-research");
+}
+
+#[tokio::test]
+async fn test_harnesses_get() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/harnesses/harness_123"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(harness_json()))
+        .mount(&server)
+        .await;
+
+    let harness = client
+        .harnesses()
+        .get("harness_123")
+        .await
+        .expect("harness get");
+
+    assert_eq!(harness.id, "harness_123");
+    assert_eq!(
+        harness.system_prompt.as_deref(),
+        Some("You research deeply.")
+    );
+}
+
+#[tokio::test]
+async fn test_harnesses_create() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/harnesses"))
+        .and(body_json(serde_json::json!({
+            "name": "deep-research",
+            "system_prompt": "You research deeply."
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(harness_json()))
+        .mount(&server)
+        .await;
+
+    let harness = client
+        .harnesses()
+        .create("deep-research", "You research deeply.")
+        .await
+        .expect("harness create");
+
+    assert_eq!(harness.id, "harness_123");
+}
+
+#[tokio::test]
+async fn test_harnesses_create_with_options() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("POST"))
+        .and(path("/v1/harnesses"))
+        .and(body_json(serde_json::json!({
+            "name": "deep-research",
+            "system_prompt": "You research deeply.",
+            "display_name": "Deep Research"
+        })))
+        .respond_with(ResponseTemplate::new(201).set_body_json(harness_json()))
+        .mount(&server)
+        .await;
+
+    let harness = client
+        .harnesses()
+        .create_with_options(
+            CreateHarnessRequest::new("deep-research")
+                .system_prompt("You research deeply.")
+                .display_name("Deep Research"),
+        )
+        .await
+        .expect("harness create with options");
+
+    assert_eq!(harness.name, "deep-research");
+}
+
+#[tokio::test]
+async fn test_harnesses_create_rejects_invalid_name() {
+    let client = Everruns::new("evr_test_key").expect("client");
+    let result = client
+        .harnesses()
+        .create("Invalid Name", "You research deeply.")
+        .await;
+
+    assert!(result.is_err());
+}
+
+#[tokio::test]
+async fn test_harnesses_update() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("PATCH"))
+        .and(path("/v1/harnesses/harness_123"))
+        .and(body_json(serde_json::json!({
+            "description": "Updated description"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(harness_json()))
+        .mount(&server)
+        .await;
+
+    let harness = client
+        .harnesses()
+        .update(
+            "harness_123",
+            UpdateHarnessRequest::new().description("Updated description"),
+        )
+        .await
+        .expect("harness update");
+
+    assert_eq!(harness.id, "harness_123");
+}
+
+#[tokio::test]
+async fn test_harnesses_delete() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("DELETE"))
+        .and(path("/v1/harnesses/harness_123"))
+        .respond_with(ResponseTemplate::new(204))
+        .mount(&server)
+        .await;
+
+    client
+        .harnesses()
+        .delete("harness_123")
+        .await
+        .expect("harness delete");
+}
+
+#[tokio::test]
+async fn test_harnesses_list_examples() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/harness-examples"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!([{
+                "name": "deep-research",
+                "display_name": "Deep Research",
+                "description": "Research harness",
+                "dev_only": false,
+                "capabilities": [],
+                "tags": ["research"]
+            }])),
+        )
+        .mount(&server)
+        .await;
+
+    let examples = client
+        .harnesses()
+        .list_examples()
+        .await
+        .expect("harness examples list");
+
+    assert_eq!(examples.len(), 1);
+    assert_eq!(examples[0].name, "deep-research");
+}
+
+// --- Model Tests ---
+
+fn model_json() -> serde_json::Value {
+    serde_json::json!({
+        "id": "model_123",
+        "model_id": "gpt-4",
+        "display_name": "GPT-4",
+        "capabilities": ["text"],
+        "enabled": true,
+        "healthy": true,
+        "is_favorite": false,
+        "provider_id": "prov_123",
+        "provider_name": "OpenAI",
+        "provider_type": "openai",
+        "source": "manual",
+        "created_at": "2026-07-01T00:00:00Z",
+        "updated_at": "2026-07-01T00:00:00Z"
+    })
+}
+
+#[tokio::test]
+async fn test_models_list() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/models"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [model_json()],
+            "total": 1,
+            "offset": 0,
+            "limit": 100
+        })))
+        .mount(&server)
+        .await;
+
+    let response = client.models().list().await.expect("models list");
+
+    assert_eq!(response.data.len(), 1);
+    assert_eq!(response.data[0].id, "model_123");
+    assert_eq!(response.data[0].model_id, "gpt-4");
+}
+
+#[tokio::test]
+async fn test_models_get() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/models/model_123"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(model_json()))
+        .mount(&server)
+        .await;
+
+    let model = client.models().get("model_123").await.expect("model get");
+
+    assert_eq!(model.id, "model_123");
+    assert_eq!(model.display_name, "GPT-4");
 }

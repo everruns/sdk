@@ -7,6 +7,8 @@
 - Agents now own a harness: `harness_id` / `harness_name` on agent create and update across Rust, Python, and TypeScript SDKs (mutually exclusive; server defaults to `generic`). Adopts upstream EVE-686.
 - Agent-first session creation: `agent_name` on session create (parallel to `agent_id`, mutually exclusive); a session created from an agent runs on the agent's harness.
 - `parallel_tool_calls` on agent and session create/update; `harness_id` exposed on agent responses; `forked_from_session_id` / `forked_from_sequence` on session responses.
+- Harnesses API across Rust, Python, and TypeScript SDKs: list/search/get/create/update/archive harnesses and list built-in examples — so callers can discover and manage the harness an agent or session references.
+- Models API (read-only): list and get available models across all SDKs, for choosing an agent's `default_model_id`.
 - Refreshed generated schemas from upstream OpenAPI.
 
 ## [0.1.10] - 2026-06-19

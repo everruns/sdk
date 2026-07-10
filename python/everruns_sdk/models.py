@@ -30,7 +30,7 @@ class Agent(BaseModel):
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
-    network_access: Optional[Any] = None
+    network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
     root_agent_id: Optional[str] = None
     status: AgentStatus
@@ -289,6 +289,17 @@ class CopyFileRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class CostTier(BaseModel):
+    """A pricing tier that activates above a context token threshold."""
+
+    above_tokens: int
+    cache_read: Optional[float] = None
+    input: float
+    output: float
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class CreateAgentRequest(BaseModel):
     """Request to create a new agent"""
 
@@ -303,7 +314,7 @@ class CreateAgentRequest(BaseModel):
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
-    network_access: Optional[Any] = None
+    network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
     system_prompt: str
     tags: Optional[list[str]] = Field(default_factory=list)
@@ -342,6 +353,25 @@ class CreateFileRequest(BaseModel):
     encoding: Optional[str] = None
     is_directory: Optional[bool] = None
     is_readonly: Optional[bool] = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class CreateHarnessRequest(BaseModel):
+    """Request to create a new harness"""
+
+    capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    default_model_id: Optional[str] = None
+    description: Optional[str] = None
+    display_name: Optional[str] = None
+    embedder_metadata: Optional[dict[str, str]] = None
+    initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    name: str
+    network_access: Optional[NetworkAccessList] = None
+    parent_harness_id: Optional[str] = None
+    system_prompt: Optional[str] = None
+    tags: Optional[list[str]] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -392,7 +422,7 @@ class CreateSessionRequest(BaseModel):
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     model_id: Optional[str] = None
-    network_access: Optional[Any] = None
+    network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
@@ -637,6 +667,50 @@ class GuardrailsDryRunResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class Harness(BaseModel):
+    """Harness configuration for sessions."""
+
+    archived_at: Optional[str] = None
+    capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    created_at: str
+    default_model_id: Optional[str] = None
+    deleted_at: Optional[str] = None
+    description: Optional[str] = None
+    display_name: Optional[str] = None
+    embedder_metadata: Optional[dict[str, str]] = None
+    id: str
+    initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    is_built_in: Optional[bool] = None
+    mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    name: str
+    network_access: Optional[NetworkAccessList] = None
+    parallel_tool_calls: Optional[bool] = None
+    parent_harness_id: Optional[str] = None
+    status: HarnessStatus
+    system_prompt: Optional[str] = None
+    tags: Optional[list[str]] = Field(default_factory=list)
+    updated_at: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class HarnessExample(BaseModel):
+    """A read-only harness example defined in code."""
+
+    capabilities: list[AgentCapabilityConfig]
+    description: str
+    dev_only: bool
+    display_name: str
+    name: str
+    parent_name: Optional[str] = None
+    tags: list[str]
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+HarnessStatus = Literal["active", "archived", "deleted"]
+
+
 class HealthCheckCaseResult(BaseModel):
     """Outcome of a single case after the agent ran and was scored."""
 
@@ -790,12 +864,139 @@ class Message(BaseModel):
 
 MessageRole = Literal["system", "user", "agent", "tool_result"]
 
+Modality = Literal["text", "image", "audio", "video", "pdf"]
+
+
+class ModelCost(BaseModel):
+    """Cost information for the model (per million tokens)"""
+
+    cache_read: Optional[float] = None
+    cost_tiers: Optional[list[CostTier]] = Field(default_factory=list)
+    input: float
+    output: float
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ModelLimits(BaseModel):
+    """Token limits for the model"""
+
+    context: int
+    input: Optional[int] = None
+    max_media: Optional[int] = None
+    output: int
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ModelModalities(BaseModel):
+    """Model modalities for input and output"""
+
+    input: list[Modality]
+    output: list[Modality]
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ModelProfile(BaseModel):
+    """LLM Model Profile describing model capabilities"""
+
+    attachment: bool
+    cost: Optional[ModelCost] = None
+    description: Optional[str] = None
+    family: str
+    knowledge: Optional[str] = None
+    last_updated: Optional[str] = None
+    limits: Optional[ModelLimits] = None
+    modalities: Optional[ModelModalities] = None
+    name: str
+    open_weights: bool
+    reasoning: bool
+    reasoning_effort: Optional[ReasoningEffortConfig] = None
+    release_date: Optional[str] = None
+    structured_output: bool
+    supported_parameters: Optional[list[str]] = Field(default_factory=list)
+    supports_phases: Optional[bool] = None
+    temperature: bool
+    tool_call: bool
+    tool_search: Optional[bool] = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+ModelSource = Literal["manual", "discovered", "predefined"]
+
+ModelVendor = Literal[
+    "openai",
+    "anthropic",
+    "google",
+    "nvidia",
+    "qwen",
+    "microsoft",
+    "minimax",
+    "moonshot",
+    "xai",
+    "llmsim",
+]
+
+
+class ModelWithProvider(BaseModel):
+    """LLM Model with provider info"""
+
+    capabilities: list[str]
+    created_at: str
+    display_name: str
+    enabled: bool
+    healthy: bool
+    id: str
+    is_favorite: bool
+    model_id: str
+    model_vendor: Optional[ModelVendor] = None
+    profile: Optional[ModelProfile] = None
+    provider_id: str
+    provider_name: str
+    provider_type: DriverId
+    source: ModelSource
+    updated_at: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
 
 class MoveFileRequest(BaseModel):
     """Request to move/rename a file"""
 
     dst_path: str
     src_path: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class NetworkAccessList(BaseModel):
+    """Network access list controlling which hosts/URLs an agent session can reach."""
+
+    allowed: Optional[list[str]] = Field(default_factory=list)
+    blocked: Optional[list[str]] = Field(default_factory=list)
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "xhigh"]
+
+
+class ReasoningEffortConfig(BaseModel):
+    """Reasoning effort configuration for a model"""
+
+    default: ReasoningEffort
+    values: list[ReasoningEffortValue]
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ReasoningEffortValue(BaseModel):
+    """Named reasoning effort value for UI display"""
+
+    name: str
+    value: ReasoningEffort
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -868,7 +1069,7 @@ class Session(BaseModel):
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     model_id: Optional[str] = None
-    network_access: Optional[Any] = None
+    network_access: Optional[NetworkAccessList] = None
     organization_id: str
     output_preview: Optional[str] = None
     owner: Optional[Any] = None
@@ -1001,6 +1202,26 @@ class UpdateFileRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class UpdateHarnessRequest(BaseModel):
+    """Request to update a harness. Only provided fields will be updated."""
+
+    capabilities: Optional[list[AgentCapabilityConfig]] = None
+    default_model_id: Optional[str] = None
+    description: Optional[str] = None
+    display_name: Optional[str] = None
+    embedder_metadata: Optional[dict[str, str]] = None
+    initial_files: Optional[list[InitialFile]] = None
+    mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    name: Optional[str] = None
+    network_access: Optional[NetworkAccessList] = None
+    parent_harness_id: Optional[str] = None
+    status: Optional[HarnessStatus] = None
+    system_prompt: Optional[str] = None
+    tags: Optional[list[str]] = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class UpdateMemoryFileRequest(BaseModel):
     content: Optional[str] = None
     encoding: Optional[str] = None
@@ -1122,6 +1343,8 @@ class ListResponse(BaseModel):
 
 CreateMemorySourceRequest = GitHubMemorySourceRequest | GitMemorySourceRequest
 
+DriverId = str
+
 
 def generate_agent_id() -> str:
     return f"agent_{secrets.token_hex(16)}"
@@ -1186,10 +1409,12 @@ Connection.model_rebuild()
 ContentPart.model_rebuild()
 Controls.model_rebuild()
 CopyFileRequest.model_rebuild()
+CostTier.model_rebuild()
 CreateAgentRequest.model_rebuild()
 CreateAgentVersionRequest.model_rebuild()
 CreateBudgetRequest.model_rebuild()
 CreateFileRequest.model_rebuild()
+CreateHarnessRequest.model_rebuild()
 CreateMemoryFileRequest.model_rebuild()
 CreateMemoryRequest.model_rebuild()
 CreateMessageRequest.model_rebuild()
@@ -1214,6 +1439,8 @@ GuardrailExamplesResponse.model_rebuild()
 GuardrailsDryRunHit.model_rebuild()
 GuardrailsDryRunRequest.model_rebuild()
 GuardrailsDryRunResponse.model_rebuild()
+Harness.model_rebuild()
+HarnessExample.model_rebuild()
 HealthCheckCaseResult.model_rebuild()
 HealthCheckRun.model_rebuild()
 HealthCheckSummary.model_rebuild()
@@ -1224,7 +1451,15 @@ MemoryFile.model_rebuild()
 MemoryFileInfo.model_rebuild()
 MemoryGrepResult.model_rebuild()
 Message.model_rebuild()
+ModelCost.model_rebuild()
+ModelLimits.model_rebuild()
+ModelModalities.model_rebuild()
+ModelProfile.model_rebuild()
+ModelWithProvider.model_rebuild()
 MoveFileRequest.model_rebuild()
+NetworkAccessList.model_rebuild()
+ReasoningEffortConfig.model_rebuild()
+ReasoningEffortValue.model_rebuild()
 ResourceStats.model_rebuild()
 ResumeSessionResponse.model_rebuild()
 RollbackAgentVersionRequest.model_rebuild()
@@ -1239,6 +1474,7 @@ ToolDefinition.model_rebuild()
 TopUpRequest.model_rebuild()
 UpdateBudgetRequest.model_rebuild()
 UpdateFileRequest.model_rebuild()
+UpdateHarnessRequest.model_rebuild()
 UpdateMemoryFileRequest.model_rebuild()
 UpdateMemoryRequest.model_rebuild()
 UpdateWorkspaceRequest.model_rebuild()

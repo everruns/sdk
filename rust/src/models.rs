@@ -39,7 +39,7 @@ pub struct Agent {
     pub mcp_servers: Option<serde_json::Value>,
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub network_access: Option<serde_json::Value>,
+    pub network_access: Option<NetworkAccessList>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parallel_tool_calls: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -483,6 +483,17 @@ impl CopyFileRequest {
     }
 }
 
+/// A pricing tier that activates above a context token threshold.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct CostTier {
+    pub above_tokens: i32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cache_read: Option<f64>,
+    pub input: f64,
+    pub output: f64,
+}
+
 /// Request to create a new agent
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -510,7 +521,7 @@ pub struct CreateAgentRequest {
     pub mcp_servers: Option<serde_json::Value>,
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub network_access: Option<serde_json::Value>,
+    pub network_access: Option<NetworkAccessList>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parallel_tool_calls: Option<bool>,
     pub system_prompt: String,
@@ -592,7 +603,7 @@ impl CreateAgentRequest {
         self
     }
 
-    pub fn network_access(mut self, network_access: serde_json::Value) -> Self {
+    pub fn network_access(mut self, network_access: NetworkAccessList) -> Self {
         self.network_access = Some(network_access);
         self
     }
@@ -743,6 +754,113 @@ impl CreateFileRequest {
             is_directory: Some(true),
             is_readonly: None,
         }
+    }
+}
+
+/// Request to create a new harness
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct CreateHarnessRequest {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub capabilities: Vec<AgentCapabilityConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_model_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub embedder_metadata: Option<std::collections::HashMap<String, String>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub initial_files: Vec<InitialFile>,
+    #[serde(rename = "mcpServers")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mcp_servers: Option<serde_json::Value>,
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub network_access: Option<NetworkAccessList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_harness_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_prompt: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<String>,
+}
+
+impl CreateHarnessRequest {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            capabilities: Vec::new(),
+            default_model_id: None,
+            description: None,
+            display_name: None,
+            embedder_metadata: None,
+            initial_files: Vec::new(),
+            mcp_servers: None,
+            name: name.into(),
+            network_access: None,
+            parent_harness_id: None,
+            system_prompt: None,
+            tags: Vec::new(),
+        }
+    }
+
+    pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
+        self.capabilities = capabilities;
+        self
+    }
+
+    pub fn default_model_id(mut self, default_model_id: impl Into<String>) -> Self {
+        self.default_model_id = Some(default_model_id.into());
+        self
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    pub fn display_name(mut self, display_name: impl Into<String>) -> Self {
+        self.display_name = Some(display_name.into());
+        self
+    }
+
+    pub fn embedder_metadata(
+        mut self,
+        embedder_metadata: std::collections::HashMap<String, String>,
+    ) -> Self {
+        self.embedder_metadata = Some(embedder_metadata);
+        self
+    }
+
+    pub fn initial_files(mut self, initial_files: Vec<InitialFile>) -> Self {
+        self.initial_files = initial_files;
+        self
+    }
+
+    pub fn mcp_servers(mut self, mcp_servers: serde_json::Value) -> Self {
+        self.mcp_servers = Some(mcp_servers);
+        self
+    }
+
+    pub fn network_access(mut self, network_access: NetworkAccessList) -> Self {
+        self.network_access = Some(network_access);
+        self
+    }
+
+    pub fn parent_harness_id(mut self, parent_harness_id: impl Into<String>) -> Self {
+        self.parent_harness_id = Some(parent_harness_id.into());
+        self
+    }
+
+    pub fn system_prompt(mut self, system_prompt: impl Into<String>) -> Self {
+        self.system_prompt = Some(system_prompt.into());
+        self
+    }
+
+    pub fn tags(mut self, tags: Vec<String>) -> Self {
+        self.tags = tags;
+        self
     }
 }
 
@@ -935,7 +1053,7 @@ pub struct CreateSessionRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub network_access: Option<serde_json::Value>,
+    pub network_access: Option<NetworkAccessList>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parallel_tool_calls: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1035,7 +1153,7 @@ impl CreateSessionRequest {
         self
     }
 
-    pub fn network_access(mut self, network_access: serde_json::Value) -> Self {
+    pub fn network_access(mut self, network_access: NetworkAccessList) -> Self {
         self.network_access = Some(network_access);
         self
     }
@@ -1099,6 +1217,9 @@ impl CreateWorkspaceRequest {
 pub struct DeleteFileResponse {
     pub deleted: bool,
 }
+
+/// LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock, mai, fireworks. Any other string is treated as an embedder-defined external provider.
+pub type DriverId = String;
 
 /// Standard event following the Everruns event protocol.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1469,6 +1590,73 @@ pub struct GuardrailsDryRunResponse {
     pub hits: Vec<GuardrailsDryRunHit>,
 }
 
+/// Harness configuration for sessions.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct Harness {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub archived_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub capabilities: Vec<AgentCapabilityConfig>,
+    pub created_at: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_model_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deleted_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub embedder_metadata: Option<std::collections::HashMap<String, String>>,
+    pub id: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub initial_files: Vec<InitialFile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_built_in: Option<bool>,
+    #[serde(rename = "mcpServers")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mcp_servers: Option<serde_json::Value>,
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub network_access: Option<NetworkAccessList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parallel_tool_calls: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_harness_id: Option<String>,
+    pub status: HarnessStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_prompt: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<String>,
+    pub updated_at: String,
+}
+
+/// A read-only harness example defined in code.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct HarnessExample {
+    pub capabilities: Vec<AgentCapabilityConfig>,
+    pub description: String,
+    pub dev_only: bool,
+    pub display_name: String,
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_name: Option<String>,
+    pub tags: Vec<String>,
+}
+
+/// Harness lifecycle status.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum HarnessStatus {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "archived")]
+    Archived,
+    #[serde(rename = "deleted")]
+    Deleted,
+}
+
 /// Outcome of a single case after the agent ran and was scored.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -1685,6 +1873,148 @@ pub enum MessageRole {
     ToolResult,
 }
 
+/// Modality type (text, image, audio, video)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum Modality {
+    #[serde(rename = "text")]
+    Text,
+    #[serde(rename = "image")]
+    Image,
+    #[serde(rename = "audio")]
+    Audio,
+    #[serde(rename = "video")]
+    Video,
+    #[serde(rename = "pdf")]
+    Pdf,
+}
+
+/// Cost information for the model (per million tokens)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ModelCost {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cache_read: Option<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub cost_tiers: Vec<CostTier>,
+    pub input: f64,
+    pub output: f64,
+}
+
+/// Token limits for the model
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ModelLimits {
+    pub context: i32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub input: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_media: Option<i32>,
+    pub output: i32,
+}
+
+/// Model modalities for input and output
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ModelModalities {
+    pub input: Vec<Modality>,
+    pub output: Vec<Modality>,
+}
+
+/// LLM Model Profile describing model capabilities
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ModelProfile {
+    pub attachment: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost: Option<ModelCost>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub family: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub knowledge: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_updated: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limits: Option<ModelLimits>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub modalities: Option<ModelModalities>,
+    pub name: String,
+    pub open_weights: bool,
+    pub reasoning: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reasoning_effort: Option<ReasoningEffortConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub release_date: Option<String>,
+    pub structured_output: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub supported_parameters: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supports_phases: Option<bool>,
+    pub temperature: bool,
+    pub tool_call: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tool_search: Option<bool>,
+}
+
+/// How the model was added to the system
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ModelSource {
+    #[serde(rename = "manual")]
+    Manual,
+    #[serde(rename = "discovered")]
+    Discovered,
+    #[serde(rename = "predefined")]
+    Predefined,
+}
+
+/// Vendor / brand that authored a model. Independent of the provider type
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ModelVendor {
+    #[serde(rename = "openai")]
+    Openai,
+    #[serde(rename = "anthropic")]
+    Anthropic,
+    #[serde(rename = "google")]
+    Google,
+    #[serde(rename = "nvidia")]
+    Nvidia,
+    #[serde(rename = "qwen")]
+    Qwen,
+    #[serde(rename = "microsoft")]
+    Microsoft,
+    #[serde(rename = "minimax")]
+    Minimax,
+    #[serde(rename = "moonshot")]
+    Moonshot,
+    #[serde(rename = "xai")]
+    Xai,
+    #[serde(rename = "llmsim")]
+    Llmsim,
+}
+
+/// LLM Model with provider info
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ModelWithProvider {
+    pub capabilities: Vec<String>,
+    pub created_at: String,
+    pub display_name: String,
+    pub enabled: bool,
+    pub healthy: bool,
+    pub id: String,
+    pub is_favorite: bool,
+    pub model_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model_vendor: Option<ModelVendor>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub profile: Option<ModelProfile>,
+    pub provider_id: String,
+    pub provider_name: String,
+    pub provider_type: DriverId,
+    pub source: ModelSource,
+    pub updated_at: String,
+}
+
 /// Request to move/rename a file
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
@@ -1700,6 +2030,49 @@ impl MoveFileRequest {
             src_path: src_path.into(),
         }
     }
+}
+
+/// Network access list controlling which hosts/URLs an agent session can reach.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct NetworkAccessList {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub allowed: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub blocked: Vec<String>,
+}
+
+/// Reasoning effort level for models that support it
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ReasoningEffort {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "minimal")]
+    Minimal,
+    #[serde(rename = "low")]
+    Low,
+    #[serde(rename = "medium")]
+    Medium,
+    #[serde(rename = "high")]
+    High,
+    #[serde(rename = "xhigh")]
+    Xhigh,
+}
+
+/// Reasoning effort configuration for a model
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ReasoningEffortConfig {
+    pub default: ReasoningEffort,
+    pub values: Vec<ReasoningEffortValue>,
+}
+
+/// Named reasoning effort value for UI display
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ReasoningEffortValue {
+    pub name: String,
+    pub value: ReasoningEffort,
 }
 
 /// Response body for resource stats.
@@ -1817,7 +2190,7 @@ pub struct Session {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub network_access: Option<serde_json::Value>,
+    pub network_access: Option<NetworkAccessList>,
     pub organization_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub output_preview: Option<String>,
@@ -2054,6 +2427,127 @@ impl UpdateFileRequest {
             encoding: None,
             is_readonly: None,
         }
+    }
+}
+
+/// Request to update a harness. Only provided fields will be updated.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[non_exhaustive]
+pub struct UpdateHarnessRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub capabilities: Option<Vec<AgentCapabilityConfig>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub default_model_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub embedder_metadata: Option<std::collections::HashMap<String, String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initial_files: Option<Vec<InitialFile>>,
+    #[serde(rename = "mcpServers")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mcp_servers: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub network_access: Option<NetworkAccessList>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_harness_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<HarnessStatus>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub system_prompt: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<String>>,
+}
+
+impl UpdateHarnessRequest {
+    pub fn new() -> Self {
+        Self {
+            capabilities: None,
+            default_model_id: None,
+            description: None,
+            display_name: None,
+            embedder_metadata: None,
+            initial_files: None,
+            mcp_servers: None,
+            name: None,
+            network_access: None,
+            parent_harness_id: None,
+            status: None,
+            system_prompt: None,
+            tags: None,
+        }
+    }
+
+    pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
+        self.capabilities = Some(capabilities);
+        self
+    }
+
+    pub fn default_model_id(mut self, default_model_id: impl Into<String>) -> Self {
+        self.default_model_id = Some(default_model_id.into());
+        self
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    pub fn display_name(mut self, display_name: impl Into<String>) -> Self {
+        self.display_name = Some(display_name.into());
+        self
+    }
+
+    pub fn embedder_metadata(
+        mut self,
+        embedder_metadata: std::collections::HashMap<String, String>,
+    ) -> Self {
+        self.embedder_metadata = Some(embedder_metadata);
+        self
+    }
+
+    pub fn initial_files(mut self, initial_files: Vec<InitialFile>) -> Self {
+        self.initial_files = Some(initial_files);
+        self
+    }
+
+    pub fn mcp_servers(mut self, mcp_servers: serde_json::Value) -> Self {
+        self.mcp_servers = Some(mcp_servers);
+        self
+    }
+
+    pub fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
+    }
+
+    pub fn network_access(mut self, network_access: NetworkAccessList) -> Self {
+        self.network_access = Some(network_access);
+        self
+    }
+
+    pub fn parent_harness_id(mut self, parent_harness_id: impl Into<String>) -> Self {
+        self.parent_harness_id = Some(parent_harness_id.into());
+        self
+    }
+
+    pub fn status(mut self, status: HarnessStatus) -> Self {
+        self.status = Some(status);
+        self
+    }
+
+    pub fn system_prompt(mut self, system_prompt: impl Into<String>) -> Self {
+        self.system_prompt = Some(system_prompt.into());
+        self
+    }
+
+    pub fn tags(mut self, tags: Vec<String>) -> Self {
+        self.tags = Some(tags);
+        self
     }
 }
 

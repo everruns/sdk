@@ -57,6 +57,24 @@ agent = await client.agents.create(
 session = await client.sessions.create(agent_name="researcher")
 ```
 
+## Harnesses & Models
+
+Discover and manage harnesses, and browse available models to choose a `default_model_id`.
+
+```python
+# Browse harnesses, then create one
+harnesses = await client.harnesses.list()          # or .search("research")
+harness = await client.harnesses.get(harnesses[0].id)
+custom = await client.harnesses.create(
+    name="my-harness",
+    system_prompt="Base instructions for every session.",
+)
+examples = await client.harnesses.list_examples()
+
+# List models to pick a default for an agent
+models = await client.models.list()
+```
+
 ## Initial Files
 
 ```python
