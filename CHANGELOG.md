@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.0] - 2026-07-11
 
 ### Highlights
 
@@ -11,6 +11,22 @@
 - Models API (read-only): list and get available models across all SDKs, for choosing an agent's `default_model_id`.
 - Fixed (TypeScript): response objects for `Agent`, `Session`, `Harness`, `ModelWithProvider`, `CapabilityInfo`, `Budget`, `Connection`, and `Message` now expose their fields in snake_case matching the wire, so multi-word fields (e.g. `harness_id`, `system_prompt`, `created_at`, `provider_type`) resolve at runtime instead of being `undefined`. Rust and Python were already correct.
 - Refreshed generated schemas from upstream OpenAPI.
+
+### Breaking Changes
+
+- **TypeScript response fields are now snake_case**: response objects (`Agent`, `Session`, `Harness`, `ModelWithProvider`, `CapabilityInfo`, `Budget`, `Connection`, `Message`, and related) now expose multi-word fields in snake_case, matching the wire. Previously these were typed camelCase but resolved to `undefined` at runtime. Update any code reading these fields.
+  - Before: `agent.harnessId`, `session.systemPrompt`, `message.createdAt` (were `undefined`)
+  - After: `agent.harness_id`, `session.system_prompt`, `message.created_at`
+  - Rust and Python were already snake_case and are unaffected. TypeScript request models remain camelCase.
+
+### What's Changed
+
+* fix(typescript): snake_case response models ([#102](https://github.com/everruns/sdk/pull/102)) by @chaliy
+* feat: add harnesses and models SDK APIs ([#101](https://github.com/everruns/sdk/pull/101)) by @chaliy
+* feat: generate public SDK models from OpenAPI ([#100](https://github.com/everruns/sdk/pull/100)) by @chaliy
+* feat: adopt agent harness ownership and agent-first sessions (EVE-686) ([#98](https://github.com/everruns/sdk/pull/98)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.1.10...v0.2.0
 
 ## [0.1.10] - 2026-06-19
 
