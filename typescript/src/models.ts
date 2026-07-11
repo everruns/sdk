@@ -5,17 +5,17 @@
 /** Agent configuration for agentic loop. */
 export interface Agent {
   capabilities?: AgentCapabilityConfig[];
-  createdAt: string;
+  created_at: string;
   model?: string | null;
-  displayName?: string | null;
-  harnessId: string;
+  display_name?: string | null;
+  harness_id: string;
   id: string;
-  initialFiles?: InitialFile[];
+  initial_files?: InitialFile[];
   name: string;
-  parallelToolCalls?: boolean | null;
-  systemPrompt: string;
+  parallel_tool_calls?: boolean | null;
+  system_prompt: string;
   tools?: ToolDefinition[];
-  updatedAt: string;
+  updated_at: string;
 }
 
 /** Response from on-demand agent analysis (built-in rules + LLM checkers) */
@@ -73,29 +73,29 @@ export interface AgentVersionDiffResponse {
 /** Budget — a spending cap for a subject in a currency. */
 export interface Budget {
   balance: number;
-  createdAt: string;
+  created_at: string;
   currency: string;
   id: string;
   limit: number;
   metadata?: unknown;
-  organizationId: string;
+  organization_id: string;
   period?: BudgetPeriod | null;
-  periodStartedAt?: string | null;
-  softLimit?: number | null;
+  period_started_at?: string | null;
+  soft_limit?: number | null;
   status: BudgetStatus;
-  subjectId: string;
-  subjectType: unknown;
-  updatedAt: string;
+  subject_id: string;
+  subject_type: unknown;
+  updated_at: string;
 }
 
 /** Result of checking all budgets for a session. */
 export interface BudgetCheckResult {
   action: string;
   balance?: number | null;
-  budgetId?: string | null;
+  budget_id?: string | null;
   currency?: string | null;
-  errorCode?: string | null;
-  errorFields?: Record<string, unknown> | null;
+  error_code?: string | null;
+  error_fields?: Record<string, unknown> | null;
   message?: string | null;
 }
 
@@ -124,26 +124,26 @@ export interface BuiltinTool {
 
 /** Public capability information (without internal details) */
 export interface CapabilityInfo {
-  agentCount?: number;
+  agent_count?: number;
   category?: string | null;
-  configSchema?: Record<string, unknown>;
-  configUiSchema?: Record<string, unknown>;
+  config_schema?: Record<string, unknown>;
+  config_ui_schema?: Record<string, unknown>;
   dependencies?: string[];
   description: string;
-  docsSlug?: string | null;
+  docs_slug?: string | null;
   features?: string[];
-  harnessCount?: number;
+  harness_count?: number;
   icon?: string | null;
   id: string;
-  isGuardrail?: boolean;
-  isMcp?: boolean;
-  isSkill?: boolean;
+  is_guardrail?: boolean;
+  is_mcp?: boolean;
+  is_skill?: boolean;
   localizations?: Record<string, unknown>;
   name: string;
-  riskLevel?: unknown;
+  risk_level?: unknown;
   status: string;
-  systemPrompt?: string | null;
-  toolDefinitions?: Record<string, unknown>[];
+  system_prompt?: string | null;
+  tool_definitions?: Record<string, unknown>[];
 }
 
 /** Client-side tool - executed by the client, not the server */
@@ -167,8 +167,8 @@ export interface ClientToolResult {
 
 export interface Connection {
   provider: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 /** A part of message content - can be text, image, image_file, tool_call, or tool_result */
@@ -492,26 +492,26 @@ export interface GuardrailsDryRunResponse {
 
 /** Harness configuration for sessions. */
 export interface Harness {
-  archivedAt?: string | null;
+  archived_at?: string | null;
   capabilities?: AgentCapabilityConfig[];
-  createdAt: string;
-  defaultModelId?: string | null;
-  deletedAt?: string | null;
+  created_at: string;
+  default_model_id?: string | null;
+  deleted_at?: string | null;
   description?: string | null;
-  displayName?: string | null;
-  embedderMetadata?: Record<string, string>;
+  display_name?: string | null;
+  embedder_metadata?: Record<string, string>;
   id: string;
-  initialFiles?: InitialFile[];
-  isBuiltIn?: boolean;
+  initial_files?: InitialFile[];
+  is_built_in?: boolean;
   mcpServers?: unknown;
   name: string;
-  networkAccess?: NetworkAccessList | null;
-  parallelToolCalls?: boolean | null;
-  parentHarnessId?: string | null;
+  network_access?: NetworkAccessList | null;
+  parallel_tool_calls?: boolean | null;
+  parent_harness_id?: string | null;
   status: HarnessStatus;
-  systemPrompt?: string | null;
+  system_prompt?: string | null;
   tags?: string[];
-  updatedAt: string;
+  updated_at: string;
 }
 
 /** A read-only harness example defined in code. */
@@ -640,13 +640,13 @@ export interface MemoryGrepResult {
 export interface Message {
   content: ContentPart[];
   controls?: Controls | null;
-  createdAt: string;
-  externalActor?: ExternalActor | null;
+  created_at: string;
+  external_actor?: ExternalActor | null;
   id: string;
   metadata?: Record<string, unknown> | null;
   phase?: unknown | null;
   role: "user" | "assistant" | "tool_result";
-  thinkingSignature?: string | null;
+  thinking_signature?: string | null;
 }
 
 export type MessageRole = "system" | "user" | "agent" | "tool_result";
@@ -715,20 +715,20 @@ export type ModelVendor =
 /** LLM Model with provider info */
 export interface ModelWithProvider {
   capabilities: string[];
-  createdAt: string;
-  displayName: string;
+  created_at: string;
+  display_name: string;
   enabled: boolean;
   healthy: boolean;
   id: string;
-  isFavorite: boolean;
-  modelId: string;
-  modelVendor?: ModelVendor | null;
+  is_favorite: boolean;
+  model_id: string;
+  model_vendor?: ModelVendor | null;
   profile?: ModelProfile | null;
-  providerId: string;
-  providerName: string;
-  providerType: DriverId;
+  provider_id: string;
+  provider_name: string;
+  provider_type: DriverId;
   source: ModelSource;
-  updatedAt: string;
+  updated_at: string;
 }
 
 /** Request to move/rename a file */
@@ -787,8 +787,8 @@ export interface ResourceStats {
 
 /** Result of resuming budgets paused for a session. */
 export interface ResumeSessionResponse {
-  resumedBudgets: number;
-  sessionId: string;
+  resumed_budgets: number;
+  session_id: string;
 }
 
 /** Request body for the `rollback_agent_version` operation. */
@@ -799,44 +799,44 @@ export interface RollbackAgentVersionRequest {
 
 /** Session - instance of agentic loop execution. */
 export interface Session {
-  activeScheduleCount?: number | null;
-  agentId?: string | null;
-  agentIdentityId?: string | null;
-  agentVersionId?: string | null;
-  blueprintConfig?: Record<string, unknown> | null;
-  blueprintId?: string | null;
+  active_schedule_count?: number | null;
+  agent_id?: string | null;
+  agent_identity_id?: string | null;
+  agent_version_id?: string | null;
+  blueprint_config?: Record<string, unknown> | null;
+  blueprint_id?: string | null;
   capabilities?: AgentCapabilityConfig[];
-  createdAt: string;
-  effectiveOwner?: unknown | null;
+  created_at: string;
+  effective_owner?: unknown | null;
   features?: string[];
-  finishedAt?: string | null;
-  forkedFromSequence?: number | null;
-  forkedFromSessionId?: string | null;
-  harnessId: string;
+  finished_at?: string | null;
+  forked_from_sequence?: number | null;
+  forked_from_session_id?: string | null;
+  harness_id: string;
   hints?: Record<string, unknown> | null;
   id: string;
-  initialFiles?: InitialFile[];
-  isPinned?: boolean | null;
+  initial_files?: InitialFile[];
+  is_pinned?: boolean | null;
   locale?: string | null;
-  maxIterations?: number | null;
+  max_iterations?: number | null;
   mcpServers?: unknown;
-  modelId?: string | null;
-  networkAccess?: NetworkAccessList | null;
-  outputPreview?: string | null;
+  model_id?: string | null;
+  network_access?: NetworkAccessList | null;
+  output_preview?: string | null;
   owner?: unknown | null;
-  ownerPrincipalId: string;
-  parallelToolCalls?: boolean | null;
-  parentSessionId?: string | null;
+  owner_principal_id: string;
+  parallel_tool_calls?: boolean | null;
+  parent_session_id?: string | null;
   preview?: string | null;
-  resolvedOwnerUserId?: string | null;
-  startedAt?: string | null;
+  resolved_owner_user_id?: string | null;
+  started_at?: string | null;
   status: SessionStatus;
-  systemPrompt?: string | null;
+  system_prompt?: string | null;
   tags?: string[];
   title?: string | null;
   tools?: ToolDefinition[];
-  updatedAt: string;
-  workspaceId: string;
+  updated_at: string;
+  workspace_id: string;
 }
 
 /** Complete file with content */

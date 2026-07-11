@@ -9,6 +9,7 @@
 - `parallel_tool_calls` on agent and session create/update; `harness_id` exposed on agent responses; `forked_from_session_id` / `forked_from_sequence` on session responses.
 - Harnesses API across Rust, Python, and TypeScript SDKs: list/search/get/create/update/archive harnesses and list built-in examples — so callers can discover and manage the harness an agent or session references.
 - Models API (read-only): list and get available models across all SDKs, for choosing an agent's `default_model_id`.
+- Fixed (TypeScript): response objects for `Agent`, `Session`, `Harness`, `ModelWithProvider`, `CapabilityInfo`, `Budget`, `Connection`, and `Message` now expose their fields in snake_case matching the wire, so multi-word fields (e.g. `harness_id`, `system_prompt`, `created_at`, `provider_type`) resolve at runtime instead of being `undefined`. Rust and Python were already correct.
 - Refreshed generated schemas from upstream OpenAPI.
 
 ## [0.1.10] - 2026-06-19

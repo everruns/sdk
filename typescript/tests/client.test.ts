@@ -1246,12 +1246,12 @@ describe("Agents create/apply with harness fields (EVE-686)", () => {
       json: async () => ({
         id: "agent_123",
         name: "customer-support",
-        systemPrompt: "You are helpful.",
-        harnessId: "harness_abc",
-        parallelToolCalls: true,
+        system_prompt: "You are helpful.",
+        harness_id: "harness_abc",
+        parallel_tool_calls: true,
         status: "active",
-        createdAt: "2026-03-13T00:00:00Z",
-        updatedAt: "2026-03-13T00:00:00Z",
+        created_at: "2026-03-13T00:00:00Z",
+        updated_at: "2026-03-13T00:00:00Z",
       }),
     });
   }
@@ -1375,12 +1375,21 @@ describe("Agents create/apply with harness fields (EVE-686)", () => {
     ).rejects.toThrow("must match pattern");
   });
 
-  // NOTE: response-field parsing (agent.harnessId etc.) is intentionally not
-  // asserted here. The API returns snake_case (harness_id) and the client casts
-  // response.json() directly to the camelCase-typed Agent with no transform, so
-  // multi-word response fields are undefined at runtime. This is a pre-existing,
-  // systemic, TypeScript-only issue (affects systemPrompt/createdAt/etc. too),
-  // out of scope for this adoption and tracked as a separate follow-up.
+  it("parses snake_case response fields on the agent (regression guard for #99)", async () => {
+    const fetchMock = agentFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const agent = await client.agents.create({
+      name: "customer-support",
+      systemPrompt: "You are helpful.",
+    });
+
+    expect(agent.harness_id).toBe("harness_abc");
+    expect(agent.system_prompt).toBe("You are helpful.");
+    expect(agent.parallel_tool_calls).toBe(true);
+    expect(agent.created_at).toBe("2026-03-13T00:00:00Z");
+  });
 });
 
 describe("Sessions create with agentName and parallelToolCalls (EVE-686)", () => {
@@ -1390,14 +1399,14 @@ describe("Sessions create with agentName and parallelToolCalls (EVE-686)", () =>
       status: 201,
       json: async () => ({
         id: "session_123",
-        harnessId: "harness_123",
-        agentId: "agent_123",
-        parallelToolCalls: true,
-        forkedFromSessionId: "session_parent",
-        forkedFromSequence: 42,
+        harness_id: "harness_123",
+        agent_id: "agent_123",
+        parallel_tool_calls: true,
+        forked_from_session_id: "session_parent",
+        forked_from_sequence: 42,
         status: "active",
-        createdAt: "2026-03-13T00:00:00Z",
-        updatedAt: "2026-03-13T00:00:00Z",
+        created_at: "2026-03-13T00:00:00Z",
+        updated_at: "2026-03-13T00:00:00Z",
       }),
     });
   }
@@ -1437,10 +1446,22 @@ describe("Sessions create with agentName and parallelToolCalls (EVE-686)", () =>
     ).rejects.toThrow("must match pattern");
   });
 
-  // NOTE: see the agent-response note above — snake_case response fields
-  // (parallel_tool_calls, forked_from_session_id, forked_from_sequence) are not
-  // mapped to the camelCase-typed Session at runtime. Pre-existing TS-only issue,
-  // tracked separately; not asserted here to avoid false confidence.
+  it("parses snake_case response fields on the session (regression guard for #99)", async () => {
+    const fetchMock = sessionFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const session = await client.sessions.create({
+      agentName: "customer-support",
+    });
+
+    expect(session.harness_id).toBe("harness_123");
+    expect(session.agent_id).toBe("agent_123");
+    expect(session.parallel_tool_calls).toBe(true);
+    expect(session.forked_from_session_id).toBe("session_parent");
+    expect(session.forked_from_sequence).toBe(42);
+    expect(session.created_at).toBe("2026-03-13T00:00:00Z");
+  });
 });
 
 describe("CreateAgentRequest with displayName", () => {
@@ -2522,6 +2543,9 @@ describe("HarnessesClient", () => {
   const harnessJson = {
     id: "harness_123",
     name: "deep-research",
+    display_name: "Deep Research",
+    system_prompt: "Do deep research.",
+    default_model_id: "mod_1",
     status: "active",
     created_at: "2026-07-01T00:00:00Z",
     updated_at: "2026-07-01T00:00:00Z",
@@ -2585,6 +2609,11 @@ describe("HarnessesClient", () => {
     const harness = await client.harnesses.get("harness_123");
 
     expect(harness.id).toBe("harness_123");
+    // Response fields resolve from the snake_case wire (regression guard for #99).
+    expect(harness.system_prompt).toBe("Do deep research.");
+    expect(harness.display_name).toBe("Deep Research");
+    expect(harness.default_model_id).toBe("mod_1");
+    expect(harness.created_at).toBe("2026-07-01T00:00:00Z");
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/harnesses/harness_123",
       expect.objectContaining({ headers: expect.any(Object) }),
@@ -2766,6 +2795,9 @@ describe("ModelsClient", () => {
 
     expect(response.data).toHaveLength(1);
     expect(response.data[0].id).toBe("model_123");
+    // provider_type is an open-string alias (DriverId); resolves to a string, not {}.
+    expect(response.data[0].provider_type).toBe("openai");
+    expect(response.data[0].model_id).toBe("gpt-4");
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/models",
       expect.objectContaining({ headers: expect.any(Object) }),
@@ -2784,6 +2816,9 @@ describe("ModelsClient", () => {
     const model = await client.models.get("model_123");
 
     expect(model.id).toBe("model_123");
+    expect(model.provider_type).toBe("openai");
+    expect(model.display_name).toBe("GPT-4");
+    expect(model.is_favorite).toBe(false);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/models/model_123",
       expect.objectContaining({ headers: expect.any(Object) }),

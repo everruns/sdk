@@ -23,7 +23,7 @@ async function main() {
   console.log("  Name:", agent.name);
   console.log("  ID:", agent.id);
   console.log("  Capabilities:", agent.capabilities);
-  console.log("  Created:", agent.createdAt);
+  console.log("  Created:", agent.created_at);
 
   // Create a session (agent is optional)
   const session = await client.sessions.create({
@@ -32,10 +32,10 @@ async function main() {
   });
   console.log("Created session:");
   console.log("  ID:", session.id);
-  console.log("  Harness:", session.harnessId);
-  console.log("  Agent:", session.agentId);
+  console.log("  Harness:", session.harness_id);
+  console.log("  Agent:", session.agent_id);
   console.log("  Status:", session.status);
-  console.log("  Created:", session.createdAt);
+  console.log("  Created:", session.created_at);
 
   // Send a message that uses the current_time capability
   const message = await client.messages.create(
