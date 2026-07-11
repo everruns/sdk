@@ -58,6 +58,7 @@ import {
   UpdateMemoryRequest,
   UpdateWorkspaceRequest,
   Workspace,
+  decodeModel,
   validateAgentName,
   validateHarnessName,
 } from "./models.js";
@@ -150,7 +151,19 @@ export class Everruns {
     return `${this.baseUrl}/v1${normalizedPath}`;
   }
 
-  async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  /**
+   * Perform a JSON request.
+   *
+   * When `model` is given, the parsed body is run through {@link decodeModel}
+   * to map the API's snake_case wire fields onto the camelCase model shape.
+   * Free-form object fields are left untouched. Envelope responses (whose
+   * payload is nested under a key) decode the inner value at the call site.
+   */
+  async fetch<T>(
+    path: string,
+    options: RequestInit = {},
+    model?: string,
+  ): Promise<T> {
     const url = this.url(path);
     const response = await fetch(url, {
       ...options,
@@ -187,7 +200,8 @@ export class Everruns {
       return undefined as T;
     }
 
-    return response.json() as Promise<T>;
+    const data = await response.json();
+    return (model !== undefined ? decodeModel<T>(data, model) : data) as T;
   }
 
   async fetchText(path: string, options: RequestInit = {}): Promise<string> {
@@ -276,10 +290,11 @@ class AgentsClient {
   async create(request: CreateAgentRequest): Promise<Agent> {
     validateAgentName(request.name);
     validateAgentHarness(request);
-    return this.client.fetch("/agents", {
-      method: "POST",
-      body: JSON.stringify(toAgentBody(request)),
-    });
+    return this.client.fetch(
+      "/agents",
+      { method: "POST", body: JSON.stringify(toAgentBody(request)) },
+      "Agent",
+    );
   }
 
   /**
@@ -293,10 +308,11 @@ class AgentsClient {
   async apply(id: string, request: CreateAgentRequest): Promise<Agent> {
     validateAgentName(request.name);
     validateAgentHarness(request);
-    return this.client.fetch("/agents", {
-      method: "POST",
-      body: JSON.stringify({ ...toAgentBody(request), id }),
-    });
+    return this.client.fetch(
+      "/agents",
+      { method: "POST", body: JSON.stringify({ ...toAgentBody(request), id }) },
+      "Agent",
+    );
   }
 
   /**
@@ -308,31 +324,42 @@ class AgentsClient {
   async applyByName(request: CreateAgentRequest): Promise<Agent> {
     validateAgentName(request.name);
     validateAgentHarness(request);
-    return this.client.fetch("/agents", {
-      method: "POST",
-      body: JSON.stringify(toAgentBody(request)),
-    });
+    return this.client.fetch(
+      "/agents",
+      { method: "POST", body: JSON.stringify(toAgentBody(request)) },
+      "Agent",
+    );
   }
 
   async get(agentId: string): Promise<Agent> {
-    return this.client.fetch(`/agents/${agentId}`);
+    return this.client.fetch(`/agents/${agentId}`, undefined, "Agent");
   }
 
   /** Get aggregate usage stats for an agent. */
   async stats(agentId: string): Promise<ResourceStats> {
-    return this.client.fetch(`/agents/${agentId}/stats`);
+    return this.client.fetch(
+      `/agents/${agentId}/stats`,
+      undefined,
+      "ResourceStats",
+    );
   }
 
   /** List recent behavioral health check runs for an agent. */
   async listHealthChecks(agentId: string): Promise<HealthCheckRun[]> {
-    return this.client.fetch(`/agents/${agentId}/health-checks`);
+    return this.client.fetch(
+      `/agents/${agentId}/health-checks`,
+      undefined,
+      "HealthCheckRun",
+    );
   }
 
   /** Trigger a behavioral health check for an agent. */
   async triggerHealthCheck(agentId: string): Promise<HealthCheckRun> {
-    return this.client.fetch(`/agents/${agentId}/health-checks`, {
-      method: "POST",
-    });
+    return this.client.fetch(
+      `/agents/${agentId}/health-checks`,
+      { method: "POST" },
+      "HealthCheckRun",
+    );
   }
 
   /** Get a single health check run for an agent. */
@@ -340,12 +367,20 @@ class AgentsClient {
     agentId: string,
     runId: string,
   ): Promise<HealthCheckRun> {
-    return this.client.fetch(`/agents/${agentId}/health-checks/${runId}`);
+    return this.client.fetch(
+      `/agents/${agentId}/health-checks/${runId}`,
+      undefined,
+      "HealthCheckRun",
+    );
   }
 
   /** List saved versions for an agent. */
   async listVersions(agentId: string): Promise<AgentVersion[]> {
-    return this.client.fetch(`/agents/${agentId}/versions`);
+    return this.client.fetch(
+      `/agents/${agentId}/versions`,
+      undefined,
+      "AgentVersion",
+    );
   }
 
   /** Save the current agent configuration as a version. */
@@ -353,10 +388,14 @@ class AgentsClient {
     agentId: string,
     request: CreateAgentVersionRequest = {},
   ): Promise<AgentVersion> {
-    return this.client.fetch(`/agents/${agentId}/versions`, {
-      method: "POST",
-      body: JSON.stringify(toCreateAgentVersionBody(request)),
-    });
+    return this.client.fetch(
+      `/agents/${agentId}/versions`,
+      {
+        method: "POST",
+        body: JSON.stringify(toCreateAgentVersionBody(request)),
+      },
+      "AgentVersion",
+    );
   }
 
   /** Set the default version for an agent. */
@@ -364,10 +403,14 @@ class AgentsClient {
     agentId: string,
     request: SetDefaultAgentVersionRequest,
   ): Promise<Agent> {
-    return this.client.fetch(`/agents/${agentId}/versions/default`, {
-      method: "POST",
-      body: JSON.stringify({ version_id: request.versionId }),
-    });
+    return this.client.fetch(
+      `/agents/${agentId}/versions/default`,
+      {
+        method: "POST",
+        body: JSON.stringify({ version_id: request.versionId }),
+      },
+      "Agent",
+    );
   }
 
   /** Diff two saved agent versions. */
@@ -378,6 +421,8 @@ class AgentsClient {
   ): Promise<AgentVersionDiffResponse> {
     return this.client.fetch(
       `/agents/${agentId}/versions/${fromVersionId}/diff/${toVersionId}`,
+      undefined,
+      "AgentVersionDiffResponse",
     );
   }
 
@@ -388,10 +433,11 @@ class AgentsClient {
     request: ForkAgentVersionRequest,
   ): Promise<Agent> {
     validateAgentName(request.name);
-    return this.client.fetch(`/agents/${agentId}/versions/${versionId}/fork`, {
-      method: "POST",
-      body: JSON.stringify(toForkAgentVersionBody(request)),
-    });
+    return this.client.fetch(
+      `/agents/${agentId}/versions/${versionId}/fork`,
+      { method: "POST", body: JSON.stringify(toForkAgentVersionBody(request)) },
+      "Agent",
+    );
   }
 
   /** Restore an agent from a saved version. */
@@ -406,6 +452,7 @@ class AgentsClient {
         method: "POST",
         body: JSON.stringify(toRollbackAgentVersionBody(request)),
       },
+      "Agent",
     );
   }
 
@@ -416,12 +463,16 @@ class AgentsClient {
     const response = await this.client.fetch<{ agents: Agent[] }>(
       `/agents${query}`,
     );
-    return response.agents;
+    return decodeModel(response.agents, "Agent");
   }
 
   /** Copy an agent, creating a new agent with the same configuration. */
   async copy(agentId: string): Promise<Agent> {
-    return this.client.fetch(`/agents/${agentId}/copy`, { method: "POST" });
+    return this.client.fetch(
+      `/agents/${agentId}/copy`,
+      { method: "POST" },
+      "Agent",
+    );
   }
 
   async delete(agentId: string): Promise<void> {
@@ -430,22 +481,30 @@ class AgentsClient {
 
   /** Import an agent from Markdown, YAML, JSON, or plain text. */
   async import(content: string): Promise<Agent> {
-    return this.client.fetch("/agents/import", {
-      method: "POST",
-      body: content,
-      headers: { "Content-Type": "text/plain" },
-    });
+    return this.client.fetch(
+      "/agents/import",
+      {
+        method: "POST",
+        body: content,
+        headers: { "Content-Type": "text/plain" },
+      },
+      "Agent",
+    );
   }
 
   /** Import an agent from a built-in example. */
   async importExample(exampleName: string): Promise<Agent> {
     const params = new URLSearchParams();
     params.set("from-example", exampleName);
-    return this.client.fetch(`/agents/import?${params.toString()}`, {
-      method: "POST",
-      body: "",
-      headers: { "Content-Type": "text/plain" },
-    });
+    return this.client.fetch(
+      `/agents/import?${params.toString()}`,
+      {
+        method: "POST",
+        body: "",
+        headers: { "Content-Type": "text/plain" },
+      },
+      "Agent",
+    );
   }
 
   /** Export an agent as Markdown with YAML front matter. */
@@ -455,15 +514,19 @@ class AgentsClient {
 
   /** Run advisory checks against an agent shape. */
   async analyze(request: AnalyzeAgentRequest): Promise<AgentAnalysisResponse> {
-    return this.client.fetch("/agents/analyze", {
-      method: "POST",
-      body: JSON.stringify({
-        system_prompt: request.systemPrompt,
-        capabilities: request.capabilities ?? [],
-        tools: request.tools ?? [],
-        mcpServers: request.mcpServers,
-      }),
-    });
+    return this.client.fetch(
+      "/agents/analyze",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          system_prompt: request.systemPrompt,
+          capabilities: request.capabilities ?? [],
+          tools: request.tools ?? [],
+          mcpServers: request.mcpServers,
+        }),
+      },
+      "AgentAnalysisResponse",
+    );
   }
 }
 
@@ -525,14 +588,15 @@ class SessionsClient {
     if (request.parallelToolCalls !== undefined) {
       body.parallel_tool_calls = request.parallelToolCalls;
     }
-    return this.client.fetch("/sessions", {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+    return this.client.fetch(
+      "/sessions",
+      { method: "POST", body: JSON.stringify(body) },
+      "Session",
+    );
   }
 
   async get(sessionId: string): Promise<Session> {
-    return this.client.fetch(`/sessions/${sessionId}`);
+    return this.client.fetch(`/sessions/${sessionId}`, undefined, "Session");
   }
 
   async list(options?: {
@@ -546,7 +610,7 @@ class SessionsClient {
     const response = await this.client.fetch<{ sessions: Session[] }>(
       `/sessions${query}`,
     );
-    return response.sessions;
+    return decodeModel(response.sessions, "Session");
   }
 
   /** Delete a session. */
@@ -577,19 +641,29 @@ class SessionsClient {
 
   /** List budgets for a session. */
   async budgets(sessionId: string): Promise<Budget[]> {
-    return this.client.fetch(`/sessions/${sessionId}/budgets`);
+    return this.client.fetch(
+      `/sessions/${sessionId}/budgets`,
+      undefined,
+      "Budget",
+    );
   }
 
   /** Check all budgets in hierarchy for a session. */
   async budgetCheck(sessionId: string): Promise<BudgetCheckResult> {
-    return this.client.fetch(`/sessions/${sessionId}/budget-check`);
+    return this.client.fetch(
+      `/sessions/${sessionId}/budget-check`,
+      undefined,
+      "BudgetCheckResult",
+    );
   }
 
   /** Resume paused budgets for a session. */
   async resume(sessionId: string): Promise<ResumeSessionResponse> {
-    return this.client.fetch(`/sessions/${sessionId}/resume`, {
-      method: "POST",
-    });
+    return this.client.fetch(
+      `/sessions/${sessionId}/resume`,
+      { method: "POST" },
+      "ResumeSessionResponse",
+    );
   }
 
   /** Batch-set encrypted secrets for a session. */
@@ -633,10 +707,11 @@ class MessagesClient {
             },
           }
         : textOrRequest;
-    return this.client.fetch(`/sessions/${sessionId}/messages`, {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
+    return this.client.fetch(
+      `/sessions/${sessionId}/messages`,
+      { method: "POST", body: JSON.stringify(request) },
+      "Message",
+    );
   }
 
   /**
@@ -665,10 +740,11 @@ class MessagesClient {
     let delay = 100;
     for (let attempt = 0; attempt <= 5; attempt++) {
       try {
-        return await this.client.fetch(`/sessions/${sessionId}/tool-results`, {
-          method: "POST",
-          body,
-        });
+        return await this.client.fetch(
+          `/sessions/${sessionId}/tool-results`,
+          { method: "POST", body },
+          "SubmitToolResultsResponse",
+        );
       } catch (error) {
         if (attempt >= 5 || !isToolResultsPendingConflict(error)) {
           throw error;
@@ -684,7 +760,7 @@ class MessagesClient {
     const response = await this.client.fetch<{ messages: Message[] }>(
       `/sessions/${sessionId}/messages`,
     );
-    return response.messages;
+    return decodeModel(response.messages, "Message");
   }
 }
 
@@ -741,7 +817,7 @@ class EventsClient {
     const response = await this.client.fetch<ListResponse<Event>>(
       `/sessions/${sessionId}/events${query}`,
     );
-    return response.data;
+    return decodeModel(response.data, "Event");
   }
 
   /**
@@ -794,7 +870,7 @@ class CapabilitiesClient {
       `/capabilities${query}`,
     );
     return {
-      data: response.data,
+      data: decodeModel(response.data, "CapabilityInfo"),
       total: response.total ?? 0,
       offset: response.offset ?? 0,
       limit: response.limit ?? 0,
@@ -803,27 +879,39 @@ class CapabilitiesClient {
 
   /** Get a specific capability by ID. */
   async get(capabilityId: string): Promise<CapabilityInfo> {
-    return this.client.fetch(`/capabilities/${capabilityId}`);
+    return this.client.fetch(
+      `/capabilities/${capabilityId}`,
+      undefined,
+      "CapabilityInfo",
+    );
   }
 
   /** List adoptable guardrail presets. */
   async listGuardrailExamples(): Promise<GuardrailExamplesResponse> {
-    return this.client.fetch("/capabilities/guardrails/examples");
+    return this.client.fetch(
+      "/capabilities/guardrails/examples",
+      undefined,
+      "GuardrailExamplesResponse",
+    );
   }
 
   /** Evaluate a guardrails config against sample content. */
   async dryRunGuardrails(
     request: GuardrailsDryRunRequest,
   ): Promise<GuardrailsDryRunResponse> {
-    return this.client.fetch("/capabilities/guardrails/dry-run", {
-      method: "POST",
-      body: JSON.stringify({
-        config: request.config,
-        stage: request.stage,
-        text: request.text,
-        tool_name: request.toolName,
-      }),
-    });
+    return this.client.fetch(
+      "/capabilities/guardrails/dry-run",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          config: request.config,
+          stage: request.stage,
+          text: request.text,
+          tool_name: request.toolName,
+        }),
+      },
+      "GuardrailsDryRunResponse",
+    );
   }
 }
 
@@ -832,34 +920,41 @@ class HarnessesClient {
 
   /** List harnesses. */
   async list(): Promise<ListResponse<Harness>> {
-    return this.client.fetch("/harnesses");
+    const response =
+      await this.client.fetch<ListResponse<Harness>>("/harnesses");
+    return { ...response, data: decodeModel(response.data, "Harness") };
   }
 
   /** Search harnesses by query. */
   async search(query: string): Promise<ListResponse<Harness>> {
-    return this.client.fetch(`/harnesses?search=${encodeURIComponent(query)}`);
+    const response = await this.client.fetch<ListResponse<Harness>>(
+      `/harnesses?search=${encodeURIComponent(query)}`,
+    );
+    return { ...response, data: decodeModel(response.data, "Harness") };
   }
 
   /** Get a harness by ID. */
   async get(id: string): Promise<Harness> {
-    return this.client.fetch(`/harnesses/${id}`);
+    return this.client.fetch(`/harnesses/${id}`, undefined, "Harness");
   }
 
   /** Create a new harness. */
   async create(request: CreateHarnessRequest): Promise<Harness> {
     validateHarnessName(request.name);
-    return this.client.fetch("/harnesses", {
-      method: "POST",
-      body: JSON.stringify(toHarnessBody(request)),
-    });
+    return this.client.fetch(
+      "/harnesses",
+      { method: "POST", body: JSON.stringify(toHarnessBody(request)) },
+      "Harness",
+    );
   }
 
   /** Update a harness. Only provided fields are updated. */
   async update(id: string, request: UpdateHarnessRequest): Promise<Harness> {
-    return this.client.fetch(`/harnesses/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(toHarnessBody(request)),
-    });
+    return this.client.fetch(
+      `/harnesses/${id}`,
+      { method: "PATCH", body: JSON.stringify(toHarnessBody(request)) },
+      "Harness",
+    );
   }
 
   /** Delete a harness. */
@@ -869,7 +964,7 @@ class HarnessesClient {
 
   /** List built-in harness examples. */
   async listExamples(): Promise<HarnessExample[]> {
-    return this.client.fetch("/harness-examples");
+    return this.client.fetch("/harness-examples", undefined, "HarnessExample");
   }
 }
 
@@ -878,12 +973,17 @@ class ModelsClient {
 
   /** List available models. */
   async list(): Promise<ListResponse<ModelWithProvider>> {
-    return this.client.fetch("/models");
+    const response =
+      await this.client.fetch<ListResponse<ModelWithProvider>>("/models");
+    return {
+      ...response,
+      data: decodeModel(response.data, "ModelWithProvider"),
+    };
   }
 
   /** Get a specific model by ID. */
   async get(id: string): Promise<ModelWithProvider> {
-    return this.client.fetch(`/models/${id}`);
+    return this.client.fetch(`/models/${id}`, undefined, "ModelWithProvider");
   }
 }
 
@@ -904,20 +1004,25 @@ class WorkspacesClient {
     const response = await this.client.fetch<ListResponse<Workspace>>(
       `/workspaces${query}`,
     );
-    return response.data;
+    return decodeModel(response.data, "Workspace");
   }
 
   /** Create a workspace. */
   async create(request: CreateWorkspaceRequest): Promise<Workspace> {
-    return this.client.fetch("/workspaces", {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
+    return this.client.fetch(
+      "/workspaces",
+      { method: "POST", body: JSON.stringify(request) },
+      "Workspace",
+    );
   }
 
   /** Get a workspace by ID. */
   async get(workspaceId: string): Promise<Workspace> {
-    return this.client.fetch(`/workspaces/${workspaceId}`);
+    return this.client.fetch(
+      `/workspaces/${workspaceId}`,
+      undefined,
+      "Workspace",
+    );
   }
 
   /** Update a workspace. */
@@ -925,10 +1030,11 @@ class WorkspacesClient {
     workspaceId: string,
     request: UpdateWorkspaceRequest,
   ): Promise<Workspace> {
-    return this.client.fetch(`/workspaces/${workspaceId}`, {
-      method: "PATCH",
-      body: JSON.stringify(request),
-    });
+    return this.client.fetch(
+      `/workspaces/${workspaceId}`,
+      { method: "PATCH", body: JSON.stringify(request) },
+      "Workspace",
+    );
   }
 
   /** Archive a workspace. */
@@ -955,7 +1061,7 @@ class WorkspaceFilesClient {
       `${fsPath}${query}`,
     );
     return {
-      data: response.data,
+      data: decodeModel(response.data, "FileInfo"),
       total: response.total ?? 0,
       offset: response.offset ?? 0,
       limit: response.limit ?? 0,
@@ -966,6 +1072,8 @@ class WorkspaceFilesClient {
   async read(workspaceId: string, path: string): Promise<SessionFile> {
     return this.client.fetch(
       `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
+      undefined,
+      "SessionFile",
     );
   }
 
@@ -982,6 +1090,7 @@ class WorkspaceFilesClient {
     return this.client.fetch(
       `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
       { method: "POST", body: JSON.stringify(body) },
+      "SessionFile",
     );
   }
 
@@ -990,6 +1099,7 @@ class WorkspaceFilesClient {
     return this.client.fetch(
       `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
       { method: "POST", body: JSON.stringify({ is_directory: true }) },
+      "SessionFile",
     );
   }
 
@@ -1006,6 +1116,7 @@ class WorkspaceFilesClient {
     return this.client.fetch(
       `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}`,
       { method: "PUT", body: JSON.stringify(body) },
+      "SessionFile",
     );
   }
 
@@ -1021,6 +1132,7 @@ class WorkspaceFilesClient {
     return this.client.fetch(
       `/workspaces/${workspaceId}/fs/${path.replace(/^\//, "")}${query}`,
       { method: "DELETE" },
+      "DeleteFileResponse",
     );
   }
 
@@ -1030,10 +1142,14 @@ class WorkspaceFilesClient {
     srcPath: string,
     dstPath: string,
   ): Promise<SessionFile> {
-    return this.client.fetch(`/workspaces/${workspaceId}/fs/_/move`, {
-      method: "POST",
-      body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
-    });
+    return this.client.fetch(
+      `/workspaces/${workspaceId}/fs/_/move`,
+      {
+        method: "POST",
+        body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
+      },
+      "SessionFile",
+    );
   }
 
   /** Copy a file. */
@@ -1042,10 +1158,14 @@ class WorkspaceFilesClient {
     srcPath: string,
     dstPath: string,
   ): Promise<SessionFile> {
-    return this.client.fetch(`/workspaces/${workspaceId}/fs/_/copy`, {
-      method: "POST",
-      body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
-    });
+    return this.client.fetch(
+      `/workspaces/${workspaceId}/fs/_/copy`,
+      {
+        method: "POST",
+        body: JSON.stringify({ src_path: srcPath, dst_path: dstPath }),
+      },
+      "SessionFile",
+    );
   }
 
   /** Search files with regex. */
@@ -1060,15 +1180,16 @@ class WorkspaceFilesClient {
       `/workspaces/${workspaceId}/fs/_/grep`,
       { method: "POST", body: JSON.stringify(body) },
     );
-    return response.data;
+    return decodeModel(response.data, "GrepResult");
   }
 
   /** Get file or directory stat. */
   async stat(workspaceId: string, path: string): Promise<FileStat> {
-    return this.client.fetch(`/workspaces/${workspaceId}/fs/_/stat`, {
-      method: "POST",
-      body: JSON.stringify({ path }),
-    });
+    return this.client.fetch(
+      `/workspaces/${workspaceId}/fs/_/stat`,
+      { method: "POST", body: JSON.stringify({ path }) },
+      "FileStat",
+    );
   }
 }
 
@@ -1089,20 +1210,21 @@ class MemoriesClient {
     const response = await this.client.fetch<ListResponse<Memory>>(
       `/memories${query}`,
     );
-    return response.data;
+    return decodeModel(response.data, "Memory");
   }
 
   /** Create a memory. */
   async create(request: CreateMemoryRequest): Promise<Memory> {
-    return this.client.fetch("/memories", {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
+    return this.client.fetch(
+      "/memories",
+      { method: "POST", body: JSON.stringify(request) },
+      "Memory",
+    );
   }
 
   /** Get a memory by ID. */
   async get(memoryId: string): Promise<Memory> {
-    return this.client.fetch(`/memories/${memoryId}`);
+    return this.client.fetch(`/memories/${memoryId}`, undefined, "Memory");
   }
 
   /** Update a memory. */
@@ -1110,10 +1232,11 @@ class MemoriesClient {
     memoryId: string,
     request: UpdateMemoryRequest,
   ): Promise<Memory> {
-    return this.client.fetch(`/memories/${memoryId}`, {
-      method: "PATCH",
-      body: JSON.stringify(request),
-    });
+    return this.client.fetch(
+      `/memories/${memoryId}`,
+      { method: "PATCH", body: JSON.stringify(request) },
+      "Memory",
+    );
   }
 
   /** Archive a memory. */
@@ -1123,9 +1246,11 @@ class MemoriesClient {
 
   /** Trigger memory sync now. */
   async sync(memoryId: string): Promise<Memory> {
-    return this.client.fetch(`/memories/${memoryId}/sync`, {
-      method: "POST",
-    });
+    return this.client.fetch(
+      `/memories/${memoryId}/sync`,
+      { method: "POST" },
+      "Memory",
+    );
   }
 
   /** List memory files at the root. */
@@ -1133,13 +1258,15 @@ class MemoriesClient {
     const response = await this.client.fetch<ListResponse<MemoryFileInfo>>(
       `/memories/${memoryId}/fs`,
     );
-    return response.data;
+    return decodeModel(response.data, "MemoryFileInfo");
   }
 
   /** Read a memory file. */
   async readFile(memoryId: string, path: string): Promise<MemoryFile> {
     return this.client.fetch(
       `/memories/${memoryId}/fs/${path.replace(/^\//, "")}`,
+      undefined,
+      "MemoryFile",
     );
   }
 
@@ -1166,6 +1293,7 @@ class MemoriesClient {
           is_directory: request.isDirectory,
         }),
       },
+      "MemoryFileInfo",
     );
   }
 
@@ -1189,6 +1317,7 @@ class MemoriesClient {
           encoding: request.encoding,
         }),
       },
+      "MemoryFile",
     );
   }
 
@@ -1212,15 +1341,16 @@ class MemoriesClient {
       `/memories/${memoryId}/fs/_/grep`,
       { method: "POST", body: JSON.stringify(body) },
     );
-    return response.data;
+    return decodeModel(response.data, "MemoryGrepResult");
   }
 
   /** Stat a memory file or directory. */
   async statFile(memoryId: string, path: string): Promise<MemoryFileInfo> {
-    return this.client.fetch(`/memories/${memoryId}/fs/_/stat`, {
-      method: "POST",
-      body: JSON.stringify({ path }),
-    });
+    return this.client.fetch(
+      `/memories/${memoryId}/fs/_/stat`,
+      { method: "POST", body: JSON.stringify({ path }) },
+      "MemoryFileInfo",
+    );
   }
 }
 
@@ -1229,18 +1359,22 @@ class BudgetsClient {
 
   /** Create a budget. */
   async create(request: CreateBudgetRequest): Promise<Budget> {
-    return this.client.fetch("/budgets", {
-      method: "POST",
-      body: JSON.stringify({
-        subject_type: request.subjectType,
-        subject_id: request.subjectId,
-        currency: request.currency,
-        limit: request.limit,
-        soft_limit: request.softLimit,
-        period: request.period,
-        metadata: request.metadata,
-      }),
-    });
+    return this.client.fetch(
+      "/budgets",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          subject_type: request.subjectType,
+          subject_id: request.subjectId,
+          currency: request.currency,
+          limit: request.limit,
+          soft_limit: request.softLimit,
+          period: request.period,
+          metadata: request.metadata,
+        }),
+      },
+      "Budget",
+    );
   }
 
   /** List budgets, optionally filtered by subject. */
@@ -1252,12 +1386,12 @@ class BudgetsClient {
     if (options?.subjectType) params.set("subject_type", options.subjectType);
     if (options?.subjectId) params.set("subject_id", options.subjectId);
     const query = params.toString() ? `?${params}` : "";
-    return this.client.fetch(`/budgets${query}`);
+    return this.client.fetch(`/budgets${query}`, undefined, "Budget");
   }
 
   /** Get a budget by ID. */
   async get(budgetId: string): Promise<Budget> {
-    return this.client.fetch(`/budgets/${budgetId}`);
+    return this.client.fetch(`/budgets/${budgetId}`, undefined, "Budget");
   }
 
   /** Update a budget. */
@@ -1265,15 +1399,19 @@ class BudgetsClient {
     budgetId: string,
     request: UpdateBudgetRequest,
   ): Promise<Budget> {
-    return this.client.fetch(`/budgets/${budgetId}`, {
-      method: "PATCH",
-      body: JSON.stringify({
-        limit: request.limit,
-        soft_limit: request.softLimit,
-        status: request.status,
-        metadata: request.metadata,
-      }),
-    });
+    return this.client.fetch(
+      `/budgets/${budgetId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          limit: request.limit,
+          soft_limit: request.softLimit,
+          status: request.status,
+          metadata: request.metadata,
+        }),
+      },
+      "Budget",
+    );
   }
 
   /** Delete (soft-delete) a budget. */
@@ -1283,10 +1421,11 @@ class BudgetsClient {
 
   /** Add credits to a budget. */
   async topUp(budgetId: string, request: TopUpRequest): Promise<Budget> {
-    return this.client.fetch(`/budgets/${budgetId}/top-up`, {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
+    return this.client.fetch(
+      `/budgets/${budgetId}/top-up`,
+      { method: "POST", body: JSON.stringify(request) },
+      "Budget",
+    );
   }
 
   /** Get paginated ledger entries for a budget. */
@@ -1298,12 +1437,20 @@ class BudgetsClient {
     if (options?.limit != null) params.set("limit", String(options.limit));
     if (options?.offset != null) params.set("offset", String(options.offset));
     const query = params.toString() ? `?${params}` : "";
-    return this.client.fetch(`/budgets/${budgetId}/ledger${query}`);
+    return this.client.fetch(
+      `/budgets/${budgetId}/ledger${query}`,
+      undefined,
+      "LedgerEntry",
+    );
   }
 
   /** Check budget status. */
   async check(budgetId: string): Promise<BudgetCheckResult> {
-    return this.client.fetch(`/budgets/${budgetId}/check`);
+    return this.client.fetch(
+      `/budgets/${budgetId}/check`,
+      undefined,
+      "BudgetCheckResult",
+    );
   }
 }
 
@@ -1312,10 +1459,11 @@ class ConnectionsClient {
 
   /** Set an API key connection for a provider. */
   async set(provider: string, apiKey: string): Promise<Connection> {
-    return this.client.fetch(`/user/connections/${provider}`, {
-      method: "POST",
-      body: JSON.stringify({ api_key: apiKey }),
-    });
+    return this.client.fetch(
+      `/user/connections/${provider}`,
+      { method: "POST", body: JSON.stringify({ api_key: apiKey }) },
+      "Connection",
+    );
   }
 
   /** List all connections. */
@@ -1323,7 +1471,7 @@ class ConnectionsClient {
     const response = await this.client.fetch<{ data: Connection[] }>(
       "/user/connections",
     );
-    return response.data;
+    return decodeModel(response.data, "Connection");
   }
 
   /** Remove a connection. */

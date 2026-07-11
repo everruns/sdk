@@ -616,6 +616,131 @@ class TypeScriptEmitter(Emitter):
             return wire_name
         return camel_case(wire_name)
 
+    def object_models(self) -> list[tuple[Model, Mapping[str, Any]]]:
+        """Models emitted as `interface` (i.e. not enum / scalar alias / union)."""
+        result: list[tuple[Model, Mapping[str, Any]]] = []
+        for model in self.models:
+            schema = self.schema_for(model, flatten=model.name in self.flatten_models)
+            if schema.get("enum") and schema.get("type") == "string":
+                continue
+            if self.is_scalar_alias(schema):
+                continue
+            if "oneOf" in schema:
+                continue
+            result.append((model, schema))
+        return result
+
+    def field_model_ref(
+        self, field_schema: Mapping[str, Any], object_names: set[str]
+    ) -> str | None:
+        """Nested object-model a field decodes into (directly or per array item),
+        or None for scalars, enums, unions, and free-form maps."""
+        schema = without_null(field_schema)
+        ref = None
+        if "$ref" in schema:
+            ref = self.public_ref_name(str(schema["$ref"]))
+        elif schema.get("type") == "array":
+            item = without_null(schema.get("items", {}))
+            if "$ref" in item:
+                ref = self.public_ref_name(str(item["$ref"]))
+        return ref if ref in object_names else None
+
+    def wire_models(self) -> list[tuple[str, list[tuple[str, str, str | None]]]]:
+        """Per-model wire-decode descriptors: (model, [(wire, ts, nested_model)]).
+
+        Only fields whose wire key differs from the camelCase property, or that
+        decode into a nested model, are listed. Free-form `Record`/`unknown`
+        fields are omitted so their keys pass through untouched. Models with no
+        such fields are dropped entirely (the decoder treats a missing descriptor
+        as passthrough)."""
+        object_names = {model.name for model, _ in self.object_models()}
+        type_overrides = self.settings().get("typeOverrides", {})
+        result: list[tuple[str, list[tuple[str, str, str | None]]]] = []
+        for model, schema in self.object_models():
+            omitted = set(self.settings().get("omitFields", {}).get(model.name, []))
+            fields: list[tuple[str, str, str | None]] = []
+            for wire_name, field_schema in self.properties_for(model.name, schema):
+                if wire_name in omitted:
+                    continue
+                ts_name = self.field_name(model.name, wire_name)
+                ref = None
+                if f"{model.name}.{wire_name}" not in type_overrides:
+                    ref = self.field_model_ref(field_schema, object_names)
+                if ts_name == wire_name and ref is None:
+                    continue
+                fields.append((wire_name, ts_name, ref))
+            if fields:
+                result.append((model.name, fields))
+        return result
+
+    def emit_wire_models(self) -> list[str]:
+        lines = [
+            "/** Wire field descriptor: rename to `name`, decode into `model`. */",
+            "interface WireField {",
+            "  name: string;",
+            "  model?: string;",
+            "}",
+            "",
+            "/**",
+            " * Response decode map (generated). The API serializes responses in",
+            " * snake_case; these descriptors map each known model shape onto its",
+            " * camelCase properties. Free-form object fields (Record<string, unknown>,",
+            " * unknown) are deliberately absent so data-bearing keys pass through",
+            " * unchanged.",
+            " */",
+            "const WIRE_MODELS: Record<string, Record<string, WireField>> = {",
+        ]
+        for model_name, fields in self.wire_models():
+            lines.append(f"  {model_name}: {{")
+            for wire_name, ts_name, ref in fields:
+                value = f"{{ name: {json.dumps(ts_name)}"
+                if ref is not None:
+                    value += f", model: {json.dumps(ref)}"
+                value += " }"
+                lines.append(f"    {json.dumps(wire_name)}: {value},")
+            lines.append("  },")
+        lines.extend(
+            [
+                "};",
+                "",
+                "/**",
+                " * Decode a parsed JSON response into its typed model shape, mapping",
+                " * snake_case wire keys to camelCase properties. Arrays are decoded",
+                " * element-wise; unknown keys and free-form nested objects are left as-is.",
+                " */",
+                "export function decodeModel<T>(value: unknown, model: string): T {",
+                "  return decodeWire(value, model) as T;",
+                "}",
+                "",
+                "function decodeWire(value: unknown, model: string): unknown {",
+                "  if (Array.isArray(value)) {",
+                "    return value.map((item) => decodeWire(item, model));",
+                "  }",
+                '  if (value === null || typeof value !== "object") {',
+                "    return value;",
+                "  }",
+                "  const fields = WIRE_MODELS[model];",
+                "  if (fields === undefined) {",
+                "    return value;",
+                "  }",
+                "  const out: Record<string, unknown> = {};",
+                "  for (const [key, val] of Object.entries(value as Record<string, unknown>)) {",
+                "    const spec = fields[key];",
+                "    if (spec === undefined) {",
+                "      out[key] = val;",
+                "    } else if (spec.model !== undefined) {",
+                "      out[spec.name] = decodeWire(val, spec.model);",
+                "    } else {",
+                "      out[spec.name] = val;",
+                "    }",
+                "  }",
+                "  return out;",
+                "}",
+                "",
+            ]
+        )
+        return lines
+
     def type_expr(self, schema: Mapping[str, Any]) -> str:
         nullable = is_nullable(schema)
         schema = without_null(schema)
@@ -782,6 +907,7 @@ class TypeScriptEmitter(Emitter):
                 "",
             ]
         )
+        lines.extend(self.emit_wire_models())
         return "\n".join(lines)
 
 

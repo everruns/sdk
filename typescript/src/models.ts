@@ -1085,3 +1085,387 @@ export function extractToolCalls(
     ];
   });
 }
+
+/** Wire field descriptor: rename to `name`, decode into `model`. */
+interface WireField {
+  name: string;
+  model?: string;
+}
+
+/**
+ * Response decode map (generated). The API serializes responses in
+ * snake_case; these descriptors map each known model shape onto its
+ * camelCase properties. Free-form object fields (Record<string, unknown>,
+ * unknown) are deliberately absent so data-bearing keys pass through
+ * unchanged.
+ */
+const WIRE_MODELS: Record<string, Record<string, WireField>> = {
+  Agent: {
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    created_at: { name: "createdAt" },
+    default_model_id: { name: "model" },
+    display_name: { name: "displayName" },
+    harness_id: { name: "harnessId" },
+    initial_files: { name: "initialFiles", model: "InitialFile" },
+    parallel_tool_calls: { name: "parallelToolCalls" },
+    system_prompt: { name: "systemPrompt" },
+    updated_at: { name: "updatedAt" },
+  },
+  AgentAnalysisResponse: {
+    findings: { name: "findings", model: "Finding" },
+  },
+  Budget: {
+    created_at: { name: "createdAt" },
+    organization_id: { name: "organizationId" },
+    period: { name: "period", model: "BudgetPeriod" },
+    period_started_at: { name: "periodStartedAt" },
+    soft_limit: { name: "softLimit" },
+    subject_id: { name: "subjectId" },
+    subject_type: { name: "subjectType" },
+    updated_at: { name: "updatedAt" },
+  },
+  BudgetCheckResult: {
+    budget_id: { name: "budgetId" },
+    error_code: { name: "errorCode" },
+    error_fields: { name: "errorFields" },
+  },
+  CapabilityInfo: {
+    agent_count: { name: "agentCount" },
+    config_schema: { name: "configSchema" },
+    config_ui_schema: { name: "configUiSchema" },
+    docs_slug: { name: "docsSlug" },
+    harness_count: { name: "harnessCount" },
+    is_guardrail: { name: "isGuardrail" },
+    is_mcp: { name: "isMcp" },
+    is_skill: { name: "isSkill" },
+    risk_level: { name: "riskLevel" },
+    system_prompt: { name: "systemPrompt" },
+    tool_definitions: { name: "toolDefinitions" },
+  },
+  Connection: {
+    created_at: { name: "createdAt" },
+    updated_at: { name: "updatedAt" },
+  },
+  Controls: {
+    error_disclosure: { name: "errorDisclosure" },
+    model_id: { name: "modelId" },
+  },
+  CopyFileRequest: {
+    dst_path: { name: "dstPath" },
+    src_path: { name: "srcPath" },
+  },
+  CostTier: {
+    above_tokens: { name: "aboveTokens" },
+    cache_read: { name: "cacheRead" },
+  },
+  CreateAgentRequest: {
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    default_model_id: { name: "model" },
+    display_name: { name: "displayName" },
+    harness_id: { name: "harnessId" },
+    harness_name: { name: "harnessName" },
+    initial_files: { name: "initialFiles", model: "InitialFile" },
+    max_iterations: { name: "maxIterations" },
+    network_access: { name: "networkAccess", model: "NetworkAccessList" },
+    parallel_tool_calls: { name: "parallelToolCalls" },
+    system_prompt: { name: "systemPrompt" },
+  },
+  CreateAgentVersionRequest: {
+    change_kind: { name: "changeKind" },
+  },
+  CreateBudgetRequest: {
+    period: { name: "period", model: "BudgetPeriod" },
+    soft_limit: { name: "softLimit" },
+    subject_id: { name: "subjectId" },
+    subject_type: { name: "subjectType" },
+  },
+  CreateFileRequest: {
+    is_directory: { name: "isDirectory" },
+    is_readonly: { name: "isReadonly" },
+  },
+  CreateHarnessRequest: {
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    default_model_id: { name: "defaultModelId" },
+    display_name: { name: "displayName" },
+    embedder_metadata: { name: "embedderMetadata" },
+    initial_files: { name: "initialFiles", model: "InitialFile" },
+    network_access: { name: "networkAccess", model: "NetworkAccessList" },
+    parent_harness_id: { name: "parentHarnessId" },
+    system_prompt: { name: "systemPrompt" },
+  },
+  CreateMemoryFileRequest: {
+    is_directory: { name: "isDirectory" },
+  },
+  CreateMessageRequest: {
+    addressed_participant_id: { name: "addressedParticipantId" },
+    controls: { name: "controls", model: "Controls" },
+    external_actor: { name: "externalActor", model: "ExternalActor" },
+    message: { name: "message", model: "MessageInput" },
+  },
+  CreateSessionRequest: {
+    agent_id: { name: "agentId" },
+    agent_identity_id: { name: "agentIdentityId" },
+    agent_name: { name: "agentName" },
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    harness_id: { name: "harnessId" },
+    harness_name: { name: "harnessName" },
+    initial_files: { name: "initialFiles", model: "InitialFile" },
+    max_iterations: { name: "maxIterations" },
+    model_id: { name: "modelId" },
+    network_access: { name: "networkAccess", model: "NetworkAccessList" },
+    parallel_tool_calls: { name: "parallelToolCalls" },
+    system_prompt: { name: "systemPrompt" },
+    workspace_id: { name: "workspaceId" },
+  },
+  Event: {
+    ts: { name: "createdAt" },
+  },
+  EventContext: {
+    exec_id: { name: "execId" },
+    input_message_id: { name: "inputMessageId" },
+    parent_span_id: { name: "parentSpanId" },
+    span_id: { name: "spanId" },
+    trace_id: { name: "traceId" },
+    turn_id: { name: "turnId" },
+  },
+  ExternalActor: {
+    actor_id: { name: "actorId" },
+    actor_name: { name: "actorName" },
+  },
+  Finding: {
+    location: { name: "location", model: "FindingLocation" },
+  },
+  ForkAgentVersionRequest: {
+    display_name: { name: "displayName" },
+  },
+  GrepRequest: {
+    path_pattern: { name: "pathPattern" },
+  },
+  GrepResult: {
+    matches: { name: "matches", model: "GrepMatch" },
+  },
+  GuardrailExamplesResponse: {
+    examples: { name: "examples", model: "GuardrailExample" },
+  },
+  GuardrailsDryRunRequest: {
+    tool_name: { name: "toolName" },
+  },
+  GuardrailsDryRunResponse: {
+    hits: { name: "hits", model: "GuardrailsDryRunHit" },
+  },
+  Harness: {
+    archived_at: { name: "archivedAt" },
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    created_at: { name: "createdAt" },
+    default_model_id: { name: "defaultModelId" },
+    deleted_at: { name: "deletedAt" },
+    display_name: { name: "displayName" },
+    embedder_metadata: { name: "embedderMetadata" },
+    initial_files: { name: "initialFiles", model: "InitialFile" },
+    is_built_in: { name: "isBuiltIn" },
+    network_access: { name: "networkAccess", model: "NetworkAccessList" },
+    parallel_tool_calls: { name: "parallelToolCalls" },
+    parent_harness_id: { name: "parentHarnessId" },
+    system_prompt: { name: "systemPrompt" },
+    updated_at: { name: "updatedAt" },
+  },
+  HarnessExample: {
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    dev_only: { name: "devOnly" },
+    display_name: { name: "displayName" },
+    parent_name: { name: "parentName" },
+  },
+  HealthCheckRun: {
+    results: { name: "results", model: "HealthCheckCaseResult" },
+    summary: { name: "summary", model: "HealthCheckSummary" },
+  },
+  InitialFile: {
+    is_readonly: { name: "isReadonly" },
+  },
+  LedgerEntry: {
+    budget_id: { name: "budgetId" },
+    created_at: { name: "createdAt" },
+    meter_source: { name: "meterSource" },
+    ref_id: { name: "refId" },
+    ref_type: { name: "refType" },
+    session_id: { name: "sessionId" },
+  },
+  Message: {
+    content: { name: "content", model: "ContentPart" },
+    controls: { name: "controls", model: "Controls" },
+    created_at: { name: "createdAt" },
+    external_actor: { name: "externalActor", model: "ExternalActor" },
+    thinking_signature: { name: "thinkingSignature" },
+  },
+  ModelCost: {
+    cache_read: { name: "cacheRead" },
+    cost_tiers: { name: "costTiers", model: "CostTier" },
+  },
+  ModelLimits: {
+    max_media: { name: "maxMedia" },
+  },
+  ModelProfile: {
+    cost: { name: "cost", model: "ModelCost" },
+    last_updated: { name: "lastUpdated" },
+    limits: { name: "limits", model: "ModelLimits" },
+    modalities: { name: "modalities", model: "ModelModalities" },
+    open_weights: { name: "openWeights" },
+    reasoning_effort: {
+      name: "reasoningEffort",
+      model: "ReasoningEffortConfig",
+    },
+    release_date: { name: "releaseDate" },
+    structured_output: { name: "structuredOutput" },
+    supported_parameters: { name: "supportedParameters" },
+    supports_phases: { name: "supportsPhases" },
+    tool_call: { name: "toolCall" },
+    tool_search: { name: "toolSearch" },
+  },
+  ModelWithProvider: {
+    created_at: { name: "createdAt" },
+    display_name: { name: "displayName" },
+    is_favorite: { name: "isFavorite" },
+    model_id: { name: "modelId" },
+    model_vendor: { name: "modelVendor" },
+    profile: { name: "profile", model: "ModelProfile" },
+    provider_id: { name: "providerId" },
+    provider_name: { name: "providerName" },
+    provider_type: { name: "providerType" },
+    updated_at: { name: "updatedAt" },
+  },
+  MoveFileRequest: {
+    dst_path: { name: "dstPath" },
+    src_path: { name: "srcPath" },
+  },
+  ReasoningEffortConfig: {
+    values: { name: "values", model: "ReasoningEffortValue" },
+  },
+  ResumeSessionResponse: {
+    resumed_budgets: { name: "resumedBudgets" },
+    session_id: { name: "sessionId" },
+  },
+  RollbackAgentVersionRequest: {
+    save_version: { name: "saveVersion" },
+  },
+  Session: {
+    active_schedule_count: { name: "activeScheduleCount" },
+    agent_id: { name: "agentId" },
+    agent_identity_id: { name: "agentIdentityId" },
+    agent_version_id: { name: "agentVersionId" },
+    blueprint_config: { name: "blueprintConfig" },
+    blueprint_id: { name: "blueprintId" },
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    created_at: { name: "createdAt" },
+    effective_owner: { name: "effectiveOwner" },
+    finished_at: { name: "finishedAt" },
+    forked_from_sequence: { name: "forkedFromSequence" },
+    forked_from_session_id: { name: "forkedFromSessionId" },
+    harness_id: { name: "harnessId" },
+    initial_files: { name: "initialFiles", model: "InitialFile" },
+    is_pinned: { name: "isPinned" },
+    max_iterations: { name: "maxIterations" },
+    model_id: { name: "modelId" },
+    network_access: { name: "networkAccess", model: "NetworkAccessList" },
+    output_preview: { name: "outputPreview" },
+    owner_principal_id: { name: "ownerPrincipalId" },
+    parallel_tool_calls: { name: "parallelToolCalls" },
+    parent_session_id: { name: "parentSessionId" },
+    resolved_owner_user_id: { name: "resolvedOwnerUserId" },
+    started_at: { name: "startedAt" },
+    system_prompt: { name: "systemPrompt" },
+    updated_at: { name: "updatedAt" },
+    workspace_id: { name: "workspaceId" },
+  },
+  SetDefaultAgentVersionRequest: {
+    version_id: { name: "versionId" },
+  },
+  SubmitToolResultsRequest: {
+    tool_results: { name: "toolResults", model: "ClientToolResult" },
+  },
+  TokenUsage: {
+    actual_cost_usd: { name: "actualCostUsd" },
+    cache_creation_tokens: { name: "cacheCreationTokens" },
+    cache_read_tokens: { name: "cacheReadTokens" },
+    effective_cost_usd: { name: "effectiveCostUsd" },
+    estimated_cost_usd: { name: "estimatedCostUsd" },
+    input_tokens: { name: "inputTokens" },
+    output_tokens: { name: "outputTokens" },
+  },
+  UpdateBudgetRequest: {
+    soft_limit: { name: "softLimit" },
+  },
+  UpdateFileRequest: {
+    is_readonly: { name: "isReadonly" },
+  },
+  UpdateHarnessRequest: {
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    default_model_id: { name: "defaultModelId" },
+    display_name: { name: "displayName" },
+    embedder_metadata: { name: "embedderMetadata" },
+    initial_files: { name: "initialFiles", model: "InitialFile" },
+    network_access: { name: "networkAccess", model: "NetworkAccessList" },
+    parent_harness_id: { name: "parentHarnessId" },
+    system_prompt: { name: "systemPrompt" },
+  },
+  AnalyzeAgentRequest: {
+    capabilities: { name: "capabilities", model: "AgentCapabilityConfig" },
+    system_prompt: { name: "systemPrompt" },
+  },
+  ListEventsOptions: {
+    since_id: { name: "sinceId" },
+    before_sequence: { name: "beforeSequence" },
+    after_sequence: { name: "afterSequence" },
+    from_ts: { name: "fromTs" },
+    to_ts: { name: "toTs" },
+    turn_id: { name: "turnId" },
+    exec_id: { name: "execId" },
+    trace_id: { name: "traceId" },
+    tool_name: { name: "toolName" },
+    order_desc: { name: "orderDesc" },
+  },
+  MessageInput: {
+    content: { name: "content", model: "ContentPart" },
+  },
+  SetConnectionRequest: {
+    api_key: { name: "apiKey" },
+  },
+  StreamOptions: {
+    since_id: { name: "sinceId" },
+    max_retries: { name: "maxRetries" },
+    idle_timeout_ms: { name: "idleTimeoutMs" },
+  },
+};
+
+/**
+ * Decode a parsed JSON response into its typed model shape, mapping
+ * snake_case wire keys to camelCase properties. Arrays are decoded
+ * element-wise; unknown keys and free-form nested objects are left as-is.
+ */
+export function decodeModel<T>(value: unknown, model: string): T {
+  return decodeWire(value, model) as T;
+}
+
+function decodeWire(value: unknown, model: string): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => decodeWire(item, model));
+  }
+  if (value === null || typeof value !== "object") {
+    return value;
+  }
+  const fields = WIRE_MODELS[model];
+  if (fields === undefined) {
+    return value;
+  }
+  const out: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+    const spec = fields[key];
+    if (spec === undefined) {
+      out[key] = val;
+    } else if (spec.model !== undefined) {
+      out[spec.name] = decodeWire(val, spec.model);
+    } else {
+      out[spec.name] = val;
+    }
+  }
+  return out;
+}

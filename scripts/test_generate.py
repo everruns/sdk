@@ -87,6 +87,22 @@ class GenerateTests(unittest.TestCase):
         self.assertIn("displayName?: string | null;", output)
         self.assertNotIn("WithUrls_Agent", output)
 
+    def test_typescript_emits_wire_decode_map(self) -> None:
+        models = sdk_codegen.build_models(small_spec(), {"models": ["Agent"]})
+        output = sdk_codegen.TypeScriptEmitter(
+            models, small_spec()["components"]["schemas"], {}
+        ).emit()
+        # Multi-word wire keys map to their camelCase property. (Raw emit quotes
+        # the keys; prettier strips the quotes when the file is written out.)
+        self.assertIn('"display_name": { name: "displayName" }', output)
+        # A generic decoder is exported for the response path.
+        self.assertIn(
+            "export function decodeModel<T>(value: unknown, model: string): T",
+            output,
+        )
+        # Single-word keys need no entry (they pass through untouched).
+        self.assertNotIn('"id":', output)
+
     def test_generation_is_deterministic_and_targeted(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

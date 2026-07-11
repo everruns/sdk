@@ -1239,6 +1239,7 @@ describe("validateAgentName", () => {
 });
 
 describe("Agents create/apply with harness fields (EVE-686)", () => {
+  // The API serializes responses in snake_case (this mirrors the real wire).
   function agentFetchMock() {
     return vi.fn().mockResolvedValue({
       ok: true,
@@ -1246,12 +1247,15 @@ describe("Agents create/apply with harness fields (EVE-686)", () => {
       json: async () => ({
         id: "agent_123",
         name: "customer-support",
-        systemPrompt: "You are helpful.",
-        harnessId: "harness_abc",
-        parallelToolCalls: true,
+        system_prompt: "You are helpful.",
+        harness_id: "harness_abc",
+        parallel_tool_calls: true,
         status: "active",
-        createdAt: "2026-03-13T00:00:00Z",
-        updatedAt: "2026-03-13T00:00:00Z",
+        initial_files: [
+          { path: "README.md", content: "hi", is_readonly: true },
+        ],
+        created_at: "2026-03-13T00:00:00Z",
+        updated_at: "2026-03-13T00:00:00Z",
       }),
     });
   }
@@ -1375,29 +1379,61 @@ describe("Agents create/apply with harness fields (EVE-686)", () => {
     ).rejects.toThrow("must match pattern");
   });
 
-  // NOTE: response-field parsing (agent.harnessId etc.) is intentionally not
-  // asserted here. The API returns snake_case (harness_id) and the client casts
-  // response.json() directly to the camelCase-typed Agent with no transform, so
-  // multi-word response fields are undefined at runtime. This is a pre-existing,
-  // systemic, TypeScript-only issue (affects systemPrompt/createdAt/etc. too),
-  // out of scope for this adoption and tracked as a separate follow-up.
+  // Response parsing: the API returns snake_case; the client maps it onto the
+  // camelCase-typed Agent (issue #99). Assert the multi-word fields resolve,
+  // including nested models (initialFiles[].isReadonly).
+  it("should map snake_case response fields onto the camelCase Agent", async () => {
+    const fetchMock = agentFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const agent = await client.agents.create({
+      name: "customer-support",
+      systemPrompt: "You are helpful.",
+      harnessId: "harness_abc",
+    });
+
+    expect(agent.systemPrompt).toBe("You are helpful.");
+    expect(agent.harnessId).toBe("harness_abc");
+    expect(agent.parallelToolCalls).toBe(true);
+    expect(agent.createdAt).toBe("2026-03-13T00:00:00Z");
+    expect(agent.updatedAt).toBe("2026-03-13T00:00:00Z");
+    // Nested model fields decode too.
+    expect(agent.initialFiles?.[0].isReadonly).toBe(true);
+    expect(agent.initialFiles?.[0].path).toBe("README.md");
+    // Single-word fields are untouched.
+    expect(agent.id).toBe("agent_123");
+    expect(agent.name).toBe("customer-support");
+  });
+
+  it("should map snake_case response fields from agents.get", async () => {
+    const fetchMock = agentFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const agent = await client.agents.get("agent_123");
+
+    expect(agent.systemPrompt).toBe("You are helpful.");
+    expect(agent.harnessId).toBe("harness_abc");
+  });
 });
 
 describe("Sessions create with agentName and parallelToolCalls (EVE-686)", () => {
+  // The API serializes responses in snake_case (this mirrors the real wire).
   function sessionFetchMock() {
     return vi.fn().mockResolvedValue({
       ok: true,
       status: 201,
       json: async () => ({
         id: "session_123",
-        harnessId: "harness_123",
-        agentId: "agent_123",
-        parallelToolCalls: true,
-        forkedFromSessionId: "session_parent",
-        forkedFromSequence: 42,
+        harness_id: "harness_123",
+        agent_id: "agent_123",
+        parallel_tool_calls: true,
+        forked_from_session_id: "session_parent",
+        forked_from_sequence: 42,
         status: "active",
-        createdAt: "2026-03-13T00:00:00Z",
-        updatedAt: "2026-03-13T00:00:00Z",
+        created_at: "2026-03-13T00:00:00Z",
+        updated_at: "2026-03-13T00:00:00Z",
       }),
     });
   }
@@ -1437,10 +1473,26 @@ describe("Sessions create with agentName and parallelToolCalls (EVE-686)", () =>
     ).rejects.toThrow("must match pattern");
   });
 
-  // NOTE: see the agent-response note above — snake_case response fields
-  // (parallel_tool_calls, forked_from_session_id, forked_from_sequence) are not
-  // mapped to the camelCase-typed Session at runtime. Pre-existing TS-only issue,
-  // tracked separately; not asserted here to avoid false confidence.
+  // Response parsing: snake_case wire fields map onto the camelCase-typed
+  // Session, including the EVE-686 additions (issue #99).
+  it("should map snake_case response fields onto the camelCase Session", async () => {
+    const fetchMock = sessionFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const session = await client.sessions.create({
+      agentName: "customer-support",
+    });
+
+    expect(session.harnessId).toBe("harness_123");
+    expect(session.agentId).toBe("agent_123");
+    expect(session.parallelToolCalls).toBe(true);
+    expect(session.forkedFromSessionId).toBe("session_parent");
+    expect(session.forkedFromSequence).toBe(42);
+    expect(session.createdAt).toBe("2026-03-13T00:00:00Z");
+    expect(session.updatedAt).toBe("2026-03-13T00:00:00Z");
+    expect(session.id).toBe("session_123");
+  });
 });
 
 describe("CreateAgentRequest with displayName", () => {
@@ -2488,7 +2540,10 @@ describe("Session budget shortcuts", () => {
     const client = new Everruns({ apiKey: "evr_test_key" });
     const result = await client.sessions.resume("sess_123");
 
-    expect(result.resumed_budgets).toBe(2);
+    // The API returns snake_case (`resumed_budgets`); the client decodes it to
+    // the camelCase `resumedBudgets` declared on ResumeSessionResponse.
+    expect(result.resumedBudgets).toBe(2);
+    expect(result.sessionId).toBe("sess_123");
     expect(fetchMock).toHaveBeenCalledWith(
       "https://custom.example.com/api/v1/sessions/sess_123/resume",
       expect.objectContaining({ method: "POST" }),
@@ -2788,5 +2843,128 @@ describe("ModelsClient", () => {
       "https://custom.example.com/api/v1/models/model_123",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
+  });
+});
+
+describe("Response decoding invariants (issue #99)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should decode deeply nested camelCase models", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: "model_123",
+        model_id: "gpt-4",
+        display_name: "GPT-4",
+        provider_id: "provider_1",
+        provider_name: "OpenAI",
+        provider_type: "openai",
+        source: "builtin",
+        capabilities: [],
+        enabled: true,
+        healthy: true,
+        is_favorite: false,
+        created_at: "2026-07-01T00:00:00Z",
+        updated_at: "2026-07-01T00:00:00Z",
+        profile: {
+          name: "gpt-4",
+          family: "gpt",
+          attachment: false,
+          reasoning: true,
+          temperature: true,
+          tool_call: true,
+          open_weights: false,
+          structured_output: true,
+          release_date: "2026-01-01",
+          cost: { input: 1, output: 2, cache_read: 0.5 },
+          limits: { context: 128000, output: 4096, max_media: 10 },
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const model = await client.models.get("model_123");
+
+    expect(model.providerName).toBe("OpenAI");
+    expect(model.isFavorite).toBe(false);
+    // Two and three levels deep.
+    expect(model.profile?.releaseDate).toBe("2026-01-01");
+    expect(model.profile?.cost?.cacheRead).toBe(0.5);
+    expect(model.profile?.limits?.maxMedia).toBe(10);
+  });
+
+  it("should leave free-form object keys untouched", async () => {
+    // Event.data is a free-form Record; its snake_case keys are data, not
+    // model fields, and must survive verbatim. Event.ts still maps to createdAt.
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [
+          {
+            id: "evt_1",
+            ts: "2026-07-01T00:00:00Z",
+            type: "tool.call_requested",
+            data: {
+              tool_name: "search",
+              nested_map: { deep_key: 42 },
+            },
+          },
+        ],
+        total: 1,
+        offset: 0,
+        limit: 25,
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const events = await client.events.list("sess_123");
+
+    expect(events[0].createdAt).toBe("2026-07-01T00:00:00Z");
+    // Free-form keys are preserved exactly (NOT camelCased).
+    expect(events[0].data.tool_name).toBe("search");
+    expect((events[0].data.nested_map as { deep_key: number }).deep_key).toBe(
+      42,
+    );
+    expect(events[0].data.toolName).toBeUndefined();
+  });
+
+  it("should preserve data-bearing map keys inside model fields", async () => {
+    // Agent.capabilities[].config is free-form; its keys must not be rewritten,
+    // while the surrounding model fields still decode.
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: "agent_123",
+        name: "assistant",
+        system_prompt: "hi",
+        harness_id: "harness_1",
+        status: "active",
+        capabilities: [
+          { ref: "web-search", config: { max_results: 5, api_key: "k" } },
+        ],
+        created_at: "2026-07-01T00:00:00Z",
+        updated_at: "2026-07-01T00:00:00Z",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new Everruns({ apiKey: "evr_test_key" });
+
+    const agent = await client.agents.get("agent_123");
+
+    expect(agent.systemPrompt).toBe("hi");
+    expect(agent.capabilities?.[0].ref).toBe("web-search");
+    const config = agent.capabilities?.[0].config as {
+      max_results: number;
+      api_key: string;
+    };
+    expect(config.max_results).toBe(5);
+    expect(config.api_key).toBe("k");
   });
 });
