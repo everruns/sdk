@@ -41,7 +41,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "eventsource-parser": "^3.0.0"
+    "eventsource-parser": "^3.1.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
