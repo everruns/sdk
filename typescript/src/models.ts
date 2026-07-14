@@ -744,12 +744,7 @@ export interface NetworkAccessList {
 }
 
 export type ReasoningEffort =
-  | "none"
-  | "minimal"
-  | "low"
-  | "medium"
-  | "high"
-  | "xhigh";
+  "none" | "minimal" | "low" | "medium" | "high" | "xhigh";
 
 /** Reasoning effort configuration for a model */
 export interface ReasoningEffortConfig {
@@ -855,10 +850,7 @@ export interface SessionFile {
 }
 
 export type SessionStatus =
-  | "started"
-  | "active"
-  | "idle"
-  | "waitingfortoolresults";
+  "started" | "active" | "idle" | "waitingfortoolresults";
 
 /** Request body for the `set_default_agent_version` operation. */
 export interface SetDefaultAgentVersionRequest {
