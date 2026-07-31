@@ -14,29 +14,31 @@ pip install everruns-sdk
 import asyncio
 from everruns_sdk import Everruns
 
+
 async def main():
     # Uses EVERRUNS_API_KEY and optional EVERRUNS_ORG_ID environment variables
     client = Everruns()
-    
+
     # Create an agent
     agent = await client.agents.create(
         name="Assistant",
         system_prompt="You are a helpful assistant.",
     )
-    
+
     # Create a session
     session = await client.sessions.create(agent_id=agent.id)
-    
+
     # Send a message
     await client.messages.create(session.id, "Hello!")
-    
+
     # Stream events
     async for event in client.events.stream(session.id):
         if event.type == "output.message.completed":
             print(event.data)
             break
-    
+
     await client.close()
+
 
 asyncio.run(main())
 ```
@@ -63,7 +65,7 @@ Discover and manage harnesses, and browse available models to choose a `default_
 
 ```python
 # Browse harnesses, then create one
-harnesses = await client.harnesses.list()          # or .search("research")
+harnesses = await client.harnesses.list()  # or .search("research")
 harness = await client.harnesses.get(harnesses[0].id)
 custom = await client.harnesses.create(
     name="my-harness",
