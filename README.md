@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.svg" alt="Everruns" width="160">
+</p>
+
 # Everruns SDK
 
 Official client libraries for the [Everruns API](https://everruns.com). Build AI agent applications with typed, async SDKs for Rust, Python, and TypeScript.
