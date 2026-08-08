@@ -173,6 +173,7 @@ export interface Connection {
 
 /** A part of message content - can be text, image, image_file, tool_call, or tool_result */
 export interface ContentPart {
+  annotations?: unknown[];
   text?: string;
   type: "text" | "image" | "image_file" | "tool_call" | "tool_result";
   base64?: string | null;
@@ -195,6 +196,8 @@ export interface Controls {
   locale?: string | null;
   modelId?: string | null;
   reasoning?: unknown | null;
+  speed?: string | null;
+  verbosity?: string | null;
 }
 
 /** Request to copy a file */
@@ -305,6 +308,7 @@ export interface CreateSessionRequest {
   agentIdentityId?: string | null;
   agentName?: string | null;
   capabilities?: AgentCapabilityConfig[];
+  goal?: string | null;
   harnessId?: string | null;
   harnessName?: string | null;
   hints?: Record<string, unknown> | null;
@@ -605,6 +609,9 @@ export interface Memory {
   last_sync_error?: string | null;
   last_synced_at?: string | null;
   name: string;
+  owner_agent_id?: string | null;
+  owner_user_id?: string | null;
+  scope: string;
   source: unknown;
   source_type: string;
   status: string;
@@ -690,12 +697,14 @@ export interface ModelProfile {
   reasoning: boolean;
   reasoningEffort?: ReasoningEffortConfig | null;
   releaseDate?: string | null;
+  speed?: unknown | null;
   structuredOutput: boolean;
   supportedParameters?: string[];
   supportsPhases?: boolean;
   temperature: boolean;
   toolCall: boolean;
   toolSearch?: boolean;
+  verbosity?: unknown | null;
 }
 
 export type ModelSource = "manual" | "discovered" | "predefined";
@@ -707,6 +716,7 @@ export type ModelVendor =
   | "nvidia"
   | "qwen"
   | "microsoft"
+  | "meta"
   | "minimax"
   | "moonshot"
   | "xai"
@@ -807,6 +817,7 @@ export interface Session {
   finished_at?: string | null;
   forked_from_sequence?: number | null;
   forked_from_session_id?: string | null;
+  goal?: string | null;
   harness_id: string;
   hints?: Record<string, unknown> | null;
   id: string;
