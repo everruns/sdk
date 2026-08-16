@@ -31,7 +31,7 @@ Wrong:     ?exclude[]=output.message.delta&exclude[]=reason.thinking.delta
 
 When both `types` and `exclude` are provided, `types` narrows first (positive filter), then `exclude` removes from that set (negative filter). Both accept only known event types (max 25 per parameter). Unknown types return 400.
 
-Reference: [everruns/everruns#575](https://github.com/everruns/everruns/pull/575) — the server uses `serde_html_form` which only supports the repeated-key format for deserializing arrays.
+Reference: [everruns/everruns#575](https://github.com/everruns/everruns/pull/575). The server uses `serde_html_form` which only supports the repeated-key format for deserializing arrays.
 
 ## Event Format
 
@@ -127,7 +127,7 @@ idle_timeout: duration           # Configurable idle timeout duration (default 4
 2. Log at DEBUG level (expected behavior, not an error)
 3. Reconnect after `retry_ms` delay (default 100ms if not provided)
 4. Include `since_id` query parameter with last received event ID
-5. **Do NOT increment `retry_count`** — graceful disconnects are planned server behavior, not errors. They must never exhaust `max_retries`.
+5. **Do NOT increment `retry_count`**: graceful disconnects are planned server behavior, not errors. They must never exhaust `max_retries`.
 
 ```python
 # Pseudocode
@@ -188,8 +188,8 @@ This ensures that a successful reconnection clears any accumulated error backoff
 
 The server sends heartbeat comments (`: heartbeat\n\n`) every 30s ([everruns/everruns#603](https://github.com/everruns/everruns/issues/603)). These reset the TCP read timer but are ignored by spec-compliant SSE parsers.
 
-- **Must be > 30s** — allow at least one heartbeat interval
-- **45s** — missing a single heartbeat reliably indicates a stalled connection
+- **Must be > 30s**: allow at least one heartbeat interval
+- **45s**: missing a single heartbeat reliably indicates a stalled connection
 - Retry logic reconnects transparently with no data loss (via `since_id`)
 
 #### Poll-Level Idle Timeout (Primary Stall Detection)
@@ -399,14 +399,14 @@ The server sends periodic SSE comment heartbeats every 30s ([everruns/everruns#6
 
 ```
 
-These are SSE comments (lines starting with `:`) — spec-compliant parsers ignore them automatically. They reset the TCP read timer, allowing reliable detection of stalled connections.
+These are SSE comments (lines starting with `:`); spec-compliant parsers ignore them automatically. They reset the TCP read timer, allowing reliable detection of stalled connections.
 
 ### How Heartbeats Work
 
 1. **Server sends `: heartbeat\n\n` every 30s** across all SSE streams
-2. **Read timeout (45s) > heartbeat interval (30s)** — a missing heartbeat means the connection is stalled
-3. **No SDK code changes needed for parsing** — SSE parsers already ignore comment lines
-4. **Read timeout triggers reconnection** — retry logic reconnects transparently via `since_id`
+2. **Read timeout (45s) > heartbeat interval (30s)**: a missing heartbeat means the connection is stalled
+3. **No SDK code changes needed for parsing**: SSE parsers already ignore comment lines
+4. **Read timeout triggers reconnection**: retry logic reconnects transparently via `since_id`
 
 ### Configuration (Server-Side)
 
