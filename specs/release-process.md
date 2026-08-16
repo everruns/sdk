@@ -48,7 +48,7 @@ triggers the automated release pipeline after merge to main.
 
 ### CI Workflows
 
-**release.yml** — Triggered on push to `main`:
+**release.yml**: Triggered on push to `main`:
 
 - Only runs when commit message starts with `chore(release): prepare v`
 - Extracts version from commit message
@@ -57,7 +57,7 @@ triggers the automated release pipeline after merge to main.
 - Creates GitHub Release with tag `vX.Y.Z`
 - Triggers publish.yml
 
-**publish.yml** — Triggered on GitHub Release published:
+**publish.yml**: Triggered on GitHub Release published:
 
 - Verifies tag version matches each SDK manifest
 - Publishes Rust SDK to crates.io
@@ -116,9 +116,9 @@ Each release section in `CHANGELOG.md` follows this structure:
 
 ### Changelog Rules
 
-- `### Highlights` — 2-5 user-facing summaries (always included)
-- `### Breaking Changes` — included for minor/major versions with migration guides
-- `### What's Changed` — single flat list (not split into Added/Changed/Fixed)
+- `### Highlights`: 2-5 user-facing summaries (always included)
+- `### Breaking Changes`: included for minor/major versions with migration guides
+- `### What's Changed`: single flat list (not split into Added/Changed/Fixed)
 - PRs listed in descending order by PR number (newest first)
 - Format per line: `* type(scope): description ([#N](URL)) by @author`
 - Ends with `**Full Changelog**: URL` compare link

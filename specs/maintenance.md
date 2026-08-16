@@ -103,10 +103,10 @@ Compare `openapi/openapi.json` endpoints against `specs/api-surface.md` and SDK 
 
 ### READMEs
 
-- [ ] `rust/README.md` — quick start is current, examples work
-- [ ] `python/README.md` — quick start is current, examples work
-- [ ] `typescript/README.md` — quick start is current, examples work
-- [ ] Root `README.md` — links and overview are current
+- [ ] `rust/README.md`: quick start is current, examples work
+- [ ] `python/README.md`: quick start is current, examples work
+- [ ] `typescript/README.md`: quick start is current, examples work
+- [ ] Root `README.md`: links and overview are current
 
 ## 5. Spec-Code Alignment
 
@@ -115,14 +115,14 @@ Ensure specs match implementation and vice versa.
 ### Specs → Code
 
 For each spec in `specs/`:
-- [ ] `architecture.md` — structure matches actual file layout
-- [ ] `api-surface.md` — endpoints match what SDKs implement
-- [ ] `auth.md` — auth patterns match SDK auth modules
-- [ ] `sse-streaming.md` — SSE behavior matches SDK streaming code
-- [ ] `error-handling.md` — error types match SDK error modules
-- [ ] `sdk-features.md` — features listed are implemented
-- [ ] `cookbooks.md` — cookbook structure matches actual cookbooks
-- [ ] `release-process.md` — release flow matches CI workflows
+- [ ] `architecture.md`: structure matches actual file layout
+- [ ] `api-surface.md`: endpoints match what SDKs implement
+- [ ] `auth.md`: auth patterns match SDK auth modules
+- [ ] `sse-streaming.md`: SSE behavior matches SDK streaming code
+- [ ] `error-handling.md`: error types match SDK error modules
+- [ ] `sdk-features.md`: features listed are implemented
+- [ ] `cookbooks.md`: cookbook structure matches actual cookbooks
+- [ ] `release-process.md`: release flow matches CI workflows
 
 ### Code → Specs
 

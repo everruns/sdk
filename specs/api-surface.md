@@ -104,7 +104,7 @@ Sessions accept harness identification via one of two parameters (mutually exclu
 If neither is provided, the server defaults to the Generic harness.
 Providing both `harness_id` and `harness_name` raises a client-side validation error.
 
-Agent is optional on session creation — sessions can run without an agent. The agent is identified by one of two mutually-exclusive parameters:
+Agent is optional on session creation; sessions can run without an agent. The agent is identified by one of two mutually-exclusive parameters:
 
 - **`agent_id`**: opaque ID (format: `agent_<32-hex>`).
 - **`agent_name`**: the agent's addressable slug. Client-side validated; providing both `agent_id` and `agent_name` raises a client-side validation error.
