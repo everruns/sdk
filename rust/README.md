@@ -238,6 +238,22 @@ match client.agents().get("invalid-id").await {
 }
 ```
 
+## TLS Backend and Binary Size
+
+The default `rustls-tls` feature bundles rustls and its crypto provider, so the
+SDK works with no system TLS library. `native-tls` links the platform TLS stack
+instead, which cuts roughly 3.4 MiB off a stripped release binary but requires
+OpenSSL (or the platform equivalent) on the build and target machines.
+
+```toml
+[dependencies]
+everruns-sdk = { version = "0.2", default-features = false, features = ["native-tls"] }
+```
+
+Measured on a minimal client that creates a session and streams events
+(stripped release build, x86_64-linux): 6.5 MiB with `rustls-tls`,
+3.0 MiB with `native-tls`.
+
 ## License
 
 MIT

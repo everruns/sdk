@@ -242,21 +242,60 @@ impl Everruns {
         headers
     }
 
-    pub(crate) async fn get<T: serde::de::DeserializeOwned>(&self, path: &str) -> Result<T> {
-        let resp = self
-            .http
-            .get(self.url(path))
-            .headers(self.headers())
-            .send()
-            .await?;
+    /// Send a request and return the response body.
+    ///
+    /// Deliberately non-generic: every typed helper funnels through this one
+    /// copy of the send-and-check machinery instead of monomorphizing it per
+    /// request and response type, which is what the code costs a consumer's
+    /// binary.
+    async fn send(&self, req: reqwest::RequestBuilder) -> Result<String> {
+        let resp = req.send().await?;
+        let status = resp.status();
 
-        self.handle_response(resp).await
+        if status.is_success() {
+            Ok(resp.text().await?)
+        } else {
+            let body = resp.text().await.unwrap_or_default();
+            Err(Error::from_api_response(status.as_u16(), &body))
+        }
+    }
+
+    /// Send a request and deserialize the response body.
+    async fn send_json<T: serde::de::DeserializeOwned>(
+        &self,
+        req: reqwest::RequestBuilder,
+    ) -> Result<T> {
+        let body = self.send(req).await?;
+        Ok(serde_json::from_str(&body)?)
+    }
+
+    /// Send a request that has no response body worth reading.
+    async fn send_empty(&self, req: reqwest::RequestBuilder) -> Result<()> {
+        self.send(req).await?;
+        Ok(())
+    }
+
+    fn json_body(
+        &self,
+        req: reqwest::RequestBuilder,
+        body: &impl serde::Serialize,
+    ) -> Result<reqwest::RequestBuilder> {
+        Ok(req.headers(self.headers()).body(serde_json::to_vec(body)?))
+    }
+
+    fn text_body(&self, req: reqwest::RequestBuilder, body: &str) -> reqwest::RequestBuilder {
+        let mut headers = self.auth_headers();
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/plain"));
+        req.headers(headers).body(body.to_string())
+    }
+
+    pub(crate) async fn get<T: serde::de::DeserializeOwned>(&self, path: &str) -> Result<T> {
+        self.get_url(self.url(path)).await
     }
 
     pub(crate) async fn get_url<T: serde::de::DeserializeOwned>(&self, url: Url) -> Result<T> {
-        let resp = self.http.get(url).headers(self.headers()).send().await?;
-
-        self.handle_response(resp).await
+        self.send_json(self.http.get(url).headers(self.headers()))
+            .await
     }
 
     pub(crate) async fn post<T: serde::de::DeserializeOwned, B: serde::Serialize>(
@@ -264,15 +303,8 @@ impl Everruns {
         path: &str,
         body: &B,
     ) -> Result<T> {
-        let resp = self
-            .http
-            .post(self.url(path))
-            .headers(self.headers())
-            .json(body)
-            .send()
-            .await?;
-
-        self.handle_response(resp).await
+        let req = self.json_body(self.http.post(self.url(path)), body)?;
+        self.send_json(req).await
     }
 
     pub(crate) async fn patch<T: serde::de::DeserializeOwned, B: serde::Serialize>(
@@ -280,15 +312,8 @@ impl Everruns {
         path: &str,
         body: &B,
     ) -> Result<T> {
-        let resp = self
-            .http
-            .patch(self.url(path))
-            .headers(self.headers())
-            .json(body)
-            .send()
-            .await?;
-
-        self.handle_response(resp).await
+        let req = self.json_body(self.http.patch(self.url(path)), body)?;
+        self.send_json(req).await
     }
 
     pub(crate) async fn post_text<T: serde::de::DeserializeOwned>(
@@ -296,17 +321,7 @@ impl Everruns {
         path: &str,
         body: &str,
     ) -> Result<T> {
-        let mut headers = self.headers();
-        headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/plain"));
-        let resp = self
-            .http
-            .post(self.url(path))
-            .headers(headers)
-            .body(body.to_string())
-            .send()
-            .await?;
-
-        self.handle_response(resp).await
+        self.post_text_url(self.url(path), body).await
     }
 
     pub(crate) async fn post_text_url<T: serde::de::DeserializeOwned>(
@@ -314,34 +329,13 @@ impl Everruns {
         url: Url,
         body: &str,
     ) -> Result<T> {
-        let mut headers = self.headers();
-        headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/plain"));
-        let resp = self
-            .http
-            .post(url)
-            .headers(headers)
-            .body(body.to_string())
-            .send()
-            .await?;
-
-        self.handle_response(resp).await
+        let req = self.text_body(self.http.post(url), body);
+        self.send_json(req).await
     }
 
     pub(crate) async fn get_text(&self, path: &str) -> Result<String> {
-        let resp = self
-            .http
-            .get(self.url(path))
-            .headers(self.headers())
-            .send()
-            .await?;
-
-        if resp.status().is_success() {
-            Ok(resp.text().await?)
-        } else {
-            let status = resp.status().as_u16();
-            let body = resp.text().await.unwrap_or_default();
-            Err(Error::from_api_response(status, &body))
-        }
+        self.send(self.http.get(self.url(path)).headers(self.headers()))
+            .await
     }
 
     pub(crate) async fn put<T: serde::de::DeserializeOwned, B: serde::Serialize>(
@@ -349,68 +343,23 @@ impl Everruns {
         path: &str,
         body: &B,
     ) -> Result<T> {
-        let resp = self
-            .http
-            .put(self.url(path))
-            .headers(self.headers())
-            .json(body)
-            .send()
-            .await?;
-
-        self.handle_response(resp).await
+        let req = self.json_body(self.http.put(self.url(path)), body)?;
+        self.send_json(req).await
     }
 
     pub(crate) async fn put_empty(&self, path: &str) -> Result<()> {
-        let resp = self
-            .http
-            .put(self.url(path))
-            .headers(self.headers())
-            .send()
-            .await?;
-
-        if resp.status().is_success() {
-            Ok(())
-        } else {
-            let status = resp.status().as_u16();
-            let body = resp.text().await.unwrap_or_default();
-            Err(Error::from_api_response(status, &body))
-        }
+        self.send_empty(self.http.put(self.url(path)).headers(self.headers()))
+            .await
     }
 
     pub(crate) async fn delete(&self, path: &str) -> Result<()> {
-        let resp = self
-            .http
-            .delete(self.url(path))
-            .headers(self.headers())
-            .send()
-            .await?;
-
-        if resp.status().is_success() {
-            Ok(())
-        } else {
-            let status = resp.status().as_u16();
-            let body = resp.text().await.unwrap_or_default();
-            Err(Error::from_api_response(status, &body))
-        }
+        self.send_empty(self.http.delete(self.url(path)).headers(self.headers()))
+            .await
     }
 
     pub(crate) async fn delete_url<T: serde::de::DeserializeOwned>(&self, url: Url) -> Result<T> {
-        let resp = self.http.delete(url).headers(self.headers()).send().await?;
-
-        self.handle_response(resp).await
-    }
-
-    async fn handle_response<T: serde::de::DeserializeOwned>(
-        &self,
-        resp: reqwest::Response,
-    ) -> Result<T> {
-        if resp.status().is_success() {
-            Ok(resp.json().await?)
-        } else {
-            let status = resp.status().as_u16();
-            let body = resp.text().await.unwrap_or_default();
-            Err(Error::from_api_response(status, &body))
-        }
+        self.send_json(self.http.delete(url).headers(self.headers()))
+            .await
     }
 
     /// Get the SSE URL for a session

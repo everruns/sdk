@@ -11,21 +11,38 @@ documentation = "https://docs.rs/everruns-sdk"
 keywords = ["everruns", "sdk", "api", "ai", "agents"]
 categories = ["api-bindings", "web-programming"]
 
+[features]
+default = ["rustls-tls"]
+# TLS backend. Pick one; `rustls-tls` bundles its own crypto, `native-tls`
+# links the platform TLS stack (smaller binary, adds a system dependency).
+rustls-tls = ["reqwest/rustls"]
+native-tls = ["reqwest/native-tls"]
+
 [dependencies]
-reqwest = { version = "0.13", features = ["json", "stream"] }
+# default-features = false drops `charset` (encoding_rs); the API is JSON over
+# UTF-8, and the TLS backend comes from this crate's own features instead.
+reqwest = { version = "0.13", default-features = false, features = [
+    "json",
+    "stream",
+    "http2",
+    "system-proxy",
+] }
 eventsource-stream = "0.2"
-tokio = { version = "1", features = ["full"] }
+# Only timers are used; consumers pick the runtime features they need.
+tokio = { version = "1", features = ["time"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
 url = "2"
 secrecy = { version = "0.10", features = ["serde"] }
 getrandom = "0.4"
-futures = "0.3"
+futures-core = "0.3"
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
 async-stream = "0.3"
 tracing = "0.1"
 
 [dev-dependencies]
-reqwest = { version = "0.13", features = ["blocking"] }
+futures = "0.3"
+tokio = { version = "1", features = ["full"] }
 tokio-test = "0.4"
 wiremock = "0.6"

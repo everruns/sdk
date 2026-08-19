@@ -10,7 +10,7 @@
 use crate::client::Everruns;
 use crate::error::{Error, Result};
 use crate::models::Event;
-use futures::stream::Stream;
+use futures_core::Stream;
 use serde::Deserialize;
 use std::future::Future;
 use std::pin::Pin;
@@ -248,7 +248,7 @@ impl EventStream {
 
         Box::pin(async_stream::try_stream! {
             use eventsource_stream::Eventsource;
-            use futures::StreamExt;
+            use futures_util::StreamExt;
 
             let types_refs: Vec<&str> = types.iter().map(|s| s.as_str()).collect();
             let exclude_refs: Vec<&str> = exclude.iter().map(|s| s.as_str()).collect();
