@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.1] - 2026-08-19
+
+### Highlights
+
+- Rust SDK footprint trimmed for consumer binaries: leaner tokio/futures/reqwest feature sets, and TLS is now a Cargo feature (default `rustls-tls`, or `native-tls` for a much smaller binary).
+- Rust SDK upgraded to reqwest 0.13.
+- Dependency and security updates across all SDKs.
+- Documentation polish: Everruns logo in the README, plainer punctuation in prose.
+
+### What's Changed
+
+* chore(rust): shrink SDK footprint in consumer binaries ([#110](https://github.com/everruns/sdk/pull/110)) by @chaliy
+* chore(rust): upgrade to reqwest 0.13 ([#109](https://github.com/everruns/sdk/pull/109)) by @chaliy
+* docs: replace em-dashes with plain punctuation in prose ([#108](https://github.com/everruns/sdk/pull/108)) by @chaliy
+* docs: add Everruns logo ([#107](https://github.com/everruns/sdk/pull/107)) by @chaliy
+* chore: update dependencies ([#106](https://github.com/everruns/sdk/pull/106)) by @chaliy
+* chore: upgrade dependencies ([#105](https://github.com/everruns/sdk/pull/105)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.2.0...v0.2.1
+
 ## [0.2.0] - 2026-07-11
 
 ### Highlights
