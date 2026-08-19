@@ -247,7 +247,7 @@ impl EventStream {
         let http_client = self.sse_http_client.clone();
 
         Box::pin(async_stream::try_stream! {
-            use reqwest_eventsource::{Event as SseEvent, RequestBuilderExt};
+            use eventsource_stream::Eventsource;
             use futures::StreamExt;
 
             let types_refs: Vec<&str> = types.iter().map(|s| s.as_str()).collect();
@@ -256,20 +256,27 @@ impl EventStream {
 
             tracing::debug!("Connecting to SSE: {}", url);
 
-            let mut es = http_client
+            let resp = http_client
                 .get(url.clone())
                 .headers(client.auth_headers())
                 .header("Accept", "text/event-stream")
                 .header("Cache-Control", "no-cache")
-                .eventsource()
+                .send()
+                .await
                 .map_err(|e| Error::Sse(e.to_string()))?;
+
+            let status = resp.status();
+            if !status.is_success() {
+                Err(Error::Sse(format!("unexpected SSE status: {status}")))?;
+            }
+
+            tracing::debug!("SSE connection opened");
+
+            let mut es = resp.bytes_stream().eventsource();
 
             while let Some(event) = es.next().await {
                 match event {
-                    Ok(SseEvent::Open) => {
-                        tracing::debug!("SSE connection opened");
-                    }
-                    Ok(SseEvent::Message(msg)) => {
+                    Ok(msg) => {
                         // Handle special lifecycle events
                         if msg.event == "connected" {
                             tracing::debug!("SSE connected event received");
@@ -307,16 +314,14 @@ impl EventStream {
                             tracing::debug!("Skipping non-event message: {}", msg.event);
                         }
                     }
-                    Err(reqwest_eventsource::Error::StreamEnded) => {
-                        tracing::debug!("SSE stream ended");
-                        break;
-                    }
                     Err(e) => {
                         tracing::warn!("SSE error: {}", e);
                         Err(Error::Sse(e.to_string()))?;
                     }
                 }
             }
+
+            tracing::debug!("SSE stream ended");
         })
     }
 

@@ -194,7 +194,7 @@ The server sends heartbeat comments (`: heartbeat\n\n`) every 30s ([everruns/eve
 
 #### Poll-Level Idle Timeout (Primary Stall Detection)
 
-**`reqwest::Client::read_timeout` is ineffective on already-streaming SSE responses.** Despite documentation saying it applies to "time between receiving bytes," it does not fire once `reqwest_eventsource` takes over the response stream. Additionally, SSE heartbeat comments (`: heartbeat\n\n`) are consumed silently by `reqwest_eventsource` and never reach `EventStream::poll_next()`.
+**`reqwest::Client::read_timeout` is ineffective on already-streaming SSE responses.** Despite documentation saying it applies to "time between receiving bytes," it does not fire once the SSE parser takes over the response body stream. Additionally, SSE heartbeat comments (`: heartbeat\n\n`) are consumed silently by the parser and never reach `EventStream::poll_next()`.
 
 **Result:** When a TCP connection goes half-open (server closed, client doesn't know), `stream.next()` returns `Poll::Pending` forever. No timeout, no error, no recovery.
 

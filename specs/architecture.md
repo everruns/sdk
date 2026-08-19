@@ -17,7 +17,7 @@ Everruns SDKs provide typed clients for the Everruns API across multiple languag
 
 | Language | Type Generator | HTTP Library | SSE Library |
 |----------|----------------|--------------|-------------|
-| Rust | shared repo generator | reqwest | reqwest-eventsource |
+| Rust | shared repo generator | reqwest | eventsource-stream |
 | Python | shared repo generator | httpx | httpx-sse |
 | TypeScript | shared repo generator | fetch/undici | eventsource-parser |
 

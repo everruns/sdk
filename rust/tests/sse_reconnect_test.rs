@@ -263,3 +263,102 @@ async fn test_idle_timeout_triggers_reconnect_on_silent_connection() {
 
     stream.stop();
 }
+
+/// Responder returning a non-2xx status for the first N calls, then SSE bodies.
+struct FailThenSseResponder {
+    call_count: Arc<AtomicUsize>,
+    failures: usize,
+    status: u16,
+    body: String,
+}
+
+impl wiremock::Respond for FailThenSseResponder {
+    fn respond(&self, _request: &wiremock::Request) -> ResponseTemplate {
+        let n = self.call_count.fetch_add(1, Ordering::SeqCst);
+        if n < self.failures {
+            return ResponseTemplate::new(self.status);
+        }
+        ResponseTemplate::new(200)
+            .insert_header("Cache-Control", "no-cache")
+            .set_body_raw(self.body.as_bytes(), "text/event-stream")
+    }
+}
+
+/// A non-2xx SSE response is an error, not an empty stream: the stream must
+/// retry and recover once the server starts serving events.
+#[tokio::test]
+async fn test_error_status_retries_then_recovers() {
+    let mock_server = MockServer::start().await;
+    let call_count = Arc::new(AtomicUsize::new(0));
+
+    let body = format!(
+        "{}{}",
+        sse_event("connected", "{}"),
+        sse_event(
+            "output.message.started",
+            &make_event_json("evt_001", "output.message.started"),
+        ),
+    );
+
+    Mock::given(method("GET"))
+        .and(path_regex("/v1/sessions/.*/sse"))
+        .respond_with(FailThenSseResponder {
+            call_count: call_count.clone(),
+            failures: 1,
+            status: 500,
+            body,
+        })
+        .mount(&mock_server)
+        .await;
+
+    let client = Everruns::with_base_url("test_key", &mock_server.uri()).unwrap();
+    let opts = everruns_sdk::sse::StreamOptions::default().with_max_retries(3);
+    let mut stream = client.events().stream_with_options("sess_1", opts);
+
+    let event = tokio::time::timeout(Duration::from_secs(10), stream.next())
+        .await
+        .expect("stream should yield within timeout")
+        .expect("stream should not end")
+        .expect("event should be Ok");
+    stream.stop();
+
+    assert_eq!(event.id, "evt_001");
+    assert_eq!(
+        call_count.load(Ordering::SeqCst),
+        2,
+        "Should have retried after the 500 response"
+    );
+}
+
+/// With the retry budget exhausted, a non-2xx SSE response surfaces as an error
+/// instead of silently ending the stream.
+#[tokio::test]
+async fn test_error_status_surfaces_when_retries_exhausted() {
+    let mock_server = MockServer::start().await;
+    let call_count = Arc::new(AtomicUsize::new(0));
+
+    Mock::given(method("GET"))
+        .and(path_regex("/v1/sessions/.*/sse"))
+        .respond_with(FailThenSseResponder {
+            call_count: call_count.clone(),
+            failures: usize::MAX,
+            status: 401,
+            body: String::new(),
+        })
+        .mount(&mock_server)
+        .await;
+
+    let client = Everruns::with_base_url("test_key", &mock_server.uri()).unwrap();
+    let opts = everruns_sdk::sse::StreamOptions::default().with_max_retries(0);
+    let mut stream = client.events().stream_with_options("sess_1", opts);
+
+    let result = tokio::time::timeout(Duration::from_secs(10), stream.next())
+        .await
+        .expect("stream should yield within timeout")
+        .expect("stream should not end");
+    stream.stop();
+
+    let err = result.expect_err("non-2xx status must surface as an error");
+    let msg = err.to_string();
+    assert!(msg.contains("401"), "error should mention status: {msg}");
+}
