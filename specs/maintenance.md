@@ -15,7 +15,7 @@ cd rust && cargo outdated
 cargo update && cargo build && cargo test
 ```
 
-Key dependencies: `reqwest`, `reqwest-eventsource`, `tokio`, `serde`, `thiserror`, `secrecy`
+Key dependencies: `reqwest`, `eventsource-stream`, `tokio`, `serde`, `thiserror`, `secrecy`
 
 ### Python
 
