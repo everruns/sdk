@@ -44,6 +44,64 @@ Update cookbook dependency versions to match SDK changes:
 - `cookbook/python/pyproject.toml`
 - `cookbook/typescript/package.json`
 
+### Binary Size (Rust)
+
+The Rust SDK links into other people's binaries, so its dependency graph is
+their binary size. Check it whenever dependencies or features change.
+
+#### Measure
+
+[`cargo-bsize`](https://github.com/Boshen/cargo-bsize) reports size by section,
+crate, function, and resolved feature list, and can rebuild under size levers to
+measure them:
+
+```bash
+cargo install cargo-bsize
+cd cookbook/rust && cargo bsize --bin dad-jokes         # full report
+cargo bsize --bin dad-jokes --baseline path/to/old-bin  # what grew
+cargo bsize --what-if --levers=opt-level=z,panic=abort  # measure build levers
+```
+
+The `Dependencies > Features` table is the one to read first: it lists every
+crate's resolved feature set and who asked for it, which is where an SDK
+dependency quietly costs a consumer.
+
+Measure a *lean* consumer, not just the cookbook. The cookbook enables `tokio`
+with `full` itself, so feature unification hides what the SDK alone pulls in.
+Build a minimal crate that depends on the SDK plus `tokio` with only `rt` and
+`macros`, `strip = true` in `[profile.release]`, and compare stripped binaries.
+
+#### Rules for SDK dependencies
+
+- No umbrella feature sets. `tokio` gets `["time"]`, not `["full"]`; a consumer
+  enables what its own runtime needs.
+- No facade crates. `futures-core` + `futures-util` (with
+  `default-features = false`), not `futures`.
+- `default-features = false` on `reqwest`, with only the features the SDK uses.
+  `charset` in particular pulls in `encoding_rs` for a JSON-over-UTF-8 API.
+- Anything a consumer might want to trade off goes behind a Cargo feature rather
+  than being decided for them. TLS backend is the current example.
+- Test both TLS backends before shipping a dependency change:
+  `cargo check --lib` and
+  `cargo check --lib --no-default-features --features native-tls`.
+
+#### Reference measurements
+
+Minimal client (create session + stream events), stripped release build,
+x86_64-linux, as of reqwest 0.13:
+
+| Configuration | Size |
+|---|-----:|
+| `rustls-tls` (default) | 6.5 MiB |
+| `native-tls` | 3.0 MiB |
+| `rustls-tls` + `opt-level = "z"` | ~4.6 MiB |
+| `rustls-tls` + `panic = "abort"` | ~5.7 MiB |
+
+Most of the default build is TLS: rustls plus its bundled aws-lc crypto (two
+AES-GCM AVX-512 routines alone are 332 KiB each). `opt-level` and `panic` are
+consumer profile settings, not something the SDK sets - document them, don't
+force them.
+
 ### Verification
 
 After all updates:
@@ -234,14 +292,17 @@ just pre-pr
 just check-cookbook
 just lint-cookbook
 
-# 5. Audit
+# 5. Binary size (after any Rust dependency change)
+cd rust && cargo bsize   # see "Binary Size (Rust)" above
+
+# 6. Audit
 cargo audit          # in rust/
 uv run pip-audit     # in python/
 npm audit            # in typescript/
 
-# 6. Review each section above, fix issues
+# 7. Review each section above, fix issues
 
-# 7. Commit and PR
+# 8. Commit and PR
 git commit -m "chore: periodic maintenance"
 ```
 
