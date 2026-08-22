@@ -104,7 +104,7 @@ class AgentVersionDiffResponse(BaseModel):
 
 
 class Budget(BaseModel):
-    """Budget — a spending cap for a subject in a currency."""
+    """Budget — a stored spending cap for a platform subject."""
 
     balance: float
     created_at: str
@@ -231,6 +231,7 @@ class Connection(BaseModel):
 class ContentPart(BaseModel):
     """A part of message content - can be text, image, image_file, tool_call, or tool_result"""
 
+    annotations: Optional[list[Any]] = Field(default_factory=list)
     text: Optional[str] = None
     type: Literal["text", "image", "image_file", "tool_call", "tool_result"]
     base64: Optional[str] = None
@@ -276,6 +277,8 @@ class Controls(BaseModel):
     locale: Optional[str] = None
     model_id: Optional[str] = None
     reasoning: Optional[Any] = None
+    speed: Optional[str] = None
+    verbosity: Optional[str] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -414,6 +417,7 @@ class CreateSessionRequest(BaseModel):
     agent_identity_id: Optional[str] = None
     agent_name: Optional[str] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    goal: Optional[str] = None
     harness_id: Optional[str] = None
     harness_name: Optional[str] = None
     hints: Optional[dict[str, Any]] = None
@@ -424,6 +428,7 @@ class CreateSessionRequest(BaseModel):
     model_id: Optional[str] = None
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
+    source: Optional[str] = None
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
     title: Optional[str] = None
@@ -779,7 +784,7 @@ class InitialFile(BaseModel):
 
 
 class LedgerEntry(BaseModel):
-    """Immutable ledger entry recording resource consumption or credit against a budget."""
+    """Immutable platform ledger record for resource consumption or credit."""
 
     amount: float
     budget_id: str
@@ -806,6 +811,9 @@ class Memory(BaseModel):
     last_sync_error: Optional[str] = None
     last_synced_at: Optional[str] = None
     name: str
+    owner_agent_id: Optional[str] = None
+    owner_user_id: Optional[str] = None
+    scope: str
     source: Any
     source_type: str
     status: str
@@ -914,12 +922,14 @@ class ModelProfile(BaseModel):
     reasoning: bool
     reasoning_effort: Optional[ReasoningEffortConfig] = None
     release_date: Optional[str] = None
+    speed: Optional[Any] = None
     structured_output: bool
     supported_parameters: Optional[list[str]] = Field(default_factory=list)
     supports_phases: Optional[bool] = None
     temperature: bool
     tool_call: bool
     tool_search: Optional[bool] = None
+    verbosity: Optional[Any] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -933,6 +943,7 @@ ModelVendor = Literal[
     "nvidia",
     "qwen",
     "microsoft",
+    "meta",
     "minimax",
     "moonshot",
     "xai",
@@ -1048,6 +1059,7 @@ class Session(BaseModel):
     """Session - instance of agentic loop execution."""
 
     active_schedule_count: Optional[int] = None
+    activity: Optional[Any] = None
     agent_id: Optional[str] = None
     agent_identity_id: Optional[str] = None
     agent_version_id: Optional[str] = None
@@ -1060,6 +1072,7 @@ class Session(BaseModel):
     finished_at: Optional[str] = None
     forked_from_sequence: Optional[int] = None
     forked_from_session_id: Optional[str] = None
+    goal: Optional[str] = None
     harness_id: str
     hints: Optional[dict[str, Any]] = None
     id: str
@@ -1078,6 +1091,8 @@ class Session(BaseModel):
     parent_session_id: Optional[str] = None
     preview: Optional[str] = None
     resolved_owner_user_id: Optional[str] = None
+    run_summary: Optional[str] = None
+    source: Optional[Any] = None
     started_at: Optional[str] = None
     status: SessionStatus
     system_prompt: Optional[str] = None

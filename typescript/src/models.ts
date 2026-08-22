@@ -70,7 +70,7 @@ export interface AgentVersionDiffResponse {
   to_version_id: unknown;
 }
 
-/** Budget — a spending cap for a subject in a currency. */
+/** Budget — a stored spending cap for a platform subject. */
 export interface Budget {
   balance: number;
   created_at: string;
@@ -173,6 +173,7 @@ export interface Connection {
 
 /** A part of message content - can be text, image, image_file, tool_call, or tool_result */
 export interface ContentPart {
+  annotations?: unknown[];
   text?: string;
   type: "text" | "image" | "image_file" | "tool_call" | "tool_result";
   base64?: string | null;
@@ -195,6 +196,8 @@ export interface Controls {
   locale?: string | null;
   modelId?: string | null;
   reasoning?: unknown | null;
+  speed?: string | null;
+  verbosity?: string | null;
 }
 
 /** Request to copy a file */
@@ -305,6 +308,7 @@ export interface CreateSessionRequest {
   agentIdentityId?: string | null;
   agentName?: string | null;
   capabilities?: AgentCapabilityConfig[];
+  goal?: string | null;
   harnessId?: string | null;
   harnessName?: string | null;
   hints?: Record<string, unknown> | null;
@@ -315,6 +319,7 @@ export interface CreateSessionRequest {
   modelId?: string | null;
   networkAccess?: NetworkAccessList | null;
   parallelToolCalls?: boolean | null;
+  source?: string | null;
   systemPrompt?: string | null;
   tags?: string[];
   title?: string | null;
@@ -581,7 +586,7 @@ export interface InitialFile {
   path: string;
 }
 
-/** Immutable ledger entry recording resource consumption or credit against a budget. */
+/** Immutable platform ledger record for resource consumption or credit. */
 export interface LedgerEntry {
   amount: number;
   budgetId: string;
@@ -605,6 +610,9 @@ export interface Memory {
   last_sync_error?: string | null;
   last_synced_at?: string | null;
   name: string;
+  owner_agent_id?: string | null;
+  owner_user_id?: string | null;
+  scope: string;
   source: unknown;
   source_type: string;
   status: string;
@@ -690,12 +698,14 @@ export interface ModelProfile {
   reasoning: boolean;
   reasoningEffort?: ReasoningEffortConfig | null;
   releaseDate?: string | null;
+  speed?: unknown | null;
   structuredOutput: boolean;
   supportedParameters?: string[];
   supportsPhases?: boolean;
   temperature: boolean;
   toolCall: boolean;
   toolSearch?: boolean;
+  verbosity?: unknown | null;
 }
 
 export type ModelSource = "manual" | "discovered" | "predefined";
@@ -707,6 +717,7 @@ export type ModelVendor =
   | "nvidia"
   | "qwen"
   | "microsoft"
+  | "meta"
   | "minimax"
   | "moonshot"
   | "xai"
@@ -795,6 +806,7 @@ export interface RollbackAgentVersionRequest {
 /** Session - instance of agentic loop execution. */
 export interface Session {
   active_schedule_count?: number | null;
+  activity?: unknown;
   agent_id?: string | null;
   agent_identity_id?: string | null;
   agent_version_id?: string | null;
@@ -807,6 +819,7 @@ export interface Session {
   finished_at?: string | null;
   forked_from_sequence?: number | null;
   forked_from_session_id?: string | null;
+  goal?: string | null;
   harness_id: string;
   hints?: Record<string, unknown> | null;
   id: string;
@@ -824,6 +837,8 @@ export interface Session {
   parent_session_id?: string | null;
   preview?: string | null;
   resolved_owner_user_id?: string | null;
+  run_summary?: string | null;
+  source?: unknown;
   started_at?: string | null;
   status: SessionStatus;
   system_prompt?: string | null;
