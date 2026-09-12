@@ -156,7 +156,7 @@ pub struct AgentVersionDiffResponse {
     pub to_version_id: serde_json::Value,
 }
 
-/// Budget — a spending cap for a subject in a currency.
+/// Budget — a stored spending cap for a platform subject.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Budget {
@@ -424,7 +424,11 @@ pub struct Connection {
 #[serde(tag = "type")]
 pub enum ContentPart {
     #[serde(rename = "text")]
-    Text { text: String },
+    Text {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        annotations: Vec<serde_json::Value>,
+        text: String,
+    },
     #[serde(rename = "image")]
     Image {
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -448,6 +452,22 @@ pub enum ContentPart {
         result: Option<serde_json::Value>,
         tool_call_id: String,
     },
+    #[serde(rename = "reasoning")]
+    Reasoning {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        bound_tool_call_id: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        encrypted: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        item_id: Option<String>,
+        provider: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        signature: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        text: Option<serde_json::Value>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        tokens: Option<i32>,
+    },
 }
 
 /// Runtime controls for message processing
@@ -464,6 +484,10 @@ pub struct Controls {
     pub model_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speed: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verbosity: Option<String>,
 }
 
 /// Request to copy a file
@@ -1036,6 +1060,8 @@ pub struct CreateSessionRequest {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub capabilities: Vec<AgentCapabilityConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub goal: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub harness_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub harness_name: Option<String>,
@@ -1057,6 +1083,8 @@ pub struct CreateSessionRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parallel_tool_calls: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub system_prompt: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
@@ -1075,6 +1103,7 @@ impl CreateSessionRequest {
             agent_identity_id: None,
             agent_name: None,
             capabilities: Vec::new(),
+            goal: None,
             harness_id: None,
             harness_name: None,
             hints: None,
@@ -1085,6 +1114,7 @@ impl CreateSessionRequest {
             model_id: None,
             network_access: None,
             parallel_tool_calls: None,
+            source: None,
             system_prompt: None,
             tags: Vec::new(),
             title: None,
@@ -1110,6 +1140,11 @@ impl CreateSessionRequest {
 
     pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {
         self.capabilities = capabilities;
+        self
+    }
+
+    pub fn goal(mut self, goal: impl Into<String>) -> Self {
+        self.goal = Some(goal.into());
         self
     }
 
@@ -1160,6 +1195,11 @@ impl CreateSessionRequest {
 
     pub fn parallel_tool_calls(mut self, parallel_tool_calls: bool) -> Self {
         self.parallel_tool_calls = Some(parallel_tool_calls);
+        self
+    }
+
+    pub fn source(mut self, source: impl Into<String>) -> Self {
+        self.source = Some(source.into());
         self
     }
 
@@ -1218,7 +1258,7 @@ pub struct DeleteFileResponse {
     pub deleted: bool,
 }
 
-/// LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock, mai, fireworks. Any other string is treated as an embedder-defined external provider.
+/// LLM provider type. Built-in: openai, openrouter, azure_openai, openai_completions, anthropic, gemini, llmsim, bedrock, mai, fireworks, meta. Any other string is treated as an embedder-defined external provider.
 pub type DriverId = String;
 
 /// Standard event following the Everruns event protocol.
@@ -1609,6 +1649,8 @@ pub struct Harness {
     pub display_name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub embedder_metadata: Option<std::collections::HashMap<String, String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
     pub id: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub initial_files: Vec<InitialFile>,
@@ -1640,6 +1682,8 @@ pub struct HarnessExample {
     pub description: String,
     pub dev_only: bool,
     pub display_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_name: Option<String>,
@@ -1762,7 +1806,7 @@ impl InitialFile {
     }
 }
 
-/// Immutable ledger entry recording resource consumption or credit against a budget.
+/// Immutable platform ledger record for resource consumption or credit.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct LedgerEntry {
@@ -1799,6 +1843,11 @@ pub struct Memory {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_synced_at: Option<String>,
     pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_agent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_user_id: Option<String>,
+    pub scope: String,
     pub source: serde_json::Value,
     pub source_type: String,
     pub status: String,
@@ -1838,7 +1887,7 @@ pub struct MemoryGrepResult {
     pub size_bytes: i64,
 }
 
-/// A message in the conversation
+/// Message - primary conversation data (API response)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Message {
@@ -1850,27 +1899,23 @@ pub struct Message {
     pub external_actor: Option<ExternalActor>,
     pub id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<serde_json::Value>,
+    pub metadata: Option<std::collections::HashMap<String, serde_json::Value>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub phase: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phase_source: Option<serde_json::Value>,
     pub role: MessageRole,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub thinking: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub thinking_signature: Option<String>,
+    pub sequence: i32,
+    pub session_id: String,
 }
 
-/// Message role in the conversation
+/// Message role (API layer)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum MessageRole {
-    #[serde(rename = "system")]
-    System,
     #[serde(rename = "user")]
     User,
     #[serde(rename = "agent")]
     Agent,
-    #[serde(rename = "tool_result")]
-    ToolResult,
 }
 
 /// Modality type (text, image, audio, video)
@@ -1945,6 +1990,8 @@ pub struct ModelProfile {
     pub reasoning_effort: Option<ReasoningEffortConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub release_date: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub speed: Option<serde_json::Value>,
     pub structured_output: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub supported_parameters: Vec<String>,
@@ -1954,6 +2001,8 @@ pub struct ModelProfile {
     pub tool_call: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tool_search: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub verbosity: Option<serde_json::Value>,
 }
 
 /// How the model was added to the system
@@ -1982,6 +2031,8 @@ pub enum ModelVendor {
     Qwen,
     #[serde(rename = "microsoft")]
     Microsoft,
+    #[serde(rename = "meta")]
+    Meta,
     #[serde(rename = "minimax")]
     Minimax,
     #[serde(rename = "moonshot")]
@@ -2057,6 +2108,8 @@ pub enum ReasoningEffort {
     High,
     #[serde(rename = "xhigh")]
     Xhigh,
+    #[serde(rename = "max")]
+    Max,
 }
 
 /// Reasoning effort configuration for a model
@@ -2150,11 +2203,15 @@ pub struct Session {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub active_schedule_count: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_identity_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub agent_version_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub archived_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub blueprint_config: Option<serde_json::Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2164,14 +2221,20 @@ pub struct Session {
     pub created_at: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub effective_owner: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub event_count: Option<i32>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub features: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_count: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub finished_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub forked_from_sequence: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub forked_from_session_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub goal: Option<String>,
     pub harness_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hints: Option<std::collections::HashMap<String, serde_json::Value>>,
@@ -2207,12 +2270,18 @@ pub struct Session {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub resolved_owner_user_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub run_summary: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub started_at: Option<String>,
     pub status: SessionStatus,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub system_prompt: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub task_count: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
