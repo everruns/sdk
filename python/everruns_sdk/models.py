@@ -22,17 +22,22 @@ class Agent(BaseModel):
     deleted_at: Optional[str] = None
     description: Optional[str] = None
     display_name: Optional[str] = None
+    exposed: Optional[bool] = None
+    exposures_suspended: Optional[bool] = None
     forked_from_agent_id: Optional[str] = None
     forked_from_version_id: Optional[str] = None
     harness_id: str
     id: str
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    intro_markdown: Optional[str] = None
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
     root_agent_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = Field(default_factory=list)
     status: AgentStatus
     system_prompt: str
     tags: Optional[list[str]] = Field(default_factory=list)
@@ -104,7 +109,7 @@ class AgentVersionDiffResponse(BaseModel):
 
 
 class Budget(BaseModel):
-    """Budget — a spending cap for a subject in a currency."""
+    """Budget — a stored spending cap for a platform subject."""
 
     balance: float
     created_at: str
@@ -231,19 +236,38 @@ class Connection(BaseModel):
 class ContentPart(BaseModel):
     """A part of message content - can be text, image, image_file, tool_call, or tool_result"""
 
-    text: Optional[str] = None
-    type: Literal["text", "image", "image_file", "tool_call", "tool_result"]
+    annotations: Optional[list[Any]] = Field(default_factory=list)
+    text: Optional[Any] = None
+    type: Literal[
+        "text",
+        "image",
+        "image_file",
+        "file",
+        "tool_call",
+        "tool_result",
+        "reasoning",
+        "provider_opaque",
+    ]
     base64: Optional[str] = None
     media_type: Optional[str] = None
     url: Optional[str] = None
     filename: Optional[str] = None
     image_id: Optional[str] = None
+    file_id: Optional[str] = None
     arguments: Optional[Any] = None
     id: Optional[str] = None
     name: Optional[str] = None
+    native: Optional[Any] = None
     error: Optional[str] = None
     result: Optional[Any] = None
     tool_call_id: Optional[str] = None
+    bound_tool_call_id: Optional[str] = None
+    encrypted: Optional[str] = None
+    item_id: Optional[str] = None
+    provider: Optional[str] = None
+    signature: Optional[str] = None
+    tokens: Optional[int] = None
+    content: Optional[dict[str, Any]] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -276,6 +300,8 @@ class Controls(BaseModel):
     locale: Optional[str] = None
     model_id: Optional[str] = None
     reasoning: Optional[Any] = None
+    speed: Optional[str] = None
+    verbosity: Optional[str] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -294,6 +320,7 @@ class CostTier(BaseModel):
 
     above_tokens: int
     cache_read: Optional[float] = None
+    cache_write: Optional[float] = None
     input: float
     output: float
 
@@ -311,11 +338,14 @@ class CreateAgentRequest(BaseModel):
     harness_name: Optional[str] = None
     id: Optional[str] = None
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    intro_markdown: Optional[str] = None
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = Field(default_factory=list)
     system_prompt: str
     tags: Optional[list[str]] = Field(default_factory=list)
     tools: Optional[list[ToolDefinition]] = Field(default_factory=list)
@@ -366,10 +396,13 @@ class CreateHarnessRequest(BaseModel):
     display_name: Optional[str] = None
     embedder_metadata: Optional[dict[str, str]] = None
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    intro_markdown: Optional[str] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
     parent_harness_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = Field(default_factory=list)
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
 
@@ -414,6 +447,7 @@ class CreateSessionRequest(BaseModel):
     agent_identity_id: Optional[str] = None
     agent_name: Optional[str] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    goal: Optional[str] = None
     harness_id: Optional[str] = None
     harness_name: Optional[str] = None
     hints: Optional[dict[str, Any]] = None
@@ -424,6 +458,7 @@ class CreateSessionRequest(BaseModel):
     model_id: Optional[str] = None
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
+    source: Optional[str] = None
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
     title: Optional[str] = None
@@ -492,17 +527,14 @@ class ExternalActor(BaseModel):
 
 
 class FileInfo(BaseModel):
-    """File metadata without content"""
+    """Stored file metadata (no binary data)."""
 
+    content_type: str
     created_at: str
+    filename: Optional[str] = None
     id: str
-    is_directory: bool
-    is_readonly: bool
-    name: str
-    path: str
-    session_id: str
+    metadata: dict[str, Any]
     size_bytes: int
-    updated_at: str
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -678,14 +710,18 @@ class Harness(BaseModel):
     description: Optional[str] = None
     display_name: Optional[str] = None
     embedder_metadata: Optional[dict[str, str]] = None
+    icon: Optional[str] = None
     id: str
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    intro_markdown: Optional[str] = None
     is_built_in: Optional[bool] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
     parent_harness_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = Field(default_factory=list)
     status: HarnessStatus
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
@@ -701,6 +737,7 @@ class HarnessExample(BaseModel):
     description: str
     dev_only: bool
     display_name: str
+    icon: Optional[str] = None
     name: str
     parent_name: Optional[str] = None
     tags: list[str]
@@ -779,7 +816,7 @@ class InitialFile(BaseModel):
 
 
 class LedgerEntry(BaseModel):
-    """Immutable ledger entry recording resource consumption or credit against a budget."""
+    """Immutable platform ledger record for resource consumption or credit."""
 
     amount: float
     budget_id: str
@@ -806,6 +843,9 @@ class Memory(BaseModel):
     last_sync_error: Optional[str] = None
     last_synced_at: Optional[str] = None
     name: str
+    owner_agent_id: Optional[str] = None
+    owner_user_id: Optional[str] = None
+    scope: str
     source: Any
     source_type: str
     status: str
@@ -846,7 +886,7 @@ class MemoryGrepResult(BaseModel):
 
 
 class Message(BaseModel):
-    """A message in the conversation"""
+    """Message - primary conversation data (API response)"""
 
     content: list[ContentPart]
     controls: Optional[Controls] = None
@@ -855,14 +895,15 @@ class Message(BaseModel):
     id: str
     metadata: Optional[dict[str, Any]] = None
     phase: Optional[Any] = None
+    phase_source: Optional[Any] = None
     role: MessageRole
-    thinking: Optional[str] = None
-    thinking_signature: Optional[str] = None
+    sequence: int
+    session_id: str
 
     model_config = ConfigDict(populate_by_name=True)
 
 
-MessageRole = Literal["system", "user", "agent", "tool_result"]
+MessageRole = Literal["user", "agent"]
 
 Modality = Literal["text", "image", "audio", "video", "pdf"]
 
@@ -871,6 +912,7 @@ class ModelCost(BaseModel):
     """Cost information for the model (per million tokens)"""
 
     cache_read: Optional[float] = None
+    cache_write: Optional[float] = None
     cost_tiers: Optional[list[CostTier]] = Field(default_factory=list)
     input: float
     output: float
@@ -914,12 +956,15 @@ class ModelProfile(BaseModel):
     reasoning: bool
     reasoning_effort: Optional[ReasoningEffortConfig] = None
     release_date: Optional[str] = None
+    speed: Optional[Any] = None
     structured_output: bool
     supported_parameters: Optional[list[str]] = Field(default_factory=list)
     supports_phases: Optional[bool] = None
+    supports_server_compaction: Optional[bool] = None
     temperature: bool
     tool_call: bool
     tool_search: Optional[bool] = None
+    verbosity: Optional[Any] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -933,6 +978,7 @@ ModelVendor = Literal[
     "nvidia",
     "qwen",
     "microsoft",
+    "meta",
     "minimax",
     "moonshot",
     "xai",
@@ -980,7 +1026,7 @@ class NetworkAccessList(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "xhigh"]
+ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "xhigh", "max"]
 
 
 class ReasoningEffortConfig(BaseModel):
@@ -1048,18 +1094,23 @@ class Session(BaseModel):
     """Session - instance of agentic loop execution."""
 
     active_schedule_count: Optional[int] = None
+    activity: Optional[Any] = None
     agent_id: Optional[str] = None
     agent_identity_id: Optional[str] = None
     agent_version_id: Optional[str] = None
+    archived_at: Optional[str] = None
     blueprint_config: Optional[dict[str, Any]] = None
     blueprint_id: Optional[str] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
     created_at: str
     effective_owner: Optional[Any] = None
+    event_count: Optional[int] = None
     features: Optional[list[str]] = Field(default_factory=list)
+    file_count: Optional[int] = None
     finished_at: Optional[str] = None
     forked_from_sequence: Optional[int] = None
     forked_from_session_id: Optional[str] = None
+    goal: Optional[str] = None
     harness_id: str
     hints: Optional[dict[str, Any]] = None
     id: str
@@ -1078,10 +1129,13 @@ class Session(BaseModel):
     parent_session_id: Optional[str] = None
     preview: Optional[str] = None
     resolved_owner_user_id: Optional[str] = None
+    run_summary: Optional[str] = None
+    source: Optional[Any] = None
     started_at: Optional[str] = None
     status: SessionStatus
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
+    task_count: Optional[int] = None
     title: Optional[str] = None
     tools: Optional[list[ToolDefinition]] = Field(default_factory=list)
     updated_at: str
@@ -1197,6 +1251,8 @@ class UpdateFileRequest(BaseModel):
 
     content: Optional[str] = None
     encoding: Optional[str] = None
+    expected_content: Optional[str] = None
+    expected_encoding: Optional[str] = None
     is_readonly: Optional[bool] = None
 
     model_config = ConfigDict(populate_by_name=True)
@@ -1211,10 +1267,13 @@ class UpdateHarnessRequest(BaseModel):
     display_name: Optional[str] = None
     embedder_metadata: Optional[dict[str, str]] = None
     initial_files: Optional[list[InitialFile]] = None
+    intro_markdown: Optional[str] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: Optional[str] = None
     network_access: Optional[NetworkAccessList] = None
     parent_harness_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = None
     status: Optional[HarnessStatus] = None
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = None
