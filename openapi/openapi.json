@@ -25624,7 +25624,7 @@
                     "display_name": {
                       "type": "string",
                       "description": "Human-readable display name.",
-                      "example": "Claude Sonnet 4.5"
+                      "example": "Claude Sonnet 5.5"
                     },
                     "enabled": {
                       "type": "boolean",
@@ -25649,7 +25649,7 @@
                     "model_id": {
                       "type": "string",
                       "description": "Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).",
-                      "example": "claude-sonnet-4-5"
+                      "example": "claude-sonnet-5-5"
                     },
                     "model_vendor": {
                       "oneOf": [
@@ -26505,7 +26505,7 @@
           "model": {
             "type": "string",
             "description": "Model identifier used for generation",
-            "example": "claude-sonnet-4-5"
+            "example": "claude-sonnet-5-5"
           },
           "provider": {
             "type": [
@@ -27977,7 +27977,7 @@
           "display_name": {
             "type": "string",
             "description": "Human-readable display name.",
-            "example": "Claude Sonnet 4.5"
+            "example": "Claude Sonnet 5.5"
           },
           "enabled": {
             "type": "boolean",
@@ -28002,7 +28002,7 @@
           "model_id": {
             "type": "string",
             "description": "Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).",
-            "example": "claude-sonnet-4-5"
+            "example": "claude-sonnet-5-5"
           },
           "model_vendor": {
             "oneOf": [
@@ -37754,7 +37754,7 @@
               "display_name": {
                 "type": "string",
                 "description": "Human-readable display name.",
-                "example": "Claude Sonnet 4.5"
+                "example": "Claude Sonnet 5.5"
               },
               "enabled": {
                 "type": "boolean",
@@ -37779,7 +37779,7 @@
               "model_id": {
                 "type": "string",
                 "description": "Provider-side model identifier as sent on the wire (e.g. `gpt-4o`).",
-                "example": "claude-sonnet-4-5"
+                "example": "claude-sonnet-5-5"
               },
               "model_vendor": {
                 "oneOf": [
