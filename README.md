@@ -203,6 +203,7 @@ Consistent error types across all SDKs:
 ## Documentation
 
 - [Getting Started](docs/getting-started.md)
+- [Connect an AG-UI client](docs/ag-ui.md)
 
 ## Examples
 
