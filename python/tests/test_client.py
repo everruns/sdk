@@ -107,22 +107,29 @@ def test_client_missing_api_key():
         Everruns()
 
 
+def test_default_base_url_is_everruns_cloud(monkeypatch):
+    """Without base_url or EVERRUNS_API_URL the client targets Everruns Cloud."""
+    monkeypatch.delenv("EVERRUNS_API_URL", raising=False)
+    client = Everruns(api_key="evr_test_key")
+    assert client._base_url == "https://app.everruns.com/api/"
+
+
 def test_base_url_normalization_adds_trailing_slash():
     """Test that base URL without trailing slash gets one added."""
-    client = Everruns(api_key="evr_test_key", base_url="https://custom.example.com/api")
+    client = Everruns(api_key="evr_test_key", base_url="https://app.everruns.com/api")
     # Base URL should have trailing slash for correct URL joining
-    assert client._base_url == "https://custom.example.com/api/"
+    assert client._base_url == "https://app.everruns.com/api/"
 
 
 def test_base_url_normalization_preserves_single_trailing_slash():
     """Test that base URL with trailing slash is normalized correctly."""
-    client = Everruns(api_key="evr_test_key", base_url="https://custom.example.com/api/")
-    assert client._base_url == "https://custom.example.com/api/"
+    client = Everruns(api_key="evr_test_key", base_url="https://app.everruns.com/api/")
+    assert client._base_url == "https://app.everruns.com/api/"
 
 
 def test_url_path_construction():
     """Test that URL paths are constructed correctly."""
-    client = Everruns(api_key="evr_test_key", base_url="https://custom.example.com/api")
+    client = Everruns(api_key="evr_test_key", base_url="https://app.everruns.com/api")
     # The _url method should produce relative paths without leading slash
     assert client._url("/agents") == "v1/agents"
     assert client._url("/sessions/123") == "v1/sessions/123"
@@ -131,7 +138,7 @@ def test_url_path_construction():
 @pytest.mark.asyncio
 @respx.mock
 async def test_client_sends_org_id_header():
-    route = respx.get("https://custom.example.com/api/v1/agents").mock(
+    route = respx.get("https://app.everruns.com/api/v1/agents").mock(
         return_value=httpx.Response(200, json={"data": [], "total": 0, "offset": 0, "limit": 0})
     )
 
@@ -733,7 +740,7 @@ def test_create_message_request_without_external_actor():
 @pytest.mark.asyncio
 @respx.mock
 async def test_create_session_with_initial_files():
-    route = respx.post("https://custom.example.com/api/v1/sessions").mock(
+    route = respx.post("https://app.everruns.com/api/v1/sessions").mock(
         return_value=httpx.Response(
             201,
             json={
@@ -790,7 +797,7 @@ async def test_create_session_with_initial_files():
 @pytest.mark.asyncio
 @respx.mock
 async def test_create_agent_with_initial_files():
-    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+    route = respx.post("https://app.everruns.com/api/v1/agents").mock(
         return_value=httpx.Response(
             201,
             json={
@@ -845,7 +852,7 @@ async def test_create_agent_with_initial_files():
 @pytest.mark.asyncio
 @respx.mock
 async def test_create_session_with_locale():
-    route = respx.post("https://custom.example.com/api/v1/sessions").mock(
+    route = respx.post("https://app.everruns.com/api/v1/sessions").mock(
         return_value=httpx.Response(
             201,
             json={
@@ -877,7 +884,7 @@ async def test_create_session_with_locale():
 @respx.mock
 async def test_import_agent_from_example():
     route = respx.post(
-        "https://custom.example.com/api/v1/agents/import?from-example=dad-jokes-agent"
+        "https://app.everruns.com/api/v1/agents/import?from-example=dad-jokes-agent"
     ).mock(
         return_value=httpx.Response(
             201,
@@ -911,7 +918,7 @@ async def test_import_agent_from_example():
 @pytest.mark.asyncio
 @respx.mock
 async def test_agent_stats():
-    route = respx.get("https://custom.example.com/api/v1/agents/agent_123/stats").mock(
+    route = respx.get("https://app.everruns.com/api/v1/agents/agent_123/stats").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -984,7 +991,7 @@ async def test_agent_health_checks():
             }
         ],
     }
-    base = "https://custom.example.com/api/v1/agents/agent_123/health-checks"
+    base = "https://app.everruns.com/api/v1/agents/agent_123/health-checks"
     list_route = respx.get(base).mock(return_value=httpx.Response(200, json=[run_json]))
     trigger_route = respx.post(base).mock(
         return_value=httpx.Response(
@@ -1054,17 +1061,17 @@ async def test_agent_versions_methods():
         "created_at": "2026-05-08T00:00:00Z",
         "updated_at": "2026-05-08T00:00:00Z",
     }
-    list_route = respx.get("https://custom.example.com/api/v1/agents/agent_123/versions").mock(
+    list_route = respx.get("https://app.everruns.com/api/v1/agents/agent_123/versions").mock(
         return_value=httpx.Response(200, json=[version_json])
     )
-    create_route = respx.post("https://custom.example.com/api/v1/agents/agent_123/versions").mock(
+    create_route = respx.post("https://app.everruns.com/api/v1/agents/agent_123/versions").mock(
         return_value=httpx.Response(200, json=version_json)
     )
     default_route = respx.post(
-        "https://custom.example.com/api/v1/agents/agent_123/versions/default"
+        "https://app.everruns.com/api/v1/agents/agent_123/versions/default"
     ).mock(return_value=httpx.Response(200, json=agent_json))
     diff_route = respx.get(
-        "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/diff/agentver_2"
+        "https://app.everruns.com/api/v1/agents/agent_123/versions/agentver_1/diff/agentver_2"
     ).mock(
         return_value=httpx.Response(
             200,
@@ -1077,10 +1084,10 @@ async def test_agent_versions_methods():
         )
     )
     fork_route = respx.post(
-        "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/fork"
+        "https://app.everruns.com/api/v1/agents/agent_123/versions/agentver_1/fork"
     ).mock(return_value=httpx.Response(200, json=agent_json))
     rollback_route = respx.post(
-        "https://custom.example.com/api/v1/agents/agent_123/versions/agentver_1/rollback"
+        "https://app.everruns.com/api/v1/agents/agent_123/versions/agentver_1/rollback"
     ).mock(return_value=httpx.Response(200, json=agent_json))
 
     client = Everruns(api_key="evr_test_key")
@@ -1142,7 +1149,7 @@ async def test_fork_agent_version_validates_agent_name():
 @respx.mock
 async def test_capabilities_list_with_options():
     route = respx.get(
-        "https://custom.example.com/api/v1/capabilities?search=web&offset=20&limit=10"
+        "https://app.everruns.com/api/v1/capabilities?search=web&offset=20&limit=10"
     ).mock(
         return_value=httpx.Response(
             200,
@@ -1180,7 +1187,7 @@ async def test_capabilities_list_with_options():
 @pytest.mark.asyncio
 @respx.mock
 async def test_agent_analyze():
-    route = respx.post("https://custom.example.com/api/v1/agents/analyze").mock(
+    route = respx.post("https://app.everruns.com/api/v1/agents/analyze").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1215,7 +1222,7 @@ async def test_agent_analyze():
 @respx.mock
 async def test_guardrails_helpers():
     examples_route = respx.get(
-        "https://custom.example.com/api/v1/capabilities/guardrails/examples"
+        "https://app.everruns.com/api/v1/capabilities/guardrails/examples"
     ).mock(
         return_value=httpx.Response(
             200,
@@ -1236,7 +1243,7 @@ async def test_guardrails_helpers():
         )
     )
     dry_run_route = respx.post(
-        "https://custom.example.com/api/v1/capabilities/guardrails/dry-run"
+        "https://app.everruns.com/api/v1/capabilities/guardrails/dry-run"
     ).mock(return_value=httpx.Response(200, json={"hits": [], "blocked": False}))
 
     client = Everruns(api_key="evr_test_key")
@@ -1279,13 +1286,13 @@ async def test_workspaces_and_memories():
         "created_at": "2026-06-13T00:00:00Z",
         "updated_at": "2026-06-13T00:00:00Z",
     }
-    workspace_route = respx.post("https://custom.example.com/api/v1/workspaces").mock(
+    workspace_route = respx.post("https://app.everruns.com/api/v1/workspaces").mock(
         return_value=httpx.Response(201, json=workspace_json)
     )
-    memory_route = respx.post("https://custom.example.com/api/v1/memories").mock(
+    memory_route = respx.post("https://app.everruns.com/api/v1/memories").mock(
         return_value=httpx.Response(201, json=memory_json)
     )
-    sync_route = respx.post("https://custom.example.com/api/v1/memories/mem_123/sync").mock(
+    sync_route = respx.post("https://app.everruns.com/api/v1/memories/mem_123/sync").mock(
         return_value=httpx.Response(200, json=memory_json)
     )
     memory_file_info = {
@@ -1303,20 +1310,20 @@ async def test_workspaces_and_memories():
         "created_at": "2026-06-13T00:00:00Z",
         "updated_at": "2026-06-13T00:00:00Z",
     }
-    list_files_route = respx.get("https://custom.example.com/api/v1/memories/mem_123/fs").mock(
+    list_files_route = respx.get("https://app.everruns.com/api/v1/memories/mem_123/fs").mock(
         return_value=httpx.Response(200, json={"data": [memory_file_info]})
     )
     read_file_route = respx.get(
-        "https://custom.example.com/api/v1/memories/mem_123/fs/notes.md"
+        "https://app.everruns.com/api/v1/memories/mem_123/fs/notes.md"
     ).mock(return_value=httpx.Response(200, json=memory_file))
     download_route = respx.get(
-        "https://custom.example.com/api/v1/memories/mem_123/fs/_/download/notes.md"
+        "https://app.everruns.com/api/v1/memories/mem_123/fs/_/download/notes.md"
     ).mock(return_value=httpx.Response(200, text="hello"))
     create_file_route = respx.post(
-        "https://custom.example.com/api/v1/memories/mem_123/fs/new.md"
+        "https://app.everruns.com/api/v1/memories/mem_123/fs/new.md"
     ).mock(return_value=httpx.Response(201, json=memory_file_info))
     create_dir_route = respx.post(
-        "https://custom.example.com/api/v1/memories/mem_123/fs/folder"
+        "https://app.everruns.com/api/v1/memories/mem_123/fs/folder"
     ).mock(
         return_value=httpx.Response(
             201,
@@ -1330,15 +1337,15 @@ async def test_workspaces_and_memories():
         )
     )
     update_file_route = respx.put(
-        "https://custom.example.com/api/v1/memories/mem_123/fs/notes.md"
+        "https://app.everruns.com/api/v1/memories/mem_123/fs/notes.md"
     ).mock(return_value=httpx.Response(200, json=memory_file))
     delete_file_route = respx.delete(
-        "https://custom.example.com/api/v1/memories/mem_123/fs/old.md"
+        "https://app.everruns.com/api/v1/memories/mem_123/fs/old.md"
     ).mock(return_value=httpx.Response(204))
-    grep_route = respx.post("https://custom.example.com/api/v1/memories/mem_123/fs/_/grep").mock(
+    grep_route = respx.post("https://app.everruns.com/api/v1/memories/mem_123/fs/_/grep").mock(
         return_value=httpx.Response(200, json={"data": [{"path": "/notes.md", "size_bytes": 5}]})
     )
-    stat_route = respx.post("https://custom.example.com/api/v1/memories/mem_123/fs/_/stat").mock(
+    stat_route = respx.post("https://app.everruns.com/api/v1/memories/mem_123/fs/_/stat").mock(
         return_value=httpx.Response(200, json=memory_file_info)
     )
 
@@ -1399,11 +1406,11 @@ async def test_workspaces_and_memories():
 @respx.mock
 async def test_workspace_and_memory_list_include_archived_query_values():
     workspace_route = respx.get(
-        "https://custom.example.com/api/v1/workspaces?include_archived=false"
+        "https://app.everruns.com/api/v1/workspaces?include_archived=false"
     ).mock(return_value=httpx.Response(200, json={"data": []}))
-    memory_route = respx.get(
-        "https://custom.example.com/api/v1/memories?include_archived=true"
-    ).mock(return_value=httpx.Response(200, json={"data": []}))
+    memory_route = respx.get("https://app.everruns.com/api/v1/memories?include_archived=true").mock(
+        return_value=httpx.Response(200, json={"data": []})
+    )
 
     client = Everruns(api_key="evr_test_key")
     try:
@@ -1420,7 +1427,7 @@ async def test_workspace_and_memory_list_include_archived_query_values():
 @respx.mock
 async def test_events_list_with_upstream_filters():
     route = respx.get(
-        "https://custom.example.com/api/v1/sessions/sess_123/events"
+        "https://app.everruns.com/api/v1/sessions/sess_123/events"
         "?since_id=event_001&types=turn.started&types=tool.completed"
         "&exclude=output.message.delta&limit=25&before_sequence=100"
         "&after_sequence=50&around=event_anchor&window=10"
@@ -1479,7 +1486,7 @@ async def test_events_list_with_upstream_filters():
 @pytest.mark.asyncio
 @respx.mock
 async def test_create_tool_results_uses_tool_results_endpoint():
-    route = respx.post("https://custom.example.com/api/v1/sessions/session_123/tool-results").mock(
+    route = respx.post("https://app.everruns.com/api/v1/sessions/session_123/tool-results").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1531,9 +1538,7 @@ FILE_RESPONSE = {
 @pytest.mark.asyncio
 @respx.mock
 async def test_workspace_files_list():
-    route = respx.get(
-        "https://custom.example.com/api/v1/workspaces/wsp_123/fs?recursive=true"
-    ).mock(
+    route = respx.get("https://app.everruns.com/api/v1/workspaces/wsp_123/fs?recursive=true").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1573,7 +1578,7 @@ async def test_workspace_files_list():
 @respx.mock
 async def test_workspace_files_read():
     route = respx.get(
-        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
+        "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
     ).mock(return_value=httpx.Response(200, json=FILE_RESPONSE))
 
     client = Everruns(api_key="evr_test_key")
@@ -1591,7 +1596,7 @@ async def test_workspace_files_read():
 @respx.mock
 async def test_workspace_files_create():
     route = respx.post(
-        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/new.txt"
+        "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/new.txt"
     ).mock(return_value=httpx.Response(201, json=FILE_RESPONSE))
 
     client = Everruns(api_key="evr_test_key")
@@ -1613,7 +1618,7 @@ async def test_workspace_files_create():
 @respx.mock
 async def test_workspace_files_create_dir():
     route = respx.post(
-        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/subdir"
+        "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/subdir"
     ).mock(
         return_value=httpx.Response(
             201,
@@ -1647,7 +1652,7 @@ async def test_workspace_files_create_dir():
 @respx.mock
 async def test_workspace_files_update():
     route = respx.put(
-        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
+        "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
     ).mock(return_value=httpx.Response(200, json=FILE_RESPONSE))
 
     client = Everruns(api_key="evr_test_key")
@@ -1666,7 +1671,7 @@ async def test_workspace_files_update():
 @respx.mock
 async def test_workspace_files_delete():
     route = respx.delete(
-        "https://custom.example.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
+        "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt"
     ).mock(return_value=httpx.Response(200, json={"deleted": True}))
 
     client = Everruns(api_key="evr_test_key")
@@ -1682,7 +1687,7 @@ async def test_workspace_files_delete():
 @pytest.mark.asyncio
 @respx.mock
 async def test_workspace_files_move():
-    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/move").mock(
+    route = respx.post("https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/move").mock(
         return_value=httpx.Response(200, json=FILE_RESPONSE)
     )
 
@@ -1703,7 +1708,7 @@ async def test_workspace_files_move():
 @pytest.mark.asyncio
 @respx.mock
 async def test_workspace_files_copy():
-    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/copy").mock(
+    route = respx.post("https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/copy").mock(
         return_value=httpx.Response(201, json=FILE_RESPONSE)
     )
 
@@ -1724,7 +1729,7 @@ async def test_workspace_files_copy():
 @pytest.mark.asyncio
 @respx.mock
 async def test_workspace_files_grep():
-    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/grep").mock(
+    route = respx.post("https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/grep").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1762,7 +1767,7 @@ async def test_workspace_files_grep():
 @pytest.mark.asyncio
 @respx.mock
 async def test_workspace_files_stat():
-    route = respx.post("https://custom.example.com/api/v1/workspaces/wsp_123/fs/_/stat").mock(
+    route = respx.post("https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/stat").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1823,7 +1828,7 @@ CONN_RESPONSE = {
 @pytest.mark.asyncio
 @respx.mock
 async def test_connections_set():
-    route = respx.post("https://custom.example.com/api/v1/user/connections/daytona").mock(
+    route = respx.post("https://app.everruns.com/api/v1/user/connections/daytona").mock(
         return_value=httpx.Response(200, json=CONN_RESPONSE)
     )
 
@@ -1842,7 +1847,7 @@ async def test_connections_set():
 @pytest.mark.asyncio
 @respx.mock
 async def test_connections_list():
-    route = respx.get("https://custom.example.com/api/v1/user/connections").mock(
+    route = respx.get("https://app.everruns.com/api/v1/user/connections").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -1868,7 +1873,7 @@ async def test_connections_list():
 @pytest.mark.asyncio
 @respx.mock
 async def test_connections_remove():
-    route = respx.delete("https://custom.example.com/api/v1/user/connections/daytona").mock(
+    route = respx.delete("https://app.everruns.com/api/v1/user/connections/daytona").mock(
         return_value=httpx.Response(204)
     )
 
@@ -1887,7 +1892,7 @@ async def test_connections_remove():
 @pytest.mark.asyncio
 @respx.mock
 async def test_session_set_secrets():
-    route = respx.put("https://custom.example.com/api/v1/sessions/sess_123/storage/secrets").mock(
+    route = respx.put("https://app.everruns.com/api/v1/sessions/sess_123/storage/secrets").mock(
         return_value=httpx.Response(200, json={})
     )
 
@@ -1909,7 +1914,7 @@ async def test_session_set_secrets():
 @pytest.mark.asyncio
 @respx.mock
 async def test_session_set_secrets_empty():
-    route = respx.put("https://custom.example.com/api/v1/sessions/sess_123/storage/secrets").mock(
+    route = respx.put("https://app.everruns.com/api/v1/sessions/sess_123/storage/secrets").mock(
         return_value=httpx.Response(200, json={})
     )
 
@@ -1944,7 +1949,7 @@ BUDGET_RESPONSE = {
 @pytest.mark.asyncio
 @respx.mock
 async def test_budgets_create():
-    route = respx.post("https://custom.example.com/api/v1/budgets").mock(
+    route = respx.post("https://app.everruns.com/api/v1/budgets").mock(
         return_value=httpx.Response(201, json=BUDGET_RESPONSE)
     )
 
@@ -1966,7 +1971,7 @@ async def test_budgets_create():
 @pytest.mark.asyncio
 @respx.mock
 async def test_budgets_get():
-    route = respx.get("https://custom.example.com/api/v1/budgets/bdgt_001").mock(
+    route = respx.get("https://app.everruns.com/api/v1/budgets/bdgt_001").mock(
         return_value=httpx.Response(200, json=BUDGET_RESPONSE)
     )
 
@@ -1983,7 +1988,7 @@ async def test_budgets_get():
 @pytest.mark.asyncio
 @respx.mock
 async def test_budgets_list():
-    route = respx.get("https://custom.example.com/api/v1/budgets?subject_type=session").mock(
+    route = respx.get("https://app.everruns.com/api/v1/budgets?subject_type=session").mock(
         return_value=httpx.Response(200, json=[BUDGET_RESPONSE])
     )
 
@@ -2002,7 +2007,7 @@ async def test_budgets_list():
 @respx.mock
 async def test_budgets_update():
     updated = {**BUDGET_RESPONSE, "limit": 20.0}
-    route = respx.patch("https://custom.example.com/api/v1/budgets/bdgt_001").mock(
+    route = respx.patch("https://app.everruns.com/api/v1/budgets/bdgt_001").mock(
         return_value=httpx.Response(200, json=updated)
     )
 
@@ -2021,7 +2026,7 @@ async def test_budgets_update():
 @pytest.mark.asyncio
 @respx.mock
 async def test_budgets_delete():
-    route = respx.delete("https://custom.example.com/api/v1/budgets/bdgt_001").mock(
+    route = respx.delete("https://app.everruns.com/api/v1/budgets/bdgt_001").mock(
         return_value=httpx.Response(204)
     )
 
@@ -2038,7 +2043,7 @@ async def test_budgets_delete():
 @respx.mock
 async def test_budgets_top_up():
     topped_up = {**BUDGET_RESPONSE, "balance": 15.0}
-    route = respx.post("https://custom.example.com/api/v1/budgets/bdgt_001/top-up").mock(
+    route = respx.post("https://app.everruns.com/api/v1/budgets/bdgt_001/top-up").mock(
         return_value=httpx.Response(200, json=topped_up)
     )
 
@@ -2058,7 +2063,7 @@ async def test_budgets_top_up():
 @pytest.mark.asyncio
 @respx.mock
 async def test_budgets_ledger():
-    route = respx.get("https://custom.example.com/api/v1/budgets/bdgt_001/ledger?limit=10").mock(
+    route = respx.get("https://app.everruns.com/api/v1/budgets/bdgt_001/ledger?limit=10").mock(
         return_value=httpx.Response(
             200,
             json=[
@@ -2087,7 +2092,7 @@ async def test_budgets_ledger():
 @pytest.mark.asyncio
 @respx.mock
 async def test_budgets_check():
-    route = respx.get("https://custom.example.com/api/v1/budgets/bdgt_001/check").mock(
+    route = respx.get("https://app.everruns.com/api/v1/budgets/bdgt_001/check").mock(
         return_value=httpx.Response(200, json={"action": "continue"})
     )
 
@@ -2107,7 +2112,7 @@ async def test_budgets_check():
 @pytest.mark.asyncio
 @respx.mock
 async def test_session_budgets():
-    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/budgets").mock(
+    route = respx.get("https://app.everruns.com/api/v1/sessions/sess_123/budgets").mock(
         return_value=httpx.Response(200, json=[BUDGET_RESPONSE])
     )
 
@@ -2125,7 +2130,7 @@ async def test_session_budgets():
 @pytest.mark.asyncio
 @respx.mock
 async def test_session_budget_check():
-    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/budget-check").mock(
+    route = respx.get("https://app.everruns.com/api/v1/sessions/sess_123/budget-check").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -2152,7 +2157,7 @@ async def test_session_budget_check():
 @pytest.mark.asyncio
 @respx.mock
 async def test_session_resume():
-    route = respx.post("https://custom.example.com/api/v1/sessions/sess_123/resume").mock(
+    route = respx.post("https://app.everruns.com/api/v1/sessions/sess_123/resume").mock(
         return_value=httpx.Response(
             200,
             json={"resumed_budgets": 2, "session_id": "sess_123"},
@@ -2179,7 +2184,7 @@ async def test_session_export():
         '{"id":"msg_002","session_id":"sess_123","sequence":2,"role":"agent",'
         '"content":[{"type":"text","text":"hi"}],"created_at":"2024-01-15T10:30:01.000Z"}\n'
     )
-    route = respx.get("https://custom.example.com/api/v1/sessions/sess_123/export").mock(
+    route = respx.get("https://app.everruns.com/api/v1/sessions/sess_123/export").mock(
         return_value=httpx.Response(200, text=jsonl)
     )
 
@@ -2251,7 +2256,7 @@ def _agent_response(**overrides):
 @respx.mock
 async def test_create_agent_with_harness_id():
     """agents.create includes harness_id in the request body."""
-    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+    route = respx.post("https://app.everruns.com/api/v1/agents").mock(
         return_value=httpx.Response(201, json=_agent_response(harness_id="harness_abc"))
     )
 
@@ -2270,7 +2275,7 @@ async def test_create_agent_with_harness_id():
 @respx.mock
 async def test_create_agent_with_harness_name():
     """agents.create includes harness_name in the request body."""
-    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+    route = respx.post("https://app.everruns.com/api/v1/agents").mock(
         return_value=httpx.Response(201, json=_agent_response())
     )
 
@@ -2289,7 +2294,7 @@ async def test_create_agent_with_harness_name():
 @respx.mock
 async def test_create_agent_with_parallel_tool_calls():
     """agents.create includes parallel_tool_calls in the request body."""
-    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+    route = respx.post("https://app.everruns.com/api/v1/agents").mock(
         return_value=httpx.Response(201, json=_agent_response(parallel_tool_calls=True))
     )
 
@@ -2335,7 +2340,7 @@ async def test_create_agent_invalid_harness_name_raises():
 @respx.mock
 async def test_apply_agent_with_harness_name():
     """agents.apply includes harness_name in the request body."""
-    route = respx.post("https://custom.example.com/api/v1/agents").mock(
+    route = respx.post("https://app.everruns.com/api/v1/agents").mock(
         return_value=httpx.Response(201, json=_agent_response())
     )
 
@@ -2376,7 +2381,7 @@ async def test_apply_by_name_harness_id_and_name_both_raises():
 @respx.mock
 async def test_create_session_with_agent_name():
     """sessions.create includes agent_name in the request body."""
-    route = respx.post("https://custom.example.com/api/v1/sessions").mock(
+    route = respx.post("https://app.everruns.com/api/v1/sessions").mock(
         return_value=httpx.Response(
             201,
             json={
@@ -2518,7 +2523,7 @@ _HARNESS_JSON = {
 @pytest.mark.asyncio
 @respx.mock
 async def test_harnesses_list():
-    route = respx.get("https://custom.example.com/api/v1/harnesses").mock(
+    route = respx.get("https://app.everruns.com/api/v1/harnesses").mock(
         return_value=httpx.Response(
             200,
             json={"data": [_HARNESS_JSON], "total": 1, "offset": 0, "limit": 0},
@@ -2540,7 +2545,7 @@ async def test_harnesses_list():
 @pytest.mark.asyncio
 @respx.mock
 async def test_harnesses_search():
-    route = respx.get("https://custom.example.com/api/v1/harnesses?search=research").mock(
+    route = respx.get("https://app.everruns.com/api/v1/harnesses?search=research").mock(
         return_value=httpx.Response(
             200,
             json={"data": [_HARNESS_JSON], "total": 1, "offset": 0, "limit": 0},
@@ -2560,7 +2565,7 @@ async def test_harnesses_search():
 @pytest.mark.asyncio
 @respx.mock
 async def test_harnesses_get():
-    route = respx.get("https://custom.example.com/api/v1/harnesses/harness_abc123").mock(
+    route = respx.get("https://app.everruns.com/api/v1/harnesses/harness_abc123").mock(
         return_value=httpx.Response(200, json=_HARNESS_JSON)
     )
 
@@ -2578,7 +2583,7 @@ async def test_harnesses_get():
 @pytest.mark.asyncio
 @respx.mock
 async def test_harnesses_create():
-    route = respx.post("https://custom.example.com/api/v1/harnesses").mock(
+    route = respx.post("https://app.everruns.com/api/v1/harnesses").mock(
         return_value=httpx.Response(201, json=_HARNESS_JSON)
     )
 
@@ -2619,7 +2624,7 @@ async def test_harnesses_create_validates_name():
 @pytest.mark.asyncio
 @respx.mock
 async def test_harnesses_update():
-    route = respx.patch("https://custom.example.com/api/v1/harnesses/harness_abc123").mock(
+    route = respx.patch("https://app.everruns.com/api/v1/harnesses/harness_abc123").mock(
         return_value=httpx.Response(200, json=_HARNESS_JSON)
     )
 
@@ -2641,7 +2646,7 @@ async def test_harnesses_update():
 @pytest.mark.asyncio
 @respx.mock
 async def test_harnesses_delete():
-    route = respx.delete("https://custom.example.com/api/v1/harnesses/harness_abc123").mock(
+    route = respx.delete("https://app.everruns.com/api/v1/harnesses/harness_abc123").mock(
         return_value=httpx.Response(204)
     )
 
@@ -2666,7 +2671,7 @@ async def test_harnesses_list_examples():
         "capabilities": [{"ref": "web_search"}],
         "tags": ["research"],
     }
-    route = respx.get("https://custom.example.com/api/v1/harness-examples").mock(
+    route = respx.get("https://app.everruns.com/api/v1/harness-examples").mock(
         return_value=httpx.Response(200, json=[example_json])
     )
 
@@ -2702,7 +2707,7 @@ _MODEL_JSON = {
 @pytest.mark.asyncio
 @respx.mock
 async def test_models_list():
-    route = respx.get("https://custom.example.com/api/v1/models").mock(
+    route = respx.get("https://app.everruns.com/api/v1/models").mock(
         return_value=httpx.Response(
             200,
             json={"data": [_MODEL_JSON], "total": 1, "offset": 0, "limit": 0},
@@ -2724,7 +2729,7 @@ async def test_models_list():
 @pytest.mark.asyncio
 @respx.mock
 async def test_models_get():
-    route = respx.get("https://custom.example.com/api/v1/models/model_1").mock(
+    route = respx.get("https://app.everruns.com/api/v1/models/model_1").mock(
         return_value=httpx.Response(200, json=_MODEL_JSON)
     )
 

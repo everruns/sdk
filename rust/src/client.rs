@@ -6,7 +6,7 @@ use crate::models::*;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue};
 use url::Url;
 
-const DEFAULT_BASE_URL: &str = "https://custom.example.com/api";
+const DEFAULT_BASE_URL: &str = "https://app.everruns.com/api";
 
 /// Main client for interacting with the Everruns API
 #[derive(Clone)]
@@ -1645,6 +1645,15 @@ mod tests {
 
     fn test_client() -> Everruns {
         Everruns::with_base_url("test_key", "https://api.example.com").unwrap()
+    }
+
+    #[test]
+    fn test_default_base_url_is_everruns_cloud() {
+        let client = Everruns::builder().api_key("test_key").build().unwrap();
+        assert_eq!(
+            client.url("/agents").as_str(),
+            "https://app.everruns.com/api/v1/agents"
+        );
     }
 
     #[test]

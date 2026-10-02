@@ -13,7 +13,7 @@ Everruns SDKs provide typed clients for the Everruns API. All language implement
 | Parameter | Env Variable | Description |
 |-----------|--------------|-------------|
 | `api_key` | `EVERRUNS_API_KEY` | personal access token |
-| `api_url` | `EVERRUNS_API_URL` | API base URL (optional, for testing/self-hosted) |
+| `api_url` | `EVERRUNS_API_URL` | API base URL (optional; defaults to Everruns Cloud, `https://app.everruns.com/api`; set it for self-hosted) |
 | `org_id` | `EVERRUNS_ORG_ID` | Organization ID for multi-org personal access tokens (optional) |
 
 All parameters can be omitted if the corresponding environment variable is set.

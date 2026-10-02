@@ -77,7 +77,7 @@ from everruns_sdk.models import (
 )
 from everruns_sdk.sse import EventStream, StreamOptions
 
-DEFAULT_BASE_URL = "https://custom.example.com/api"
+DEFAULT_BASE_URL = "https://app.everruns.com/api"
 
 
 def _is_html_response(body: str) -> bool:

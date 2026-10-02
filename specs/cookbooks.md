@@ -45,7 +45,7 @@ Each language must implement the "Dad Jokes Agent" demonstrating:
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `EVERRUNS_API_KEY` | Yes | personal access token for authentication |
-| `EVERRUNS_API_URL` | No | Override base URL (default: production) |
+| `EVERRUNS_API_URL` | No | Override base URL (default: Everruns Cloud, `https://app.everruns.com/api`) |
 | `EVERRUNS_ORG_ID` | No | Organization ID for multi-org personal access tokens |
 
 ### Agent Configuration
