@@ -106,7 +106,7 @@ export class Everruns {
     // when joining with paths that start with "/".
     // Example: "http://host/api/" + "/v1/agents" = "http://host/api//v1/agents" (wrong)
     //          "http://host/api" + "/v1/agents" = "http://host/api/v1/agents" (correct)
-    const rawBaseUrl = options.baseUrl ?? "https://custom.example.com/api";
+    const rawBaseUrl = options.baseUrl ?? "https://app.everruns.com/api";
     this.baseUrl = trimTrailingSlashes(rawBaseUrl);
     const orgId =
       options.orgId !== undefined
