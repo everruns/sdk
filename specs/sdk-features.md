@@ -34,6 +34,44 @@ client = Everruns(api_key="evr_pat_...", org_id="org_...")
 client = Everruns(api_url="https://custom.example.com/api")
 ```
 
+## Change Reasons
+
+Callers can record why they changed something. The server reads an
+`Everruns-Change-Reason` header on REST requests and stores it in the changed
+entity's history (upstream: `crates/server/src/domains/change_history/intent.rs`
+in everruns/everruns). The header is not in the OpenAPI spec, so the SDKs add
+it by hand.
+
+| Language | API |
+|----------|-----|
+| Rust | `client.with_reason("...") -> Everruns` |
+| Python | `client.with_reason("...") -> Everruns` |
+| TypeScript | `client.withReason("...") -> Everruns` |
+
+Decision: a derived client, not a per-method parameter or options object. The
+reason is invocation metadata, not a command param, and threading it through
+~100 method signatures per language would bloat every signature for an optional
+value. A derived client scopes one reason to any number of calls, has the same
+shape in all three languages, and needs no per-language options type.
+
+Requirements:
+
+- The derived client shares the original's configuration (and, in Rust and
+  Python, its HTTP connection pool). The original is unchanged.
+- The derived client sends the header on every API request it makes; the
+  server records it only on mutations.
+- The value is trimmed, then UTF-8 percent-encoded with every byte outside the
+  RFC 3986 unreserved set (`A-Z a-z 0-9 - _ . ~`) escaped as uppercase `%XX`,
+  matching the server's decoder and the everruns CLI. `+` is escaped, never sent
+  as a space. All SDKs send identical bytes for the same reason.
+- A blank reason sends no header (deriving with a blank reason clears one).
+- No client-side validation: the server owns the rules and rejects with HTTP
+  400 `invalid_change_reason` a reason over 1000 characters
+  (`MAX_CHANGE_REASON_CHARS`), with control characters other than newline and
+  tab, or shaped like a credential. SDKs export `CHANGE_REASON_HEADER` and
+  `MAX_CHANGE_REASON_CHARS` for callers that want to check up front.
+- Python: closing a derived client is a no-op; the original owns the connection.
+
 ## Resource Sub-Clients
 
 SDKs expose resource-specific sub-clients for better ergonomics:

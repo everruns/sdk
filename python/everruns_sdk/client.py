@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 from typing import Any, Literal, Optional
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import httpx
 
@@ -79,6 +79,23 @@ from everruns_sdk.sse import EventStream, StreamOptions
 
 DEFAULT_BASE_URL = "https://app.everruns.com/api"
 
+#: Request header carrying a change reason; the server records it in the
+#: changed entity's history.
+CHANGE_REASON_HEADER = "Everruns-Change-Reason"
+
+#: Longest change reason the server accepts, in characters.
+MAX_CHANGE_REASON_CHARS = 1000
+
+
+def _encode_change_reason(reason: str) -> str:
+    """Percent-encode a change reason as UTF-8.
+
+    Only RFC 3986 unreserved characters stay bare: the encoding the server's
+    decoder and the Everruns CLI use. ``+`` is encoded rather than read as a
+    space.
+    """
+    return quote(reason, safe="", encoding="utf-8")
+
 
 def _is_html_response(body: str) -> bool:
     """Check if the body looks like an HTML response."""
@@ -149,6 +166,9 @@ class Everruns:
 
         self._api_key = ApiKey(api_key)
         self._org_id = _validate_org_id(org_id)
+        # Set only on clients derived with `with_reason`, which share `_client`.
+        self._change_reason: Optional[str] = None
+        self._owns_client = True
         # Ensure base URL has trailing slash for correct URL joining.
         # httpx follows RFC 3986: without trailing slash, relative paths
         # replace the last path segment instead of appending.
@@ -160,6 +180,32 @@ class Everruns:
             headers=self._auth_headers(),
             timeout=30.0,
         )
+
+    def with_reason(self, reason: str) -> "Everruns":
+        """Derive a client that records ``reason`` as the change reason of every request.
+
+        The derived client shares this client's connection pool and settings;
+        this client is left unchanged. The reason travels in the
+        ``Everruns-Change-Reason`` header, UTF-8 percent-encoded, and lands in
+        the changed entity's history. A blank reason sends no header.
+
+        The server trims the reason and rejects (HTTP 400,
+        ``invalid_change_reason``) one longer than ``MAX_CHANGE_REASON_CHARS``
+        characters, one with control characters other than newline and tab,
+        or one that looks like it contains a credential.
+
+        The derived client does not own the connection: closing it is a no-op;
+        close the client it was derived from.
+
+        Example:
+            >>> await client.with_reason("retire the unused agent").agents.delete("agent_123")
+        """
+        derived = object.__new__(Everruns)
+        derived.__dict__.update(self.__dict__)
+        trimmed = reason.strip()
+        derived._change_reason = _encode_change_reason(trimmed) if trimmed else None
+        derived._owns_client = False
+        return derived
 
     @property
     def agents(self) -> AgentsClient:
@@ -231,23 +277,31 @@ class Everruns:
         headers = {"Authorization": self._api_key.value}
         if content_type is not None:
             headers["Content-Type"] = content_type
+        headers.update(self._reason_headers())
         if self._org_id is not None:
             headers["X-Org-Id"] = self._org_id
         return headers
 
+    def _reason_headers(self) -> dict[str, str]:
+        # Per request, because derived clients share one httpx client whose
+        # default headers carry no reason.
+        if self._change_reason is None:
+            return {}
+        return {CHANGE_REASON_HEADER: self._change_reason}
+
     async def _get(self, path: str) -> Any:
-        resp = await self._client.get(self._url(path))
+        resp = await self._client.get(self._url(path), headers=self._reason_headers())
         return await self._handle_response(resp)
 
     async def _get_text(self, path: str) -> str:
-        resp = await self._client.get(self._url(path))
+        resp = await self._client.get(self._url(path), headers=self._reason_headers())
         if resp.is_success:
             return resp.text
         await self._raise_error(resp)
         return ""  # unreachable
 
     async def _post(self, path: str, data: Any) -> Any:
-        resp = await self._client.post(self._url(path), json=data)
+        resp = await self._client.post(self._url(path), json=data, headers=self._reason_headers())
         return await self._handle_response(resp)
 
     async def _post_text(self, path: str, content: str) -> Any:
@@ -259,25 +313,25 @@ class Everruns:
         return await self._handle_response(resp)
 
     async def _patch(self, path: str, data: Any) -> Any:
-        resp = await self._client.patch(self._url(path), json=data)
+        resp = await self._client.patch(self._url(path), json=data, headers=self._reason_headers())
         return await self._handle_response(resp)
 
     async def _put(self, path: str, data: Any) -> Any:
-        resp = await self._client.put(self._url(path), json=data)
+        resp = await self._client.put(self._url(path), json=data, headers=self._reason_headers())
         return await self._handle_response(resp)
 
     async def _put_empty(self, path: str) -> None:
-        resp = await self._client.put(self._url(path))
+        resp = await self._client.put(self._url(path), headers=self._reason_headers())
         if not resp.is_success:
             await self._raise_error(resp)
 
     async def _delete(self, path: str) -> None:
-        resp = await self._client.delete(self._url(path))
+        resp = await self._client.delete(self._url(path), headers=self._reason_headers())
         if not resp.is_success:
             await self._raise_error(resp)
 
     async def _delete_json(self, path: str) -> Any:
-        resp = await self._client.delete(self._url(path))
+        resp = await self._client.delete(self._url(path), headers=self._reason_headers())
         return await self._handle_response(resp)
 
     async def _handle_response(self, resp: httpx.Response) -> Any:
@@ -299,8 +353,9 @@ class Everruns:
         raise ApiError.from_response(resp.status_code, body)
 
     async def close(self) -> None:
-        """Close the HTTP client."""
-        await self._client.aclose()
+        """Close the HTTP client (a no-op on a client derived with ``with_reason``)."""
+        if self._owns_client:
+            await self._client.aclose()
 
     async def __aenter__(self) -> "Everruns":
         return self

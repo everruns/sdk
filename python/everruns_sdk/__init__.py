@@ -9,7 +9,7 @@ Quick Start:
 """
 
 from everruns_sdk.auth import ApiKey
-from everruns_sdk.client import Everruns
+from everruns_sdk.client import CHANGE_REASON_HEADER, MAX_CHANGE_REASON_CHARS, Everruns
 from everruns_sdk.errors import (
     ApiError,
     AuthenticationError,
@@ -94,6 +94,8 @@ from everruns_sdk.models import (
 
 __all__ = [
     "Everruns",
+    "CHANGE_REASON_HEADER",
+    "MAX_CHANGE_REASON_CHARS",
     "ApiKey",
     "EverrunsError",
     "ApiError",

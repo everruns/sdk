@@ -8,6 +8,13 @@ use url::Url;
 
 const DEFAULT_BASE_URL: &str = "https://app.everruns.com/api";
 
+/// Request header carrying a change reason. The server records it in the
+/// changed entity's history.
+pub const CHANGE_REASON_HEADER: &str = "Everruns-Change-Reason";
+
+/// Longest change reason the server accepts, in characters.
+pub const MAX_CHANGE_REASON_CHARS: usize = 1000;
+
 /// Main client for interacting with the Everruns API
 #[derive(Clone)]
 pub struct Everruns {
@@ -15,6 +22,7 @@ pub struct Everruns {
     base_url: Url,
     api_key: ApiKey,
     org_id: Option<HeaderValue>,
+    change_reason: Option<HeaderValue>,
 }
 
 /// Builder for configuring an Everruns client.
@@ -153,7 +161,43 @@ impl Everruns {
             base_url,
             api_key,
             org_id,
+            change_reason: None,
         })
+    }
+
+    /// Derive a client that records `reason` as the change reason of every
+    /// request it sends.
+    ///
+    /// The derived client shares this client's connection pool and settings;
+    /// `self` is left unchanged. The reason travels in the
+    /// `Everruns-Change-Reason` header, UTF-8 percent-encoded, and lands in the
+    /// changed entity's history. A blank reason sends no header.
+    ///
+    /// The server trims the reason and rejects (HTTP 400,
+    /// `invalid_change_reason`) one longer than [`MAX_CHANGE_REASON_CHARS`]
+    /// characters, one with control characters other than newline and tab, or
+    /// one that looks like it contains a credential.
+    ///
+    /// ```rust,no_run
+    /// # async fn run(client: everruns_sdk::Everruns) -> everruns_sdk::error::Result<()> {
+    /// client
+    ///     .with_reason("retire the unused agent")
+    ///     .agents()
+    ///     .delete("agent_123")
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn with_reason(&self, reason: impl AsRef<str>) -> Self {
+        let reason = reason.as_ref().trim();
+        let change_reason = (!reason.is_empty()).then(|| {
+            // Percent-encoded output is ASCII, so it is always a valid header value.
+            HeaderValue::from_str(&encode_change_reason(reason)).expect("ASCII header value")
+        });
+        Self {
+            change_reason,
+            ..self.clone()
+        }
     }
 
     /// Get the agents client
@@ -232,6 +276,9 @@ impl Everruns {
         );
         if let Some(org_id) = &self.org_id {
             headers.insert("X-Org-Id", org_id.clone());
+        }
+        if let Some(reason) = &self.change_reason {
+            headers.insert(CHANGE_REASON_HEADER, reason.clone());
         }
         headers
     }
@@ -382,6 +429,21 @@ impl Everruns {
         }
         url
     }
+}
+
+/// Percent-encode a change reason as UTF-8, leaving only RFC 3986 unreserved
+/// characters bare: the encoding the server's decoder and the Everruns CLI use.
+/// `+` is encoded rather than read as a space.
+pub(crate) fn encode_change_reason(reason: &str) -> String {
+    let mut out = String::with_capacity(reason.len());
+    for byte in reason.bytes() {
+        if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'~') {
+            out.push(byte as char);
+        } else {
+            out.push_str(&format!("%{byte:02X}"));
+        }
+    }
+    out
 }
 
 /// Validate harness binding on an agent create/apply request.
@@ -1635,6 +1697,10 @@ impl std::fmt::Debug for Everruns {
                 "org_id",
                 &self.org_id.as_ref().and_then(|v| v.to_str().ok()),
             )
+            .field(
+                "change_reason",
+                &self.change_reason.as_ref().and_then(|v| v.to_str().ok()),
+            )
             .finish()
     }
 }
@@ -1645,6 +1711,34 @@ mod tests {
 
     fn test_client() -> Everruns {
         Everruns::with_base_url("test_key", "https://api.example.com").unwrap()
+    }
+
+    #[test]
+    fn test_change_reason_is_percent_encoded() {
+        assert_eq!(
+            encode_change_reason("make it kid friendly ✓"),
+            "make%20it%20kid%20friendly%20%E2%9C%93"
+        );
+        assert_eq!(encode_change_reason("a+b/c?d=e&f"), "a%2Bb%2Fc%3Fd%3De%26f");
+        assert_eq!(encode_change_reason("line\nnext"), "line%0Anext");
+        assert_eq!(encode_change_reason("Az09-_.~"), "Az09-_.~");
+    }
+
+    #[test]
+    fn test_with_reason_sets_header_without_touching_original() {
+        let client = test_client();
+        let scoped = client.with_reason("  rotate key  ");
+        assert_eq!(
+            scoped.auth_headers().get(CHANGE_REASON_HEADER).unwrap(),
+            "rotate%20key"
+        );
+        assert!(client.auth_headers().get(CHANGE_REASON_HEADER).is_none());
+    }
+
+    #[test]
+    fn test_blank_reason_sends_no_header() {
+        let client = test_client().with_reason("first").with_reason("   ");
+        assert!(client.auth_headers().get(CHANGE_REASON_HEADER).is_none());
     }
 
     #[test]

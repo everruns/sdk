@@ -35,6 +35,6 @@ pub mod models;
 pub mod sse;
 
 pub use auth::ApiKey;
-pub use client::Everruns;
+pub use client::{CHANGE_REASON_HEADER, Everruns, MAX_CHANGE_REASON_CHARS};
 pub use error::Error;
 pub use models::*;

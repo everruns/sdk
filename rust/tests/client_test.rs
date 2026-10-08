@@ -132,6 +132,53 @@ async fn test_client_sends_org_id_header() {
 }
 
 #[tokio::test]
+async fn test_with_reason_sends_encoded_change_reason_header() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("DELETE"))
+        .and(path("/v1/agents/agent_1"))
+        .and(header(
+            "Everruns-Change-Reason",
+            "retire%20%C3%BCnused%20agent%20%E2%9C%93",
+        ))
+        .respond_with(ResponseTemplate::new(204))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    client
+        .with_reason("retire ünused agent ✓")
+        .agents()
+        .delete("agent_1")
+        .await
+        .expect("delete with reason");
+}
+
+#[tokio::test]
+async fn test_client_without_reason_sends_no_change_reason_header() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+    let _scoped = client.with_reason("only on the derived client");
+
+    Mock::given(method("DELETE"))
+        .and(path("/v1/agents/agent_1"))
+        .respond_with(ResponseTemplate::new(204))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    client.agents().delete("agent_1").await.expect("delete");
+
+    let requests = server.received_requests().await.expect("recorded");
+    assert_eq!(requests.len(), 1);
+    assert!(
+        !requests[0].headers.contains_key("everruns-change-reason"),
+        "original client must not send a change reason"
+    );
+}
+
+#[tokio::test]
 async fn test_create_session_with_initial_files() {
     let server = MockServer::start().await;
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");

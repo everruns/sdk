@@ -22,7 +22,13 @@
  * ```
  */
 
-export { Everruns, type EverrunsOptions } from "./client.js";
+export {
+  Everruns,
+  type EverrunsOptions,
+  CHANGE_REASON_HEADER,
+  MAX_CHANGE_REASON_CHARS,
+  encodeChangeReason,
+} from "./client.js";
 export { ApiKey } from "./auth.js";
 export * from "./models.js";
 export * from "./errors.js";

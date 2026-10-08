@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiKey } from "../src/auth.js";
-import { Everruns } from "../src/client.js";
+import { Everruns, encodeChangeReason } from "../src/client.js";
 import { ValidationError } from "../src/errors.js";
 import {
   generateAgentId,
@@ -236,6 +236,72 @@ describe("Everruns", () => {
         }),
       }),
     );
+  });
+
+  it("withReason sends the encoded change reason header", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 204 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key", orgId: "org_123" });
+    await client
+      .withReason("  retire ünused agent ✓ ")
+      .agents.delete("agent_1");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://app.everruns.com/api/v1/agents/agent_1",
+      expect.objectContaining({
+        method: "DELETE",
+        headers: expect.objectContaining({
+          Authorization: "evr_test_key",
+          "X-Org-Id": "org_123",
+          "Everruns-Change-Reason": "retire%20%C3%BCnused%20agent%20%E2%9C%93",
+        }),
+      }),
+    );
+  });
+
+  it("withReason covers text-body requests", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ id: "agent_1" }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    await client.withReason("a+b/c").agents.import("name: a");
+
+    const headers = fetchMock.mock.calls[0][1].headers;
+    expect(headers["Everruns-Change-Reason"]).toBe("a%2Bb%2Fc");
+  });
+
+  it("original client sends no change reason after deriving", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 204 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new Everruns({ apiKey: "evr_test_key" });
+    const derived = client.withReason("only on the derived client");
+    await client.agents.delete("agent_1");
+    await client.withReason("   ").agents.delete("agent_1");
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    for (const call of fetchMock.mock.calls) {
+      expect(call[1].headers).not.toHaveProperty("Everruns-Change-Reason");
+    }
+    expect(derived).toBeInstanceOf(Everruns);
+    expect(derived.agents).not.toBe(client.agents);
+  });
+
+  it("encodeChangeReason matches the server decoder", () => {
+    expect(encodeChangeReason("make it kid friendly ✓")).toBe(
+      "make%20it%20kid%20friendly%20%E2%9C%93",
+    );
+    expect(encodeChangeReason("a+b/c?d=e&f")).toBe("a%2Bb%2Fc%3Fd%3De%26f");
+    expect(encodeChangeReason("it's (done)!*")).toBe(
+      "it%27s%20%28done%29%21%2A",
+    );
+    expect(encodeChangeReason("line\nnext")).toBe("line%0Anext");
+    expect(encodeChangeReason("Az09-_.~")).toBe("Az09-_.~");
   });
 
   it("should create agent with initial files", async () => {
