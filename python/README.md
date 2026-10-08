@@ -119,6 +119,24 @@ Or with an explicit token and organization:
 client = Everruns(api_key="evr_pat_...", org_id="org_...")
 ```
 
+## Change Reasons
+
+Record why a change was made. `with_reason` derives a client that sends the
+reason with every request it makes; the server stores it in the changed
+entity's history. The derived client shares the original's connection, and the
+original stays unchanged:
+
+```python
+await client.with_reason("retire the unused agent").agents.delete("agent_123")
+
+scoped = client.with_reason("rotate prompts for the Q3 launch")
+await scoped.agents.apply(agent_id, "assistant", "You are concise.")
+```
+
+The reason travels in the `Everruns-Change-Reason` header, UTF-8
+percent-encoded. A blank reason sends no header. The server trims the reason and rejects it with HTTP 400 (`invalid_change_reason`) when it is longer than 1000 characters, contains control characters other than newline and tab, or looks like it contains a credential. Closing a derived
+client is a no-op; close the client it came from.
+
 ## Agent Versions
 
 ```python

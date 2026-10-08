@@ -152,6 +152,74 @@ async def test_client_sends_org_id_header():
     assert route.calls[0].request.headers["X-Org-Id"] == "org_123"
 
 
+@pytest.mark.asyncio
+@respx.mock
+async def test_with_reason_sends_encoded_change_reason_header():
+    route = respx.delete("https://app.everruns.com/api/v1/agents/agent_1").mock(
+        return_value=httpx.Response(204)
+    )
+
+    client = Everruns(api_key="evr_test_key", org_id="org_123")
+    try:
+        await client.with_reason("  retire \u00fcnused agent \u2713 ").agents.delete("agent_1")
+    finally:
+        await client.close()
+
+    request = route.calls[0].request
+    assert request.headers["Everruns-Change-Reason"] == "retire%20%C3%BCnused%20agent%20%E2%9C%93"
+    assert request.headers["X-Org-Id"] == "org_123"
+    assert request.headers["Authorization"]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_with_reason_covers_text_bodies():
+    route = respx.post("https://app.everruns.com/api/v1/agents/import").mock(
+        return_value=httpx.Response(200, json=_agent_response())
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    try:
+        await client.with_reason("a+b/c").agents.import_agent("name: a")
+    finally:
+        await client.close()
+
+    assert route.calls[0].request.headers["Everruns-Change-Reason"] == "a%2Bb%2Fc"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_original_client_sends_no_change_reason():
+    route = respx.delete("https://app.everruns.com/api/v1/agents/agent_1").mock(
+        return_value=httpx.Response(204)
+    )
+
+    client = Everruns(api_key="evr_test_key")
+    derived = client.with_reason("only on the derived client")
+    try:
+        await client.agents.delete("agent_1")
+        await derived.close()  # no-op: the derived client does not own the connection
+        await client.with_reason("   ").agents.delete("agent_1")
+    finally:
+        await client.close()
+
+    assert route.call_count == 2
+    for call in route.calls:
+        assert "Everruns-Change-Reason" not in call.request.headers
+    assert derived._client is client._client
+
+
+def test_change_reason_encoding_matches_server_decoder():
+    from everruns_sdk.client import _encode_change_reason
+
+    assert _encode_change_reason("make it kid friendly \u2713") == (
+        "make%20it%20kid%20friendly%20%E2%9C%93"
+    )
+    assert _encode_change_reason("a+b/c?d=e&f") == "a%2Bb%2Fc%3Fd%3De%26f"
+    assert _encode_change_reason("line\nnext") == "line%0Anext"
+    assert _encode_change_reason("Az09-_.~") == "Az09-_.~"
+
+
 def test_capabilities_subclient():
     """Test that capabilities sub-client is available."""
     client = Everruns(api_key="evr_test_key")

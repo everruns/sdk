@@ -181,6 +181,12 @@ Session create/update payloads support optional `title`, `locale`, `model_id`, `
 - `GET /v1/sessions/{id}/storage/keys` - List key-value storage
 - `GET /v1/sessions/{id}/storage/secrets` - List secrets
 
+### Change Reasons
+
+Every mutation can carry a change reason via the `Everruns-Change-Reason`
+header, set through a derived client (`with_reason` / `withReason`). See
+`specs/sdk-features.md`, "Change Reasons".
+
 ## Not Covered (Out of SDK Scope)
 
 Server administration endpoints not exposed via SDK:

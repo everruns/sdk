@@ -189,6 +189,29 @@ client = Everruns(api_key="evr_pat_...", org_id="org_...")
 const client = new Everruns({ apiKey: "evr_pat_...", orgId: "org_..." });
 ```
 
+## Change Reasons
+
+Mutations can carry a reason that the server records in the changed entity's
+history. Derive a client scoped to the reason; the original stays unchanged:
+
+```rust
+// Rust
+client.with_reason("retire the unused agent").agents().delete("agent_123").await?;
+```
+
+```python
+# Python
+await client.with_reason("retire the unused agent").agents.delete("agent_123")
+```
+
+```typescript
+// TypeScript
+await client.withReason("retire the unused agent").agents.delete("agent_123");
+```
+
+The reason is sent as the `Everruns-Change-Reason` header, UTF-8
+percent-encoded; the server accepts up to 1000 characters.
+
 ## Error Handling
 
 Consistent error types across all SDKs:

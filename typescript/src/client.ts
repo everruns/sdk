@@ -70,6 +70,25 @@ import {
 } from "./errors.js";
 import { EventStream } from "./sse.js";
 
+/** Request header carrying a change reason; the server records it in the changed entity's history. */
+export const CHANGE_REASON_HEADER = "Everruns-Change-Reason";
+
+/** Longest change reason the server accepts, in characters. */
+export const MAX_CHANGE_REASON_CHARS = 1000;
+
+/**
+ * Percent-encode a change reason as UTF-8, leaving only RFC 3986 unreserved
+ * characters bare: the encoding the server's decoder and the Everruns CLI use.
+ * `encodeURIComponent` also leaves `!'()*` bare, which the server would decode
+ * fine; they are escaped too so all three SDKs send identical bytes.
+ */
+export function encodeChangeReason(reason: string): string {
+  return encodeURIComponent(reason).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
 export interface EverrunsOptions {
   apiKey?: string | ApiKey;
   baseUrl?: string;
@@ -80,19 +99,23 @@ export class Everruns {
   private readonly apiKey: ApiKey;
   private readonly baseUrl: string;
   private readonly orgId?: string;
+  // Encoded; set only on clients derived with `withReason`.
+  private readonly changeReason?: string;
 
-  readonly agents: AgentsClient;
-  readonly sessions: SessionsClient;
-  readonly messages: MessagesClient;
-  readonly events: EventsClient;
-  readonly capabilities: CapabilitiesClient;
-  readonly harnesses: HarnessesClient;
-  readonly models: ModelsClient;
-  readonly workspaces: WorkspacesClient;
-  readonly workspaceFiles: WorkspaceFilesClient;
-  readonly memories: MemoriesClient;
-  readonly connections: ConnectionsClient;
-  readonly budgets: BudgetsClient;
+  // Assigned through `subClients`, so `withReason` can bind a fresh set to a
+  // derived client without repeating the list.
+  readonly agents!: AgentsClient;
+  readonly sessions!: SessionsClient;
+  readonly messages!: MessagesClient;
+  readonly events!: EventsClient;
+  readonly capabilities!: CapabilitiesClient;
+  readonly harnesses!: HarnessesClient;
+  readonly models!: ModelsClient;
+  readonly workspaces!: WorkspacesClient;
+  readonly workspaceFiles!: WorkspaceFilesClient;
+  readonly memories!: MemoriesClient;
+  readonly connections!: ConnectionsClient;
+  readonly budgets!: BudgetsClient;
 
   constructor(options: EverrunsOptions = {}) {
     if (options.apiKey instanceof ApiKey) {
@@ -114,18 +137,53 @@ export class Everruns {
         : process.env.EVERRUNS_ORG_ID || undefined;
     this.orgId = validateOrgId(orgId);
 
-    this.agents = new AgentsClient(this);
-    this.sessions = new SessionsClient(this);
-    this.messages = new MessagesClient(this);
-    this.events = new EventsClient(this);
-    this.capabilities = new CapabilitiesClient(this);
-    this.harnesses = new HarnessesClient(this);
-    this.models = new ModelsClient(this);
-    this.workspaces = new WorkspacesClient(this);
-    this.workspaceFiles = new WorkspaceFilesClient(this);
-    this.memories = new MemoriesClient(this);
-    this.connections = new ConnectionsClient(this);
-    this.budgets = new BudgetsClient(this);
+    Object.assign(this, Everruns.subClients(this));
+  }
+
+  private static subClients(client: Everruns) {
+    return {
+      agents: new AgentsClient(client),
+      sessions: new SessionsClient(client),
+      messages: new MessagesClient(client),
+      events: new EventsClient(client),
+      capabilities: new CapabilitiesClient(client),
+      harnesses: new HarnessesClient(client),
+      models: new ModelsClient(client),
+      workspaces: new WorkspacesClient(client),
+      workspaceFiles: new WorkspaceFilesClient(client),
+      memories: new MemoriesClient(client),
+      connections: new ConnectionsClient(client),
+      budgets: new BudgetsClient(client),
+    };
+  }
+
+  /**
+   * Derive a client that records `reason` as the change reason of every API
+   * request it makes.
+   *
+   * The derived client shares this client's settings; this client is left
+   * unchanged. The reason travels in the `Everruns-Change-Reason` header,
+   * UTF-8 percent-encoded, and lands in the changed entity's history. A blank
+   * reason sends no header.
+   *
+   * The server trims the reason and rejects (HTTP 400,
+   * `invalid_change_reason`) one longer than {@link MAX_CHANGE_REASON_CHARS}
+   * characters, one with control characters other than newline and tab, or
+   * one that looks like it contains a credential.
+   *
+   * @example
+   * ```typescript
+   * await client.withReason("retire the unused agent").agents.delete("agent_123");
+   * ```
+   */
+  withReason(reason: string): Everruns {
+    const trimmed = reason.trim();
+    const derived = Object.create(Everruns.prototype) as Everruns;
+    Object.assign(derived, this, {
+      changeReason: trimmed ? encodeChangeReason(trimmed) : undefined,
+    });
+    Object.assign(derived, Everruns.subClients(derived));
+    return derived;
   }
 
   /**
@@ -242,6 +300,9 @@ export class Everruns {
     }
     if (this.orgId !== undefined) {
       headers["X-Org-Id"] = this.orgId;
+    }
+    if (this.changeReason !== undefined) {
+      headers[CHANGE_REASON_HEADER] = this.changeReason;
     }
     return headers;
   }

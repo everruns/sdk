@@ -191,6 +191,27 @@ let client = Everruns::builder()
     .build()?;
 ```
 
+## Change Reasons
+
+Record why a change was made. `with_reason` derives a client that sends the
+reason with every request it makes; the server stores it in the changed
+entity's history. The derived client shares the original's connection pool, and
+the original stays unchanged:
+
+```rust
+client
+    .with_reason("retire the unused agent")
+    .agents()
+    .delete("agent_123")
+    .await?;
+
+let scoped = client.with_reason("rotate prompts for the Q3 launch");
+scoped.agents().apply(&id, "assistant", "You are concise.").await?;
+```
+
+The reason travels in the `Everruns-Change-Reason` header, UTF-8
+percent-encoded. A blank reason sends no header. The server trims the reason and rejects it with HTTP 400 (`invalid_change_reason`) when it is longer than 1000 characters, contains control characters other than newline and tab, or looks like it contains a credential.
+
 ## Streaming Events
 
 The SDK supports SSE streaming with automatic reconnection:

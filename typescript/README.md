@@ -166,6 +166,22 @@ orgId: "org_..."
 });
 ```
 
+## Change Reasons
+
+Record why a change was made. `withReason` derives a client that sends the
+reason with every API request it makes; the server stores it in the changed
+entity's history. The original client stays unchanged:
+
+```typescript
+await client.withReason("retire the unused agent").agents.delete("agent_123");
+
+const scoped = client.withReason("rotate prompts for the Q3 launch");
+await scoped.agents.delete("agent_456");
+```
+
+The reason travels in the `Everruns-Change-Reason` header, UTF-8
+percent-encoded. A blank reason sends no header. The server trims the reason and rejects it with HTTP 400 (`invalid_change_reason`) when it is longer than 1000 characters, contains control characters other than newline and tab, or looks like it contains a credential.
+
 ## Streaming Events
 
 The SDK supports SSE streaming with automatic reconnection:
