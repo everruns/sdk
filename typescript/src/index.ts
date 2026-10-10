@@ -31,6 +31,21 @@ export {
 } from "./client.js";
 export { ApiKey } from "./auth.js";
 export * from "./models.js";
+export {
+  AgentClient,
+  END_USER_HEADER,
+  type AgentClientOptions,
+  type AgentCard,
+  type AgentSession,
+  type AgentSessionList,
+  type AgentMessage,
+  type RuntimeToken,
+  type CreateAgentSessionOptions,
+  type ListAgentSessionsOptions,
+  type ListAgentEventsOptions,
+  type SendAgentMessageOptions,
+  type StreamAgentEventsOptions,
+} from "./agent.js";
 export * from "./errors.js";
 export {
   EventStream,

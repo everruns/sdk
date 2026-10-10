@@ -34,6 +34,14 @@ export interface DisconnectingData {
   retry_ms: number;
 }
 
+/** Request additions used by clients that are not the management client. */
+export interface StreamExtras {
+  /** Extra request headers (e.g. `End-User`). */
+  headers?: Record<string, string>;
+  /** Replay events after this sequence on the first connection (`0`: all). */
+  afterSequence?: number;
+}
+
 /**
  * Async iterator for SSE events with automatic reconnection.
  *
@@ -55,6 +63,7 @@ export class EventStream implements AsyncIterable<Event> {
   private readonly baseUrl: string;
   private readonly authHeader: string;
   private readonly orgId?: string;
+  private readonly extra: StreamExtras;
   private readonly options: StreamOptions;
   private lastEventId?: string;
   private abortController?: AbortController;
@@ -69,10 +78,12 @@ export class EventStream implements AsyncIterable<Event> {
     authHeader: string,
     options: StreamOptions = {},
     orgId?: string,
+    extra: StreamExtras = {},
   ) {
     this.baseUrl = url;
     this.authHeader = authHeader;
     this.orgId = orgId;
+    this.extra = extra;
     this.options = options;
     this.lastEventId = options.sinceId;
   }
@@ -105,6 +116,12 @@ export class EventStream implements AsyncIterable<Event> {
 
     if (this.lastEventId) {
       params.push(`since_id=${encodeURIComponent(this.lastEventId)}`);
+    }
+
+    // A replay cursor only applies to the first connection; reconnects resume
+    // from `since_id`.
+    if (this.extra.afterSequence !== undefined && !this.lastEventId) {
+      params.push(`after_sequence=${this.extra.afterSequence}`);
     }
 
     if (this.options.types) {
@@ -245,6 +262,7 @@ export class EventStream implements AsyncIterable<Event> {
         headers: {
           Authorization: this.authHeader,
           ...this.orgHeaders(),
+          ...this.extra.headers,
           Accept: "text/event-stream",
           "Cache-Control": "no-cache",
         },

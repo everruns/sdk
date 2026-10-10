@@ -8,7 +8,42 @@ TypeScript SDK for the Everruns API.
 npm install @everruns/sdk
 ```
 
-## Quick Start
+## Call your agent from code
+
+Use `AgentClient` to call one agent from an application. It holds an agent key
+(`evr_ak_...`) that reaches that agent's sessions and nothing else.
+
+```typescript
+import { AgentClient } from "@everruns/sdk";
+
+// Reads EVERRUNS_AGENT_URL and EVERRUNS_AGENT_KEY
+const agent = new AgentClient();
+// or: new AgentClient({ agentUrl: "https://app.everruns.com/api/v1/channels/apichan_...", credential: "evr_ak_..." })
+
+// One call: creates a session, sends the message, waits for the turn
+console.log(await agent.run("What can you do?"));
+
+// Act for one of your application's users (the key needs the `end_user` permission)
+const alice = agent.forEndUser("customer-42");
+console.log(await alice.run("Where is my order?"));
+
+// For a browser or mobile app, never ship the key: mint a short-lived runtime token
+const { access_token } = await alice.runtimeToken();
+// ...then, in the browser:
+const browser = new AgentClient({
+  agentUrl: "https://app.everruns.com/api/v1/channels/apichan_...",
+  credential: access_token,
+});
+```
+
+For more control use `createSession`, `sendMessage`, `streamEvents`, `listEvents`,
+`getSession`, `cancel`, `answerQuestions` and `submitToolApprovals`.
+
+The management client below (`Everruns`, with a personal access token) is for
+managing Everruns: agents, harnesses, workspaces. Its `sessions.create` and
+`messages.create` are deprecated for calling an agent; use `AgentClient` instead.
+
+## Management Quick Start
 
 ```typescript
 import { Everruns } from "@everruns/sdk";

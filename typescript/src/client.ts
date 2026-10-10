@@ -531,6 +531,13 @@ class AgentsClient {
 class SessionsClient {
   constructor(private readonly client: Everruns) {}
 
+  /**
+   * Create a session.
+   *
+   * @deprecated To call an agent from an application, use `AgentClient` with
+   * an agent key. The management client is for managing Everruns (agents,
+   * harnesses, workspaces) with a personal access token.
+   */
   async create(request: CreateSessionRequest = {}): Promise<Session> {
     if (request.harnessId && request.harnessName) {
       throw new Error("Cannot specify both harnessId and harnessName");
@@ -675,8 +682,13 @@ class MessagesClient {
 
   /**
    * Create a new message (send text).
+   *
+   * @deprecated To call an agent from an application, use `AgentClient` with
+   * an agent key. The management client is for managing Everruns (agents,
+   * harnesses, workspaces) with a personal access token.
    */
   async create(sessionId: string, text: string): Promise<Message>;
+  /** @deprecated Use `AgentClient` with an agent key to call an agent. */
   async create(
     sessionId: string,
     request: CreateMessageRequest,

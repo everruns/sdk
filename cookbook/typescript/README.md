@@ -15,3 +15,14 @@ export EVERRUNS_API_URL=http://localhost:9000
 npm install
 npx tsx src/main.ts
 ```
+
+## Agent client
+
+`src/agent_client.ts` calls an existing agent with an agent key instead of a
+management token:
+
+```bash
+export EVERRUNS_AGENT_URL=https://app.everruns.com/api/v1/channels/apichan_...
+export EVERRUNS_AGENT_KEY=evr_ak_...
+npx tsx src/agent_client.ts
+```
