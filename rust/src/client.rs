@@ -296,15 +296,7 @@ impl Everruns {
     /// request and response type, which is what the code costs a consumer's
     /// binary.
     async fn send(&self, req: reqwest::RequestBuilder) -> Result<String> {
-        let resp = req.send().await?;
-        let status = resp.status();
-
-        if status.is_success() {
-            Ok(resp.text().await?)
-        } else {
-            let body = resp.text().await.unwrap_or_default();
-            Err(Error::from_api_response(status.as_u16(), &body))
-        }
+        send_request(req).await
     }
 
     /// Send a request and deserialize the response body.
@@ -417,18 +409,46 @@ impl Everruns {
         types: &[&str],
         exclude: &[&str],
     ) -> Url {
-        let mut url = self.url(&format!("/sessions/{}/sse", session_id));
-        if let Some(id) = since_id {
-            url.query_pairs_mut().append_pair("since_id", id);
-        }
-        for t in types {
-            url.query_pairs_mut().append_pair("types", t);
-        }
-        for e in exclude {
-            url.query_pairs_mut().append_pair("exclude", e);
-        }
-        url
+        append_sse_query(
+            self.url(&format!("/sessions/{}/sse", session_id)),
+            since_id,
+            types,
+            exclude,
+        )
     }
+}
+
+/// Send a request and return the body of a successful response, or the API
+/// error of a failed one. Shared by the management and agent clients.
+pub(crate) async fn send_request(req: reqwest::RequestBuilder) -> Result<String> {
+    let resp = req.send().await?;
+    let status = resp.status();
+
+    if status.is_success() {
+        Ok(resp.text().await?)
+    } else {
+        let body = resp.text().await.unwrap_or_default();
+        Err(Error::from_api_response(status.as_u16(), &body))
+    }
+}
+
+/// Add the SSE resume and filter query parameters to a session `/sse` URL.
+pub(crate) fn append_sse_query(
+    mut url: Url,
+    since_id: Option<&str>,
+    types: &[&str],
+    exclude: &[&str],
+) -> Url {
+    if let Some(id) = since_id {
+        url.query_pairs_mut().append_pair("since_id", id);
+    }
+    for t in types {
+        url.query_pairs_mut().append_pair("types", t);
+    }
+    for e in exclude {
+        url.query_pairs_mut().append_pair("exclude", e);
+    }
+    url
 }
 
 /// Percent-encode a change reason as UTF-8, leaving only RFC 3986 unreserved
@@ -698,6 +718,11 @@ impl<'a> SessionsClient<'a> {
     }
 
     /// Create a new session (server defaults to Generic harness)
+    ///
+    /// To call an agent from an application, prefer [`AgentClient`](crate::AgentClient)
+    /// with an agent key: it holds a credential that reaches one agent only.
+    /// This management client, with a personal access token, is for managing
+    /// Everruns (agents, harnesses, workspaces).
     pub async fn create(&self) -> Result<Session> {
         let req = CreateSessionRequest::new();
         self.client.post("/sessions", &req).await
@@ -803,6 +828,11 @@ impl<'a> MessagesClient<'a> {
     }
 
     /// Create a new message (send text)
+    ///
+    /// To call an agent from an application, prefer
+    /// [`AgentClient::send_message`](crate::AgentClient::send_message) or
+    /// [`AgentClient::run`](crate::AgentClient::run) with an agent key. This management
+    /// client, with a personal access token, is for managing Everruns.
     pub async fn create(&self, session_id: &str, text: &str) -> Result<Message> {
         let req = CreateMessageRequest::user_text(text);
         self.client

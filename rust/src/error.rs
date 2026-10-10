@@ -41,6 +41,13 @@ pub enum Error {
     #[error("Validation error: {0}")]
     Validation(String),
 
+    /// The agent's turn failed (`turn.failed` event)
+    #[error("Turn failed: {message}")]
+    TurnFailed {
+        code: Option<String>,
+        message: String,
+    },
+
     /// Server-initiated graceful disconnect with retry hint
     #[error("Graceful disconnect: reason={reason}, retry_ms={retry_ms}")]
     GracefulDisconnect { reason: String, retry_ms: u64 },

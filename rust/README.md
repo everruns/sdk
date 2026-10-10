@@ -2,6 +2,31 @@
 
 Rust SDK for the Everruns API.
 
+## Call your agent from code
+
+To call an agent from an application, use `AgentClient` with an agent key. It holds a credential that reaches one agent and nothing else. The management client (`Everruns`, below) is for managing Everruns (agents, harnesses, workspaces) with a personal access token.
+
+```rust
+use everruns_sdk::AgentClient;
+
+// EVERRUNS_AGENT_URL and EVERRUNS_AGENT_KEY, or AgentClient::new(url, "evr_ak_...")
+let agent = AgentClient::from_env()?;
+
+// Create a session, send, wait for the turn, get the reply.
+let reply = agent.run("What can you do?", None).await?;
+
+// Act for one of your own users (the key needs `end_user`): sends `End-User`.
+let alice = agent.for_end_user("customer-42");
+let session = alice.create_session(Some("Billing"), None).await?;
+alice.send_message(&session.id, "Where is my invoice?", Some("msg-key-1")).await?;
+
+// Browsers never see the key: hand them a short-lived runtime token.
+let token = alice.runtime_token().await?;
+println!("{} (expires in {}s)", token.access_token, token.expires_in);
+```
+
+Also available: `card`, `list_sessions`, `get_session`, `cancel`, `list_events`, `stream_events`, `answer_questions`, `submit_tool_approvals`. A failed turn from `run` is `Error::TurnFailed`. See `examples/agent.rs`.
+
 ## Installation
 
 ```bash

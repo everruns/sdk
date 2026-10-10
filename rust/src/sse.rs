@@ -7,10 +7,11 @@
 //! - Exponential backoff for unexpected disconnections
 //! - Resume from last event ID via `since_id`
 
-use crate::client::Everruns;
+use crate::client::{Everruns, append_sse_query};
 use crate::error::{Error, Result};
 use crate::models::Event;
 use futures_core::Stream;
+use reqwest::header::HeaderMap;
 use serde::Deserialize;
 use std::future::Future;
 use std::pin::Pin;
@@ -154,8 +155,12 @@ pub struct DisconnectingData {
 /// # }
 /// ```
 pub struct EventStream {
-    client: Everruns,
-    session_id: String,
+    /// The session's `/sse` URL without query parameters.
+    url: url::Url,
+    /// Request headers (credentials) sent on every connection.
+    headers: HeaderMap,
+    /// Fixed query parameters added to every connection (e.g. `after_sequence`).
+    extra_query: Vec<(&'static str, String)>,
     options: StreamOptions,
     inner: Option<Pin<Box<dyn Stream<Item = Result<Event>> + Send>>>,
     last_event_id: Option<String>,
@@ -186,6 +191,19 @@ pub struct EventStream {
 
 impl EventStream {
     pub(crate) fn new(client: Everruns, session_id: String, options: StreamOptions) -> Self {
+        let url = client.sse_url(&session_id, None, &[], &[]);
+        Self::from_parts(url, client.auth_headers(), Vec::new(), options)
+    }
+
+    /// Build a stream from an SSE URL and the headers to send with it. Shared by
+    /// the management client and the agent client, which differ only in where the
+    /// stream lives and how it authenticates.
+    pub(crate) fn from_parts(
+        url: url::Url,
+        headers: HeaderMap,
+        extra_query: Vec<(&'static str, String)>,
+        options: StreamOptions,
+    ) -> Self {
         // Dedicated SSE client: no overall timeout (streams run for hours),
         // reused across reconnections for connection pool / TCP reuse.
         // read_timeout is kept as a secondary safety net, but the primary
@@ -198,8 +216,9 @@ impl EventStream {
         let idle_timeout = options.idle_timeout;
 
         Self {
-            client,
-            session_id,
+            url,
+            headers,
+            extra_query,
             options,
             inner: None,
             last_event_id: None,
@@ -235,8 +254,9 @@ impl EventStream {
     }
 
     fn connect(&mut self) -> Pin<Box<dyn Stream<Item = Result<Event>> + Send>> {
-        let client = self.client.clone();
-        let session_id = self.session_id.clone();
+        let base_url = self.url.clone();
+        let headers = self.headers.clone();
+        let extra_query = self.extra_query.clone();
         let since_id = self
             .last_event_id
             .clone()
@@ -252,13 +272,16 @@ impl EventStream {
 
             let types_refs: Vec<&str> = types.iter().map(|s| s.as_str()).collect();
             let exclude_refs: Vec<&str> = exclude.iter().map(|s| s.as_str()).collect();
-            let url = client.sse_url(&session_id, since_id.as_deref(), &types_refs, &exclude_refs);
+            let mut url = append_sse_query(base_url, since_id.as_deref(), &types_refs, &exclude_refs);
+            for (key, value) in &extra_query {
+                url.query_pairs_mut().append_pair(key, value);
+            }
 
             tracing::debug!("Connecting to SSE: {}", url);
 
             let resp = http_client
                 .get(url.clone())
-                .headers(client.auth_headers())
+                .headers(headers)
                 .header("Accept", "text/event-stream")
                 .header("Cache-Control", "no-cache")
                 .send()
