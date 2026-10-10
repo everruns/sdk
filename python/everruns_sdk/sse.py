@@ -22,6 +22,7 @@ from httpx_sse import aconnect_sse
 from everruns_sdk.models import Event
 
 if TYPE_CHECKING:
+    from everruns_sdk.agent import Agent
     from everruns_sdk.client import Everruns
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,8 @@ class StreamOptions:
     types: list[str] = field(default_factory=list)
     exclude: list[str] = field(default_factory=list)
     since_id: Optional[str] = None
+    after_sequence: Optional[int] = None
+    """Replay events after this sequence first (agent client only; ``0`` replays all)."""
     max_retries: Optional[int] = None
     idle_timeout: float = DEFAULT_IDLE_TIMEOUT_SECS
     """Idle timeout in seconds for detecting half-open connections.
@@ -85,11 +88,15 @@ class EventStream:
 
     def __init__(
         self,
-        client: "Everruns",
+        client: "Everruns | Agent",
         session_id: str,
         options: StreamOptions,
+        sse_path: Optional[str] = None,
     ):
         self._client = client
+        # Route relative to the client's base URL. The management client serves
+        # `v1/sessions/{id}/sse`; the agent client passes `sessions/{id}/sse`.
+        self._sse_path = sse_path or f"v1/sessions/{session_id}/sse"
         self._session_id = session_id
         self._options = options
         self._last_event_id: Optional[str] = None
@@ -139,12 +146,15 @@ class EventStream:
         """Build the SSE URL with query parameters."""
         # base_url already has trailing slash, use relative path
         base = self._client._base_url.rstrip("/")
-        url = f"{base}/v1/sessions/{self._session_id}/sse"
+        url = f"{base}/{self._sse_path}"
         params = []
 
         since_id = self._last_event_id or self._options.since_id
         if since_id:
             params.append(f"since_id={since_id}")
+
+        if self._options.after_sequence is not None and self._last_event_id is None:
+            params.append(f"after_sequence={self._options.after_sequence}")
 
         for t in self._options.types:
             params.append(f"types={t}")

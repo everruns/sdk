@@ -2,12 +2,18 @@
 
 A typed client for the Everruns API.
 
-Quick Start:
+Call an agent from code (agent key):
+    >>> from everruns_sdk import AgentClient
+    >>> agent = AgentClient()  # EVERRUNS_AGENT_URL, EVERRUNS_AGENT_KEY
+    >>> print(await agent.run("Hello!"))
+
+Manage Everruns (personal access token):
     >>> from everruns_sdk import Everruns
     >>> client = Everruns()  # uses EVERRUNS_API_KEY
     >>> agent = await client.agents.create("assistant", "You are helpful.")
 """
 
+from everruns_sdk.agent import AgentClient
 from everruns_sdk.auth import ApiKey
 from everruns_sdk.client import CHANGE_REASON_HEADER, MAX_CHANGE_REASON_CHARS, Everruns
 from everruns_sdk.errors import (
@@ -104,6 +110,7 @@ __all__ = [
     "RateLimitError",
     "ValidationError",
     "Agent",
+    "AgentClient",
     "AgentCapabilityConfig",
     "AgentAnalysisResponse",
     "AgentVersion",

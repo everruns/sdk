@@ -8,7 +8,50 @@ Python SDK for the Everruns API.
 pip install everruns-sdk
 ```
 
-## Quick Start
+## Call your agent from code
+
+Use `AgentClient` to call one agent from an application. It holds an agent key
+(`evr_ak_...`) that reaches that agent's session routes and nothing else.
+
+```python
+import asyncio
+from everruns_sdk import AgentClient
+
+
+async def main():
+    # EVERRUNS_AGENT_URL and EVERRUNS_AGENT_KEY, or pass agent_url= and credential=
+    agent = AgentClient()
+
+    # One call: create a session, send, wait for the turn, return the reply text
+    print(await agent.run("What is the status of order 42?"))
+
+    # Act for one of your application's users (key needs the `end_user` permission)
+    alice = agent.for_end_user("customer-42")
+    session = await alice.create_session("Order question")
+    await alice.send_message(session["id"], "Where is my package?")
+    async for event in alice.stream_events(session["id"], after_sequence=0):
+        if event.type == "turn.completed":
+            break
+
+    # For a browser or mobile app: hand over a short-lived runtime token, never the key
+    token = await alice.runtime_token()
+    print(token["access_token"], token["expires_in"])
+
+    await agent.close()
+
+
+asyncio.run(main())
+```
+
+The same client works against the Everruns server
+(`https://app.everruns.com/api/v1/channels/<channel_id>`) and a serve app.
+
+The management client below (`Everruns`) is for managing Everruns (agents,
+harnesses, workspaces) with a personal access token. Calling an agent through its
+`sessions.create` / `messages.create` still works but is deprecated and warns once;
+use `AgentClient` instead.
+
+## Management Quick Start
 
 ```python
 import asyncio
