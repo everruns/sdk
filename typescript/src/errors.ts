@@ -12,12 +12,20 @@ export class EverrunsError extends Error {
 export class ApiError extends EverrunsError {
   readonly statusCode: number;
   readonly body?: unknown;
+  /** Problem `code` from the response body, when the server sent one. */
+  readonly code?: string;
 
-  constructor(statusCode: number, message: string, body?: unknown) {
+  constructor(
+    statusCode: number,
+    message: string,
+    body?: unknown,
+    code?: string,
+  ) {
     super(message);
     this.name = "ApiError";
     this.statusCode = statusCode;
     this.body = body;
+    this.code = code;
   }
 }
 

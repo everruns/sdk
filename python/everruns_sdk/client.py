@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import warnings
 from typing import Any, Literal, Optional
 from urllib.parse import quote, urlencode
 
@@ -95,6 +96,23 @@ def _encode_change_reason(reason: str) -> str:
     space.
     """
     return quote(reason, safe="", encoding="utf-8")
+
+
+_warned_deprecations: set[str] = set()
+
+
+def _warn_agent_call_deprecated(method: str) -> None:
+    """Warn once per process that ``method`` is not the way to call an agent."""
+    if method in _warned_deprecations:
+        return
+    _warned_deprecations.add(method)
+    warnings.warn(
+        f"Everruns.{method} with a personal access token is deprecated for calling an "
+        "agent from an application: use everruns_sdk.AgentClient with an agent key. The "
+        "management client is for managing Everruns (agents, harnesses, workspaces).",
+        DeprecationWarning,
+        stacklevel=3,
+    )
 
 
 def _is_html_response(body: str) -> bool:
@@ -784,6 +802,12 @@ class SessionsClient:
     ) -> Session:
         """Create a new session.
 
+        .. deprecated::
+            To call an agent from an application, use :class:`everruns_sdk.AgentClient`
+            with an agent key. This management client is for managing Everruns
+            (agents, harnesses, workspaces) with a personal access token.
+            Emits a ``DeprecationWarning`` once per process.
+
         Args:
             harness_id: Harness ID (format: ``harness_<32-hex>``). Optional;
                 server defaults to the Generic harness if omitted.
@@ -809,6 +833,7 @@ class SessionsClient:
                 if both ``agent_id`` and ``agent_name`` are provided, or if
                 ``harness_name`` or ``agent_name`` fails validation.
         """
+        _warn_agent_call_deprecated("sessions.create")
         if harness_id is not None and harness_name is not None:
             raise ValueError("Cannot specify both harness_id and harness_name")
         if harness_name is not None:
@@ -915,7 +940,15 @@ class MessagesClient:
         text: str,
         controls: Optional[Controls] = None,
     ) -> Message:
-        """Create a new message (send text)."""
+        """Create a new message (send text).
+
+        .. deprecated::
+            To call an agent from an application, use :class:`everruns_sdk.AgentClient`
+            with an agent key. This management client is for managing Everruns
+            with a personal access token. Emits a ``DeprecationWarning`` once
+            per process.
+        """
+        _warn_agent_call_deprecated("messages.create")
         req = CreateMessageRequest(
             message=MessageInput(
                 role="user",

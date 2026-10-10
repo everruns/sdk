@@ -12,6 +12,10 @@ path = "src/main.rs"
 name = "weather-tools"
 path = "src/weather_tools.rs"
 
+[[bin]]
+name = "agent-client"
+path = "src/agent_client.rs"
+
 [dependencies]
 everruns-sdk = { path = "../../rust" }
 tokio = { version = "1", features = ["full"] }

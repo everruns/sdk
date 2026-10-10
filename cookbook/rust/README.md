@@ -14,3 +14,13 @@ export EVERRUNS_API_KEY=fake-key
 export EVERRUNS_API_URL=http://localhost:9000
 cargo run
 ```
+
+## Agent client
+
+Call an existing agent with an agent key instead of a personal access token:
+
+```bash
+export EVERRUNS_AGENT_URL=https://app.everruns.com/api/v1/channels/apichan_...
+export EVERRUNS_AGENT_KEY=evr_ak_...
+cargo run --bin agent-client
+```

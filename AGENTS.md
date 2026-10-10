@@ -23,6 +23,7 @@ Fix root cause. Unsure: read more code; if stuck, ask w/ short options. Unrecogn
 
 - `specs/architecture.md` - SDK architecture, generation strategy, hybrid approach
 - `specs/api-surface.md` - Covered API endpoints (agents, sessions, messages, events)
+- `specs/agent-client.md` - Agent client (`AgentClient`): calling one agent through the Agent Execution API
 - `specs/auth.md` - EVERRUNS_API_KEY pattern, auth header format
 - `specs/sse-streaming.md` - SSE reconnection, since_id, event types
 - `specs/error-handling.md` - Error types per language, retry patterns

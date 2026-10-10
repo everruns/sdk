@@ -16,6 +16,12 @@ DEV_MODE=1 everruns-server
 - [python/](python/) - Python SDK example
 - [typescript/](typescript/) - TypeScript SDK example
 
+## Call your agent from code
+
+`AgentClient` calls one agent through its agent URL with an agent key; it never
+reaches the management API. Set `EVERRUNS_AGENT_URL` and `EVERRUNS_AGENT_KEY`
+and run each SDK's `agent_client` example (see the per-language READMEs).
+
 ## Workspaces & Memories
 
 Workspaces hold files shared across sessions; memories are long-term,
