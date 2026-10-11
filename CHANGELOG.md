@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0] - 2026-10-11
+
+### Highlights
+
+- New `AgentClient` in the Python, TypeScript, and Rust SDKs for calling one agent through the Agent Execution API with an agent key (`EVERRUNS_AGENT_URL` / `EVERRUNS_AGENT_KEY`). It covers `run()`, sessions, events and SSE streaming, cancel, questions, tool approvals, runtime tokens, `for_end_user`, and idempotency keys. The management client is now deprecated in favor of `AgentClient`.
+- Change reasons: all SDKs gain `with_reason` / `withReason`, a derived client that sends the `Everruns-Change-Reason` header so the server records the reason in entity change history.
+- The default base URL is now Everruns Cloud (`https://app.everruns.com/api`) instead of a placeholder, so a client created with only `EVERRUNS_API_KEY` works. `EVERRUNS_API_URL` still overrides it for self-hosted.
+- Docs: how to connect an AG-UI client to an Everruns endpoint.
+- OpenAPI examples no longer name the sunset Claude Sonnet 4.5.
+
+### What's Changed
+
+* feat: AgentClient for calling one agent through the Agent Execution API ([#116](https://github.com/everruns/sdk/pull/116)) by @chaliy
+* feat: send change reasons from all SDKs ([#115](https://github.com/everruns/sdk/pull/115)) by @chaliy
+* fix: default base URL to Everruns Cloud ([#114](https://github.com/everruns/sdk/pull/114)) by @chaliy
+* docs: connect an AG-UI client to an Everruns endpoint ([#113](https://github.com/everruns/sdk/pull/113)) by @chaliy
+* docs: drop sunset Claude Sonnet 4.5 from OpenAPI examples ([#112](https://github.com/everruns/sdk/pull/112)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.2.1...v0.3.0
+
 ## [0.2.1] - 2026-08-19
 
 ### Highlights
