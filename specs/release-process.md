@@ -62,7 +62,10 @@ triggers the automated release pipeline after merge to main.
 - Verifies tag version matches each SDK manifest
 - Publishes Rust SDK to crates.io
 - Publishes Python SDK to PyPI (OIDC Trusted Publishing)
-- Publishes TypeScript SDK to npm
+- Publishes TypeScript SDK to npm (OIDC Trusted Publishing)
+
+Manual dispatch takes a `target` input (`all`, `rust`, `python`, `typescript`) to
+re-publish one registry after the others already succeeded.
 
 ### Required Secrets
 
@@ -71,11 +74,17 @@ Configure in GitHub Settings → Secrets → Actions:
 | Secret | Registry | How to obtain |
 |--------|----------|---------------|
 | `CARGO_REGISTRY_TOKEN` | crates.io | https://crates.io/settings/tokens |
-| `NPM_TOKEN` | npm | https://www.npmjs.com/settings/~/tokens (Granular, with 2FA bypass) |
 
-### Trusted Publishing (PyPI)
+### Trusted Publishing (PyPI, npm)
 
-Python uses OIDC Trusted Publishing (no secret needed):
+Python and TypeScript use OIDC Trusted Publishing (no secret needed). npm needs
+npm >= 11.5.1, so the job runs on Node 24.
+
+npm: on https://www.npmjs.com/package/@everruns/sdk/access, add a GitHub Actions
+trusted publisher with organization `everruns`, repository `sdk`, workflow
+`publish.yml`.
+
+PyPI:
 
 1. Go to https://pypi.org/manage/account/publishing/
 2. Add trusted publisher:
@@ -85,7 +94,7 @@ Python uses OIDC Trusted Publishing (no secret needed):
 
 ### npm Provenance
 
-npm uses token auth + provenance attestation (`--provenance` flag).
+Trusted publishing attaches a provenance attestation automatically.
 Provenance links published packages to their source in GitHub Actions.
 
 ## Changelog Format
