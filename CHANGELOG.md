@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.1] - 2026-10-11
+
+### Highlights
+
+- Python `AgentClient` now sends the agent key as `Authorization: Bearer <credential>`. In 0.3.0 it sent the bare key, so every call after the agent card failed with 401 against both hosted API channels and serve apps. The TypeScript and Rust clients were not affected.
+- The TypeScript SSE stream no longer prints connection diagnostics to stdout. Set `EVERRUNS_SDK_DEBUG` to see them.
+
+### What's Changed
+
+* fix: send the agent key as a Bearer credential from Python AgentClient ([#119](https://github.com/everruns/sdk/pull/119)) by @chaliy
+* chore(ci): publish the npm package with trusted publishing ([#118](https://github.com/everruns/sdk/pull/118)) by @chaliy
+
+**Full Changelog**: https://github.com/everruns/sdk/compare/v0.3.0...v0.3.1
+
 ## [0.3.0] - 2026-10-11
 
 ### Highlights
