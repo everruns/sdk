@@ -24,6 +24,14 @@ export const READ_TIMEOUT_MS = 45_000;
  * Same as READ_TIMEOUT_MS. Configurable via StreamOptions.idleTimeoutMs. */
 export const DEFAULT_IDLE_TIMEOUT_MS = 45_000;
 
+/** Connection diagnostics stay quiet unless `EVERRUNS_SDK_DEBUG` is set: Node
+ * prints `console.debug` to stdout, which would mix into a CLI's own output. */
+function debugLog(...args: unknown[]): void {
+  if (typeof process !== "undefined" && process.env?.EVERRUNS_SDK_DEBUG) {
+    console.debug(...args);
+  }
+}
+
 /**
  * Data from a disconnecting event.
  */
@@ -197,7 +205,7 @@ export class EventStream implements AsyncIterable<Event> {
           this.retryCount++;
           const delay = this.getRetryDelay();
           this.updateBackoff();
-          console.debug(
+          debugLog(
             `Stream ended, reconnecting in ${delay}ms (attempt ${this.retryCount})`,
           );
           await this.sleep(delay);
@@ -214,7 +222,7 @@ export class EventStream implements AsyncIterable<Event> {
 
           if (this.shouldReconnect) {
             const delay = this.getRetryDelay();
-            console.debug(`Graceful reconnect in ${delay}ms`);
+            debugLog(`Graceful reconnect in ${delay}ms`);
             await this.sleep(delay);
             this.gracefulDisconnect = false;
             continue;
@@ -234,7 +242,7 @@ export class EventStream implements AsyncIterable<Event> {
           this.retryCount++;
           const delay = this.getRetryDelay();
           this.updateBackoff();
-          console.debug(
+          debugLog(
             `Reconnecting after error in ${delay}ms (attempt ${this.retryCount}): ${error}`,
           );
           await this.sleep(delay);
@@ -248,7 +256,7 @@ export class EventStream implements AsyncIterable<Event> {
 
   private async *connect(): AsyncGenerator<Event> {
     const url = this.buildUrl();
-    console.debug(`Connecting to SSE: ${url}`);
+    debugLog(`Connecting to SSE: ${url}`);
 
     const idleMs = this.options.idleTimeoutMs ?? DEFAULT_IDLE_TIMEOUT_MS;
 
@@ -290,7 +298,7 @@ export class EventStream implements AsyncIterable<Event> {
       const resetReadTimeout = () => {
         clearTimeout(readTimeoutId);
         readTimeoutId = setTimeout(() => {
-          console.debug("SSE idle timeout, triggering reconnect");
+          debugLog("SSE idle timeout, triggering reconnect");
           reader.cancel();
         }, idleMs);
       };
@@ -299,7 +307,7 @@ export class EventStream implements AsyncIterable<Event> {
         onEvent: (event: EventSourceMessage) => {
           // Handle special lifecycle events
           if (event.event === "connected") {
-            console.debug("SSE connected event received");
+            debugLog("SSE connected event received");
             // Proves connection is healthy — reset backoff/retry state
             this.resetBackoff();
             return;
@@ -309,7 +317,7 @@ export class EventStream implements AsyncIterable<Event> {
             // Parse disconnecting data for retry hint
             try {
               const data = JSON.parse(event.data) as DisconnectingData;
-              console.debug(
+              debugLog(
                 `SSE disconnecting: reason=${data.reason}, retry_ms=${data.retry_ms}`,
               );
               throw new GracefulDisconnect(data.retry_ms);
@@ -317,7 +325,7 @@ export class EventStream implements AsyncIterable<Event> {
               if (e instanceof GracefulDisconnect) {
                 throw e;
               }
-              console.debug("SSE disconnecting event received (no data)");
+              debugLog("SSE disconnecting event received (no data)");
               throw new GracefulDisconnect(100);
             }
           }

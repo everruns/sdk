@@ -86,7 +86,7 @@ class AgentClient:
         self._end_user = _header_value(END_USER_HEADER, end_user) if end_user is not None else None
         self._owns_client = True
         self._client = httpx.AsyncClient(
-            headers={"Authorization": self._api_key.value, "Content-Type": "application/json"},
+            headers={"Authorization": self._authorization(), "Content-Type": "application/json"},
             timeout=30.0,
         )
 
@@ -109,11 +109,16 @@ class AgentClient:
 
     # -- plumbing -----------------------------------------------------------
 
+    def _authorization(self) -> str:
+        # The Agent Execution API (server API channels and serve apps alike)
+        # reads only `Authorization: Bearer <credential>`.
+        return f"Bearer {self._api_key.value}"
+
     def _url(self, path: str) -> str:
         return f"{self._base_url}{path}"
 
     def _auth_headers(self, *, content_type: Optional[str] = "application/json") -> dict[str, str]:
-        headers = {"Authorization": self._api_key.value}
+        headers = {"Authorization": self._authorization()}
         if content_type is not None:
             headers["Content-Type"] = content_type
         headers.update(self._request_headers())

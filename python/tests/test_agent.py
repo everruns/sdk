@@ -86,7 +86,7 @@ async def test_auth_header_and_no_management_headers():
     agent = make_agent()
     await agent.get_session("session_1")
     headers = route.calls[0].request.headers
-    assert headers["authorization"] == "evr_ak_secret"
+    assert headers["authorization"] == "Bearer evr_ak_secret"
     assert "end-user" not in headers
     assert "x-org-id" not in headers
     assert "everruns-change-reason" not in headers
@@ -232,7 +232,7 @@ async def test_run_returns_final_assistant_text():
     assert await agent.run("hi") == "final answer"
     assert json.loads(send.calls[0].request.content)["message"]["content"][0]["text"] == "hi"
     assert stream.calls[0].request.url.params["after_sequence"] == "0"
-    assert stream.calls[0].request.headers["authorization"] == "evr_ak_secret"
+    assert stream.calls[0].request.headers["authorization"] == "Bearer evr_ak_secret"
     await agent.close()
 
 
