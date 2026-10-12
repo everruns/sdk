@@ -16,6 +16,10 @@ Fix root cause. Unsure: read more code; if stuck, ask w/ short options. Unrecogn
 - Code testable, runnable locally
 - Small, incremental PR-sized changes
 - No backward compat needed (pre-1.0)
+- Changelog is part of done. A PR that completes a user-facing feature or fix adds a public changelog entry on
+  docs.everruns.com: a companion PR in everruns/everruns adds `docs/changelog/<date>-<slug>/`,
+  merged right after this one. Fill the PR template's `Changelog:` line (companion PR, the
+  program it is part of, or `not user-facing`). Rules: https://github.com/everruns/everruns/blob/main/knowledge/docs/changelog.md
 
 ### Specs
 

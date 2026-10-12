@@ -2,6 +2,8 @@
 
 <!-- 1-3 bullet points describing the change -->
 
+Changelog: <!-- everruns/everruns#<companion PR> | part of <program or Linear issue> | not user-facing -->
+
 ## Test Plan
 
 <!-- How was this tested? -->
