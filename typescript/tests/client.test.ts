@@ -674,7 +674,7 @@ describe("Everruns", () => {
     );
   });
 
-  it("should create workspaces and memories", async () => {
+  it("should get a workspace and manage memories", async () => {
     const workspaceJson = {
       id: "wsp_123",
       name: "team-research",
@@ -714,7 +714,7 @@ describe("Everruns", () => {
       .fn()
       .mockResolvedValueOnce({
         ok: true,
-        status: 201,
+        status: 200,
         json: async () => workspaceJson,
       })
       .mockResolvedValueOnce({
@@ -781,10 +781,7 @@ describe("Everruns", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const client = new Everruns({ apiKey: "evr_test_key" });
-    const workspace = await client.workspaces.create({
-      name: "team-research",
-      description: "Research workspace",
-    });
+    const workspace = await client.workspaces.get("wsp_123");
     const memory = await client.memories.create({
       name: "design-docs",
       description: "Docs",
@@ -819,14 +816,8 @@ describe("Everruns", () => {
     expect(stat.path).toBe("/notes.md");
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      "https://app.everruns.com/api/v1/workspaces",
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify({
-          name: "team-research",
-          description: "Research workspace",
-        }),
-      }),
+      "https://app.everruns.com/api/v1/workspaces/wsp_123",
+      expect.objectContaining({ headers: expect.anything() }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,

@@ -2,8 +2,8 @@
 
 use everruns_sdk::{
     AnalyzeAgentRequest, ContentPart, CreateAgentRequest, CreateBudgetRequest,
-    CreateHarnessRequest, CreateMemoryRequest, CreateSessionRequest, CreateWorkspaceRequest,
-    Everruns, GuardrailsDryRunRequest, HarnessStatus, HealthCheckStatus, InitialFile, TopUpRequest,
+    CreateHarnessRequest, CreateMemoryRequest, CreateSessionRequest, Everruns,
+    GuardrailsDryRunRequest, HarnessStatus, HealthCheckStatus, InitialFile, TopUpRequest,
     UpdateBudgetRequest, UpdateHarnessRequest,
 };
 use std::sync::Mutex;
@@ -793,13 +793,9 @@ async fn test_workspaces_and_memories() {
         "updated_at": "2026-06-13T00:00:00Z"
     });
 
-    Mock::given(method("POST"))
-        .and(path("/v1/workspaces"))
-        .and(body_json(serde_json::json!({
-            "name": "team-research",
-            "description": "Research workspace"
-        })))
-        .respond_with(ResponseTemplate::new(201).set_body_json(workspace))
+    Mock::given(method("GET"))
+        .and(path("/v1/workspaces/wsp_123"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(workspace))
         .mount(&server)
         .await;
     Mock::given(method("POST"))
@@ -906,9 +902,9 @@ async fn test_workspaces_and_memories() {
 
     let workspace = client
         .workspaces()
-        .create(CreateWorkspaceRequest::new("team-research").description("Research workspace"))
+        .get("wsp_123")
         .await
-        .expect("workspace create should succeed");
+        .expect("workspace get should succeed");
     let memory = client
         .memories()
         .create(CreateMemoryRequest::new("design-docs").description("Docs"))

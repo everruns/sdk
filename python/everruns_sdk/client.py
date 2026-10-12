@@ -30,7 +30,6 @@ from everruns_sdk.models import (
     CreateMemoryRequest,
     CreateMessageRequest,
     CreateSessionRequest,
-    CreateWorkspaceRequest,
     DeleteFileResponse,
     Event,
     FileInfo,
@@ -1096,12 +1095,6 @@ class WorkspacesClient:
         )
         resp = await self._client._get(path)
         return [Workspace(**w) for w in resp.get("data", [])]
-
-    async def create(self, name: str, *, description: Optional[str] = None) -> Workspace:
-        """Create a workspace."""
-        req = CreateWorkspaceRequest(name=name, description=description)
-        resp = await self._client._post("/workspaces", req.model_dump(exclude_none=True))
-        return Workspace(**resp)
 
     async def get(self, workspace_id: str) -> Workspace:
         """Get a workspace by ID."""

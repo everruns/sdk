@@ -321,12 +321,6 @@ export interface CreateSessionRequest {
   title?: string | null;
   tools?: ToolDefinition[];
   virtualUserId?: string | null;
-  workspaceId?: string | null;
-}
-
-export interface CreateWorkspaceRequest {
-  description?: string | null;
-  name: string;
 }
 
 /** Response for delete operation */

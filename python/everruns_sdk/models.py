@@ -425,14 +425,6 @@ class CreateSessionRequest(BaseModel):
     title: Optional[str] = None
     tools: Optional[list[ToolDefinition]] = Field(default_factory=list)
     virtual_user_id: Optional[str] = None
-    workspace_id: Optional[str] = None
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
-class CreateWorkspaceRequest(BaseModel):
-    description: Optional[str] = None
-    name: str
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -1418,7 +1410,6 @@ CreateMemoryFileRequest.model_rebuild()
 CreateMemoryRequest.model_rebuild()
 CreateMessageRequest.model_rebuild()
 CreateSessionRequest.model_rebuild()
-CreateWorkspaceRequest.model_rebuild()
 DeleteFileResponse.model_rebuild()
 Event.model_rebuild()
 EventContext.model_rebuild()
