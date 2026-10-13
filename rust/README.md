@@ -126,28 +126,6 @@ let session = client
 
 Runnable example: [`examples/initial_files.rs`](examples/initial_files.rs)
 
-## Agent Versions
-
-```rust
-use everruns_sdk::{AgentVersionChangeKind, CreateAgentVersionRequest};
-
-let version = client
-    .agents()
-    .create_version(
-        "agent_...",
-        CreateAgentVersionRequest::new()
-            .change_kind(AgentVersionChangeKind::Manual)
-            .summary("Baseline"),
-    )
-    .await?;
-
-let versions = client.agents().list_versions("agent_...").await?;
-let diff = client
-    .agents()
-    .diff_versions("agent_...", "agentver_1", &version.id)
-    .await?;
-```
-
 ## Workspaces
 
 Workspaces hold files shared across sessions.

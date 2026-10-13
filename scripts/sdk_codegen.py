@@ -116,6 +116,25 @@ def response_wrappers(spec: Mapping[str, Any]) -> dict[str, dict[str, str]]:
     return wrappers
 
 
+def resolve_pointer(spec: Mapping[str, Any], pointer: str) -> Mapping[str, Any]:
+    """Resolve a local JSON pointer (`#/a/b`) against the OpenAPI document.
+
+    `schemaSources` uses this for public models whose wire schema upstream only
+    emits inline, e.g. when a component name is reused for another type.
+    """
+    if not pointer.startswith("#/"):
+        raise CodegenError(f"unsupported schema source pointer: {pointer}")
+    node: Any = spec
+    for token in pointer.removeprefix("#/").split("/"):
+        token = token.replace("~1", "/").replace("~0", "~")
+        if not isinstance(node, Mapping) or token not in node:
+            raise CodegenError(f"schema source pointer does not resolve: {pointer}")
+        node = node[token]
+    if not isinstance(node, Mapping):
+        raise CodegenError(f"schema source pointer is not a schema: {pointer}")
+    return node
+
+
 def build_models(spec: Mapping[str, Any], config: Mapping[str, Any]) -> list[Model]:
     schemas = component_schemas(spec)
     wrappers = response_wrappers(spec)
@@ -126,12 +145,17 @@ def build_models(spec: Mapping[str, Any], config: Mapping[str, Any]) -> list[Mod
 
     models: list[Model] = []
     seen: set[str] = set()
+    sources = config.get("schemaSources", {})
     for name in config.get("models", []):
-        if name not in schemas:
+        if name in sources:
+            schema = resolve_pointer(spec, str(sources[name]))
+        elif name not in schemas:
             raise CodegenError(
                 f"configured public schema is missing from OpenAPI: {name}"
             )
-        schema = config.get("schemaOverrides", {}).get(name, schemas[name])
+        else:
+            schema = schemas[name]
+        schema = config.get("schemaOverrides", {}).get(name, schema)
         models.append(Model(str(name), schema))
         seen.add(str(name))
 
@@ -472,15 +496,6 @@ class PythonEmitter(Emitter):
                     "        if not self.is_tool_call() or not self.id or not self.name:",
                     "            return None",
                     "        return ToolCallInfo(id=self.id, name=self.name, arguments=self.arguments or {})",
-                ]
-            )
-        elif model.name == "MessageInput":
-            lines.extend(
-                [
-                    "",
-                    "    @staticmethod",
-                    '    def tool_results(results: list[ContentPart]) -> "MessageInput":',
-                    '        return MessageInput(role="tool_result", content=results)',
                 ]
             )
         elif model.name == "Event":
@@ -936,8 +951,13 @@ class RustEmitter(Emitter):
                     model.name, wire_field, field_schema, wire_field in required
                 )
                 if wire_field not in required:
+                    skip = (
+                        "Vec::is_empty"
+                        if field_type.startswith("Vec<")
+                        else "Option::is_none"
+                    )
                     lines.append(
-                        '        #[serde(default, skip_serializing_if = "Option::is_none")]'
+                        f'        #[serde(default, skip_serializing_if = "{skip}")]'
                     )
                 lines.append(f"        {field_name}: {field_type},")
             lines.append("    },")
@@ -1165,7 +1185,7 @@ class RustEmitter(Emitter):
                 "pub type DeleteResponse = DeleteFileResponse;",
                 "",
                 "impl ContentPart {",
-                "    pub fn text(text: impl Into<String>) -> Self { Self::Text { text: text.into() } }",
+                "    pub fn text(text: impl Into<String>) -> Self { Self::Text { annotations: Vec::new(), text: text.into() } }",
                 "",
                 "    pub fn tool_result(tool_call_id: impl Into<String>, result: serde_json::Value) -> Self {",
                 "        Self::ToolResult { tool_call_id: tool_call_id.into(), result: Some(result), error: None }",
@@ -1179,7 +1199,7 @@ class RustEmitter(Emitter):
                 "",
                 "    pub fn as_tool_call(&self) -> Option<ToolCallInfo<'_>> {",
                 "        match self {",
-                "            Self::ToolCall { id, name, arguments } => Some(ToolCallInfo { id, name, arguments }),",
+                "            Self::ToolCall { id, name, arguments, .. } => Some(ToolCallInfo { id, name, arguments }),",
                 "            _ => None,",
                 "        }",
                 "    }",
@@ -1201,8 +1221,6 @@ class RustEmitter(Emitter):
                 "    pub fn user_text(text: impl Into<String>) -> Self {",
                 "        Self::new(MessageRole::User, vec![ContentPart::text(text)])",
                 "    }",
-                "",
-                "    pub fn tool_results(results: Vec<ContentPart>) -> Self { Self::new(MessageRole::ToolResult, results) }",
                 "}",
                 "",
                 "impl CreateMessageRequest {",

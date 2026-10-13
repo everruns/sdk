@@ -5,8 +5,6 @@ import { ApiKey } from "./auth.js";
 import {
   Agent,
   AgentAnalysisResponse,
-  AgentVersion,
-  AgentVersionDiffResponse,
   AnalyzeAgentRequest,
   Budget,
   BudgetCheckResult,
@@ -14,7 +12,6 @@ import {
   Connection,
   ContentPart,
   CreateAgentRequest,
-  CreateAgentVersionRequest,
   CreateBudgetRequest,
   CreateMemoryFileRequest,
   CreateMemoryRequest,
@@ -24,7 +21,6 @@ import {
   CreateSessionRequest,
   FileInfo,
   FileStat,
-  ForkAgentVersionRequest,
   GuardrailExamplesResponse,
   GuardrailsDryRunRequest,
   GuardrailsDryRunResponse,
@@ -47,11 +43,9 @@ import {
   ModelWithProvider,
   ResourceStats,
   ResumeSessionResponse,
-  RollbackAgentVersionRequest,
   SessionFile,
   SubmitToolResultsResponse,
   StreamOptions,
-  SetDefaultAgentVersionRequest,
   TopUpRequest,
   UpdateBudgetRequest,
   UpdateMemoryFileRequest,
@@ -402,72 +396,6 @@ class AgentsClient {
     runId: string,
   ): Promise<HealthCheckRun> {
     return this.client.fetch(`/agents/${agentId}/health-checks/${runId}`);
-  }
-
-  /** List saved versions for an agent. */
-  async listVersions(agentId: string): Promise<AgentVersion[]> {
-    return this.client.fetch(`/agents/${agentId}/versions`);
-  }
-
-  /** Save the current agent configuration as a version. */
-  async createVersion(
-    agentId: string,
-    request: CreateAgentVersionRequest = {},
-  ): Promise<AgentVersion> {
-    return this.client.fetch(`/agents/${agentId}/versions`, {
-      method: "POST",
-      body: JSON.stringify(toCreateAgentVersionBody(request)),
-    });
-  }
-
-  /** Set the default version for an agent. */
-  async setDefaultVersion(
-    agentId: string,
-    request: SetDefaultAgentVersionRequest,
-  ): Promise<Agent> {
-    return this.client.fetch(`/agents/${agentId}/versions/default`, {
-      method: "POST",
-      body: JSON.stringify({ version_id: request.versionId }),
-    });
-  }
-
-  /** Diff two saved agent versions. */
-  async diffVersions(
-    agentId: string,
-    fromVersionId: string,
-    toVersionId: string,
-  ): Promise<AgentVersionDiffResponse> {
-    return this.client.fetch(
-      `/agents/${agentId}/versions/${fromVersionId}/diff/${toVersionId}`,
-    );
-  }
-
-  /** Create a new agent from a saved version. */
-  async forkVersion(
-    agentId: string,
-    versionId: string,
-    request: ForkAgentVersionRequest,
-  ): Promise<Agent> {
-    validateAgentName(request.name);
-    return this.client.fetch(`/agents/${agentId}/versions/${versionId}/fork`, {
-      method: "POST",
-      body: JSON.stringify(toForkAgentVersionBody(request)),
-    });
-  }
-
-  /** Restore an agent from a saved version. */
-  async rollbackVersion(
-    agentId: string,
-    versionId: string,
-    request: RollbackAgentVersionRequest = {},
-  ): Promise<Agent> {
-    return this.client.fetch(
-      `/agents/${agentId}/versions/${versionId}/rollback`,
-      {
-        method: "POST",
-        body: JSON.stringify(toRollbackAgentVersionBody(request)),
-      },
-    );
   }
 
   async list(options?: { search?: string }): Promise<Agent[]> {
@@ -1497,45 +1425,6 @@ function toHarnessBody(
   }
   if ("status" in request && request.status !== undefined) {
     body.status = request.status;
-  }
-  return body;
-}
-
-function toCreateAgentVersionBody(
-  request: CreateAgentVersionRequest,
-): Record<string, unknown> {
-  const body: Record<string, unknown> = {};
-  if (request.changeKind !== undefined) {
-    body.change_kind = request.changeKind;
-  }
-  if (request.summary !== undefined) {
-    body.summary = request.summary;
-  }
-  return body;
-}
-
-function toForkAgentVersionBody(
-  request: ForkAgentVersionRequest,
-): Record<string, unknown> {
-  const body: Record<string, unknown> = { name: request.name };
-  if (request.displayName !== undefined) {
-    body.display_name = request.displayName;
-  }
-  if (request.description !== undefined) {
-    body.description = request.description;
-  }
-  return body;
-}
-
-function toRollbackAgentVersionBody(
-  request: RollbackAgentVersionRequest,
-): Record<string, unknown> {
-  const body: Record<string, unknown> = {};
-  if (request.saveVersion !== undefined) {
-    body.save_version = request.saveVersion;
-  }
-  if (request.summary !== undefined) {
-    body.summary = request.summary;
   }
   return body;
 }

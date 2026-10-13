@@ -79,6 +79,43 @@ class GenerateTests(unittest.TestCase):
             [model.name for model in models], ["Agent", "PublicAgent", "Options"]
         )
 
+    def test_schema_sources_resolve_inline_schemas(self) -> None:
+        spec = small_spec()
+        spec["components"]["schemas"]["ListResponse_FileInfo"] = {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["path"],
+                        "properties": {"path": {"type": "string"}},
+                    },
+                }
+            },
+        }
+        models = sdk_codegen.build_models(
+            spec,
+            {
+                "models": ["Agent", "FileInfo"],
+                "schemaSources": {
+                    "FileInfo": "#/components/schemas/ListResponse_FileInfo/properties/data/items"
+                },
+            },
+        )
+        file_info = next(model for model in models if model.name == "FileInfo")
+        self.assertEqual(file_info.schema["required"], ["path"])
+
+    def test_schema_sources_reject_unresolved_pointer(self) -> None:
+        with self.assertRaisesRegex(sdk_codegen.CodegenError, "does not resolve"):
+            sdk_codegen.build_models(
+                small_spec(),
+                {
+                    "models": ["Agent", "FileInfo"],
+                    "schemaSources": {"FileInfo": "#/components/schemas/Missing"},
+                },
+            )
+
     def test_typescript_generation_uses_public_casing(self) -> None:
         models = sdk_codegen.build_models(small_spec(), {"models": ["Agent"]})
         output = sdk_codegen.TypeScriptEmitter(

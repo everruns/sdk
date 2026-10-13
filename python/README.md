@@ -180,29 +180,6 @@ The reason travels in the `Everruns-Change-Reason` header, UTF-8
 percent-encoded. A blank reason sends no header. The server trims the reason and rejects it with HTTP 400 (`invalid_change_reason`) when it is longer than 1000 characters, contains control characters other than newline and tab, or looks like it contains a credential. Closing a derived
 client is a no-op; close the client it came from.
 
-## Agent Versions
-
-```python
-version = await client.agents.create_version(
-    "agent_...",
-    change_kind="manual",
-    summary="Baseline",
-)
-
-versions = await client.agents.list_versions("agent_...")
-diff = await client.agents.diff_versions("agent_...", "agentver_1", version.id)
-fork = await client.agents.fork_version(
-    "agent_...",
-    version.id,
-    name="forked-agent",
-)
-rollback = await client.agents.rollback_version(
-    "agent_...",
-    version.id,
-    save_version=True,
-)
-```
-
 ## Workspaces
 
 Workspaces hold files shared across sessions.
