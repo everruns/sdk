@@ -182,10 +182,11 @@ client is a no-op; close the client it came from.
 
 ## Workspaces
 
-Workspaces hold files shared across sessions.
+Every session owns a workspace (there is no standalone workspace creation). Read its ID from the session.
 
 ```python
-workspace = await client.workspaces.create(name="team-docs")
+session = await client.sessions.create()
+workspace = await client.workspaces.get(session.workspace_id)
 
 await client.workspace_files.create(
     workspace.id,

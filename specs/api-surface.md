@@ -129,7 +129,6 @@ Session create/update payloads support optional `title`, `locale`, `model_id`, `
 
 ### Workspaces
 - `GET /v1/workspaces` - List workspaces (supports `search`, `include_archived`)
-- `POST /v1/workspaces` - Create workspace
 - `GET /v1/workspaces/{workspace_id}` - Get workspace
 - `PATCH /v1/workspaces/{workspace_id}` - Update workspace
 - `DELETE /v1/workspaces/{workspace_id}` - Archive workspace

@@ -129,10 +129,11 @@ Run locally from this repo with `npx tsx examples/initial-files.ts`.
 
 ## Workspaces
 
-Workspaces hold files shared across sessions.
+Every session owns a workspace (there is no standalone workspace creation). Read its ID from the session.
 
 ```typescript
-const workspace = await client.workspaces.create({ name: "team-docs" });
+const session = await client.sessions.create();
+const workspace = await client.workspaces.get(session.workspace_id);
 
 await client.workspaceFiles.create(
 workspace.id,

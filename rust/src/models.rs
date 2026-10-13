@@ -1129,8 +1129,6 @@ pub struct CreateSessionRequest {
     pub tools: Vec<ToolDefinition>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub virtual_user_id: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub workspace_id: Option<String>,
 }
 
 impl CreateSessionRequest {
@@ -1158,7 +1156,6 @@ impl CreateSessionRequest {
             title: None,
             tools: Vec::new(),
             virtual_user_id: None,
-            workspace_id: None,
         }
     }
 
@@ -1269,33 +1266,6 @@ impl CreateSessionRequest {
 
     pub fn virtual_user_id(mut self, virtual_user_id: impl Into<String>) -> Self {
         self.virtual_user_id = Some(virtual_user_id.into());
-        self
-    }
-
-    pub fn workspace_id(mut self, workspace_id: impl Into<String>) -> Self {
-        self.workspace_id = Some(workspace_id.into());
-        self
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct CreateWorkspaceRequest {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub name: String,
-}
-
-impl CreateWorkspaceRequest {
-    pub fn new(name: impl Into<String>) -> Self {
-        Self {
-            description: None,
-            name: name.into(),
-        }
-    }
-
-    pub fn description(mut self, description: impl Into<String>) -> Self {
-        self.description = Some(description.into());
         self
     }
 }

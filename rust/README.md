@@ -128,14 +128,13 @@ Runnable example: [`examples/initial_files.rs`](examples/initial_files.rs)
 
 ## Workspaces
 
-Workspaces hold files shared across sessions.
+Every session owns a workspace (there is no standalone workspace creation). Read its ID from the session.
 
 ```rust
-use everruns_sdk::CreateWorkspaceRequest;
-
+let session = client.sessions().create().await?;
 let workspace = client
     .workspaces()
-    .create(CreateWorkspaceRequest::new("team-docs"))
+    .get(session.workspace_id.as_deref().expect("workspace_id"))
     .await?;
 
 client

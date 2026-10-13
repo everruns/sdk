@@ -153,7 +153,7 @@ main();
 | Messages | Create, list |
 | Events | Poll, stream (SSE) |
 | Capabilities | List, get, guardrail examples, guardrail dry-run |
-| Workspaces | Create, list, get, update, archive |
+| Workspaces | List, get, update, archive (each session owns its workspace) |
 | Filesystem | List, read, write workspace files |
 | Memories | Create, list, get, update, archive, sync, file operations |
 | Images | Upload, retrieve |

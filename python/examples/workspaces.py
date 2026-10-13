@@ -1,4 +1,6 @@
-"""Example: create a workspace and manage its files.
+"""Example: use a session's workspace and manage its files.
+
+Every session owns a workspace; there is no standalone workspace creation.
 
 Run with:
     EVERRUNS_API_KEY=evr_... uv run python examples/workspaces.py
@@ -13,16 +15,14 @@ async def main():
     client = Everruns()
 
     try:
-        workspace = await client.workspaces.create(
-            name="workspaces-example-py",
-            description="Shared files for the team",
-        )
-        print(f"Created workspace {workspace.id}")
+        session = await client.sessions.create()
+        workspace = await client.workspaces.get(session.workspace_id)
+        print(f"Session {session.id} uses workspace {workspace.id}")
 
         await client.workspace_files.create(
             workspace.id,
             "/notes/welcome.md",
-            "# Welcome\n\nShared workspace files live here.\n",
+            "# Welcome\n\nWorkspace files live here.\n",
             encoding="text",
         )
 
@@ -33,8 +33,8 @@ async def main():
         files = await client.workspace_files.list(workspace.id, recursive=True)
         print(f"Workspace has {len(files)} file(s)")
 
-        await client.workspaces.delete(workspace.id)
-        print("Archived workspace")
+        await client.sessions.delete(session.id)
+        print("Deleted session")
     finally:
         await client.close()
 

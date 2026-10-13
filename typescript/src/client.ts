@@ -15,7 +15,6 @@ import {
   CreateBudgetRequest,
   CreateMemoryFileRequest,
   CreateMemoryRequest,
-  CreateWorkspaceRequest,
   DeleteFileResponse,
   Session,
   CreateSessionRequest,
@@ -906,14 +905,6 @@ class WorkspacesClient {
       `/workspaces${query}`,
     );
     return response.data;
-  }
-
-  /** Create a workspace. */
-  async create(request: CreateWorkspaceRequest): Promise<Workspace> {
-    return this.client.fetch("/workspaces", {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
   }
 
   /** Get a workspace by ID. */

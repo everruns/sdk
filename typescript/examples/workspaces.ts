@@ -1,5 +1,7 @@
 /**
- * Example: create a workspace and manage its files.
+ * Example: use a session's workspace and manage its files.
+ *
+ * Every session owns a workspace; there is no standalone workspace creation.
  *
  * Run with:
  * `EVERRUNS_API_KEY=evr_... npx tsx examples/workspaces.ts`
@@ -10,16 +12,17 @@ import { Everruns } from "../src/index.js";
 async function main() {
   const client = Everruns.fromEnv();
 
-  const workspace = await client.workspaces.create({
-    name: "workspaces-example-ts",
-    description: "Shared files for the team",
-  });
-  console.log("Created workspace", workspace.id);
+  const session = await client.sessions.create();
+  if (!session.workspace_id) {
+    throw new Error("session did not expose a workspace_id");
+  }
+  const workspace = await client.workspaces.get(session.workspace_id);
+  console.log(`Session ${session.id} uses workspace ${workspace.id}`);
 
   await client.workspaceFiles.create(
     workspace.id,
     "/notes/welcome.md",
-    "# Welcome\n\nShared workspace files live here.\n",
+    "# Welcome\n\nWorkspace files live here.\n",
     { encoding: "text" },
   );
 
@@ -35,8 +38,8 @@ async function main() {
   });
   console.log(`Workspace has ${files.data.length} file(s)`);
 
-  await client.workspaces.delete(workspace.id);
-  console.log("Archived workspace");
+  await client.sessions.delete(session.id);
+  console.log("Deleted session");
 }
 
 main().catch(console.error);

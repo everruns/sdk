@@ -1,29 +1,30 @@
-//! Example: create a workspace and manage its files
+//! Example: use a session's workspace and manage its files
+//!
+//! Every session owns a workspace; there is no standalone workspace creation.
 //!
 //! Run with:
 //! `EVERRUNS_API_KEY=evr_... cargo run --example workspaces`
 
-use everruns_sdk::{CreateWorkspaceRequest, Error, Everruns};
+use everruns_sdk::{Error, Everruns};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let client = Everruns::from_env()?;
 
-    let workspace = client
-        .workspaces()
-        .create(
-            CreateWorkspaceRequest::new("workspaces-example-rs")
-                .description("Shared files for the team"),
-        )
-        .await?;
-    println!("Created workspace {}", workspace.id);
+    let session = client.sessions().create().await?;
+    let workspace_id = session
+        .workspace_id
+        .clone()
+        .expect("session should expose its workspace_id");
+    let workspace = client.workspaces().get(&workspace_id).await?;
+    println!("Session {} uses workspace {}", session.id, workspace.id);
 
     client
         .workspace_files()
         .create(
             &workspace.id,
             "/notes/welcome.md",
-            "# Welcome\n\nShared workspace files live here.\n",
+            "# Welcome\n\nWorkspace files live here.\n",
             Some("text"),
         )
         .await?;
@@ -41,8 +42,8 @@ async fn main() -> Result<(), Error> {
         .await?;
     println!("Workspace has {} file(s)", files.data.len());
 
-    client.workspaces().delete(&workspace.id).await?;
-    println!("Archived workspace");
+    client.sessions().delete(&session.id).await?;
+    println!("Deleted session");
 
     Ok(())
 }

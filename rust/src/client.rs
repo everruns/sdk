@@ -1132,11 +1132,6 @@ impl<'a> WorkspacesClient<'a> {
         self.client.get_url(url).await
     }
 
-    /// Create a workspace.
-    pub async fn create(&self, req: CreateWorkspaceRequest) -> Result<Workspace> {
-        self.client.post("/workspaces", &req).await
-    }
-
     /// Get a workspace by ID.
     pub async fn get(&self, workspace_id: &str) -> Result<Workspace> {
         self.client

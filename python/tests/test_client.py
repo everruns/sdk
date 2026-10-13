@@ -1238,8 +1238,8 @@ async def test_workspaces_and_memories():
         "created_at": "2026-06-13T00:00:00Z",
         "updated_at": "2026-06-13T00:00:00Z",
     }
-    workspace_route = respx.post("https://app.everruns.com/api/v1/workspaces").mock(
-        return_value=httpx.Response(201, json=workspace_json)
+    workspace_route = respx.get("https://app.everruns.com/api/v1/workspaces/wsp_123").mock(
+        return_value=httpx.Response(200, json=workspace_json)
     )
     memory_route = respx.post("https://app.everruns.com/api/v1/memories").mock(
         return_value=httpx.Response(201, json=memory_json)
@@ -1303,9 +1303,7 @@ async def test_workspaces_and_memories():
 
     client = Everruns(api_key="evr_test_key")
     try:
-        workspace = await client.workspaces.create(
-            "team-research", description="Research workspace"
-        )
+        workspace = await client.workspaces.get("wsp_123")
         memory = await client.memories.create("design-docs", description="Docs")
         synced = await client.memories.sync("mem_123")
         files = await client.memories.list_files("mem_123")
@@ -1328,10 +1326,7 @@ async def test_workspaces_and_memories():
     assert downloaded == "hello"
     assert grep[0].path == "/notes.md"
     assert stat.path == "/notes.md"
-    assert json.loads(workspace_route.calls.last.request.content) == {
-        "name": "team-research",
-        "description": "Research workspace",
-    }
+    assert workspace_route.called
     assert json.loads(memory_route.calls.last.request.content) == {
         "name": "design-docs",
         "description": "Docs",
