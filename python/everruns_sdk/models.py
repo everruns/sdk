@@ -15,24 +15,33 @@ class Agent(BaseModel):
     """Agent configuration for agentic loop."""
 
     archived_at: Optional[str] = None
+    avatar: Optional[Any] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    communication: Optional[Any] = None
     created_at: str
     default_model_id: Optional[str] = None
-    default_version_id: Optional[str] = None
     deleted_at: Optional[str] = None
     description: Optional[str] = None
     display_name: Optional[str] = None
+    exposed: Optional[bool] = None
+    exposures_suspended: Optional[bool] = None
     forked_from_agent_id: Optional[str] = None
-    forked_from_version_id: Optional[str] = None
     harness_id: str
     id: str
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    intro_markdown: Optional[str] = None
+    is_built_in: Optional[bool] = None
     max_iterations: Optional[int] = None
+    max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
     root_agent_id: Optional[str] = None
+    sandbox_policy: Optional[Any] = None
+    service_virtual_user_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = Field(default_factory=list)
     status: AgentStatus
     system_prompt: str
     tags: Optional[list[str]] = Field(default_factory=list)
@@ -63,48 +72,8 @@ class AgentCapabilityConfig(BaseModel):
 AgentStatus = Literal["active", "archived", "deleted"]
 
 
-class AgentVersion(BaseModel):
-    """Immutable snapshot of an Agent's authored and resolved runtime config."""
-
-    agent_id: str
-    authored_config: dict[str, Any]
-    change_kind: AgentVersionChangeKind
-    config_hash: str
-    created_at: str
-    created_by_principal_id: Optional[str] = None
-    id: str
-    is_published: Optional[bool] = None
-    parent_version_id: Optional[str] = None
-    resolved_config: dict[str, Any]
-    semver_major: int
-    semver_minor: int
-    semver_patch: int
-    source_version_id: Optional[str] = None
-    summary: Optional[str] = None
-    version: str
-    version_number: int
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
-AgentVersionChangeKind = Literal[
-    "auto", "manual", "patch", "minor", "major", "import", "rollback", "fork"
-]
-
-
-class AgentVersionDiffResponse(BaseModel):
-    """Response body for agent version diff."""
-
-    authored_diff: Any
-    from_version_id: Any
-    resolved_diff: Any
-    to_version_id: Any
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
 class Budget(BaseModel):
-    """Budget — a spending cap for a subject in a currency."""
+    """Budget — a stored spending cap for a platform subject."""
 
     balance: float
     created_at: str
@@ -231,19 +200,38 @@ class Connection(BaseModel):
 class ContentPart(BaseModel):
     """A part of message content - can be text, image, image_file, tool_call, or tool_result"""
 
-    text: Optional[str] = None
-    type: Literal["text", "image", "image_file", "tool_call", "tool_result"]
+    annotations: Optional[list[Any]] = Field(default_factory=list)
+    text: Optional[Any] = None
+    type: Literal[
+        "text",
+        "image",
+        "image_file",
+        "file",
+        "tool_call",
+        "tool_result",
+        "reasoning",
+        "provider_opaque",
+    ]
     base64: Optional[str] = None
     media_type: Optional[str] = None
     url: Optional[str] = None
     filename: Optional[str] = None
     image_id: Optional[str] = None
+    file_id: Optional[str] = None
     arguments: Optional[Any] = None
     id: Optional[str] = None
     name: Optional[str] = None
+    native: Optional[Any] = None
     error: Optional[str] = None
     result: Optional[Any] = None
     tool_call_id: Optional[str] = None
+    bound_tool_call_id: Optional[str] = None
+    encrypted: Optional[str] = None
+    item_id: Optional[str] = None
+    provider: Optional[str] = None
+    signature: Optional[str] = None
+    tokens: Optional[int] = None
+    content: Optional[dict[str, Any]] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -276,6 +264,8 @@ class Controls(BaseModel):
     locale: Optional[str] = None
     model_id: Optional[str] = None
     reasoning: Optional[Any] = None
+    speed: Optional[str] = None
+    verbosity: Optional[str] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -294,6 +284,7 @@ class CostTier(BaseModel):
 
     above_tokens: int
     cache_read: Optional[float] = None
+    cache_write: Optional[float] = None
     input: float
     output: float
 
@@ -304,6 +295,7 @@ class CreateAgentRequest(BaseModel):
     """Request to create a new agent"""
 
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    communication: Optional[Any] = None
     default_model_id: Optional[str] = None
     description: Optional[str] = None
     display_name: Optional[str] = None
@@ -311,23 +303,20 @@ class CreateAgentRequest(BaseModel):
     harness_name: Optional[str] = None
     id: Optional[str] = None
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    intro_markdown: Optional[str] = None
     max_iterations: Optional[int] = None
+    max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
+    sandbox_policy: Optional[Any] = None
+    service_virtual_user_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = Field(default_factory=list)
     system_prompt: str
     tags: Optional[list[str]] = Field(default_factory=list)
     tools: Optional[list[ToolDefinition]] = Field(default_factory=list)
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
-class CreateAgentVersionRequest(BaseModel):
-    """Request body for the `create_agent_version` operation."""
-
-    change_kind: Optional[AgentVersionChangeKind] = None
-    summary: Optional[str] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -366,10 +355,13 @@ class CreateHarnessRequest(BaseModel):
     display_name: Optional[str] = None
     embedder_metadata: Optional[dict[str, str]] = None
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
+    intro_markdown: Optional[str] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
     parent_harness_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = Field(default_factory=list)
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
 
@@ -398,6 +390,7 @@ class CreateMessageRequest(BaseModel):
     """Request to create a message"""
 
     addressed_participant_id: Optional[str] = None
+    client_message_id: Optional[str] = None
     controls: Optional[Controls] = None
     external_actor: Optional[ExternalActor] = None
     message: MessageInput
@@ -411,9 +404,9 @@ class CreateSessionRequest(BaseModel):
     """Request to create a session"""
 
     agent_id: Optional[str] = None
-    agent_identity_id: Optional[str] = None
     agent_name: Optional[str] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    goal: Optional[str] = None
     harness_id: Optional[str] = None
     harness_name: Optional[str] = None
     hints: Optional[dict[str, Any]] = None
@@ -424,10 +417,14 @@ class CreateSessionRequest(BaseModel):
     model_id: Optional[str] = None
     network_access: Optional[NetworkAccessList] = None
     parallel_tool_calls: Optional[bool] = None
+    playground_user_id: Optional[str] = None
+    sandbox: Optional[Any] = None
+    source: Optional[str] = None
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
     title: Optional[str] = None
     tools: Optional[list[ToolDefinition]] = Field(default_factory=list)
+    virtual_user_id: Optional[str] = None
     workspace_id: Optional[str] = None
 
     model_config = ConfigDict(populate_by_name=True)
@@ -541,16 +538,6 @@ class FindingLocation(BaseModel):
     end: Optional[int] = None
     field: str
     start: Optional[int] = None
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
-class ForkAgentVersionRequest(BaseModel):
-    """Request body for the `fork_agent_version` operation."""
-
-    name: str
-    display_name: Optional[str] = None
-    description: Optional[str] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -678,6 +665,7 @@ class Harness(BaseModel):
     description: Optional[str] = None
     display_name: Optional[str] = None
     embedder_metadata: Optional[dict[str, str]] = None
+    icon: Optional[str] = None
     id: str
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     is_built_in: Optional[bool] = None
@@ -701,6 +689,7 @@ class HarnessExample(BaseModel):
     description: str
     dev_only: bool
     display_name: str
+    icon: Optional[str] = None
     name: str
     parent_name: Optional[str] = None
     tags: list[str]
@@ -779,7 +768,7 @@ class InitialFile(BaseModel):
 
 
 class LedgerEntry(BaseModel):
-    """Immutable ledger entry recording resource consumption or credit against a budget."""
+    """Immutable platform ledger record for resource consumption or credit."""
 
     amount: float
     budget_id: str
@@ -806,6 +795,9 @@ class Memory(BaseModel):
     last_sync_error: Optional[str] = None
     last_synced_at: Optional[str] = None
     name: str
+    owner_agent_id: Optional[str] = None
+    owner_user_id: Optional[str] = None
+    scope: str
     source: Any
     source_type: str
     status: str
@@ -846,23 +838,25 @@ class MemoryGrepResult(BaseModel):
 
 
 class Message(BaseModel):
-    """A message in the conversation"""
+    """Message - primary conversation data (API response)"""
 
     content: list[ContentPart]
     controls: Optional[Controls] = None
     created_at: str
+    delivery: Optional[Any] = None
     external_actor: Optional[ExternalActor] = None
     id: str
     metadata: Optional[dict[str, Any]] = None
     phase: Optional[Any] = None
+    phase_source: Optional[Any] = None
     role: MessageRole
-    thinking: Optional[str] = None
-    thinking_signature: Optional[str] = None
+    sequence: int
+    session_id: str
 
     model_config = ConfigDict(populate_by_name=True)
 
 
-MessageRole = Literal["system", "user", "agent", "tool_result"]
+MessageRole = Literal["user", "agent"]
 
 Modality = Literal["text", "image", "audio", "video", "pdf"]
 
@@ -871,6 +865,7 @@ class ModelCost(BaseModel):
     """Cost information for the model (per million tokens)"""
 
     cache_read: Optional[float] = None
+    cache_write: Optional[float] = None
     cost_tiers: Optional[list[CostTier]] = Field(default_factory=list)
     input: float
     output: float
@@ -903,23 +898,28 @@ class ModelProfile(BaseModel):
 
     attachment: bool
     cost: Optional[ModelCost] = None
+    decisions: Optional[Any] = None
     description: Optional[str] = None
     family: str
     knowledge: Optional[str] = None
     last_updated: Optional[str] = None
     limits: Optional[ModelLimits] = None
     modalities: Optional[ModelModalities] = None
+    model_card_url: Optional[str] = None
     name: str
     open_weights: bool
     reasoning: bool
     reasoning_effort: Optional[ReasoningEffortConfig] = None
     release_date: Optional[str] = None
+    speed: Optional[Any] = None
     structured_output: bool
     supported_parameters: Optional[list[str]] = Field(default_factory=list)
     supports_phases: Optional[bool] = None
+    supports_server_compaction: Optional[bool] = None
     temperature: bool
     tool_call: bool
     tool_search: Optional[bool] = None
+    verbosity: Optional[Any] = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -933,8 +933,11 @@ ModelVendor = Literal[
     "nvidia",
     "qwen",
     "microsoft",
+    "meta",
     "minimax",
+    "mistral",
     "moonshot",
+    "typesafe",
     "xai",
     "llmsim",
 ]
@@ -950,13 +953,17 @@ class ModelWithProvider(BaseModel):
     healthy: bool
     id: str
     is_favorite: bool
+    is_new: Optional[bool] = None
     model_id: str
     model_vendor: Optional[ModelVendor] = None
     profile: Optional[ModelProfile] = None
+    profile_key: str
     provider_id: str
     provider_name: str
     provider_type: DriverId
+    service: Any
     source: ModelSource
+    stale: Optional[bool] = None
     updated_at: str
 
     model_config = ConfigDict(populate_by_name=True)
@@ -980,7 +987,7 @@ class NetworkAccessList(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "xhigh"]
+ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "xhigh", "max"]
 
 
 class ReasoningEffortConfig(BaseModel):
@@ -1035,31 +1042,26 @@ class ResumeSessionResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class RollbackAgentVersionRequest(BaseModel):
-    """Request body for the `rollback_agent_version` operation."""
-
-    save_version: Optional[bool] = None
-    summary: Optional[str] = None
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
 class Session(BaseModel):
     """Session - instance of agentic loop execution."""
 
     active_schedule_count: Optional[int] = None
+    activity: Optional[Any] = None
     agent_id: Optional[str] = None
-    agent_identity_id: Optional[str] = None
-    agent_version_id: Optional[str] = None
+    agent_revision: Optional[int] = None
+    archived_at: Optional[str] = None
     blueprint_config: Optional[dict[str, Any]] = None
     blueprint_id: Optional[str] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
     created_at: str
     effective_owner: Optional[Any] = None
+    event_count: Optional[int] = None
     features: Optional[list[str]] = Field(default_factory=list)
+    file_count: Optional[int] = None
     finished_at: Optional[str] = None
     forked_from_sequence: Optional[int] = None
     forked_from_session_id: Optional[str] = None
+    goal: Optional[str] = None
     harness_id: str
     hints: Optional[dict[str, Any]] = None
     id: str
@@ -1076,16 +1078,21 @@ class Session(BaseModel):
     owner_principal_id: Optional[str] = None
     parallel_tool_calls: Optional[bool] = None
     parent_session_id: Optional[str] = None
+    playground_user_id: Optional[str] = None
     preview: Optional[str] = None
     resolved_owner_user_id: Optional[str] = None
+    run_summary: Optional[str] = None
+    source: Optional[Any] = None
     started_at: Optional[str] = None
     status: SessionStatus
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = Field(default_factory=list)
+    task_count: Optional[int] = None
     title: Optional[str] = None
     tools: Optional[list[ToolDefinition]] = Field(default_factory=list)
     updated_at: str
     usage: Optional[TokenUsage] = None
+    virtual_user_id: Optional[str] = None
     workspace_id: Optional[str] = None
 
     model_config = ConfigDict(populate_by_name=True)
@@ -1110,14 +1117,6 @@ class SessionFile(BaseModel):
 
 
 SessionStatus = Literal["started", "active", "idle", "waitingfortoolresults"]
-
-
-class SetDefaultAgentVersionRequest(BaseModel):
-    """Request body for the `set_default_agent_version` operation."""
-
-    version_id: str
-
-    model_config = ConfigDict(populate_by_name=True)
 
 
 class StatRequest(BaseModel):
@@ -1197,6 +1196,8 @@ class UpdateFileRequest(BaseModel):
 
     content: Optional[str] = None
     encoding: Optional[str] = None
+    expected_content: Optional[str] = None
+    expected_encoding: Optional[str] = None
     is_readonly: Optional[bool] = None
 
     model_config = ConfigDict(populate_by_name=True)
@@ -1211,10 +1212,13 @@ class UpdateHarnessRequest(BaseModel):
     display_name: Optional[str] = None
     embedder_metadata: Optional[dict[str, str]] = None
     initial_files: Optional[list[InitialFile]] = None
+    intro_markdown: Optional[str] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: Optional[str] = None
     network_access: Optional[NetworkAccessList] = None
     parent_harness_id: Optional[str] = None
+    short_description: Optional[str] = None
+    starters: Optional[list[Any]] = None
     status: Optional[HarnessStatus] = None
     system_prompt: Optional[str] = None
     tags: Optional[list[str]] = None
@@ -1264,6 +1268,8 @@ class AnalyzeAgentRequest(BaseModel):
     """Request to preview the final agent shape with capabilities applied"""
 
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
+    harness_id: Optional[Any] = None
+    initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     system_prompt: str
     tools: Optional[list[dict[str, Any]]] = Field(default_factory=list)
@@ -1294,14 +1300,10 @@ class ListEventsOptions(BaseModel):
 
 
 class MessageInput(BaseModel):
-    role: Literal["user", "tool_result"]
+    role: Literal["user"]
     content: list[ContentPart]
 
     model_config = ConfigDict(populate_by_name=True)
-
-    @staticmethod
-    def tool_results(results: list[ContentPart]) -> "MessageInput":
-        return MessageInput(role="tool_result", content=results)
 
 
 class SetConnectionRequest(BaseModel):
@@ -1396,8 +1398,6 @@ def extract_tool_calls(data: dict[str, Any]) -> list[ToolCallInfo]:
 Agent.model_rebuild()
 AgentAnalysisResponse.model_rebuild()
 AgentCapabilityConfig.model_rebuild()
-AgentVersion.model_rebuild()
-AgentVersionDiffResponse.model_rebuild()
 Budget.model_rebuild()
 BudgetCheckResult.model_rebuild()
 BudgetPeriod.model_rebuild()
@@ -1411,7 +1411,6 @@ Controls.model_rebuild()
 CopyFileRequest.model_rebuild()
 CostTier.model_rebuild()
 CreateAgentRequest.model_rebuild()
-CreateAgentVersionRequest.model_rebuild()
 CreateBudgetRequest.model_rebuild()
 CreateFileRequest.model_rebuild()
 CreateHarnessRequest.model_rebuild()
@@ -1428,7 +1427,6 @@ FileInfo.model_rebuild()
 FileStat.model_rebuild()
 Finding.model_rebuild()
 FindingLocation.model_rebuild()
-ForkAgentVersionRequest.model_rebuild()
 GitHubMemorySourceRequest.model_rebuild()
 GitMemorySourceRequest.model_rebuild()
 GrepMatch.model_rebuild()
@@ -1462,10 +1460,8 @@ ReasoningEffortConfig.model_rebuild()
 ReasoningEffortValue.model_rebuild()
 ResourceStats.model_rebuild()
 ResumeSessionResponse.model_rebuild()
-RollbackAgentVersionRequest.model_rebuild()
 Session.model_rebuild()
 SessionFile.model_rebuild()
-SetDefaultAgentVersionRequest.model_rebuild()
 StatRequest.model_rebuild()
 SubmitToolResultsRequest.model_rebuild()
 SubmitToolResultsResponse.model_rebuild()

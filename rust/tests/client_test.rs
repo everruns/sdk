@@ -1,11 +1,10 @@
 //! Integration tests for Everruns SDK
 
 use everruns_sdk::{
-    AgentVersionChangeKind, AnalyzeAgentRequest, ContentPart, CreateAgentRequest,
-    CreateAgentVersionRequest, CreateBudgetRequest, CreateHarnessRequest, CreateMemoryRequest,
-    CreateSessionRequest, CreateWorkspaceRequest, Everruns, ForkAgentVersionRequest,
-    GuardrailsDryRunRequest, HarnessStatus, HealthCheckStatus, InitialFile,
-    RollbackAgentVersionRequest, TopUpRequest, UpdateBudgetRequest, UpdateHarnessRequest,
+    AnalyzeAgentRequest, ContentPart, CreateAgentRequest, CreateBudgetRequest,
+    CreateHarnessRequest, CreateMemoryRequest, CreateSessionRequest, CreateWorkspaceRequest,
+    Everruns, GuardrailsDryRunRequest, HarnessStatus, HealthCheckStatus, InitialFile, TopUpRequest,
+    UpdateBudgetRequest, UpdateHarnessRequest,
 };
 use std::sync::Mutex;
 use wiremock::{
@@ -287,150 +286,6 @@ async fn test_create_agent_with_initial_files() {
 }
 
 #[tokio::test]
-async fn test_agent_versions_methods() {
-    let server = MockServer::start().await;
-    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
-
-    let version_json = serde_json::json!({
-        "id": "agentver_123",
-        "agent_id": "agent_123",
-        "version_number": 1,
-        "semver_major": 1,
-        "semver_minor": 0,
-        "semver_patch": 0,
-        "version": "1.0.0",
-        "change_kind": "manual",
-        "config_hash": "hash_123",
-        "authored_config": {"name": "assistant"},
-        "resolved_config": {"name": "assistant"},
-        "created_at": "2026-05-08T00:00:00Z",
-        "summary": "Initial version"
-    });
-    let agent_json = serde_json::json!({
-        "id": "agent_456",
-        "name": "forked-agent",
-        "description": "Forked",
-        "system_prompt": "Help.",
-        "default_model_id": null,
-        "tags": [],
-        "capabilities": [],
-        "initial_files": [],
-        "status": "active",
-        "created_at": "2026-05-08T00:00:00Z",
-        "updated_at": "2026-05-08T00:00:00Z"
-    });
-
-    Mock::given(method("GET"))
-        .and(path("/v1/agents/agent_123/versions"))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_json(serde_json::json!([version_json.clone()])),
-        )
-        .mount(&server)
-        .await;
-    Mock::given(method("POST"))
-        .and(path("/v1/agents/agent_123/versions"))
-        .and(body_json(serde_json::json!({
-            "change_kind": "manual",
-            "summary": "Initial version"
-        })))
-        .respond_with(ResponseTemplate::new(200).set_body_json(version_json.clone()))
-        .mount(&server)
-        .await;
-    Mock::given(method("POST"))
-        .and(path("/v1/agents/agent_123/versions/default"))
-        .and(body_json(serde_json::json!({"version_id": "agentver_1"})))
-        .respond_with(ResponseTemplate::new(200).set_body_json(agent_json.clone()))
-        .mount(&server)
-        .await;
-    Mock::given(method("GET"))
-        .and(path(
-            "/v1/agents/agent_123/versions/agentver_1/diff/agentver_2",
-        ))
-        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-            "from_version_id": "agentver_1",
-            "to_version_id": "agentver_2",
-            "authored_diff": [],
-            "resolved_diff": []
-        })))
-        .mount(&server)
-        .await;
-    Mock::given(method("POST"))
-        .and(path("/v1/agents/agent_123/versions/agentver_1/fork"))
-        .and(body_json(serde_json::json!({
-            "name": "forked-agent",
-            "display_name": "Forked Agent",
-            "description": "Forked"
-        })))
-        .respond_with(ResponseTemplate::new(200).set_body_json(agent_json.clone()))
-        .mount(&server)
-        .await;
-    Mock::given(method("POST"))
-        .and(path("/v1/agents/agent_123/versions/agentver_1/rollback"))
-        .and(body_json(serde_json::json!({
-            "save_version": true,
-            "summary": "Revert"
-        })))
-        .respond_with(ResponseTemplate::new(200).set_body_json(agent_json))
-        .mount(&server)
-        .await;
-
-    let versions = client
-        .agents()
-        .list_versions("agent_123")
-        .await
-        .expect("versions should list");
-    let created = client
-        .agents()
-        .create_version(
-            "agent_123",
-            CreateAgentVersionRequest::new()
-                .change_kind(AgentVersionChangeKind::Manual)
-                .summary("Initial version"),
-        )
-        .await
-        .expect("version should be created");
-    let default_agent = client
-        .agents()
-        .set_default_version("agent_123", "agentver_1")
-        .await
-        .expect("default version should update");
-    let diff = client
-        .agents()
-        .diff_versions("agent_123", "agentver_1", "agentver_2")
-        .await
-        .expect("versions should diff");
-    let forked_agent = client
-        .agents()
-        .fork_version(
-            "agent_123",
-            "agentver_1",
-            ForkAgentVersionRequest::new("forked-agent")
-                .display_name("Forked Agent")
-                .description("Forked"),
-        )
-        .await
-        .expect("version should fork");
-    let rolled_back_agent = client
-        .agents()
-        .rollback_version(
-            "agent_123",
-            "agentver_1",
-            RollbackAgentVersionRequest::new()
-                .save_version(true)
-                .summary("Revert"),
-        )
-        .await
-        .expect("version should roll back");
-
-    assert_eq!(versions[0].id, "agentver_123");
-    assert_eq!(created.summary.as_deref(), Some("Initial version"));
-    assert_eq!(default_agent.id, "agent_456");
-    assert_eq!(diff.to_version_id, "agentver_2");
-    assert_eq!(forked_agent.name, "forked-agent");
-    assert_eq!(rolled_back_agent.name, "forked-agent");
-}
-
-#[tokio::test]
 async fn test_create_agent_rejects_both_harness_id_and_harness_name() {
     let client = Everruns::new("evr_test_key").expect("client");
     let result = client
@@ -586,21 +441,6 @@ async fn test_create_session_serializes_agent_name_into_body() {
         .expect("session creation should succeed");
 
     assert_eq!(session.id, "session_123");
-}
-
-#[tokio::test]
-async fn test_fork_agent_version_validates_agent_name() {
-    let client = Everruns::new("evr_test_key").expect("client");
-    let result = client
-        .agents()
-        .fork_version(
-            "agent_123",
-            "agentver_1",
-            ForkAgentVersionRequest::new("Invalid Name"),
-        )
-        .await;
-
-    assert!(result.is_err());
 }
 
 #[tokio::test]
@@ -946,6 +786,7 @@ async fn test_workspaces_and_memories() {
         "source_type": "manual",
         "source": {"provider": "manual"},
         "is_readonly": false,
+        "scope": "org",
         "sync_status": "idle",
         "status": "active",
         "created_at": "2026-06-13T00:00:00Z",
@@ -2316,6 +2157,8 @@ fn model_json() -> serde_json::Value {
         "provider_name": "OpenAI",
         "provider_type": "openai",
         "source": "manual",
+        "profile_key": "openai/gpt-4",
+        "service": "chat",
         "created_at": "2026-07-01T00:00:00Z",
         "updated_at": "2026-07-01T00:00:00Z"
     })

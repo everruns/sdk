@@ -23,6 +23,10 @@ The overlay contains only SDK policy that OpenAPI cannot express without
 language coupling:
 
 - the schemas included in the public SDK surface;
+- `schemaSources`, a local JSON pointer for a public model whose wire schema
+  upstream emits only inline (e.g. the workspace `FileInfo`, inlined in
+  `ListResponse_FileInfo` since the `FileInfo` component name now belongs to
+  stored uploads);
 - stable public aliases and SDK-only option/helper models;
 - historical field casing, ordering, and optionality needed for compatibility;
 - language-specific type names and generated builder/union shapes.

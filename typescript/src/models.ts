@@ -4,15 +4,26 @@
 
 /** Agent configuration for agentic loop. */
 export interface Agent {
+  avatar?: unknown | null;
   capabilities?: AgentCapabilityConfig[];
+  communication?: unknown;
   created_at: string;
   model?: string | null;
   display_name?: string | null;
+  exposed?: boolean;
+  exposures_suspended?: boolean;
   harness_id: string;
   id: string;
   initial_files?: InitialFile[];
+  intro_markdown?: string | null;
+  is_built_in?: boolean;
+  max_output_tokens?: number | null;
   name: string;
   parallel_tool_calls?: boolean | null;
+  sandbox_policy?: unknown | null;
+  service_virtual_user_id?: string | null;
+  short_description?: string | null;
+  starters?: unknown[];
   system_prompt: string;
   tools?: ToolDefinition[];
   updated_at: string;
@@ -31,46 +42,7 @@ export interface AgentCapabilityConfig {
 
 export type AgentStatus = "active" | "archived" | "deleted";
 
-/** Immutable snapshot of an Agent's authored and resolved runtime config. */
-export interface AgentVersion {
-  agent_id: string;
-  authored_config: Record<string, unknown>;
-  change_kind: AgentVersionChangeKind;
-  config_hash: string;
-  created_at: string;
-  created_by_principal_id?: string | null;
-  id: string;
-  is_published: boolean;
-  parent_version_id?: string | null;
-  resolved_config: Record<string, unknown>;
-  semver_major: number;
-  semver_minor: number;
-  semver_patch: number;
-  source_version_id?: string | null;
-  summary?: string | null;
-  version: string;
-  version_number: number;
-}
-
-export type AgentVersionChangeKind =
-  | "auto"
-  | "manual"
-  | "patch"
-  | "minor"
-  | "major"
-  | "import"
-  | "rollback"
-  | "fork";
-
-/** Response body for agent version diff. */
-export interface AgentVersionDiffResponse {
-  authored_diff: unknown;
-  from_version_id: unknown;
-  resolved_diff: unknown;
-  to_version_id: unknown;
-}
-
-/** Budget — a spending cap for a subject in a currency. */
+/** Budget — a stored spending cap for a platform subject. */
 export interface Budget {
   balance: number;
   created_at: string;
@@ -173,19 +145,37 @@ export interface Connection {
 
 /** A part of message content - can be text, image, image_file, tool_call, or tool_result */
 export interface ContentPart {
-  text?: string;
-  type: "text" | "image" | "image_file" | "tool_call" | "tool_result";
+  annotations?: unknown[];
+  text?: unknown | null;
+  type:
+    | "text"
+    | "image"
+    | "image_file"
+    | "file"
+    | "tool_call"
+    | "tool_result"
+    | "reasoning"
+    | "provider_opaque";
   base64?: string | null;
   media_type?: string | null;
   url?: string | null;
   filename?: string | null;
   image_id?: string;
+  file_id?: string;
   arguments?: unknown;
   id?: string;
   name?: string;
+  native?: unknown | null;
   error?: string | null;
   result?: unknown;
   tool_call_id?: string;
+  bound_tool_call_id?: string | null;
+  encrypted?: string | null;
+  item_id?: string | null;
+  provider?: string;
+  signature?: string | null;
+  tokens?: number | null;
+  content?: Record<string, unknown>;
 }
 
 /** Runtime controls for message processing */
@@ -195,6 +185,8 @@ export interface Controls {
   locale?: string | null;
   modelId?: string | null;
   reasoning?: unknown | null;
+  speed?: string | null;
+  verbosity?: string | null;
 }
 
 /** Request to copy a file */
@@ -207,6 +199,7 @@ export interface CopyFileRequest {
 export interface CostTier {
   aboveTokens: number;
   cacheRead?: number | null;
+  cacheWrite?: number | null;
   input: number;
   output: number;
 }
@@ -214,6 +207,7 @@ export interface CostTier {
 /** Request to create a new agent */
 export interface CreateAgentRequest {
   capabilities?: AgentCapabilityConfig[];
+  communication?: unknown;
   model?: string | null;
   description?: string | null;
   displayName?: string | null;
@@ -221,20 +215,20 @@ export interface CreateAgentRequest {
   harnessName?: string | null;
   id?: string | null;
   initialFiles?: InitialFile[];
+  introMarkdown?: string | null;
   maxIterations?: number | null;
+  maxOutputTokens?: number | null;
   mcpServers?: unknown;
   name: string;
   networkAccess?: NetworkAccessList | null;
   parallelToolCalls?: boolean | null;
+  sandboxPolicy?: unknown | null;
+  serviceVirtualUserId?: string | null;
+  shortDescription?: string | null;
+  starters?: unknown[];
   systemPrompt: string;
   tags?: string[];
   tools?: ToolDefinition[];
-}
-
-/** Request body for the `create_agent_version` operation. */
-export interface CreateAgentVersionRequest {
-  changeKind?: AgentVersionChangeKind | null;
-  summary?: string | null;
 }
 
 /** Request body for creating a spending budget. */
@@ -264,10 +258,13 @@ export interface CreateHarnessRequest {
   displayName?: string | null;
   embedderMetadata?: Record<string, string>;
   initialFiles?: InitialFile[];
+  introMarkdown?: string | null;
   mcpServers?: unknown;
   name: string;
   networkAccess?: NetworkAccessList | null;
   parentHarnessId?: string | null;
+  shortDescription?: string | null;
+  starters?: unknown[];
   systemPrompt?: string | null;
   tags?: string[];
 }
@@ -292,6 +289,7 @@ export type CreateMemorySourceRequest =
 /** Request to create a message */
 export interface CreateMessageRequest {
   addressedParticipantId?: string | null;
+  clientMessageId?: string | null;
   controls?: Controls | null;
   externalActor?: ExternalActor | null;
   message: MessageInput;
@@ -302,9 +300,9 @@ export interface CreateMessageRequest {
 /** Request to create a session */
 export interface CreateSessionRequest {
   agentId?: string | null;
-  agentIdentityId?: string | null;
   agentName?: string | null;
   capabilities?: AgentCapabilityConfig[];
+  goal?: string | null;
   harnessId?: string | null;
   harnessName?: string | null;
   hints?: Record<string, unknown> | null;
@@ -315,10 +313,14 @@ export interface CreateSessionRequest {
   modelId?: string | null;
   networkAccess?: NetworkAccessList | null;
   parallelToolCalls?: boolean | null;
+  playgroundUserId?: string | null;
+  sandbox?: unknown | null;
+  source?: string | null;
   systemPrompt?: string | null;
   tags?: string[];
   title?: string | null;
   tools?: ToolDefinition[];
+  virtualUserId?: string | null;
   workspaceId?: string | null;
 }
 
@@ -400,13 +402,6 @@ export interface FindingLocation {
   end?: number | null;
   field: string;
   start?: number | null;
-}
-
-/** Request body for the `fork_agent_version` operation. */
-export interface ForkAgentVersionRequest {
-  name: string;
-  displayName?: string | null;
-  description?: string | null;
 }
 
 /** Request body for GitHub memory source. */
@@ -500,6 +495,7 @@ export interface Harness {
   description?: string | null;
   display_name?: string | null;
   embedder_metadata?: Record<string, string>;
+  icon?: string | null;
   id: string;
   initial_files?: InitialFile[];
   is_built_in?: boolean;
@@ -520,6 +516,7 @@ export interface HarnessExample {
   description: string;
   devOnly: boolean;
   displayName: string;
+  icon?: string | null;
   name: string;
   parentName?: string | null;
   tags: string[];
@@ -581,7 +578,7 @@ export interface InitialFile {
   path: string;
 }
 
-/** Immutable ledger entry recording resource consumption or credit against a budget. */
+/** Immutable platform ledger record for resource consumption or credit. */
 export interface LedgerEntry {
   amount: number;
   budgetId: string;
@@ -605,6 +602,9 @@ export interface Memory {
   last_sync_error?: string | null;
   last_synced_at?: string | null;
   name: string;
+  owner_agent_id?: string | null;
+  owner_user_id?: string | null;
+  scope: string;
   source: unknown;
   source_type: string;
   status: string;
@@ -636,26 +636,29 @@ export interface MemoryGrepResult {
   size_bytes: number;
 }
 
-/** A message in the conversation */
+/** Message - primary conversation data (API response) */
 export interface Message {
   content: ContentPart[];
   controls?: Controls | null;
   created_at: string;
+  delivery?: unknown | null;
   external_actor?: ExternalActor | null;
   id: string;
   metadata?: Record<string, unknown> | null;
   phase?: unknown | null;
+  phase_source?: unknown | null;
   role: "user" | "assistant" | "tool_result";
-  thinking_signature?: string | null;
+  session_id: string;
 }
 
-export type MessageRole = "system" | "user" | "agent" | "tool_result";
+export type MessageRole = "user" | "agent";
 
 export type Modality = "text" | "image" | "audio" | "video" | "pdf";
 
 /** Cost information for the model (per million tokens) */
 export interface ModelCost {
   cacheRead?: number | null;
+  cacheWrite?: number | null;
   costTiers?: CostTier[];
   input: number;
   output: number;
@@ -679,23 +682,28 @@ export interface ModelModalities {
 export interface ModelProfile {
   attachment: boolean;
   cost?: ModelCost | null;
+  decisions?: unknown | null;
   description?: string | null;
   family: string;
   knowledge?: string | null;
   lastUpdated?: string | null;
   limits?: ModelLimits | null;
   modalities?: ModelModalities | null;
+  modelCardUrl?: string | null;
   name: string;
   openWeights: boolean;
   reasoning: boolean;
   reasoningEffort?: ReasoningEffortConfig | null;
   releaseDate?: string | null;
+  speed?: unknown | null;
   structuredOutput: boolean;
   supportedParameters?: string[];
   supportsPhases?: boolean;
+  supportsServerCompaction?: boolean;
   temperature: boolean;
   toolCall: boolean;
   toolSearch?: boolean;
+  verbosity?: unknown | null;
 }
 
 export type ModelSource = "manual" | "discovered" | "predefined";
@@ -707,8 +715,11 @@ export type ModelVendor =
   | "nvidia"
   | "qwen"
   | "microsoft"
+  | "meta"
   | "minimax"
+  | "mistral"
   | "moonshot"
+  | "typesafe"
   | "xai"
   | "llmsim";
 
@@ -721,13 +732,17 @@ export interface ModelWithProvider {
   healthy: boolean;
   id: string;
   is_favorite: boolean;
+  is_new?: boolean;
   model_id: string;
   model_vendor?: ModelVendor | null;
   profile?: ModelProfile | null;
+  profile_key: string;
   provider_id: string;
   provider_name: string;
   provider_type: DriverId;
+  service: unknown;
   source: ModelSource;
+  stale?: boolean;
   updated_at: string;
 }
 
@@ -744,7 +759,7 @@ export interface NetworkAccessList {
 }
 
 export type ReasoningEffort =
-  "none" | "minimal" | "low" | "medium" | "high" | "xhigh";
+  "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 
 /** Reasoning effort configuration for a model */
 export interface ReasoningEffortConfig {
@@ -786,27 +801,25 @@ export interface ResumeSessionResponse {
   session_id: string;
 }
 
-/** Request body for the `rollback_agent_version` operation. */
-export interface RollbackAgentVersionRequest {
-  saveVersion?: boolean;
-  summary?: string | null;
-}
-
 /** Session - instance of agentic loop execution. */
 export interface Session {
   active_schedule_count?: number | null;
+  activity?: unknown;
   agent_id?: string | null;
-  agent_identity_id?: string | null;
-  agent_version_id?: string | null;
+  agent_revision?: number | null;
+  archived_at?: string | null;
   blueprint_config?: Record<string, unknown> | null;
   blueprint_id?: string | null;
   capabilities?: AgentCapabilityConfig[];
   created_at: string;
   effective_owner?: unknown | null;
+  event_count?: number | null;
   features?: string[];
+  file_count?: number | null;
   finished_at?: string | null;
   forked_from_sequence?: number | null;
   forked_from_session_id?: string | null;
+  goal?: string | null;
   harness_id: string;
   hints?: Record<string, unknown> | null;
   id: string;
@@ -822,15 +835,20 @@ export interface Session {
   owner_principal_id: string;
   parallel_tool_calls?: boolean | null;
   parent_session_id?: string | null;
+  playground_user_id?: string | null;
   preview?: string | null;
   resolved_owner_user_id?: string | null;
+  run_summary?: string | null;
+  source?: unknown;
   started_at?: string | null;
   status: SessionStatus;
   system_prompt?: string | null;
   tags?: string[];
+  task_count?: number | null;
   title?: string | null;
   tools?: ToolDefinition[];
   updated_at: string;
+  virtual_user_id?: string | null;
   workspace_id: string;
 }
 
@@ -851,11 +869,6 @@ export interface SessionFile {
 
 export type SessionStatus =
   "started" | "active" | "idle" | "waitingfortoolresults";
-
-/** Request body for the `set_default_agent_version` operation. */
-export interface SetDefaultAgentVersionRequest {
-  versionId: string;
-}
 
 export interface StatRequest {
   path: string;
@@ -904,6 +917,8 @@ export interface UpdateBudgetRequest {
 export interface UpdateFileRequest {
   content?: string | null;
   encoding?: string | null;
+  expectedContent?: string | null;
+  expectedEncoding?: string | null;
   isReadonly?: boolean | null;
 }
 
@@ -915,10 +930,13 @@ export interface UpdateHarnessRequest {
   displayName?: string | null;
   embedderMetadata?: Record<string, string> | null;
   initialFiles?: InitialFile[] | null;
+  introMarkdown?: string | null;
   mcpServers?: unknown | null;
   name?: string | null;
   networkAccess?: NetworkAccessList | null;
   parentHarnessId?: string | null;
+  shortDescription?: string | null;
+  starters?: unknown[] | null;
   status?: HarnessStatus | null;
   systemPrompt?: string | null;
   tags?: string[] | null;
@@ -956,6 +974,8 @@ export interface Workspace {
 /** Request to preview the final agent shape with capabilities applied */
 export interface AnalyzeAgentRequest {
   capabilities?: AgentCapabilityConfig[];
+  harnessId?: unknown | null;
+  initialFiles?: InitialFile[];
   mcpServers?: unknown;
   systemPrompt: string;
   tools?: Record<string, unknown>[];
@@ -982,7 +1002,7 @@ export interface ListEventsOptions {
 }
 
 export interface MessageInput {
-  role: "user" | "tool_result";
+  role: "user";
   content: ContentPart[];
 }
 

@@ -16,9 +16,6 @@ from everruns_sdk.models import (
     Agent,
     AgentAnalysisResponse,
     AgentCapabilityConfig,
-    AgentVersion,
-    AgentVersionChangeKind,
-    AgentVersionDiffResponse,
     AnalyzeAgentRequest,
     Budget,
     BudgetCheckResult,
@@ -28,7 +25,6 @@ from everruns_sdk.models import (
     ContentPart,
     Controls,
     CreateAgentRequest,
-    CreateAgentVersionRequest,
     CreateHarnessRequest,
     CreateMemoryFileRequest,
     CreateMemoryRequest,
@@ -39,7 +35,6 @@ from everruns_sdk.models import (
     Event,
     FileInfo,
     FileStat,
-    ForkAgentVersionRequest,
     GrepResult,
     GuardrailExamplesResponse,
     GuardrailsDryRunRequest,
@@ -61,10 +56,8 @@ from everruns_sdk.models import (
     NetworkAccessList,
     ResourceStats,
     ResumeSessionResponse,
-    RollbackAgentVersionRequest,
     Session,
     SessionFile,
-    SetDefaultAgentVersionRequest,
     SubmitToolResultsRequest,
     SubmitToolResultsResponse,
     ToolDefinition,
@@ -425,85 +418,6 @@ class AgentsClient:
         resp = await self._client._get(f"/agents/{agent_id}/health-checks/{run_id}")
         return HealthCheckRun(**resp)
 
-    async def list_versions(self, agent_id: str) -> list[AgentVersion]:
-        """List saved versions for an agent."""
-        resp = await self._client._get(f"/agents/{agent_id}/versions")
-        return [AgentVersion(**version) for version in resp]
-
-    async def create_version(
-        self,
-        agent_id: str,
-        *,
-        change_kind: Optional[AgentVersionChangeKind] = None,
-        summary: Optional[str] = None,
-    ) -> AgentVersion:
-        """Save the current agent configuration as a version."""
-        req = CreateAgentVersionRequest(change_kind=change_kind, summary=summary)
-        resp = await self._client._post(
-            f"/agents/{agent_id}/versions",
-            req.model_dump(exclude_none=True),
-        )
-        return AgentVersion(**resp)
-
-    async def set_default_version(self, agent_id: str, version_id: str) -> Agent:
-        """Set the default version for an agent."""
-        req = SetDefaultAgentVersionRequest(version_id=version_id)
-        resp = await self._client._post(
-            f"/agents/{agent_id}/versions/default",
-            req.model_dump(exclude_none=True),
-        )
-        return Agent(**resp)
-
-    async def diff_versions(
-        self,
-        agent_id: str,
-        from_version_id: str,
-        to_version_id: str,
-    ) -> AgentVersionDiffResponse:
-        """Diff two saved agent versions."""
-        resp = await self._client._get(
-            f"/agents/{agent_id}/versions/{from_version_id}/diff/{to_version_id}"
-        )
-        return AgentVersionDiffResponse(**resp)
-
-    async def fork_version(
-        self,
-        agent_id: str,
-        version_id: str,
-        *,
-        name: str,
-        display_name: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> Agent:
-        """Create a new agent from a saved version."""
-        validate_agent_name(name)
-        req = ForkAgentVersionRequest(
-            name=name,
-            display_name=display_name,
-            description=description,
-        )
-        resp = await self._client._post(
-            f"/agents/{agent_id}/versions/{version_id}/fork",
-            req.model_dump(exclude_none=True),
-        )
-        return Agent(**resp)
-
-    async def rollback_version(
-        self,
-        agent_id: str,
-        version_id: str,
-        *,
-        save_version: Optional[bool] = None,
-        summary: Optional[str] = None,
-    ) -> Agent:
-        """Restore an agent from a saved version."""
-        req = RollbackAgentVersionRequest(save_version=save_version, summary=summary)
-        resp = await self._client._post(
-            f"/agents/{agent_id}/versions/{version_id}/rollback",
-            req.model_dump(exclude_none=True),
-        )
-        return Agent(**resp)
-
     async def create(
         self,
         name: str,
@@ -745,7 +659,9 @@ class AgentsClient:
         )
         resp = await self._client._post(
             "/agents/analyze",
-            req.model_dump(by_alias=True, exclude_none=True),
+            # exclude_unset keeps fields this helper does not expose (e.g.
+            # harness_id, initial_files) off the wire instead of sending [].
+            req.model_dump(by_alias=True, exclude_none=True, exclude_unset=True),
         )
         return AgentAnalysisResponse(**resp)
 
