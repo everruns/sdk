@@ -3126,6 +3126,85 @@
         }
       }
     },
+    "/v1/agents/{agent_id}/failures": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "List sessions with failed turns",
+        "description": "List sessions with failed turns. Filters by failure time and includes older, recovered, and archived sessions, matching agent activity. Returns the latest matching failure per session.",
+        "operationId": "list_agent_failures",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Prefixed public identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Exclusive lower bound on failure time; defaults to 24 hours before `before`.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "description": "Inclusive upper bound, normally the Agents activity response's generated_at.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentFailureSessions"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "agents-authoring",
+          "support": "preview"
+        }
+      }
+    },
     "/v1/agents/{agent_id}/github": {
       "get": {
         "tags": [
@@ -3250,6 +3329,64 @@
           },
           "404": {
             "description": "Agent not found"
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "agents-authoring",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/github/everruns-app": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Make an agent act as the shared Everruns GitHub App",
+        "description": "Make an agent act on GitHub as the shared Everruns App, through one installation an org admin linked in Settings > Organization. Only for an agent without a GitHub App of its own; disconnect that first.",
+        "operationId": "use_agent_everruns_app",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "description": "Prefixed public identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UseEverrunsAppRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentGitHubStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent or linked installation not found"
+          },
+          "409": {
+            "description": "The agent has a GitHub App of its own"
+          },
+          "503": {
+            "description": "The shared Everruns App is not configured"
           }
         },
         "x-docs": {
@@ -6868,7 +7005,7 @@
           }
         ],
         "requestBody": {
-          "description": "`{\"message\": {\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": …}]}}`",
+          "description": "`{\"message\": {\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": …}]}, \"files\": [MessageFile]}`. Content holds text and image parts; `files` (optional) carries files as base64 `data` or a public https `url`, each kept in the session's `/attachments`.",
           "content": {
             "application/json": {
               "schema": {}
@@ -8440,6 +8577,154 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MetricsTimeSeriesResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "internal",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "operations-billing",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/durable/monitoring": {
+      "get": {
+        "tags": [
+          "durable"
+        ],
+        "summary": "Get platform-wide execution monitoring",
+        "description": "Get platform-wide execution monitoring. Requires platform-user access.",
+        "operationId": "get_fleet_monitoring",
+        "responses": {
+          "200": {
+            "description": "Platform-wide execution monitoring",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringSnapshot"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Platform access required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "internal",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "operations-billing",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/durable/monitoring/actors": {
+      "get": {
+        "tags": [
+          "durable"
+        ],
+        "summary": "List a bounded platform-wide page of session actors",
+        "operationId": "list_fleet_monitoring_actors",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based offset for fixed 200-actor pages; maximum 1000000.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "worker_id",
+            "in": "query",
+            "description": "Filter by a valid current lease holder, up to 256 UTF-8 bytes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "worker-01"
+          },
+          {
+            "name": "phase",
+            "in": "query",
+            "description": "Filter by runnable, model, tools, waiting, or setup execution state.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "model"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Platform actor page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringActorPage"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "internal",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "operations-billing",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/durable/monitoring/actors/{session_id}": {
+      "get": {
+        "tags": [
+          "durable"
+        ],
+        "summary": "Inspect a session actor across organizations",
+        "description": "Inspect a session actor across organizations. Requires platform-user access.",
+        "operationId": "get_fleet_monitoring_actor",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Platform actor diagnostics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringActorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Actor not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -10264,7 +10549,7 @@
           }
         ],
         "requestBody": {
-          "description": "`{\"message\": {\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": …}]}}`",
+          "description": "`{\"message\": {\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": …}]}, \"files\": [MessageFile]}`. Content holds text and image parts; `files` (optional) carries files as base64 `data` or a public https `url`, each kept in the session's `/attachments`.",
           "content": {
             "application/json": {
               "schema": {}
@@ -16986,6 +17271,189 @@
         }
       }
     },
+    "/v1/monitoring": {
+      "get": {
+        "tags": [
+          "monitoring"
+        ],
+        "summary": "Get organization execution monitoring",
+        "operationId": "get_monitoring",
+        "responses": {
+          "200": {
+            "description": "Organization execution monitoring",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringSnapshot"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not enrolled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Requires organization adoption of the monitoring feature flag",
+          "group": "operations-billing",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/monitoring/actors": {
+      "get": {
+        "tags": [
+          "monitoring"
+        ],
+        "summary": "List organization session actors",
+        "operationId": "list_monitoring_actors",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Zero-based offset for fixed 200-actor pages; maximum 1000000.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "worker_id",
+            "in": "query",
+            "description": "Filter by a valid current lease holder, up to 256 UTF-8 bytes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "worker-01"
+          },
+          {
+            "name": "phase",
+            "in": "query",
+            "description": "Filter by runnable, model, tools, waiting, or setup execution state.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "model"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization actor page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringActorPage"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Requires organization adoption of the monitoring feature flag",
+          "group": "operations-billing",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/monitoring/actors/{session_id}": {
+      "get": {
+        "tags": [
+          "monitoring"
+        ],
+        "summary": "Inspect an organization actor and its lease history",
+        "operationId": "get_monitoring_actor",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "description": "Session identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization actor diagnostics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringActorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Actor not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Requires organization adoption of the monitoring feature flag",
+          "group": "operations-billing",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/monitoring/config": {
+      "get": {
+        "tags": [
+          "monitoring"
+        ],
+        "summary": "Resolve organization monitoring read authority",
+        "operationId": "monitoring_config",
+        "responses": {
+          "200": {
+            "description": "Monitoring authorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceConfigResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Requires organization adoption of the monitoring feature flag",
+          "group": "operations-billing",
+          "support": "preview"
+        }
+      }
+    },
     "/v1/notifications": {
       "get": {
         "tags": [
@@ -18131,6 +18599,133 @@
             "cookieAuth": []
           }
         ],
+        "x-docs": {
+          "audience": "public",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "identity-access",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/orgs/{org}/github/everruns-app": {
+      "get": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "List the org's Everruns GitHub App links",
+        "description": "List the organization's links to the shared Everruns GitHub App.",
+        "operationId": "list_links",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EverrunsAppLinks"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "identity-access",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/orgs/{org}/github/everruns-app/authorize": {
+      "get": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Link an Everruns GitHub App installation",
+        "description": "Start linking a shared Everruns GitHub App installation to the organization.",
+        "operationId": "authorize_link",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "return_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to GitHub"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "x-docs": {
+          "audience": "public",
+          "availability": "Everruns Cloud and self-hosted Platform",
+          "group": "identity-access",
+          "support": "preview"
+        }
+      }
+    },
+    "/v1/orgs/{org}/github/everruns-app/{connection_id}": {
+      "delete": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Unlink an Everruns GitHub App installation",
+        "description": "Unlink a shared Everruns GitHub App installation and remove every agent's choice of it.",
+        "operationId": "unlink",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Unlinked"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Link not found"
+          }
+        },
         "x-docs": {
           "audience": "public",
           "availability": "Everruns Cloud and self-hosted Platform",
@@ -30231,6 +30826,7 @@
         "description": "Activity for every agent and channel in the organization.",
         "required": [
           "generated_at",
+          "window_start",
           "hours",
           "days",
           "totals",
@@ -30268,6 +30864,11 @@
           },
           "totals": {
             "$ref": "#/components/schemas/AgentActivityTotals"
+          },
+          "window_start": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Exact exclusive lower bound of the run and failure window."
           }
         }
       },
@@ -31031,6 +31632,85 @@
           }
         }
       },
+      "AgentFailedSession": {
+        "type": "object",
+        "required": [
+          "session",
+          "failed_turns",
+          "failure_sequence",
+          "failed_at"
+        ],
+        "properties": {
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "failed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failed_turns": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failure_sequence": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Sequence of the latest terminal failure in the requested window."
+          },
+          "session": {
+            "$ref": "#/components/schemas/Session"
+          }
+        }
+      },
+      "AgentFailureSessions": {
+        "type": "object",
+        "required": [
+          "data",
+          "total_sessions",
+          "failed_turns",
+          "after",
+          "before",
+          "offset",
+          "limit"
+        ],
+        "properties": {
+          "after": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentFailedSession"
+            }
+          },
+          "failed_turns": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "total_sessions": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "AgentGitHubDisconnect": {
         "type": "object",
         "description": "Result of disconnecting an agent from GitHub.",
@@ -31050,7 +31730,8 @@
           "connected",
           "app_created",
           "missing_permissions",
-          "suggested_owners"
+          "suggested_owners",
+          "everruns_app_installations"
         ],
         "properties": {
           "account": {
@@ -31088,11 +31769,18 @@
               "string",
               "null"
             ],
-            "description": "The login GitHub shows for the agent, e.g. `pr-summarizer[bot]`.\nKnown for an agent's own App; `None` otherwise."
+            "description": "The login GitHub shows for the agent, e.g. `pr-summarizer[bot]`, or the\nshared App's (`everruns[bot]`) when the agent chose it and the\ndeployment names its slug; `None` otherwise."
           },
           "connected": {
             "type": "boolean",
-            "description": "An installation is bound, so tools and triggers work."
+            "description": "An installation is bound, so tools and triggers work: the agent's own\nApp's, or a shared Everruns App installation the agent chose."
+          },
+          "everruns_app_installations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EverrunsAppInstallation"
+            },
+            "description": "Shared Everruns App installations an org admin linked, which this agent\ncan choose instead of an App of its own (D3). Empty when none is linked\nor the deployment has no shared App."
           },
           "identity_id": {
             "type": [
@@ -36350,7 +37038,7 @@
           }
         },
         "additionalProperties": {
-          "description": "Additional provider-specific form fields (e.g. org_slug for Deno personal tokens)."
+          "description": "Additional provider-specific form fields (e.g. org_slug for provider personal tokens)."
         }
       },
       "CreateDatabaseRequest": {
@@ -40286,6 +40974,118 @@
             "type": "integer",
             "format": "int64",
             "description": "Convenience: count of `turn.started` events."
+          }
+        }
+      },
+      "EverrunsAppInstallation": {
+        "type": "object",
+        "description": "A shared Everruns App installation the org links, as an agent can choose it.",
+        "required": [
+          "connection_id",
+          "account"
+        ],
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "GitHub account the installation is on."
+          },
+          "account_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "GitHub's account type: `User` or `Organization`, when known."
+          },
+          "connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The org link's connection id; pass it to choose this installation."
+          },
+          "repository_selection": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`all` or `selected`, when known."
+          }
+        }
+      },
+      "EverrunsAppLink": {
+        "type": "object",
+        "description": "One shared App installation linked to the org.",
+        "required": [
+          "id",
+          "installation_id",
+          "account",
+          "agent_count",
+          "linked_at"
+        ],
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "GitHub account the installation is on.",
+            "example": "acme"
+          },
+          "account_type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "GitHub's account type: `User` or `Organization`."
+          },
+          "agent_count": {
+            "type": "integer",
+            "description": "Agents in the org acting through this link.",
+            "minimum": 0
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Connection id agents choose the link by."
+          },
+          "installation_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "GitHub installation id.",
+            "example": 4242
+          },
+          "linked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "repository_selection": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`all` or `selected`."
+          }
+        }
+      },
+      "EverrunsAppLinks": {
+        "type": "object",
+        "description": "The org's links to the shared Everruns GitHub App.",
+        "required": [
+          "configured",
+          "installations"
+        ],
+        "properties": {
+          "app_slug": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The shared App's slug; agents that choose it show up as `<slug>[bot]`."
+          },
+          "configured": {
+            "type": "boolean",
+            "description": "The deployment has a shared App; without one nothing can be linked."
+          },
+          "installations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EverrunsAppLink"
+            }
           }
         }
       },
@@ -51450,6 +52250,676 @@
           }
         }
       },
+      "MonitoringActor": {
+        "type": "object",
+        "description": "Session actor ownership, lease validity, and durable progress cursors.",
+        "required": [
+          "session_id",
+          "org_id",
+          "session_status",
+          "phase",
+          "phase_since",
+          "lease_state"
+        ],
+        "properties": {
+          "attempts_since_release": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Lease attempts accumulated since the last release.",
+            "example": 1
+          },
+          "cancel_requested_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "UTC cancellation request timestamp; null when cancellation is not requested.",
+            "example": "2026-10-14T12:00:02Z"
+          },
+          "consumed_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Persisted consumed event cursor; its difference from inbox_seq is not a pending-message count.",
+            "example": 39
+          },
+          "fence": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monotonic ownership fence; null when no actor row exists.",
+            "example": 17
+          },
+          "holder": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Current recorded holder, or previous holder for an expired lease; null when unleased.",
+            "example": "worker-01"
+          },
+          "inbox_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Durable inbox progress cursor; it is not a message count.",
+            "example": 42
+          },
+          "lease_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "UTC deadline of the recorded lease; null when unleased.",
+            "example": "2026-10-14T12:00:10Z"
+          },
+          "lease_renewed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Last persisted acquisition or renewal acknowledgement in UTC; null before an acknowledgement or after release.",
+            "example": "2026-10-14T12:00:00Z"
+          },
+          "lease_state": {
+            "type": "string",
+            "description": "Observed lease validity: held, expired, or unleased.",
+            "example": "held"
+          },
+          "lease_ttl_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Positive interval between renewal acknowledgement and expiry in milliseconds; null when unavailable.",
+            "example": 10000,
+            "minimum": 0
+          },
+          "next_input_seq": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Persisted next-input progress cursor.",
+            "example": 12
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Public identifier of the owning session's organization.",
+            "example": "org_00000000000000000000000000000001"
+          },
+          "phase": {
+            "type": "string",
+            "description": "Observed execution state; idle is also possible for a released actor detail.",
+            "example": "model"
+          },
+          "phase_since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of the committed observation used to classify the phase.",
+            "example": "2026-10-14T12:00:01Z"
+          },
+          "runnable_age_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Milliseconds awaiting a valid lease; null for held or parked actors.",
+            "example": 3000,
+            "minimum": 0
+          },
+          "runnable_since": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "UTC timestamp when the actor became runnable; null for parked work.",
+            "example": "2026-10-14T11:59:59Z"
+          },
+          "session_id": {
+            "type": "string",
+            "description": "Canonical session identifier whose actor is being inspected.",
+            "example": "session_01933b5a000070008000000000000001"
+          },
+          "session_status": {
+            "type": "string",
+            "description": "Persisted session lifecycle status.",
+            "example": "active"
+          }
+        }
+      },
+      "MonitoringActorDetail": {
+        "type": "object",
+        "description": "Authorized actor inspection with bounded ownership history and trace timing.",
+        "required": [
+          "generated_at",
+          "actor",
+          "ownership_history",
+          "steps"
+        ],
+        "properties": {
+          "actor": {
+            "$ref": "#/components/schemas/MonitoringActor",
+            "description": "Actor observation after validating the owning session's organization."
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC observation time for actor ownership and timing.",
+            "example": "2026-10-14T12:00:03Z"
+          },
+          "ownership_history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringLeaseEvent"
+            },
+            "description": "Up to 50 newest ownership changes from the retained one-day history."
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringStep"
+            },
+            "description": "Up to 100 projected steps from the latest turn, newest first; no conversation payloads."
+          }
+        }
+      },
+      "MonitoringActorPage": {
+        "type": "object",
+        "description": "Bounded page of current session actor observations.",
+        "required": [
+          "generated_at",
+          "actors"
+        ],
+        "properties": {
+          "actors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringActor"
+            },
+            "description": "Up to 200 matching actors, ordered by expired leases and oldest runnable work."
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC observation time for this actor page.",
+            "example": "2026-10-14T12:00:03Z"
+          },
+          "next_offset": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Offset for the next page; null when there are no further matching actors.",
+            "example": 200,
+            "minimum": 0
+          }
+        }
+      },
+      "MonitoringCohort": {
+        "type": "object",
+        "description": "Bounded execution breakdown for one organization and live lease holder.",
+        "required": [
+          "phase",
+          "org_id",
+          "count"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Sessions in this phase, organization, and holder cohort.",
+            "example": 32,
+            "minimum": 0
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Public identifier of the organization owning these sessions.",
+            "example": "org_00000000000000000000000000000001"
+          },
+          "phase": {
+            "type": "string",
+            "description": "Execution state shared by this organization and live holder cohort.",
+            "example": "model"
+          },
+          "worker_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Live lease holder; null for unleased or expired ownership.",
+            "example": "worker-01"
+          }
+        }
+      },
+      "MonitoringLeaseEvent": {
+        "type": "object",
+        "description": "Persisted actor ownership transition, excluding renewal noise.",
+        "required": [
+          "occurred_at",
+          "kind",
+          "holder",
+          "fence"
+        ],
+        "properties": {
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "New lease deadline in UTC; null for a release.",
+            "example": "2026-10-14T12:00:10Z"
+          },
+          "fence": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Ownership fence associated with this transition.",
+            "example": 18
+          },
+          "holder": {
+            "type": "string",
+            "description": "Holder acquiring ownership, or the holder relinquishing a released lease.",
+            "example": "worker-02"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Ownership transition: acquired, reacquired, or released; renewals produce no history entry.",
+            "example": "reacquired"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC time of the persisted ownership transition.",
+            "example": "2026-10-14T12:00:00Z"
+          },
+          "previous_expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Previous lease deadline in UTC, when recorded.",
+            "example": "2026-10-14T11:59:59Z"
+          },
+          "previous_holder": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Holder preceding acquisition or reacquisition, when recorded.",
+            "example": "worker-01"
+          }
+        }
+      },
+      "MonitoringOwnership": {
+        "type": "object",
+        "description": "Valid actor ownership linking an organization to a worker.",
+        "required": [
+          "worker_id",
+          "org_id",
+          "actor_leases"
+        ],
+        "properties": {
+          "actor_leases": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Valid actor leases held by this worker within this organization.",
+            "example": 32,
+            "minimum": 0
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Public identifier of the sessions' owning organization.",
+            "example": "org_00000000000000000000000000000001"
+          },
+          "worker_id": {
+            "type": "string",
+            "description": "Worker currently holding the valid actor leases.",
+            "example": "worker-01"
+          }
+        }
+      },
+      "MonitoringPhase": {
+        "type": "object",
+        "description": "Population and age of one committed execution state.",
+        "required": [
+          "phase",
+          "count",
+          "oldest_ms"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Complete number of sessions observed in this execution state.",
+            "example": 2800,
+            "minimum": 0
+          },
+          "oldest_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Age of the oldest committed phase observation in milliseconds; may be partial when cohorts are truncated.",
+            "example": 3200,
+            "minimum": 0
+          },
+          "phase": {
+            "type": "string",
+            "description": "Execution state: runnable, model, tools, waiting, or setup.",
+            "example": "model"
+          }
+        }
+      },
+      "MonitoringSnapshot": {
+        "type": "object",
+        "description": "Live execution population, ownership, and event-window summary.",
+        "required": [
+          "generated_at",
+          "scope",
+          "window_seconds",
+          "actors",
+          "organizations",
+          "actor_leases",
+          "expired_leases",
+          "phases",
+          "cohorts",
+          "ownership",
+          "workers",
+          "events",
+          "lease_events",
+          "cohorts_truncated",
+          "workers_truncated"
+        ],
+        "properties": {
+          "actor_leases": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Complete count of actor leases valid at the observation time.",
+            "example": 3700,
+            "minimum": 0
+          },
+          "actors": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Complete population of live sessions and runnable or held session actors.",
+            "example": 5000,
+            "minimum": 0
+          },
+          "cohorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringCohort"
+            },
+            "description": "Bounded phase, organization, and live holder breakdown; consult cohorts_truncated."
+          },
+          "cohorts_truncated": {
+            "type": "boolean",
+            "description": "Whether ownership cohort detail exceeded its limit; population and phase counts remain complete.",
+            "example": false
+          },
+          "events": {
+            "type": "object",
+            "description": "Committed lifecycle event counts in the lookback window, not lifetime totals.",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "example": {
+              "reason.started": 350,
+              "tool.started": 240,
+              "turn.started": 120
+            }
+          },
+          "expired_leases": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Held leases whose deadline has passed, regardless of worker heartbeat.",
+            "example": 3,
+            "minimum": 0
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC observation time used to classify lease validity and event windows.",
+            "example": "2026-10-14T12:00:03Z"
+          },
+          "lease_events": {
+            "type": "object",
+            "description": "Acquisition, reacquisition, and release counts in the lookback window; renewals are excluded.",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "example": {
+              "acquired": 120,
+              "reacquired": 3,
+              "released": 110
+            }
+          },
+          "oldest_runnable_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Age of the oldest work awaiting a valid lease, in milliseconds; null when none is runnable.",
+            "example": 3000,
+            "minimum": 0
+          },
+          "organizations": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Distinct organizations represented in the current population.",
+            "example": 12,
+            "minimum": 0
+          },
+          "ownership": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringOwnership"
+            },
+            "description": "Organization-to-worker mapping derived only from valid actor leases."
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringPhase"
+            },
+            "description": "Complete counts by execution state, with observed phase ages."
+          },
+          "scope": {
+            "type": "string",
+            "description": "Monitoring boundary: organization or fleet.",
+            "example": "fleet"
+          },
+          "window_seconds": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Lookback window for lifecycle and ownership event counts, in seconds.",
+            "example": 60,
+            "minimum": 0
+          },
+          "workers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringWorker"
+            },
+            "description": "Bounded worker observations; global telemetry is redacted for organization callers."
+          },
+          "workers_truncated": {
+            "type": "boolean",
+            "description": "Whether worker detail exceeded its limit; population and phase counts remain complete.",
+            "example": false
+          }
+        }
+      },
+      "MonitoringStep": {
+        "type": "object",
+        "description": "Payload-free timing projection of one step in the latest turn.",
+        "required": [
+          "turn_no",
+          "step_no",
+          "kind",
+          "status",
+          "started_at"
+        ],
+        "properties": {
+          "duration_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Recorded step duration in milliseconds; null until duration is available.",
+            "example": 820
+          },
+          "kind": {
+            "type": "string",
+            "description": "Trace-step category, without tool arguments, results, or agent names.",
+            "example": "tool"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC time at which the projected step started.",
+            "example": "2026-10-14T12:00:01Z"
+          },
+          "status": {
+            "type": "string",
+            "description": "Projected execution status of the trace step.",
+            "example": "completed"
+          },
+          "step_no": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Projected step ordinal within the turn.",
+            "example": 3
+          },
+          "turn_no": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Projected turn ordinal for this trace step.",
+            "example": 2
+          }
+        }
+      },
+      "MonitoringWorker": {
+        "type": "object",
+        "description": "Scope-aware actor ownership with platform-only worker telemetry.",
+        "required": [
+          "id",
+          "actor_leases",
+          "phases"
+        ],
+        "properties": {
+          "accepting_work": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Last reported admission flag; null in organization scope.",
+            "example": true
+          },
+          "actor_leases": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Valid actor leases in this monitoring scope; not occupied work slots.",
+            "example": 32,
+            "minimum": 0
+          },
+          "capacity": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Reported maximum worker concurrency; null in organization scope.",
+            "example": 50,
+            "minimum": 0
+          },
+          "current_load": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Reported worker activity load, distinct from actor leases; null in organization scope.",
+            "example": 8,
+            "minimum": 0
+          },
+          "id": {
+            "type": "string",
+            "description": "Worker identifier recorded by actor ownership or the fleet registry.",
+            "example": "worker-01"
+          },
+          "last_heartbeat_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Last worker heartbeat in UTC; null in organization scope.",
+            "example": "2026-10-14T12:00:00Z"
+          },
+          "phases": {
+            "type": "object",
+            "description": "Leased session counts by execution state within this scope.",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "example": {
+              "model": 20,
+              "tools": 12
+            }
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Fleet-only worker status, including stale heartbeats; null in organization scope.",
+            "example": "active"
+          },
+          "worker_group": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Registered worker group; null in organization scope.",
+            "example": "execution"
+          }
+        }
+      },
       "MoveFileRequest": {
         "type": "object",
         "description": "Request to move/rename a file",
@@ -52725,6 +54195,21 @@
                   "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context.",
                   "example": false
                 },
+                "last_message_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time",
+                  "description": "Timestamp of the latest input or completed assistant message.\nPopulated on session lists; session edits and tool events do not advance it."
+                },
+                "last_turn_status": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Outcome of the latest terminal turn, distinguishing cancellation from failure."
+                },
                 "locale": {
                   "type": [
                     "string",
@@ -53705,6 +55190,21 @@
                       ],
                       "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context.",
                       "example": false
+                    },
+                    "last_message_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time",
+                      "description": "Timestamp of the latest input or completed assistant message.\nPopulated on session lists; session edits and tool events do not advance it."
+                    },
+                    "last_turn_status": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Outcome of the latest terminal turn, distinguishing cancellation from failure."
                     },
                     "locale": {
                       "type": [
@@ -59277,6 +60777,21 @@
             ],
             "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context.",
             "example": false
+          },
+          "last_message_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Timestamp of the latest input or completed assistant message.\nPopulated on session lists; session edits and tool events do not advance it."
+          },
+          "last_turn_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Outcome of the latest terminal turn, distinguishing cancellation from failure."
           },
           "locale": {
             "type": [
@@ -66470,6 +67985,20 @@
           }
         }
       },
+      "UseEverrunsAppRequest": {
+        "type": "object",
+        "description": "Which org link to act through.",
+        "required": [
+          "connection_id"
+        ],
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Connection id of one of the org's linked installations, from the\nagent's GitHub status (`everruns_app_installations`)."
+          }
+        }
+      },
       "User": {
         "type": "object",
         "description": "User response for listing",
@@ -69579,6 +71108,21 @@
                 "description": "Whether this session is pinned by the current user.\nOnly populated when the request has an authenticated user context.",
                 "example": false
               },
+              "last_message_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Timestamp of the latest input or completed assistant message.\nPopulated on session lists; session edits and tool events do not advance it."
+              },
+              "last_turn_status": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Outcome of the latest terminal turn, distinguishing cancellation from failure."
+              },
               "locale": {
                 "type": [
                   "string",
@@ -70621,6 +72165,10 @@
       "x-displayName": "Durable"
     },
     {
+      "name": "monitoring",
+      "x-displayName": "Monitoring"
+    },
+    {
       "name": "durable-schedules",
       "description": "Durable scheduled tasks management endpoints",
       "x-displayName": "Durable schedules"
@@ -70755,6 +72303,7 @@
       "name": "Operations & billing",
       "tags": [
         "durable",
+        "monitoring",
         "durable-schedules",
         "sandbox-templates",
         "sandboxes",

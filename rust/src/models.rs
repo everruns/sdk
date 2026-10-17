@@ -2221,6 +2221,10 @@ pub struct Session {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_pinned: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_message_at: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_turn_status: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_iterations: Option<u64>,

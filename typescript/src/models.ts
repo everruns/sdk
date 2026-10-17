@@ -819,6 +819,8 @@ export interface Session {
   id: string;
   initial_files?: InitialFile[];
   is_pinned?: boolean | null;
+  last_message_at?: string | null;
+  last_turn_status?: string | null;
   locale?: string | null;
   max_iterations?: number | null;
   mcpServers?: unknown;

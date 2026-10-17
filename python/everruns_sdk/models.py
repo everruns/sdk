@@ -1059,6 +1059,8 @@ class Session(BaseModel):
     id: str
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     is_pinned: Optional[bool] = None
+    last_message_at: Optional[str] = None
+    last_turn_status: Optional[str] = None
     locale: Optional[str] = None
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
