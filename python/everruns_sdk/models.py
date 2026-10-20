@@ -147,6 +147,7 @@ class CapabilityInfo(BaseModel):
     dependencies: Optional[list[str]] = Field(default_factory=list)
     description: str
     docs_slug: Optional[str] = None
+    feature_flag: Optional[str] = None
     features: Optional[list[str]] = Field(default_factory=list)
     harness_count: Optional[int] = None
     icon: Optional[str] = None
@@ -1059,6 +1060,8 @@ class Session(BaseModel):
     id: str
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     is_pinned: Optional[bool] = None
+    last_message_at: Optional[str] = None
+    last_turn_status: Optional[str] = None
     locale: Optional[str] = None
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
