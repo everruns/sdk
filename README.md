@@ -18,7 +18,7 @@ cargo add everruns-sdk
 pip install everruns-sdk
 ```
 
-**TypeScript** (Node 18+)
+**TypeScript** (Node 22.23.4+, 24.22.1+, or 26.12.1+ on supported release lines)
 ```bash
 npm install @everruns/sdk
 ```
