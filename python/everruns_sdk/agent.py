@@ -192,7 +192,8 @@ class AgentClient:
         return await self._request("GET", path)
 
     async def get_session(self, session_id: str) -> dict[str, Any]:
-        """Get a session, including ``pending_questions`` and ``pending_approvals``."""
+        """Get a session, including ``pending_questions``, ``pending_approvals`` and ``work``,
+        the latest turn's work report."""
         return await self._request("GET", f"/sessions/{session_id}")
 
     async def send_message(
