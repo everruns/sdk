@@ -583,6 +583,10 @@ pub struct AgentSession {
     /// Tool calls waiting for a decision (see [`AgentClient::submit_tool_approvals`]).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pending_approvals: Option<serde_json::Value>,
+    /// The latest turn's work report: state, headline, plan counts and result.
+    /// Callers without `full` visibility get the public view, without step labels.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub work: Option<serde_json::Value>,
     #[serde(flatten)]
     pub extra: serde_json::Map<String, serde_json::Value>,
 }

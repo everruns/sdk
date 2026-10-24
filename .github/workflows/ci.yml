@@ -170,7 +170,12 @@ jobs:
           key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
-        run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server
+        # Only the server binary, without debug info: the full debug build of
+        # every server binary outgrew the runner's disk.
+        run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server --bin everruns-server
+        env:
+          CARGO_PROFILE_DEV_DEBUG: "0"
+          CARGO_INCREMENTAL: "0"
 
       # Start server
       - name: Start everruns-server
@@ -261,7 +266,12 @@ jobs:
           key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
-        run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server
+        # Only the server binary, without debug info: the full debug build of
+        # every server binary outgrew the runner's disk.
+        run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server --bin everruns-server
+        env:
+          CARGO_PROFILE_DEV_DEBUG: "0"
+          CARGO_INCREMENTAL: "0"
 
       - name: Start everruns-server
         run: |

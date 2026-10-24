@@ -103,6 +103,7 @@ export interface CapabilityInfo {
   dependencies?: string[];
   description: string;
   docs_slug?: string | null;
+  feature_flag?: string | null;
   features?: string[];
   harness_count?: number;
   icon?: string | null;
@@ -819,6 +820,8 @@ export interface Session {
   id: string;
   initial_files?: InitialFile[];
   is_pinned?: boolean | null;
+  last_message_at?: string | null;
+  last_turn_status?: string | null;
   locale?: string | null;
   max_iterations?: number | null;
   mcpServers?: unknown;

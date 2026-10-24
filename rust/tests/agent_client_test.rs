@@ -26,7 +26,8 @@ fn session_json() -> serde_json::Value {
     json!({
         "id": "sess_1", "title": "T", "status": "idle",
         "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-01T00:00:00Z",
-        "pending_questions": [], "pending_approvals": [], "future_field": 1
+        "pending_questions": [], "pending_approvals": [], "future_field": 1,
+        "work": {"state": "working", "headline": "Step 2 of 4", "steps": []}
     })
 }
 
@@ -121,6 +122,7 @@ async fn for_end_user_sets_the_header_on_the_derived_client_only() {
     let s = alice.get_session("sess_1").await.unwrap();
     assert_eq!(s.id, "sess_1");
     assert_eq!(s.extra["future_field"], 1);
+    assert_eq!(s.work.as_ref().unwrap()["headline"], "Step 2 of 4");
     base.get_session("sess_2").await.unwrap();
 }
 

@@ -57,6 +57,8 @@ export interface AgentSession {
   updated_at: string;
   pending_questions?: unknown[];
   pending_approvals?: unknown[];
+  /** The latest turn's work report (state, headline, plan counts, result). */
+  work?: Record<string, unknown>;
   [key: string]: unknown;
 }
 
