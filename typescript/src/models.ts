@@ -17,6 +17,7 @@ export interface Agent {
   initial_files?: InitialFile[];
   intro_markdown?: string | null;
   is_built_in?: boolean;
+  localizations?: unknown;
   max_output_tokens?: number | null;
   name: string;
   parallel_tool_calls?: boolean | null;
@@ -217,6 +218,7 @@ export interface CreateAgentRequest {
   id?: string | null;
   initialFiles?: InitialFile[];
   introMarkdown?: string | null;
+  localizations?: unknown;
   maxIterations?: number | null;
   maxOutputTokens?: number | null;
   mcpServers?: unknown;
@@ -260,6 +262,7 @@ export interface CreateHarnessRequest {
   embedderMetadata?: Record<string, string>;
   initialFiles?: InitialFile[];
   introMarkdown?: string | null;
+  localizations?: unknown;
   mcpServers?: unknown;
   name: string;
   networkAccess?: NetworkAccessList | null;
@@ -494,6 +497,7 @@ export interface Harness {
   id: string;
   initial_files?: InitialFile[];
   is_built_in?: boolean;
+  localizations?: unknown;
   mcpServers?: unknown;
   name: string;
   network_access?: NetworkAccessList | null;
@@ -512,6 +516,7 @@ export interface HarnessExample {
   devOnly: boolean;
   displayName: string;
   icon?: string | null;
+  localizations: unknown;
   name: string;
   parentName?: string | null;
   tags: string[];
@@ -928,6 +933,7 @@ export interface UpdateHarnessRequest {
   embedderMetadata?: Record<string, string> | null;
   initialFiles?: InitialFile[] | null;
   introMarkdown?: string | null;
+  localizations?: unknown | null;
   mcpServers?: unknown | null;
   name?: string | null;
   networkAccess?: NetworkAccessList | null;

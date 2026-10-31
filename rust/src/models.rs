@@ -41,6 +41,8 @@ pub struct Agent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_built_in: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub localizations: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_iterations: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_output_tokens: Option<i32>,
@@ -519,6 +521,8 @@ pub struct CreateAgentRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub intro_markdown: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub localizations: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_iterations: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_output_tokens: Option<i32>,
@@ -558,6 +562,7 @@ impl CreateAgentRequest {
             id: None,
             initial_files: Vec::new(),
             intro_markdown: None,
+            localizations: None,
             max_iterations: None,
             max_output_tokens: None,
             mcp_servers: None,
@@ -621,6 +626,11 @@ impl CreateAgentRequest {
 
     pub fn intro_markdown(mut self, intro_markdown: impl Into<String>) -> Self {
         self.intro_markdown = Some(intro_markdown.into());
+        self
+    }
+
+    pub fn localizations(mut self, localizations: serde_json::Value) -> Self {
+        self.localizations = Some(localizations);
         self
     }
 
@@ -802,6 +812,8 @@ pub struct CreateHarnessRequest {
     pub initial_files: Vec<InitialFile>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub intro_markdown: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub localizations: Option<serde_json::Value>,
     #[serde(rename = "mcpServers")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mcp_servers: Option<serde_json::Value>,
@@ -830,6 +842,7 @@ impl CreateHarnessRequest {
             embedder_metadata: None,
             initial_files: Vec::new(),
             intro_markdown: None,
+            localizations: None,
             mcp_servers: None,
             name: name.into(),
             network_access: None,
@@ -876,6 +889,11 @@ impl CreateHarnessRequest {
 
     pub fn intro_markdown(mut self, intro_markdown: impl Into<String>) -> Self {
         self.intro_markdown = Some(intro_markdown.into());
+        self
+    }
+
+    pub fn localizations(mut self, localizations: serde_json::Value) -> Self {
+        self.localizations = Some(localizations);
         self
     }
 
@@ -1646,6 +1664,8 @@ pub struct Harness {
     pub initial_files: Vec<InitialFile>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_built_in: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub localizations: Option<serde_json::Value>,
     #[serde(rename = "mcpServers")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mcp_servers: Option<serde_json::Value>,
@@ -1674,6 +1694,7 @@ pub struct HarnessExample {
     pub display_name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub icon: Option<String>,
+    pub localizations: serde_json::Value,
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_name: Option<String>,
@@ -2505,6 +2526,8 @@ pub struct UpdateHarnessRequest {
     pub initial_files: Option<Vec<InitialFile>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub intro_markdown: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub localizations: Option<serde_json::Value>,
     #[serde(rename = "mcpServers")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mcp_servers: Option<serde_json::Value>,
@@ -2536,6 +2559,7 @@ impl UpdateHarnessRequest {
             embedder_metadata: None,
             initial_files: None,
             intro_markdown: None,
+            localizations: None,
             mcp_servers: None,
             name: None,
             network_access: None,
@@ -2583,6 +2607,11 @@ impl UpdateHarnessRequest {
 
     pub fn intro_markdown(mut self, intro_markdown: impl Into<String>) -> Self {
         self.intro_markdown = Some(intro_markdown.into());
+        self
+    }
+
+    pub fn localizations(mut self, localizations: serde_json::Value) -> Self {
+        self.localizations = Some(localizations);
         self
     }
 

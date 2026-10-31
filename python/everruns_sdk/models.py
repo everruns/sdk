@@ -31,6 +31,7 @@ class Agent(BaseModel):
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     intro_markdown: Optional[str] = None
     is_built_in: Optional[bool] = None
+    localizations: Optional[Any] = None
     max_iterations: Optional[int] = None
     max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
@@ -305,6 +306,7 @@ class CreateAgentRequest(BaseModel):
     id: Optional[str] = None
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     intro_markdown: Optional[str] = None
+    localizations: Optional[Any] = None
     max_iterations: Optional[int] = None
     max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
@@ -357,6 +359,7 @@ class CreateHarnessRequest(BaseModel):
     embedder_metadata: Optional[dict[str, str]] = None
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     intro_markdown: Optional[str] = None
+    localizations: Optional[Any] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
@@ -662,6 +665,7 @@ class Harness(BaseModel):
     id: str
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
     is_built_in: Optional[bool] = None
+    localizations: Optional[Any] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
@@ -683,6 +687,7 @@ class HarnessExample(BaseModel):
     dev_only: bool
     display_name: str
     icon: Optional[str] = None
+    localizations: Any
     name: str
     parent_name: Optional[str] = None
     tags: list[str]
@@ -1208,6 +1213,7 @@ class UpdateHarnessRequest(BaseModel):
     embedder_metadata: Optional[dict[str, str]] = None
     initial_files: Optional[list[InitialFile]] = None
     intro_markdown: Optional[str] = None
+    localizations: Optional[Any] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: Optional[str] = None
     network_access: Optional[NetworkAccessList] = None
