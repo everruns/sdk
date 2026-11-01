@@ -2120,6 +2120,7 @@ async fn test_harnesses_list_examples() {
                 "name": "deep-research",
                 "display_name": "Deep Research",
                 "description": "Research harness",
+                "localizations": {},
                 "dev_only": false,
                 "capabilities": [],
                 "tags": ["research"]
