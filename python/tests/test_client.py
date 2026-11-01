@@ -2614,6 +2614,7 @@ async def test_harnesses_list_examples():
         "name": "deep-research",
         "display_name": "Deep Research",
         "description": "Research harness",
+        "localizations": {},
         "dev_only": False,
         "capabilities": [{"ref": "web_search"}],
         "tags": ["research"],
