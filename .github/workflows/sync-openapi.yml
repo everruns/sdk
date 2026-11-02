@@ -42,14 +42,35 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create PR
+      # PRs opened with the built-in GITHUB_TOKEN are refused (the org does not
+      # let Actions create PRs) and would not trigger CI anyway, so the branch is
+      # pushed with the built-in token and the PR is opened with the GitHub token
+      # from Doppler. The token stays inside `doppler run`, never in GITHUB_ENV.
+      - name: Install Doppler CLI
         if: steps.diff.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          title: "chore: sync OpenAPI spec and generated SDK models"
-          branch: chore/sync-openapi
-          commit-message: "chore: sync OpenAPI spec and generated SDK models"
-          author: "Mykhailo Chalyi <mike@chaliy.name>"
-          committer: "Mykhailo Chalyi <mike@chaliy.name>"
-          body: |
-            Auto-generated PR to sync OpenAPI spec changes from the main repo and refresh generated public SDK models.
+        uses: dopplerhq/cli-action@4819d808ab99e5cde19a0637a16536a4038fad73 # v4
+
+      - name: Push branch and open PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          BRANCH: chore/sync-openapi
+          TITLE: "chore: sync OpenAPI spec and generated SDK models"
+        run: |
+          git config user.name "Mykhailo Chalyi"
+          git config user.email "mike@chaliy.name"
+          git checkout -B "$BRANCH"
+          git add -A
+          git commit -m "$TITLE"
+          git push --force origin "$BRANCH"
+          doppler run -- bash -c '
+            export GH_TOKEN="$GITHUB_TOKEN"
+            open=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq length)
+            if [ "$open" != "0" ]; then
+              echo "PR for $BRANCH already open; branch updated."
+              exit 0
+            fi
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
+              --title "$TITLE" \
+              --body "Auto-generated PR to sync OpenAPI spec changes from the main repo and refresh generated public SDK models."
+          '
