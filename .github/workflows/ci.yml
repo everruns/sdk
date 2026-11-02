@@ -168,6 +168,19 @@ jobs:
         with:
           path: ~/.cargo/bin/everruns-server
           key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
+      # The runner was killed mid-build (out of memory or disk) even with two
+      # compile jobs. Free the preinstalled toolchains we never use and add swap.
+      - name: Make room for the everruns-server build
+        if: steps.cache-server.outputs.cache-hit != 'true'
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          sudo swapoff -a || true
+          sudo fallocate -l 12G /mnt/ci-swapfile
+          sudo chmod 600 /mnt/ci-swapfile
+          sudo mkswap /mnt/ci-swapfile
+          sudo swapon /mnt/ci-swapfile
+          free -h
+          df -h / /mnt
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
         # Only the server binary, without debug info: the full debug build of
@@ -267,6 +280,19 @@ jobs:
         with:
           path: ~/.cargo/bin/everruns-server
           key: everruns-server-${{ runner.os }}-${{ steps.everruns-sha.outputs.sha }}
+      # The runner was killed mid-build (out of memory or disk) even with two
+      # compile jobs. Free the preinstalled toolchains we never use and add swap.
+      - name: Make room for the everruns-server build
+        if: steps.cache-server.outputs.cache-hit != 'true'
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          sudo swapoff -a || true
+          sudo fallocate -l 12G /mnt/ci-swapfile
+          sudo chmod 600 /mnt/ci-swapfile
+          sudo mkswap /mnt/ci-swapfile
+          sudo swapon /mnt/ci-swapfile
+          free -h
+          df -h / /mnt
       - name: Install everruns-server
         if: steps.cache-server.outputs.cache-hit != 'true'
         # Only the server binary, without debug info: the full debug build of
