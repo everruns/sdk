@@ -136,7 +136,7 @@ jobs:
 
   run-cookbooks:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -175,6 +175,9 @@ jobs:
         run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server --bin everruns-server
         env:
           CARGO_PROFILE_DEV_DEBUG: "0"
+          # The server build from everruns main got the runner killed (out of
+          # memory) at full parallelism; fewer jobs is slower but fits.
+          CARGO_BUILD_JOBS: "2"
           CARGO_INCREMENTAL: "0"
 
       # Start server
@@ -236,7 +239,7 @@ jobs:
 
   run-examples:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -271,6 +274,9 @@ jobs:
         run: cargo install --debug --locked --git https://github.com/everruns/everruns everruns-server --bin everruns-server
         env:
           CARGO_PROFILE_DEV_DEBUG: "0"
+          # The server build from everruns main got the runner killed (out of
+          # memory) at full parallelism; fewer jobs is slower but fits.
+          CARGO_BUILD_JOBS: "2"
           CARGO_INCREMENTAL: "0"
 
       - name: Start everruns-server
