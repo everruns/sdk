@@ -51,8 +51,10 @@ from everruns_sdk.models import (
     MemoryGrepResult,
     Message,
     MessageInput,
+    MessageReactions,
     ModelWithProvider,
     NetworkAccessList,
+    ReactionChange,
     ResourceStats,
     ResumeSessionResponse,
     Session,
@@ -334,6 +336,10 @@ class Everruns:
         resp = await self._client.put(self._url(path), headers=self._reason_headers())
         if not resp.is_success:
             await self._raise_error(resp)
+
+    async def _put_json(self, path: str) -> Any:
+        resp = await self._client.put(self._url(path), headers=self._reason_headers())
+        return await self._handle_response(resp)
 
     async def _delete(self, path: str) -> None:
         resp = await self._client.delete(self._url(path), headers=self._reason_headers())
@@ -838,6 +844,10 @@ class SessionsClient:
         return await self._client._get_text(f"/sessions/{session_id}/export")
 
 
+def _reaction_path(session_id: str, message_id: str, emoji: str) -> str:
+    return f"/sessions/{session_id}/messages/{message_id}/reactions/{quote(emoji, safe='')}"
+
+
 class MessagesClient:
     """Client for message operations."""
 
@@ -876,6 +886,25 @@ class MessagesClient:
             req.model_dump(exclude_none=True),
         )
         return Message(**resp)
+
+    async def react(self, session_id: str, message_id: str, emoji: str) -> ReactionChange:
+        """Add the caller's reaction to a message. Idempotent.
+
+        ``emoji`` is one Unicode emoji or a custom emoji as ``:name:``; it is
+        percent-encoded into the path.
+        """
+        resp = await self._client._put_json(_reaction_path(session_id, message_id, emoji))
+        return ReactionChange(**resp)
+
+    async def unreact(self, session_id: str, message_id: str, emoji: str) -> ReactionChange:
+        """Remove the caller's reaction from a message. Idempotent."""
+        resp = await self._client._delete_json(_reaction_path(session_id, message_id, emoji))
+        return ReactionChange(**resp)
+
+    async def reactions(self, session_id: str) -> list[MessageReactions]:
+        """List per-message reaction summaries for a session."""
+        resp = await self._client._get(f"/sessions/{session_id}/reactions")
+        return [MessageReactions(**m) for m in resp]
 
     async def create_tool_results(
         self,

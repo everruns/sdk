@@ -2200,3 +2200,108 @@ async fn test_models_get() {
     assert_eq!(model.id, "model_123");
     assert_eq!(model.display_name, "GPT-4");
 }
+
+fn reaction_change_json(emoji: &str, reacted: bool, changed: bool) -> serde_json::Value {
+    serde_json::json!({
+        "message_id": "message_1", "emoji": emoji, "reacted": reacted, "changed": changed
+    })
+}
+
+#[tokio::test]
+async fn test_react_and_unreact_encode_emoji_path() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("PUT"))
+        .and(path(
+            "/v1/sessions/session_1/messages/message_1/reactions/%F0%9F%91%8D",
+        ))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(reaction_change_json("👍", true, true)),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("DELETE"))
+        .and(path(
+            "/v1/sessions/session_1/messages/message_1/reactions/%3Aparty%3A",
+        ))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(reaction_change_json(":party:", false, false)),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let added = client
+        .messages()
+        .react("session_1", "message_1", "👍")
+        .await
+        .expect("react");
+    assert!(added.reacted && added.changed);
+    assert_eq!(added.emoji, "👍");
+
+    let removed = client
+        .messages()
+        .unreact("session_1", "message_1", ":party:")
+        .await
+        .expect("unreact");
+    assert!(!removed.reacted && !removed.changed);
+}
+
+#[tokio::test]
+async fn test_reactions_lists_summaries() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/sessions/session_1/reactions"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([{
+            "message_id": "message_1",
+            "reactions": [{
+                "emoji": "👍", "count": 2, "me": true, "agent": false,
+                "actors": [
+                    {"kind": "user", "id": "user_1", "name": "Ann", "reacted_at": "2026-01-01T00:00:00Z"},
+                    {"kind": "agent", "id": "agent_1", "reacted_at": "2026-01-01T00:00:01Z"}
+                ]
+            }]
+        }])))
+        .mount(&server)
+        .await;
+
+    let list = client
+        .messages()
+        .reactions("session_1")
+        .await
+        .expect("list");
+    assert_eq!(list.len(), 1);
+    assert_eq!(list[0].message_id, "message_1");
+    let summary = &list[0].reactions[0];
+    assert_eq!(summary.count, 2);
+    assert!(summary.me && !summary.agent);
+    assert_eq!(summary.actors[0].name.as_deref(), Some("Ann"));
+    assert_eq!(
+        summary.actors[1].kind,
+        everruns_sdk::ReactionActorKind::Agent
+    );
+}
+
+#[tokio::test]
+async fn test_react_error_surfaces_api_error() {
+    let server = MockServer::start().await;
+    let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
+
+    Mock::given(method("PUT"))
+        .respond_with(ResponseTemplate::new(404).set_body_json(serde_json::json!({
+            "error": {"code": "not_found", "message": "message not found"}
+        })))
+        .mount(&server)
+        .await;
+
+    let err = client
+        .messages()
+        .react("session_1", "missing", "👍")
+        .await
+        .unwrap_err();
+    assert!(matches!(err, everruns_sdk::Error::Api { status: 404, .. }));
+}

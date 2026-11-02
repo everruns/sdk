@@ -391,6 +391,22 @@ impl Everruns {
             .await
     }
 
+    pub(crate) async fn put_no_body<T: serde::de::DeserializeOwned>(
+        &self,
+        path: &str,
+    ) -> Result<T> {
+        self.send_json(self.http.put(self.url(path)).headers(self.headers()))
+            .await
+    }
+
+    pub(crate) async fn delete_json<T: serde::de::DeserializeOwned>(
+        &self,
+        path: &str,
+    ) -> Result<T> {
+        self.send_json(self.http.delete(self.url(path)).headers(self.headers()))
+            .await
+    }
+
     pub(crate) async fn delete(&self, path: &str) -> Result<()> {
         self.send_empty(self.http.delete(self.url(path)).headers(self.headers()))
             .await
@@ -455,8 +471,14 @@ pub(crate) fn append_sse_query(
 /// characters bare: the encoding the server's decoder and the Everruns CLI use.
 /// `+` is encoded rather than read as a space.
 pub(crate) fn encode_change_reason(reason: &str) -> String {
-    let mut out = String::with_capacity(reason.len());
-    for byte in reason.bytes() {
+    encode_path_segment(reason)
+}
+
+/// Percent-encode every byte outside the RFC 3986 unreserved set, so the value
+/// is safe as one URL path segment (an emoji, or a custom emoji like `:party:`).
+pub(crate) fn encode_path_segment(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for byte in value.bytes() {
         if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'~') {
             out.push(byte as char);
         } else {
@@ -464,6 +486,15 @@ pub(crate) fn encode_change_reason(reason: &str) -> String {
         }
     }
     out
+}
+
+fn reaction_path(session_id: &str, message_id: &str, emoji: &str) -> String {
+    format!(
+        "/sessions/{}/messages/{}/reactions/{}",
+        session_id,
+        message_id,
+        encode_path_segment(emoji)
+    )
 }
 
 /// Validate harness binding on an agent create/apply request.
@@ -767,6 +798,39 @@ impl<'a> MessagesClient<'a> {
         let req = CreateMessageRequest::user_text(text);
         self.client
             .post(&format!("/sessions/{}/messages", session_id), &req)
+            .await
+    }
+
+    /// Add the caller's reaction to a message. Idempotent: `changed` is false
+    /// when the reaction was already there. `emoji` is one Unicode emoji or a
+    /// custom emoji as `:name:`; it is percent-encoded into the path.
+    pub async fn react(
+        &self,
+        session_id: &str,
+        message_id: &str,
+        emoji: &str,
+    ) -> Result<ReactionChange> {
+        self.client
+            .put_no_body(&reaction_path(session_id, message_id, emoji))
+            .await
+    }
+
+    /// Remove the caller's reaction from a message. Idempotent.
+    pub async fn unreact(
+        &self,
+        session_id: &str,
+        message_id: &str,
+        emoji: &str,
+    ) -> Result<ReactionChange> {
+        self.client
+            .delete_json(&reaction_path(session_id, message_id, emoji))
+            .await
+    }
+
+    /// List per-message reaction summaries for a session.
+    pub async fn reactions(&self, session_id: &str) -> Result<Vec<MessageReactions>> {
+        self.client
+            .get(&format!("/sessions/{}/reactions", session_id))
             .await
     }
 

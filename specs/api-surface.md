@@ -115,6 +115,13 @@ Session create/update payloads support optional `title`, `locale`, `model_id`, `
 ### Messages
 - `POST /v1/sessions/{id}/messages` - Create message (supports `external_actor` for channel identity)
 - `GET /v1/sessions/{id}/messages` - List messages
+- `PUT /v1/sessions/{id}/messages/{message_id}/reactions/{emoji}` - Add the caller's reaction (idempotent; emoji percent-encoded, custom emoji as `:name:`)
+- `DELETE /v1/sessions/{id}/messages/{message_id}/reactions/{emoji}` - Remove the caller's reaction (idempotent)
+- `GET /v1/sessions/{id}/reactions` - Per-message reaction summaries
+
+Agent Execution API (`AgentClient`, base `/v1/channels/{channel_id}`): the same three routes under `/sessions/{session_id}/...`; the list accepts a `message_id` filter.
+
+SDK methods: Rust `messages().react/unreact/reactions`, Python `messages.react/unreact/reactions`, TypeScript `messages.react/unreact/reactions`; `AgentClient` has `react/unreact/reactions` in all three.
 
 ### Events
 - `GET /v1/sessions/{id}/events` - List events (polling, supports filtering, backward/forward pagination, centered windows, and full-text search)

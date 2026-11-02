@@ -2692,3 +2692,84 @@ async def test_models_get():
     assert route.called
     assert model.id == "model_1"
     assert model.display_name == "GPT-4o"
+
+
+def _reaction_change(emoji: str, reacted: bool, changed: bool = True) -> dict:
+    return {"message_id": "message_1", "emoji": emoji, "reacted": reacted, "changed": changed}
+
+
+@respx.mock
+async def test_react_and_unreact_encode_emoji_path():
+    base = "https://api.test/v1/sessions/session_1/messages/message_1/reactions"
+    put = respx.put(f"{base}/%F0%9F%91%8D").mock(
+        return_value=httpx.Response(200, json=_reaction_change("👍", True))
+    )
+    delete = respx.delete(f"{base}/%3Aparty%3A").mock(
+        return_value=httpx.Response(200, json=_reaction_change(":party:", False, False))
+    )
+    client = Everruns(api_key="evr_test_key", base_url="https://api.test")
+
+    added = await client.messages.react("session_1", "message_1", "👍")
+    assert put.calls.last.request.url.raw_path == (
+        b"/v1/sessions/session_1/messages/message_1/reactions/%F0%9F%91%8D"
+    )
+    assert added.reacted and added.changed and added.emoji == "👍"
+
+    removed = await client.messages.unreact("session_1", "message_1", ":party:")
+    assert delete.called
+    assert not removed.reacted and not removed.changed
+
+
+@respx.mock
+async def test_reactions_lists_summaries():
+    respx.get("https://api.test/v1/sessions/session_1/reactions").mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {
+                    "message_id": "message_1",
+                    "reactions": [
+                        {
+                            "emoji": "👍",
+                            "count": 2,
+                            "me": True,
+                            "agent": False,
+                            "actors": [
+                                {
+                                    "kind": "user",
+                                    "id": "user_1",
+                                    "name": "Ann",
+                                    "reacted_at": "2026-01-01T00:00:00Z",
+                                },
+                                {
+                                    "kind": "agent",
+                                    "id": "agent_1",
+                                    "reacted_at": "2026-01-01T00:00:01Z",
+                                },
+                            ],
+                        }
+                    ],
+                }
+            ],
+        )
+    )
+    client = Everruns(api_key="evr_test_key", base_url="https://api.test")
+    result = await client.messages.reactions("session_1")
+    assert result[0].message_id == "message_1"
+    summary = result[0].reactions[0]
+    assert summary.count == 2 and summary.me and not summary.agent
+    assert summary.actors[0].name == "Ann"
+    assert summary.actors[1].kind == "agent"
+
+
+@respx.mock
+async def test_react_error_surfaces_api_error():
+    respx.put(url__regex=r"https://api\.test/v1/sessions/.*/reactions/.*").mock(
+        return_value=httpx.Response(
+            404, json={"error": {"code": "not_found", "message": "message not found"}}
+        )
+    )
+    client = Everruns(api_key="evr_test_key", base_url="https://api.test")
+    with pytest.raises(ApiError) as info:
+        await client.messages.react("session_1", "missing", "👍")
+    assert info.value.status_code == 404

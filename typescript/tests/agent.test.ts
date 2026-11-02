@@ -345,3 +345,59 @@ describe("AgentClient streaming and run", () => {
     expect(error.message).toContain("model unavailable");
   });
 });
+
+describe("AgentClient reactions", () => {
+  const agent = () =>
+    new AgentClient({ agentUrl: BASE, credential: "evr_ak_x" });
+  const change = (emoji: string, reacted: boolean) => ({
+    message_id: "m1",
+    emoji,
+    reacted,
+    changed: true,
+  });
+
+  it("uses channel paths and percent-encodes the emoji", async () => {
+    const calls = mockFetch(
+      jsonResponse(change("👍", true)),
+      jsonResponse(change(":party:", false)),
+      jsonResponse([
+        {
+          message_id: "m1",
+          reactions: [
+            { emoji: "👍", count: 1, me: true, agent: false, actors: [] },
+          ],
+        },
+      ]),
+    );
+    const a = agent();
+
+    const added = await a.react("s1", "m1", "👍");
+    expect(calls[0].url).toBe(
+      `${BASE}/sessions/s1/messages/m1/reactions/%F0%9F%91%8D`,
+    );
+    expect(calls[0].init.method).toBe("PUT");
+    expect(calls[0].headers.Authorization).toMatch(/^Bearer /);
+    expect(added.reacted).toBe(true);
+
+    const removed = await a.unreact("s1", "m1", ":party:");
+    expect(calls[1].url).toBe(
+      `${BASE}/sessions/s1/messages/m1/reactions/%3Aparty%3A`,
+    );
+    expect(calls[1].init.method).toBe("DELETE");
+    expect(removed.reacted).toBe(false);
+
+    const list = await a.reactions("s1", { messageId: "m1" });
+    expect(calls[2].url).toBe(`${BASE}/sessions/s1/reactions?message_id=m1`);
+    expect(list[0].reactions[0].emoji).toBe("👍");
+  });
+
+  it("surfaces a 422 as ApiError with its code", async () => {
+    mockFetch(jsonResponse({ code: "invalid_emoji", message: "no" }, 422));
+    const error = await agent()
+      .react("s1", "m1", "nope")
+      .catch((e) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.statusCode).toBe(422);
+    expect(error.code).toBe("invalid_emoji");
+  });
+});
