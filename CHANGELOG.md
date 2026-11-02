@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Highlights
+
+- Message reactions in the Rust, Python, and TypeScript SDKs: `react`, `unreact`, and `reactions` on the messages client and on `AgentClient`. Emoji are percent-encoded into the request path; custom emoji use `:name:`.
+
 ## [0.3.1] - 2026-10-11
 
 ### Highlights

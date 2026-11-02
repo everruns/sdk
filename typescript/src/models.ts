@@ -54,6 +54,7 @@ export interface Budget {
   organization_id: string;
   period?: BudgetPeriod | null;
   period_started_at?: string | null;
+  policy?: unknown;
   soft_limit?: number | null;
   status: BudgetStatus;
   subject_id: string;
@@ -240,6 +241,7 @@ export interface CreateBudgetRequest {
   limit: number;
   metadata?: unknown;
   period?: BudgetPeriod | null;
+  policy?: unknown | null;
   softLimit?: number | null;
   subjectId: string;
   subjectType: string;
@@ -651,6 +653,12 @@ export interface Message {
   session_id: string;
 }
 
+/** The reactions on one message. */
+export interface MessageReactions {
+  message_id: string;
+  reactions: ReactionSummary[];
+}
+
 export type MessageRole = "user" | "agent";
 
 export type Modality = "text" | "image" | "audio" | "video" | "pdf";
@@ -756,6 +764,40 @@ export interface MoveFileRequest {
 export interface NetworkAccessList {
   allowed?: string[];
   blocked?: string[];
+}
+
+/** Who put a reaction on a message. */
+export interface ReactionActor {
+  id: string;
+  kind: ReactionActorKind;
+  name?: string | null;
+}
+
+export type ReactionActorKind = "user" | "consumer" | "agent" | "external";
+
+/** One person or agent who reacted. */
+export interface ReactionActorView {
+  id: string;
+  kind: ReactionActorKind;
+  name?: string | null;
+  reacted_at: string;
+}
+
+/** Result of adding or removing a reaction. */
+export interface ReactionChange {
+  changed: boolean;
+  emoji: string;
+  message_id: string;
+  reacted: boolean;
+}
+
+/** One emoji on a message. */
+export interface ReactionSummary {
+  actors: ReactionActorView[];
+  agent: boolean;
+  count: number;
+  emoji: string;
+  me: boolean;
 }
 
 export type ReasoningEffort =
@@ -911,6 +953,7 @@ export interface TopUpRequest {
 export interface UpdateBudgetRequest {
   limit?: number | null;
   metadata?: unknown;
+  policy?: unknown | null;
   softLimit?: number | null;
   status?: string | null;
 }

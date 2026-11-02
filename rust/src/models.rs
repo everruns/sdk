@@ -134,6 +134,8 @@ pub struct Budget {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub period_started_at: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub policy: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub soft_limit: Option<f64>,
     pub status: BudgetStatus,
     pub subject_id: String,
@@ -701,6 +703,8 @@ pub struct CreateBudgetRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub period: Option<BudgetPeriod>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub policy: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub soft_limit: Option<f64>,
     pub subject_id: String,
     pub subject_type: String,
@@ -718,6 +722,7 @@ impl CreateBudgetRequest {
             limit,
             metadata: None,
             period: None,
+            policy: None,
             soft_limit: None,
             subject_id: subject_id.into(),
             subject_type: subject_type.into(),
@@ -731,6 +736,11 @@ impl CreateBudgetRequest {
 
     pub fn period(mut self, period: BudgetPeriod) -> Self {
         self.period = Some(period);
+        self
+    }
+
+    pub fn policy(mut self, policy: serde_json::Value) -> Self {
+        self.policy = Some(policy);
         self
     }
 
@@ -1922,6 +1932,14 @@ pub struct Message {
     pub session_id: String,
 }
 
+/// The reactions on one message.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct MessageReactions {
+    pub message_id: String,
+    pub reactions: Vec<ReactionSummary>,
+}
+
 /// Message role (API layer)
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum MessageRole {
@@ -2122,6 +2140,61 @@ pub struct NetworkAccessList {
     pub allowed: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub blocked: Vec<String>,
+}
+
+/// Who put a reaction on a message.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ReactionActor {
+    pub id: String,
+    pub kind: ReactionActorKind,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+/// Who reacted.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum ReactionActorKind {
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "consumer")]
+    Consumer,
+    #[serde(rename = "agent")]
+    Agent,
+    #[serde(rename = "external")]
+    External,
+}
+
+/// One person or agent who reacted.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ReactionActorView {
+    pub id: String,
+    pub kind: ReactionActorKind,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    pub reacted_at: String,
+}
+
+/// Result of adding or removing a reaction.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ReactionChange {
+    pub changed: bool,
+    pub emoji: String,
+    pub message_id: String,
+    pub reacted: bool,
+}
+
+/// One emoji on a message.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ReactionSummary {
+    pub actors: Vec<ReactionActorView>,
+    pub agent: bool,
+    pub count: u64,
+    pub emoji: String,
+    pub me: bool,
 }
 
 /// Reasoning effort level for models that support it
@@ -2424,6 +2497,8 @@ pub struct UpdateBudgetRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metadata: Option<serde_json::Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub policy: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub soft_limit: Option<Option<f64>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
@@ -2434,6 +2509,7 @@ impl UpdateBudgetRequest {
         Self {
             limit: None,
             metadata: None,
+            policy: None,
             soft_limit: None,
             status: None,
         }
@@ -2446,6 +2522,11 @@ impl UpdateBudgetRequest {
 
     pub fn metadata(mut self, metadata: serde_json::Value) -> Self {
         self.metadata = Some(metadata);
+        self
+    }
+
+    pub fn policy(mut self, policy: serde_json::Value) -> Self {
+        self.policy = Some(policy);
         self
     }
 

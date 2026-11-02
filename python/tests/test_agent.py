@@ -311,3 +311,52 @@ async def test_management_client_warns_once(monkeypatch):
     assert all("AgentClient" in str(w.message) for w in deprecations)
     assert all(w.filename == __file__ for w in deprecations)
     await client.close()
+
+
+@respx.mock
+async def test_reactions_use_channel_paths_and_encode_emoji():
+    change = {"message_id": "message_1", "emoji": "👍", "reacted": True, "changed": True}
+    put = respx.put(f"{BASE}/sessions/session_1/messages/message_1/reactions/%F0%9F%91%8D").mock(
+        return_value=httpx.Response(200, json=change)
+    )
+    msg = f"{BASE}/sessions/session_1/messages/message_1"
+    delete = respx.delete(f"{msg}/reactions/%3Aparty%3A").mock(
+        return_value=httpx.Response(200, json={**change, "emoji": ":party:", "reacted": False})
+    )
+    listing = respx.get(
+        f"{BASE}/sessions/session_1/reactions", params={"message_id": "message_1"}
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {
+                    "message_id": "message_1",
+                    "reactions": [
+                        {"emoji": "👍", "count": 1, "me": True, "agent": False, "actors": []}
+                    ],
+                }
+            ],
+        )
+    )
+    agent = make_agent()
+    added = await agent.react("session_1", "message_1", "👍")
+    assert added.reacted
+    assert put.calls.last.request.headers["authorization"] == "Bearer evr_ak_secret"
+    removed = await agent.unreact("session_1", "message_1", ":party:")
+    assert not removed.reacted and delete.called
+    result = await agent.reactions("session_1", message_id="message_1")
+    assert listing.called
+    assert result[0].reactions[0].emoji == "👍"
+
+
+@respx.mock
+async def test_reaction_validation_error_surfaces_api_error():
+    respx.put(url__regex=r".*/reactions/.*").mock(
+        return_value=httpx.Response(
+            422, json={"error": {"code": "invalid_emoji", "message": "not an emoji"}}
+        )
+    )
+    with pytest.raises(ApiError) as info:
+        await make_agent().react("session_1", "message_1", "nope")
+    assert info.value.status_code == 422
+    assert info.value.code == "invalid_emoji"

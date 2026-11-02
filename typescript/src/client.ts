@@ -41,6 +41,8 @@ import {
   MemoryGrepResult,
   ModelWithProvider,
   ResourceStats,
+  MessageReactions,
+  ReactionChange,
   ResumeSessionResponse,
   SessionFile,
   SubmitToolResultsResponse,
@@ -680,12 +682,50 @@ class MessagesClient {
     throw new Error("unreachable");
   }
 
+  /**
+   * Add the caller's reaction to a message. Idempotent. `emoji` is one Unicode
+   * emoji or a custom emoji as `:name:`; it is percent-encoded into the path.
+   */
+  async react(
+    sessionId: string,
+    messageId: string,
+    emoji: string,
+  ): Promise<ReactionChange> {
+    return this.client.fetch(reactionPath(sessionId, messageId, emoji), {
+      method: "PUT",
+    });
+  }
+
+  /** Remove the caller's reaction from a message. Idempotent. */
+  async unreact(
+    sessionId: string,
+    messageId: string,
+    emoji: string,
+  ): Promise<ReactionChange> {
+    return this.client.fetch(reactionPath(sessionId, messageId, emoji), {
+      method: "DELETE",
+    });
+  }
+
+  /** List per-message reaction summaries for a session. */
+  async reactions(sessionId: string): Promise<MessageReactions[]> {
+    return this.client.fetch(`/sessions/${sessionId}/reactions`);
+  }
+
   async list(sessionId: string): Promise<Message[]> {
     const response = await this.client.fetch<{ messages: Message[] }>(
       `/sessions/${sessionId}/messages`,
     );
     return response.messages;
   }
+}
+
+function reactionPath(
+  sessionId: string,
+  messageId: string,
+  emoji: string,
+): string {
+  return `/sessions/${sessionId}/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`;
 }
 
 function isToolResultsPendingConflict(error: unknown): boolean {

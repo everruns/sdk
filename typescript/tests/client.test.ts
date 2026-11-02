@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiKey } from "../src/auth.js";
 import { Everruns, encodeChangeReason } from "../src/client.js";
-import { ValidationError } from "../src/errors.js";
+import { NotFoundError, ValidationError } from "../src/errors.js";
 import {
   generateAgentId,
   generateHarnessId,
@@ -2743,5 +2743,96 @@ describe("ModelsClient", () => {
       "https://app.everruns.com/api/v1/models/model_123",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
+  });
+  describe("message reactions", () => {
+    const base = "https://app.everruns.com/api/v1/sessions/session_1";
+    const change = (emoji: string, reacted: boolean, changed = true) => ({
+      message_id: "message_1",
+      emoji,
+      reacted,
+      changed,
+    });
+    const ok = (body: unknown) => ({
+      ok: true,
+      status: 200,
+      json: async () => body,
+    });
+
+    it("react and unreact percent-encode the emoji path", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(ok(change("👍", true)))
+        .mockResolvedValueOnce(ok(change(":party:", false, false)));
+      vi.stubGlobal("fetch", fetchMock);
+      const client = new Everruns({ apiKey: "evr_test_key" });
+
+      const added = await client.messages.react("session_1", "message_1", "👍");
+      expect(fetchMock.mock.calls[0][0]).toBe(
+        `${base}/messages/message_1/reactions/%F0%9F%91%8D`,
+      );
+      expect(fetchMock.mock.calls[0][1].method).toBe("PUT");
+      expect(added).toEqual(change("👍", true));
+
+      const removed = await client.messages.unreact(
+        "session_1",
+        "message_1",
+        ":party:",
+      );
+      expect(fetchMock.mock.calls[1][0]).toBe(
+        `${base}/messages/message_1/reactions/%3Aparty%3A`,
+      );
+      expect(fetchMock.mock.calls[1][1].method).toBe("DELETE");
+      expect(removed.reacted).toBe(false);
+      expect(removed.changed).toBe(false);
+    });
+
+    it("reactions lists per-message summaries", async () => {
+      const summaries = [
+        {
+          message_id: "message_1",
+          reactions: [
+            {
+              emoji: "👍",
+              count: 1,
+              me: true,
+              agent: false,
+              actors: [
+                {
+                  kind: "user",
+                  id: "user_1",
+                  name: "Ann",
+                  reacted_at: "2026-01-01T00:00:00Z",
+                },
+              ],
+            },
+          ],
+        },
+      ];
+      const fetchMock = vi.fn().mockResolvedValue(ok(summaries));
+      vi.stubGlobal("fetch", fetchMock);
+      const client = new Everruns({ apiKey: "evr_test_key" });
+
+      const result = await client.messages.reactions("session_1");
+      expect(fetchMock.mock.calls[0][0]).toBe(`${base}/reactions`);
+      expect(fetchMock.mock.calls[0][1].method).toBeUndefined();
+      expect(result[0].reactions[0].actors[0].name).toBe("Ann");
+    });
+
+    it("react surfaces a 404 as NotFoundError", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status: 404,
+          statusText: "Not Found",
+          headers: new Headers(),
+          text: async () => "",
+        }),
+      );
+      const client = new Everruns({ apiKey: "evr_test_key" });
+      await expect(
+        client.messages.react("session_1", "missing", "👍"),
+      ).rejects.toBeInstanceOf(NotFoundError);
+    });
   });
 });

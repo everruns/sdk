@@ -24,7 +24,7 @@
 use crate::auth::ApiKey;
 use crate::client::send_request;
 use crate::error::{Error, Result};
-use crate::models::Event;
+use crate::models::{Event, MessageReactions, ReactionChange};
 use crate::sse::{EventStream, StreamOptions};
 use futures_util::StreamExt;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValue};
@@ -297,6 +297,59 @@ impl AgentClient {
             idempotency_key,
         )
         .await
+    }
+
+    /// Add the caller's reaction to a message. Idempotent. `emoji` is one
+    /// Unicode emoji or a custom emoji as `:name:`; it is percent-encoded.
+    pub async fn react(
+        &self,
+        session_id: &str,
+        message_id: &str,
+        emoji: &str,
+    ) -> Result<ReactionChange> {
+        let url = self.url(&[
+            "sessions",
+            session_id,
+            "messages",
+            message_id,
+            "reactions",
+            emoji,
+        ]);
+        let req = self.http.put(url).headers(self.json_headers(None)?);
+        Ok(serde_json::from_str(&send_request(req).await?)?)
+    }
+
+    /// Remove the caller's reaction from a message. Idempotent.
+    pub async fn unreact(
+        &self,
+        session_id: &str,
+        message_id: &str,
+        emoji: &str,
+    ) -> Result<ReactionChange> {
+        let url = self.url(&[
+            "sessions",
+            session_id,
+            "messages",
+            message_id,
+            "reactions",
+            emoji,
+        ]);
+        let req = self.http.delete(url).headers(self.json_headers(None)?);
+        Ok(serde_json::from_str(&send_request(req).await?)?)
+    }
+
+    /// List per-message reaction summaries for a session. Pass `message_id`
+    /// to limit the result to one message.
+    pub async fn reactions(
+        &self,
+        session_id: &str,
+        message_id: Option<&str>,
+    ) -> Result<Vec<MessageReactions>> {
+        let mut url = self.url(&["sessions", session_id, "reactions"]);
+        if let Some(message_id) = message_id {
+            url.query_pairs_mut().append_pair("message_id", message_id);
+        }
+        self.get(url).await
     }
 
     /// Cancel the session's running turn.

@@ -20,13 +20,14 @@ from __future__ import annotations
 import os
 import re
 from typing import Any, Optional
+from urllib.parse import quote
 
 import httpx
 
 from everruns_sdk.auth import ApiKey
 from everruns_sdk.client import _is_html_response, _with_query
 from everruns_sdk.errors import ApiError, EverrunsError, ValidationError
-from everruns_sdk.models import Event
+from everruns_sdk.models import Event, MessageReactions, ReactionChange
 from everruns_sdk.sse import EventStream, StreamOptions
 
 END_USER_HEADER = "End-User"
@@ -212,6 +213,28 @@ class AgentClient:
             idempotency_key=idempotency_key,
         )
 
+    async def react(self, session_id: str, message_id: str, emoji: str) -> ReactionChange:
+        """Add the caller's reaction to a message. Idempotent.
+
+        ``emoji`` is one Unicode emoji or a custom emoji as ``:name:``; it is
+        percent-encoded into the path.
+        """
+        resp = await self._request("PUT", _reaction_path(session_id, message_id, emoji))
+        return ReactionChange(**resp)
+
+    async def unreact(self, session_id: str, message_id: str, emoji: str) -> ReactionChange:
+        """Remove the caller's reaction from a message. Idempotent."""
+        resp = await self._request("DELETE", _reaction_path(session_id, message_id, emoji))
+        return ReactionChange(**resp)
+
+    async def reactions(
+        self, session_id: str, *, message_id: Optional[str] = None
+    ) -> list[MessageReactions]:
+        """List per-message reaction summaries; ``message_id`` limits to one message."""
+        path = _with_query(f"/sessions/{session_id}/reactions", {"message_id": message_id})
+        resp = await self._request("GET", path)
+        return [MessageReactions(**m) for m in resp]
+
     async def cancel(self, session_id: str) -> Any:
         """Cancel the running turn."""
         return await self._request("POST", f"/sessions/{session_id}/cancel")
@@ -329,6 +352,10 @@ class AgentClient:
 
     async def __aexit__(self, *args: Any) -> None:
         await self.close()
+
+
+def _reaction_path(session_id: str, message_id: str, emoji: str) -> str:
+    return f"/sessions/{session_id}/messages/{message_id}/reactions/{quote(emoji, safe='')}"
 
 
 def _assistant_text(data: Any) -> str:

@@ -85,6 +85,7 @@ class Budget(BaseModel):
     organization_id: str
     period: Optional[BudgetPeriod] = None
     period_started_at: Optional[str] = None
+    policy: Optional[Any] = None
     soft_limit: Optional[float] = None
     status: BudgetStatus
     subject_id: str
@@ -331,6 +332,7 @@ class CreateBudgetRequest(BaseModel):
     limit: float
     metadata: Optional[Any] = None
     period: Optional[BudgetPeriod] = None
+    policy: Optional[Any] = None
     soft_limit: Optional[float] = None
     subject_id: str
     subject_type: str
@@ -854,6 +856,15 @@ class Message(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class MessageReactions(BaseModel):
+    """The reactions on one message."""
+
+    message_id: str
+    reactions: list[ReactionSummary]
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 MessageRole = Literal["user", "agent"]
 
 Modality = Literal["text", "image", "audio", "video", "pdf"]
@@ -981,6 +992,53 @@ class NetworkAccessList(BaseModel):
 
     allowed: Optional[list[str]] = Field(default_factory=list)
     blocked: Optional[list[str]] = Field(default_factory=list)
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ReactionActor(BaseModel):
+    """Who put a reaction on a message."""
+
+    id: str
+    kind: ReactionActorKind
+    name: Optional[str] = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+ReactionActorKind = Literal["user", "consumer", "agent", "external"]
+
+
+class ReactionActorView(BaseModel):
+    """One person or agent who reacted."""
+
+    id: str
+    kind: ReactionActorKind
+    name: Optional[str] = None
+    reacted_at: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ReactionChange(BaseModel):
+    """Result of adding or removing a reaction."""
+
+    changed: bool
+    emoji: str
+    message_id: str
+    reacted: bool
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ReactionSummary(BaseModel):
+    """One emoji on a message."""
+
+    actors: list[ReactionActorView]
+    agent: bool
+    count: int
+    emoji: str
+    me: bool
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -1185,6 +1243,7 @@ class UpdateBudgetRequest(BaseModel):
 
     limit: Optional[float] = None
     metadata: Optional[Any] = None
+    policy: Optional[Any] = None
     soft_limit: Optional[float] = None
     status: Optional[str] = None
 
@@ -1449,6 +1508,7 @@ MemoryFile.model_rebuild()
 MemoryFileInfo.model_rebuild()
 MemoryGrepResult.model_rebuild()
 Message.model_rebuild()
+MessageReactions.model_rebuild()
 ModelCost.model_rebuild()
 ModelLimits.model_rebuild()
 ModelModalities.model_rebuild()
@@ -1456,6 +1516,10 @@ ModelProfile.model_rebuild()
 ModelWithProvider.model_rebuild()
 MoveFileRequest.model_rebuild()
 NetworkAccessList.model_rebuild()
+ReactionActor.model_rebuild()
+ReactionActorView.model_rebuild()
+ReactionChange.model_rebuild()
+ReactionSummary.model_rebuild()
 ReasoningEffortConfig.model_rebuild()
 ReasoningEffortValue.model_rebuild()
 ResourceStats.model_rebuild()

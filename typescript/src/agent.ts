@@ -18,7 +18,7 @@ import {
   RateLimitError,
   ValidationError,
 } from "./errors.js";
-import type { Event } from "./models.js";
+import type { Event, MessageReactions, ReactionChange } from "./models.js";
 import { EventStream } from "./sse.js";
 
 /** Reconnects `run` allows after the stream ends or drops without a result. */
@@ -213,6 +213,45 @@ export class AgentClient {
     });
   }
 
+  /**
+   * Add the caller's reaction to a message. Idempotent. `emoji` is one Unicode
+   * emoji or a custom emoji as `:name:`; it is percent-encoded into the path.
+   */
+  async react(
+    sessionId: string,
+    messageId: string,
+    emoji: string,
+  ): Promise<ReactionChange> {
+    return this.request<ReactionChange>(
+      reactionPath(sessionId, messageId, emoji),
+      { method: "PUT" },
+    );
+  }
+
+  /** Remove the caller's reaction from a message. Idempotent. */
+  async unreact(
+    sessionId: string,
+    messageId: string,
+    emoji: string,
+  ): Promise<ReactionChange> {
+    return this.request<ReactionChange>(
+      reactionPath(sessionId, messageId, emoji),
+      { method: "DELETE" },
+    );
+  }
+
+  /** List per-message reaction summaries; `messageId` limits to one message. */
+  async reactions(
+    sessionId: string,
+    options: { messageId?: string } = {},
+  ): Promise<MessageReactions[]> {
+    const params = new URLSearchParams();
+    if (options.messageId) params.set("message_id", options.messageId);
+    return this.request<MessageReactions[]>(
+      `/sessions/${sessionId}/reactions${queryString(params)}`,
+    );
+  }
+
   /** Cancel the session's running turn. */
   async cancel(sessionId: string): Promise<unknown> {
     return this.request(`/sessions/${sessionId}/cancel`, { method: "POST" });
@@ -370,6 +409,14 @@ export class AgentClient {
     }
     return (await response.json()) as T;
   }
+}
+
+function reactionPath(
+  sessionId: string,
+  messageId: string,
+  emoji: string,
+): string {
+  return `/sessions/${sessionId}/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`;
 }
 
 function idempotencyHeaders(key?: string): Record<string, string> {

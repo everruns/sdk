@@ -406,3 +406,64 @@ async fn run_on_an_existing_session_streams_after_the_newest_sequence() {
     let reply = client(&server).run("again", Some("sess_1")).await.unwrap();
     assert_eq!(reply, "new");
 }
+
+#[tokio::test]
+async fn reactions_use_channel_paths_and_encode_emoji() {
+    let server = MockServer::start().await;
+    let change = |emoji: &str, reacted: bool| {
+        ResponseTemplate::new(200).set_body_json(json!({
+            "message_id": "msg_1", "emoji": emoji, "reacted": reacted, "changed": true
+        }))
+    };
+    Mock::given(method("PUT"))
+        .and(path(
+            "/v1/channels/chan_1/sessions/sess_1/messages/msg_1/reactions/%F0%9F%91%8D",
+        ))
+        .and(header("authorization", "Bearer evr_ak_test"))
+        .respond_with(change("👍", true))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("DELETE"))
+        .and(path(
+            "/v1/channels/chan_1/sessions/sess_1/messages/msg_1/reactions/:party:",
+        ))
+        .respond_with(change(":party:", false))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/v1/channels/chan_1/sessions/sess_1/reactions"))
+        .and(query_param("message_id", "msg_1"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!([{
+            "message_id": "msg_1",
+            "reactions": [{"emoji": "👍", "count": 1, "me": true, "agent": false, "actors": []}]
+        }])))
+        .expect(1)
+        .mount(&server)
+        .await;
+
+    let c = client(&server);
+    let added = c.react("sess_1", "msg_1", "👍").await.unwrap();
+    assert!(added.reacted);
+    let removed = c.unreact("sess_1", "msg_1", ":party:").await.unwrap();
+    assert!(!removed.reacted);
+    let list = c.reactions("sess_1", Some("msg_1")).await.unwrap();
+    assert_eq!(list[0].reactions[0].emoji, "👍");
+}
+
+#[tokio::test]
+async fn reaction_validation_error_surfaces_api_error() {
+    let server = MockServer::start().await;
+    Mock::given(method("PUT"))
+        .respond_with(ResponseTemplate::new(422).set_body_json(json!({
+            "error": {"code": "invalid_emoji", "message": "not an emoji"}
+        })))
+        .mount(&server)
+        .await;
+    let err = client(&server)
+        .react("sess_1", "msg_1", "nope")
+        .await
+        .unwrap_err();
+    assert!(matches!(err, Error::Api { status: 422, .. }));
+}
