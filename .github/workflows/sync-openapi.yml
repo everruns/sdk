@@ -60,7 +60,8 @@ jobs:
           git config user.name "Mykhailo Chalyi"
           git config user.email "mike@chaliy.name"
           git checkout -B "$BRANCH"
-          git add -A
+          # Only tracked files: the Doppler CLI action drops its binary in ./bin.
+          git add -u
           git commit -m "$TITLE"
           git push --force origin "$BRANCH"
           doppler run -- bash -c '
