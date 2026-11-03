@@ -53,6 +53,8 @@ pub struct Agent {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub network_access: Option<NetworkAccessList>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_agent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parallel_tool_calls: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub root_agent_id: Option<String>,
@@ -535,6 +537,8 @@ pub struct CreateAgentRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub network_access: Option<NetworkAccessList>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub owner_agent_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parallel_tool_calls: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sandbox_policy: Option<serde_json::Value>,
@@ -570,6 +574,7 @@ impl CreateAgentRequest {
             mcp_servers: None,
             name: name.into(),
             network_access: None,
+            owner_agent_id: None,
             parallel_tool_calls: None,
             sandbox_policy: None,
             service_virtual_user_id: None,
@@ -653,6 +658,11 @@ impl CreateAgentRequest {
 
     pub fn network_access(mut self, network_access: NetworkAccessList) -> Self {
         self.network_access = Some(network_access);
+        self
+    }
+
+    pub fn owner_agent_id(mut self, owner_agent_id: impl Into<String>) -> Self {
+        self.owner_agent_id = Some(owner_agent_id.into());
         self
     }
 
@@ -1936,8 +1946,12 @@ pub struct Message {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct MessageReactions {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub author: Option<String>,
     pub message_id: String,
     pub reactions: Vec<ReactionSummary>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sequence: Option<i64>,
 }
 
 /// Message role (API layer)

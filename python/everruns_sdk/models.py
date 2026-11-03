@@ -37,6 +37,7 @@ class Agent(BaseModel):
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
+    owner_agent_id: Optional[str] = None
     parallel_tool_calls: Optional[bool] = None
     root_agent_id: Optional[str] = None
     sandbox_policy: Optional[Any] = None
@@ -313,6 +314,7 @@ class CreateAgentRequest(BaseModel):
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
     name: str
     network_access: Optional[NetworkAccessList] = None
+    owner_agent_id: Optional[str] = None
     parallel_tool_calls: Optional[bool] = None
     sandbox_policy: Optional[Any] = None
     service_virtual_user_id: Optional[str] = None
@@ -859,8 +861,10 @@ class Message(BaseModel):
 class MessageReactions(BaseModel):
     """The reactions on one message."""
 
+    author: Optional[str] = None
     message_id: str
     reactions: list[ReactionSummary]
+    sequence: Optional[int] = None
 
     model_config = ConfigDict(populate_by_name=True)
 

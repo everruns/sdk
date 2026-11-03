@@ -20,6 +20,7 @@ export interface Agent {
   localizations?: unknown;
   max_output_tokens?: number | null;
   name: string;
+  owner_agent_id?: string | null;
   parallel_tool_calls?: boolean | null;
   sandbox_policy?: unknown | null;
   service_virtual_user_id?: string | null;
@@ -225,6 +226,7 @@ export interface CreateAgentRequest {
   mcpServers?: unknown;
   name: string;
   networkAccess?: NetworkAccessList | null;
+  ownerAgentId?: string | null;
   parallelToolCalls?: boolean | null;
   sandboxPolicy?: unknown | null;
   serviceVirtualUserId?: string | null;
@@ -655,8 +657,10 @@ export interface Message {
 
 /** The reactions on one message. */
 export interface MessageReactions {
+  author?: string | null;
   message_id: string;
   reactions: ReactionSummary[];
+  sequence?: number | null;
 }
 
 export type MessageRole = "user" | "agent";
