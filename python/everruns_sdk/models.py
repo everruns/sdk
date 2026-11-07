@@ -18,6 +18,7 @@ class Agent(BaseModel):
     avatar: Optional[Any] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
     communication: Optional[Any] = None
+    completion_check: Optional[Any] = None
     created_at: str
     default_model_id: Optional[str] = None
     deleted_at: Optional[str] = None
@@ -300,6 +301,7 @@ class CreateAgentRequest(BaseModel):
 
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
     communication: Optional[Any] = None
+    completion_check: Optional[Any] = None
     default_model_id: Optional[str] = None
     description: Optional[str] = None
     display_name: Optional[str] = None
@@ -914,6 +916,7 @@ class ModelProfile(BaseModel):
     decisions: Optional[Any] = None
     description: Optional[str] = None
     family: str
+    images: Optional[Any] = None
     knowledge: Optional[str] = None
     last_updated: Optional[str] = None
     limits: Optional[ModelLimits] = None
@@ -1132,6 +1135,7 @@ class Session(BaseModel):
     locale: Optional[str] = None
     max_iterations: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    mcp_creator: Optional[Any] = None
     model_id: Optional[str] = None
     network_access: Optional[NetworkAccessList] = None
     organization_id: str
@@ -1331,6 +1335,7 @@ class Workspace(BaseModel):
 class AnalyzeAgentRequest(BaseModel):
     """Request to preview the final agent shape with capabilities applied"""
 
+    agent_id: Optional[str] = None
     capabilities: Optional[list[AgentCapabilityConfig]] = Field(default_factory=list)
     harness_id: Optional[Any] = None
     initial_files: Optional[list[InitialFile]] = Field(default_factory=list)
