@@ -16,6 +16,8 @@ pub struct Agent {
     pub capabilities: Vec<AgentCapabilityConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub communication: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub completion_check: Option<serde_json::Value>,
     pub created_at: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default_model_id: Option<String>,
@@ -509,6 +511,8 @@ pub struct CreateAgentRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub communication: Option<serde_json::Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub completion_check: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default_model_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -560,6 +564,7 @@ impl CreateAgentRequest {
         Self {
             capabilities: Vec::new(),
             communication: None,
+            completion_check: None,
             default_model_id: None,
             description: None,
             display_name: None,
@@ -593,6 +598,11 @@ impl CreateAgentRequest {
 
     pub fn communication(mut self, communication: serde_json::Value) -> Self {
         self.communication = Some(communication);
+        self
+    }
+
+    pub fn completion_check(mut self, completion_check: serde_json::Value) -> Self {
+        self.completion_check = Some(completion_check);
         self
     }
 
@@ -2025,6 +2035,8 @@ pub struct ModelProfile {
     pub description: Option<String>,
     pub family: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub images: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub knowledge: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_updated: Option<String>,
@@ -2341,6 +2353,8 @@ pub struct Session {
     #[serde(rename = "mcpServers")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mcp_servers: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mcp_creator: Option<serde_json::Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model_id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2872,6 +2886,8 @@ pub struct Workspace {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct AnalyzeAgentRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_id: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub capabilities: Vec<AgentCapabilityConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2889,6 +2905,7 @@ pub struct AnalyzeAgentRequest {
 impl AnalyzeAgentRequest {
     pub fn new(system_prompt: impl Into<String>) -> Self {
         Self {
+            agent_id: None,
             capabilities: Vec::new(),
             harness_id: None,
             initial_files: Vec::new(),
@@ -2896,6 +2913,11 @@ impl AnalyzeAgentRequest {
             system_prompt: system_prompt.into(),
             tools: Vec::new(),
         }
+    }
+
+    pub fn agent_id(mut self, agent_id: impl Into<String>) -> Self {
+        self.agent_id = Some(agent_id.into());
+        self
     }
 
     pub fn capabilities(mut self, capabilities: Vec<AgentCapabilityConfig>) -> Self {

@@ -7,6 +7,7 @@ export interface Agent {
   avatar?: unknown | null;
   capabilities?: AgentCapabilityConfig[];
   communication?: unknown;
+  completion_check?: unknown;
   created_at: string;
   model?: string | null;
   display_name?: string | null;
@@ -212,6 +213,7 @@ export interface CostTier {
 export interface CreateAgentRequest {
   capabilities?: AgentCapabilityConfig[];
   communication?: unknown;
+  completionCheck?: unknown;
   model?: string | null;
   description?: string | null;
   displayName?: string | null;
@@ -697,6 +699,7 @@ export interface ModelProfile {
   decisions?: unknown | null;
   description?: string | null;
   family: string;
+  images?: unknown | null;
   knowledge?: string | null;
   lastUpdated?: string | null;
   limits?: ModelLimits | null;
@@ -876,6 +879,7 @@ export interface Session {
   locale?: string | null;
   max_iterations?: number | null;
   mcpServers?: unknown;
+  mcp_creator?: unknown | null;
   model_id?: string | null;
   network_access?: NetworkAccessList | null;
   output_preview?: string | null;
@@ -1023,6 +1027,7 @@ export interface Workspace {
 
 /** Request to preview the final agent shape with capabilities applied */
 export interface AnalyzeAgentRequest {
+  agentId?: string | null;
   capabilities?: AgentCapabilityConfig[];
   harnessId?: unknown | null;
   initialFiles?: InitialFile[];
