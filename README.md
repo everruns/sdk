@@ -251,6 +251,13 @@ just lint     # Run all linters
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
+## Ecosystem
+
+The Everruns SDK is part of [Everruns](https://everruns.com/projects/), a free, non-commercial
+community ecosystem of open-source AI projects by
+[Mykhailo Chalyi](https://chaliy.name) and contributors. Questions, ideas and
+research discussion are welcome on [Discord](https://everruns.com/discord).
+
 ## License
 
 MIT
