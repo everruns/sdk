@@ -36,6 +36,7 @@ class Agent(BaseModel):
     max_iterations: Optional[int] = None
     max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    model_role: Optional[Any] = None
     name: str
     network_access: Optional[NetworkAccessList] = None
     owner_agent_id: Optional[str] = None
@@ -314,6 +315,7 @@ class CreateAgentRequest(BaseModel):
     max_iterations: Optional[int] = None
     max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    model_role: Optional[Any] = None
     name: str
     network_access: Optional[NetworkAccessList] = None
     owner_agent_id: Optional[str] = None

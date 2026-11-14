@@ -51,6 +51,8 @@ pub struct Agent {
     #[serde(rename = "mcpServers")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mcp_servers: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model_role: Option<serde_json::Value>,
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub network_access: Option<NetworkAccessList>,
@@ -537,6 +539,8 @@ pub struct CreateAgentRequest {
     #[serde(rename = "mcpServers")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mcp_servers: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model_role: Option<serde_json::Value>,
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub network_access: Option<NetworkAccessList>,
@@ -577,6 +581,7 @@ impl CreateAgentRequest {
             max_iterations: None,
             max_output_tokens: None,
             mcp_servers: None,
+            model_role: None,
             name: name.into(),
             network_access: None,
             owner_agent_id: None,
@@ -663,6 +668,11 @@ impl CreateAgentRequest {
 
     pub fn mcp_servers(mut self, mcp_servers: serde_json::Value) -> Self {
         self.mcp_servers = Some(mcp_servers);
+        self
+    }
+
+    pub fn model_role(mut self, model_role: serde_json::Value) -> Self {
+        self.model_role = Some(model_role);
         self
     }
 
