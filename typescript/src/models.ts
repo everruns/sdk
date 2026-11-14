@@ -20,6 +20,7 @@ export interface Agent {
   is_built_in?: boolean;
   localizations?: unknown;
   max_output_tokens?: number | null;
+  model_role?: unknown | null;
   name: string;
   owner_agent_id?: string | null;
   parallel_tool_calls?: boolean | null;
@@ -226,6 +227,7 @@ export interface CreateAgentRequest {
   maxIterations?: number | null;
   maxOutputTokens?: number | null;
   mcpServers?: unknown;
+  modelRole?: unknown | null;
   name: string;
   networkAccess?: NetworkAccessList | null;
   ownerAgentId?: string | null;
