@@ -80,7 +80,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           # npm trusted publishing (OIDC) needs npm >= 11.5.1, which ships with Node 24.
-          node-version: "24"
+          node-version: "24.22.1"
           registry-url: "https://registry.npmjs.org"
 
       - name: Verify version matches tag
