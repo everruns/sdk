@@ -264,7 +264,7 @@ impl Everruns {
         // Use relative path (no leading slash) for correct joining with base URL.
         // The path parameter starts with "/" (e.g., "/agents"), so we strip it.
         let path_without_slash = path.strip_prefix('/').unwrap_or(path);
-        let full_path = format!("v1/{}", path_without_slash);
+        let full_path = format!("v1/platform/{}", path_without_slash);
         self.base_url.join(&full_path).expect("valid URL")
     }
 
@@ -1765,7 +1765,7 @@ mod tests {
         let client = Everruns::builder().api_key("test_key").build().unwrap();
         assert_eq!(
             client.url("/agents").as_str(),
-            "https://app.everruns.com/api/v1/agents"
+            "https://app.everruns.com/api/v1/platform/agents"
         );
     }
 
@@ -1775,7 +1775,7 @@ mod tests {
         let url = client.sse_url("session_123", None, &[], &[]);
         assert_eq!(
             url.as_str(),
-            "https://api.example.com/v1/sessions/session_123/sse"
+            "https://api.example.com/v1/platform/sessions/session_123/sse"
         );
     }
 
@@ -1796,7 +1796,7 @@ mod tests {
         let url = client.sse_url("session_123", Some("evt_001"), &[], &[]);
         assert_eq!(
             url.as_str(),
-            "https://api.example.com/v1/sessions/session_123/sse?since_id=evt_001"
+            "https://api.example.com/v1/platform/sessions/session_123/sse?since_id=evt_001"
         );
     }
 
@@ -1829,7 +1829,7 @@ mod tests {
         );
         assert_eq!(
             url_str,
-            "https://api.example.com/v1/sessions/session_123/sse?exclude=output.message.delta&exclude=reason.thinking.delta"
+            "https://api.example.com/v1/platform/sessions/session_123/sse?exclude=output.message.delta&exclude=reason.thinking.delta"
         );
     }
 
@@ -1839,7 +1839,7 @@ mod tests {
         let url = client.sse_url("session_123", None, &[], &["output.message.delta"]);
         assert_eq!(
             url.as_str(),
-            "https://api.example.com/v1/sessions/session_123/sse?exclude=output.message.delta"
+            "https://api.example.com/v1/platform/sessions/session_123/sse?exclude=output.message.delta"
         );
     }
 
@@ -1854,7 +1854,7 @@ mod tests {
         );
         assert_eq!(
             url.as_str(),
-            "https://api.example.com/v1/sessions/session_123/sse?since_id=evt_001&exclude=output.message.delta&exclude=reason.thinking.delta"
+            "https://api.example.com/v1/platform/sessions/session_123/sse?since_id=evt_001&exclude=output.message.delta&exclude=reason.thinking.delta"
         );
     }
 
@@ -1896,7 +1896,7 @@ mod tests {
         );
         assert_eq!(
             url.as_str(),
-            "https://api.example.com/v1/sessions/session_123/sse?types=turn.started&types=turn.completed"
+            "https://api.example.com/v1/platform/sessions/session_123/sse?types=turn.started&types=turn.completed"
         );
     }
 
@@ -1911,7 +1911,7 @@ mod tests {
         );
         assert_eq!(
             url.as_str(),
-            "https://api.example.com/v1/sessions/session_123/sse?since_id=evt_001&types=turn.started&exclude=output.message.delta"
+            "https://api.example.com/v1/platform/sessions/session_123/sse?since_id=evt_001&types=turn.started&exclude=output.message.delta"
         );
     }
 }

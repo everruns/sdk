@@ -78,7 +78,7 @@ async fn test_graceful_disconnect_preserves_retry_budget() {
     ];
 
     Mock::given(method("GET"))
-        .and(path_regex("/v1/sessions/.*/sse"))
+        .and(path_regex("/v1/platform/sessions/.*/sse"))
         .respond_with(SseResponder {
             call_count: call_count.clone(),
             responses,
@@ -145,7 +145,7 @@ async fn test_connected_event_resets_backoff_after_error() {
     ];
 
     Mock::given(method("GET"))
-        .and(path_regex("/v1/sessions/.*/sse"))
+        .and(path_regex("/v1/platform/sessions/.*/sse"))
         .respond_with(SseResponder {
             call_count: call_count.clone(),
             responses,
@@ -301,7 +301,7 @@ async fn test_error_status_retries_then_recovers() {
     );
 
     Mock::given(method("GET"))
-        .and(path_regex("/v1/sessions/.*/sse"))
+        .and(path_regex("/v1/platform/sessions/.*/sse"))
         .respond_with(FailThenSseResponder {
             call_count: call_count.clone(),
             failures: 1,
@@ -338,7 +338,7 @@ async fn test_error_status_surfaces_when_retries_exhausted() {
     let call_count = Arc::new(AtomicUsize::new(0));
 
     Mock::given(method("GET"))
-        .and(path_regex("/v1/sessions/.*/sse"))
+        .and(path_regex("/v1/platform/sessions/.*/sse"))
         .respond_with(FailThenSseResponder {
             call_count: call_count.clone(),
             failures: usize::MAX,

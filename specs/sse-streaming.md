@@ -5,7 +5,7 @@ Server-Sent Events (SSE) streaming specification for Everruns SDKs.
 ## Connection
 
 ```
-GET /v1/sessions/{id}/sse
+GET /v1/platform/sessions/{id}/sse
 Accept: text/event-stream
 Cache-Control: no-cache
 ```
@@ -317,11 +317,11 @@ const opts = { exclude: ["output.message.delta", "reason.thinking.delta"] };
 SDKs must build SSE URLs correctly, using repeated keys for array parameters:
 
 ```
-Base:      /v1/sessions/{session_id}/sse
-since_id:  /v1/sessions/{session_id}/sse?since_id={event_id}
-types:     /v1/sessions/{session_id}/sse?types=turn.started&types=turn.completed
-exclude:   /v1/sessions/{session_id}/sse?exclude=output.message.delta
-Combined:  /v1/sessions/{session_id}/sse?since_id={id}&types=turn.started&exclude=output.message.delta
+Base:      /v1/platform/sessions/{session_id}/sse
+since_id:  /v1/platform/sessions/{session_id}/sse?since_id={event_id}
+types:     /v1/platform/sessions/{session_id}/sse?types=turn.started&types=turn.completed
+exclude:   /v1/platform/sessions/{session_id}/sse?exclude=output.message.delta
+Combined:  /v1/platform/sessions/{session_id}/sse?since_id={id}&types=turn.started&exclude=output.message.delta
 ```
 
 Note: URL-encode special characters in `since_id`. Each `types` and `exclude` value MUST be a separate query key (see [Array Parameter Expansion](#array-parameter-expansion)).

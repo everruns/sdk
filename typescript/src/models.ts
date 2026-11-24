@@ -20,6 +20,8 @@ export interface Agent {
   is_built_in?: boolean;
   localizations?: unknown;
   max_output_tokens?: number | null;
+  model_preset?: string | null;
+  model_role?: unknown | null;
   name: string;
   owner_agent_id?: string | null;
   parallel_tool_calls?: boolean | null;
@@ -226,6 +228,8 @@ export interface CreateAgentRequest {
   maxIterations?: number | null;
   maxOutputTokens?: number | null;
   mcpServers?: unknown;
+  modelPreset?: string | null;
+  modelRole?: unknown | null;
   name: string;
   networkAccess?: NetworkAccessList | null;
   ownerAgentId?: string | null;
@@ -515,7 +519,7 @@ export interface Harness {
   updated_at: string;
 }
 
-/** A read-only harness example defined in code. */
+/** A read-only harness example defined in code, adoptable as an org harness. */
 export interface HarnessExample {
   capabilities: AgentCapabilityConfig[];
   description: string;

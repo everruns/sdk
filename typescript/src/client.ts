@@ -122,8 +122,8 @@ export class Everruns {
     }
     // Normalize base URL: remove trailing slash to avoid double slashes
     // when joining with paths that start with "/".
-    // Example: "http://host/api/" + "/v1/agents" = "http://host/api//v1/agents" (wrong)
-    //          "http://host/api" + "/v1/agents" = "http://host/api/v1/agents" (correct)
+    // Example: "http://host/api/" + "/v1/platform/agents" = "http://host/api//v1/platform/agents" (wrong)
+    //          "http://host/api" + "/v1/platform/agents" = "http://host/api/v1/platform/agents" (correct)
     const rawBaseUrl = options.baseUrl ?? "https://app.everruns.com/api";
     this.baseUrl = trimTrailingSlashes(rawBaseUrl);
     const orgId =
@@ -194,13 +194,13 @@ export class Everruns {
   }
 
   /**
-   * Build full URL from a path, adding the /v1 prefix.
+   * Build full URL from a path, adding the /v1/platform prefix.
    * Path should start with "/" (e.g., "/agents").
    */
   private url(path: string): string {
     // Ensure path starts with "/" for consistency
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    return `${this.baseUrl}/v1${normalizedPath}`;
+    return `${this.baseUrl}/v1/platform${normalizedPath}`;
   }
 
   async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {

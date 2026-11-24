@@ -233,7 +233,7 @@ class TestEventStreamState:
         """Test basic URL building."""
         stream = EventStream(MockClient(), "session_123", StreamOptions())
         url = stream._build_url()
-        assert url == "https://api.example.com/v1/sessions/session_123/sse"
+        assert url == "https://api.example.com/v1/platform/sessions/session_123/sse"
 
     def test_url_building_with_since_id(self):
         """Test URL building with since_id."""

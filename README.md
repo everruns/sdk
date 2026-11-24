@@ -6,6 +6,13 @@
 
 Official client libraries for the [Everruns API](https://everruns.com). Build AI agent applications with typed, async SDKs for Rust, Python, and TypeScript.
 
+The `Everruns` platform client uses `/api/v1/platform/`, including session
+streaming. Keep the base URL at `https://app.everruns.com/api`; the SDK adds
+the namespace. Servers also accept legacy management URLs, so existing client
+releases continue working. Legacy URLs become deprecated on December 22, 2026;
+that date does not automatically remove them.
+`AgentClient` keeps using the published agent URL you supply.
+
 ## Installation
 
 **Rust**

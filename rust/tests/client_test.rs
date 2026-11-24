@@ -115,7 +115,7 @@ async fn test_client_sends_org_id_header() {
         .expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/agents"))
+        .and(path("/v1/platform/agents"))
         .and(header("X-Org-Id", "org_123"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [],
@@ -136,7 +136,7 @@ async fn test_with_reason_sends_encoded_change_reason_header() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("DELETE"))
-        .and(path("/v1/agents/agent_1"))
+        .and(path("/v1/platform/agents/agent_1"))
         .and(header(
             "Everruns-Change-Reason",
             "retire%20%C3%BCnused%20agent%20%E2%9C%93",
@@ -161,7 +161,7 @@ async fn test_client_without_reason_sends_no_change_reason_header() {
     let _scoped = client.with_reason("only on the derived client");
 
     Mock::given(method("DELETE"))
-        .and(path("/v1/agents/agent_1"))
+        .and(path("/v1/platform/agents/agent_1"))
         .respond_with(ResponseTemplate::new(204))
         .expect(1)
         .mount(&server)
@@ -183,7 +183,7 @@ async fn test_create_session_with_initial_files() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions"))
+        .and(path("/v1/platform/sessions"))
         .and(body_json(serde_json::json!({
             "agent_id": "agent_123",
             "title": "Session with files",
@@ -235,7 +235,7 @@ async fn test_create_agent_with_initial_files() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/agents"))
+        .and(path("/v1/platform/agents"))
         .and(body_json(serde_json::json!({
             "name": "starter-agent",
             "system_prompt": "You keep files ready.",
@@ -374,7 +374,7 @@ async fn test_create_agent_serializes_harness_name_into_body() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/agents"))
+        .and(path("/v1/platform/agents"))
         .and(body_json(serde_json::json!({
             "name": "customer-support",
             "system_prompt": "You are helpful.",
@@ -414,7 +414,7 @@ async fn test_create_session_serializes_agent_name_into_body() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions"))
+        .and(path("/v1/platform/sessions"))
         .and(body_json(serde_json::json!({
             "agent_name": "customer-support",
             "parallel_tool_calls": false
@@ -449,7 +449,7 @@ async fn test_create_session_with_locale() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions"))
+        .and(path("/v1/platform/sessions"))
         .and(body_json(serde_json::json!({
             "title": "Localized session",
             "locale": "uk-UA"
@@ -487,7 +487,7 @@ async fn test_import_agent_from_example() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/agents/import"))
+        .and(path("/v1/platform/agents/import"))
         .and(query_param("from-example", "dad-jokes-agent"))
         .respond_with(ResponseTemplate::new(201).set_body_json(serde_json::json!({
             "id": "agent_123",
@@ -520,7 +520,7 @@ async fn test_agent_stats() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/agents/agent_123/stats"))
+        .and(path("/v1/platform/agents/agent_123/stats"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "session_count": 4,
             "active_session_count": 1,
@@ -592,14 +592,14 @@ async fn test_agent_health_checks() {
     });
 
     Mock::given(method("GET"))
-        .and(path("/v1/agents/agent_123/health-checks"))
+        .and(path("/v1/platform/agents/agent_123/health-checks"))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(serde_json::json!([run_json.clone()])),
         )
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/agents/agent_123/health-checks"))
+        .and(path("/v1/platform/agents/agent_123/health-checks"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "id": "healthcheck_456",
             "config_hash": "abc123",
@@ -609,7 +609,9 @@ async fn test_agent_health_checks() {
         .mount(&server)
         .await;
     Mock::given(method("GET"))
-        .and(path("/v1/agents/agent_123/health-checks/healthcheck_123"))
+        .and(path(
+            "/v1/platform/agents/agent_123/health-checks/healthcheck_123",
+        ))
         .respond_with(ResponseTemplate::new(200).set_body_json(run_json))
         .mount(&server)
         .await;
@@ -648,7 +650,7 @@ async fn test_capabilities_list_with_options() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/capabilities"))
+        .and(path("/v1/platform/capabilities"))
         .and(query_param("search", "web"))
         .and(query_param("offset", "20"))
         .and(query_param("limit", "10"))
@@ -688,7 +690,7 @@ async fn test_agent_analyze() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/agents/analyze"))
+        .and(path("/v1/platform/agents/analyze"))
         .and(body_json(serde_json::json!({
             "system_prompt": "You are helpful."
         })))
@@ -719,7 +721,7 @@ async fn test_guardrails_helpers() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/capabilities/guardrails/examples"))
+        .and(path("/v1/platform/capabilities/guardrails/examples"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "examples": [{
                 "name": "secret-detection",
@@ -735,7 +737,7 @@ async fn test_guardrails_helpers() {
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/capabilities/guardrails/dry-run"))
+        .and(path("/v1/platform/capabilities/guardrails/dry-run"))
         .and(body_json(serde_json::json!({
             "config": {"checks": []},
             "stage": "output",
@@ -794,12 +796,12 @@ async fn test_workspaces_and_memories() {
     });
 
     Mock::given(method("GET"))
-        .and(path("/v1/workspaces/wsp_123"))
+        .and(path("/v1/platform/workspaces/wsp_123"))
         .respond_with(ResponseTemplate::new(200).set_body_json(workspace))
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/memories"))
+        .and(path("/v1/platform/memories"))
         .and(body_json(serde_json::json!({
             "name": "design-docs",
             "description": "Docs"
@@ -808,7 +810,7 @@ async fn test_workspaces_and_memories() {
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/memories/mem_123/sync"))
+        .and(path("/v1/platform/memories/mem_123/sync"))
         .respond_with(ResponseTemplate::new(200).set_body_json(memory))
         .mount(&server)
         .await;
@@ -828,24 +830,24 @@ async fn test_workspaces_and_memories() {
         "updated_at": "2026-06-13T00:00:00Z"
     });
     Mock::given(method("GET"))
-        .and(path("/v1/memories/mem_123/fs"))
+        .and(path("/v1/platform/memories/mem_123/fs"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [memory_file_info.clone()]
         })))
         .mount(&server)
         .await;
     Mock::given(method("GET"))
-        .and(path("/v1/memories/mem_123/fs/notes.md"))
+        .and(path("/v1/platform/memories/mem_123/fs/notes.md"))
         .respond_with(ResponseTemplate::new(200).set_body_json(memory_file.clone()))
         .mount(&server)
         .await;
     Mock::given(method("GET"))
-        .and(path("/v1/memories/mem_123/fs/_/download/notes.md"))
+        .and(path("/v1/platform/memories/mem_123/fs/_/download/notes.md"))
         .respond_with(ResponseTemplate::new(200).set_body_string("hello"))
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/memories/mem_123/fs/new.md"))
+        .and(path("/v1/platform/memories/mem_123/fs/new.md"))
         .and(body_json(serde_json::json!({
             "content": "new",
             "encoding": "text"
@@ -854,7 +856,7 @@ async fn test_workspaces_and_memories() {
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/memories/mem_123/fs/folder"))
+        .and(path("/v1/platform/memories/mem_123/fs/folder"))
         .and(body_json(serde_json::json!({
             "is_directory": true
         })))
@@ -868,7 +870,7 @@ async fn test_workspaces_and_memories() {
         .mount(&server)
         .await;
     Mock::given(method("PUT"))
-        .and(path("/v1/memories/mem_123/fs/notes.md"))
+        .and(path("/v1/platform/memories/mem_123/fs/notes.md"))
         .and(body_json(serde_json::json!({
             "content": "updated",
             "encoding": "text"
@@ -877,12 +879,12 @@ async fn test_workspaces_and_memories() {
         .mount(&server)
         .await;
     Mock::given(method("DELETE"))
-        .and(path("/v1/memories/mem_123/fs/old.md"))
+        .and(path("/v1/platform/memories/mem_123/fs/old.md"))
         .respond_with(ResponseTemplate::new(204))
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/memories/mem_123/fs/_/grep"))
+        .and(path("/v1/platform/memories/mem_123/fs/_/grep"))
         .and(body_json(serde_json::json!({
             "pattern": "hello"
         })))
@@ -892,7 +894,7 @@ async fn test_workspaces_and_memories() {
         .mount(&server)
         .await;
     Mock::given(method("POST"))
-        .and(path("/v1/memories/mem_123/fs/_/stat"))
+        .and(path("/v1/platform/memories/mem_123/fs/_/stat"))
         .and(body_json(serde_json::json!({
             "path": "/notes.md"
         })))
@@ -977,7 +979,7 @@ async fn test_events_list_with_upstream_filters() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/sessions/sess_123/events"))
+        .and(path("/v1/platform/sessions/sess_123/events"))
         .and(query_param("since_id", "event_001"))
         .and(query_param("types", "turn.started"))
         .and(query_param("types", "tool.completed"))
@@ -1049,7 +1051,7 @@ async fn test_create_tool_results_uses_tool_results_endpoint() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/session_123/tool-results"))
+        .and(path("/v1/platform/sessions/session_123/tool-results"))
         .and(body_json(serde_json::json!({
             "tool_results": [{
                 "tool_call_id": "call_123",
@@ -1087,7 +1089,7 @@ async fn test_workspace_files_list() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/workspaces/wsp_123/fs"))
+        .and(path("/v1/platform/workspaces/wsp_123/fs"))
         .and(query_param("recursive", "true"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [{
@@ -1125,7 +1127,9 @@ async fn test_workspace_files_read() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/workspaces/wsp_123/fs/workspace/hello.txt"))
+        .and(path(
+            "/v1/platform/workspaces/wsp_123/fs/workspace/hello.txt",
+        ))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "id": "file_001",
             "session_id": "wsp_123",
@@ -1158,7 +1162,7 @@ async fn test_workspace_files_create() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/workspaces/wsp_123/fs/workspace/new.txt"))
+        .and(path("/v1/platform/workspaces/wsp_123/fs/workspace/new.txt"))
         .and(body_json(serde_json::json!({
             "content": "new content",
             "encoding": "text"
@@ -1195,7 +1199,7 @@ async fn test_workspace_files_create_dir() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/workspaces/wsp_123/fs/workspace/subdir"))
+        .and(path("/v1/platform/workspaces/wsp_123/fs/workspace/subdir"))
         .and(body_json(serde_json::json!({
             "is_directory": true
         })))
@@ -1229,7 +1233,9 @@ async fn test_workspace_files_update() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("PUT"))
-        .and(path("/v1/workspaces/wsp_123/fs/workspace/hello.txt"))
+        .and(path(
+            "/v1/platform/workspaces/wsp_123/fs/workspace/hello.txt",
+        ))
         .and(body_json(serde_json::json!({
             "content": "updated"
         })))
@@ -1264,7 +1270,9 @@ async fn test_workspace_files_delete() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("DELETE"))
-        .and(path("/v1/workspaces/wsp_123/fs/workspace/hello.txt"))
+        .and(path(
+            "/v1/platform/workspaces/wsp_123/fs/workspace/hello.txt",
+        ))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(serde_json::json!({"deleted": true})),
         )
@@ -1286,7 +1294,7 @@ async fn test_workspace_files_move() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/workspaces/wsp_123/fs/_/move"))
+        .and(path("/v1/platform/workspaces/wsp_123/fs/_/move"))
         .and(body_json(serde_json::json!({
             "src_path": "/workspace/old.txt",
             "dst_path": "/workspace/new.txt"
@@ -1320,7 +1328,7 @@ async fn test_workspace_files_copy() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/workspaces/wsp_123/fs/_/copy"))
+        .and(path("/v1/platform/workspaces/wsp_123/fs/_/copy"))
         .and(body_json(serde_json::json!({
             "src_path": "/workspace/original.txt",
             "dst_path": "/workspace/copy.txt"
@@ -1354,7 +1362,7 @@ async fn test_workspace_files_grep() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/workspaces/wsp_123/fs/_/grep"))
+        .and(path("/v1/platform/workspaces/wsp_123/fs/_/grep"))
         .and(body_json(serde_json::json!({
             "pattern": "TODO"
         })))
@@ -1391,7 +1399,7 @@ async fn test_workspace_files_stat() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/workspaces/wsp_123/fs/_/stat"))
+        .and(path("/v1/platform/workspaces/wsp_123/fs/_/stat"))
         .and(body_json(serde_json::json!({
             "path": "/workspace/hello.txt"
         })))
@@ -1426,7 +1434,7 @@ async fn test_connections_set() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/user/connections/daytona"))
+        .and(path("/v1/platform/user/connections/daytona"))
         .and(body_json(serde_json::json!({
             "api_key": "dtn_secret_key"
         })))
@@ -1453,7 +1461,7 @@ async fn test_connections_list() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/user/connections"))
+        .and(path("/v1/platform/user/connections"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [{
                 "provider": "daytona",
@@ -1483,7 +1491,7 @@ async fn test_connections_remove() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("DELETE"))
-        .and(path("/v1/user/connections/daytona"))
+        .and(path("/v1/platform/user/connections/daytona"))
         .respond_with(ResponseTemplate::new(204))
         .mount(&server)
         .await;
@@ -1503,7 +1511,7 @@ async fn test_session_set_secrets() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("PUT"))
-        .and(path("/v1/sessions/sess_123/storage/secrets"))
+        .and(path("/v1/platform/sessions/sess_123/storage/secrets"))
         .and(body_json(serde_json::json!({
             "secrets": {
                 "OPENAI_API_KEY": "sk-abc123",
@@ -1531,7 +1539,7 @@ async fn test_session_set_secrets_empty() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("PUT"))
-        .and(path("/v1/sessions/sess_123/storage/secrets"))
+        .and(path("/v1/platform/sessions/sess_123/storage/secrets"))
         .and(body_json(serde_json::json!({
             "secrets": {}
         })))
@@ -1555,7 +1563,7 @@ async fn test_budgets_create() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/budgets"))
+        .and(path("/v1/platform/budgets"))
         .and(body_json(serde_json::json!({
             "subject_type": "session",
             "subject_id": "sess_123",
@@ -1595,7 +1603,7 @@ async fn test_budgets_get() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/budgets/bdgt_001"))
+        .and(path("/v1/platform/budgets/bdgt_001"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "id": "bdgt_001",
             "organization_id": "org_123",
@@ -1627,7 +1635,7 @@ async fn test_budgets_list() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/budgets"))
+        .and(path("/v1/platform/budgets"))
         .and(query_param("subject_type", "session"))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(serde_json::json!([{
@@ -1662,7 +1670,7 @@ async fn test_budgets_update() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("PATCH"))
-        .and(path("/v1/budgets/bdgt_001"))
+        .and(path("/v1/platform/budgets/bdgt_001"))
         .and(body_json(serde_json::json!({
             "limit": 20.0
         })))
@@ -1696,7 +1704,7 @@ async fn test_budgets_delete() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("DELETE"))
-        .and(path("/v1/budgets/bdgt_001"))
+        .and(path("/v1/platform/budgets/bdgt_001"))
         .respond_with(ResponseTemplate::new(204))
         .mount(&server)
         .await;
@@ -1714,7 +1722,7 @@ async fn test_budgets_top_up() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/budgets/bdgt_001/top-up"))
+        .and(path("/v1/platform/budgets/bdgt_001/top-up"))
         .and(body_json(serde_json::json!({
             "amount": 5.0,
             "description": "manual top-up"
@@ -1752,7 +1760,7 @@ async fn test_budgets_ledger() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/budgets/bdgt_001/ledger"))
+        .and(path("/v1/platform/budgets/bdgt_001/ledger"))
         .and(query_param("limit", "10"))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(serde_json::json!([{
@@ -1782,7 +1790,7 @@ async fn test_budgets_check() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/budgets/bdgt_001/check"))
+        .and(path("/v1/platform/budgets/bdgt_001/check"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "action": "continue"
         })))
@@ -1806,7 +1814,7 @@ async fn test_session_budgets() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/sessions/sess_123/budgets"))
+        .and(path("/v1/platform/sessions/sess_123/budgets"))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(serde_json::json!([{
                 "id": "bdgt_001",
@@ -1840,7 +1848,7 @@ async fn test_session_budget_check() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/sessions/sess_123/budget-check"))
+        .and(path("/v1/platform/sessions/sess_123/budget-check"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "action": "warn",
             "message": "Budget running low",
@@ -1867,7 +1875,7 @@ async fn test_session_resume() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/sessions/sess_123/resume"))
+        .and(path("/v1/platform/sessions/sess_123/resume"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "resumed_budgets": 2,
             "session_id": "sess_123"
@@ -1893,7 +1901,7 @@ async fn test_session_export() {
     let jsonl = "{\"id\":\"msg_001\",\"session_id\":\"sess_123\",\"sequence\":1,\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hello\"}],\"created_at\":\"2024-01-15T10:30:00.000Z\"}\n{\"id\":\"msg_002\",\"session_id\":\"sess_123\",\"sequence\":2,\"role\":\"agent\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}],\"created_at\":\"2024-01-15T10:30:01.000Z\"}\n";
 
     Mock::given(method("GET"))
-        .and(path("/v1/sessions/sess_123/export"))
+        .and(path("/v1/platform/sessions/sess_123/export"))
         .respond_with(ResponseTemplate::new(200).set_body_string(jsonl))
         .mount(&server)
         .await;
@@ -1932,7 +1940,7 @@ async fn test_harnesses_list() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/harnesses"))
+        .and(path("/v1/platform/harnesses"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [harness_json()],
             "total": 1,
@@ -1955,7 +1963,7 @@ async fn test_harnesses_search() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/harnesses"))
+        .and(path("/v1/platform/harnesses"))
         .and(query_param("search", "research"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [harness_json()],
@@ -1982,7 +1990,7 @@ async fn test_harnesses_get() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/harnesses/harness_123"))
+        .and(path("/v1/platform/harnesses/harness_123"))
         .respond_with(ResponseTemplate::new(200).set_body_json(harness_json()))
         .mount(&server)
         .await;
@@ -2006,7 +2014,7 @@ async fn test_harnesses_create() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/harnesses"))
+        .and(path("/v1/platform/harnesses"))
         .and(body_json(serde_json::json!({
             "name": "deep-research",
             "system_prompt": "You research deeply."
@@ -2030,7 +2038,7 @@ async fn test_harnesses_create_with_options() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("POST"))
-        .and(path("/v1/harnesses"))
+        .and(path("/v1/platform/harnesses"))
         .and(body_json(serde_json::json!({
             "name": "deep-research",
             "system_prompt": "You research deeply.",
@@ -2070,7 +2078,7 @@ async fn test_harnesses_update() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("PATCH"))
-        .and(path("/v1/harnesses/harness_123"))
+        .and(path("/v1/platform/harnesses/harness_123"))
         .and(body_json(serde_json::json!({
             "description": "Updated description"
         })))
@@ -2096,7 +2104,7 @@ async fn test_harnesses_delete() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("DELETE"))
-        .and(path("/v1/harnesses/harness_123"))
+        .and(path("/v1/platform/harnesses/harness_123"))
         .respond_with(ResponseTemplate::new(204))
         .mount(&server)
         .await;
@@ -2114,7 +2122,7 @@ async fn test_harnesses_list_examples() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/harness-examples"))
+        .and(path("/v1/platform/harness-examples"))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(serde_json::json!([{
                 "name": "deep-research",
@@ -2167,7 +2175,7 @@ async fn test_models_list() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/models"))
+        .and(path("/v1/platform/models"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "data": [model_json()],
             "total": 1,
@@ -2190,7 +2198,7 @@ async fn test_models_get() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/models/model_123"))
+        .and(path("/v1/platform/models/model_123"))
         .respond_with(ResponseTemplate::new(200).set_body_json(model_json()))
         .mount(&server)
         .await;
@@ -2214,7 +2222,7 @@ async fn test_react_and_unreact_encode_emoji_path() {
 
     Mock::given(method("PUT"))
         .and(path(
-            "/v1/sessions/session_1/messages/message_1/reactions/%F0%9F%91%8D",
+            "/v1/platform/sessions/session_1/messages/message_1/reactions/%F0%9F%91%8D",
         ))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(reaction_change_json("👍", true, true)),
@@ -2224,7 +2232,7 @@ async fn test_react_and_unreact_encode_emoji_path() {
         .await;
     Mock::given(method("DELETE"))
         .and(path(
-            "/v1/sessions/session_1/messages/message_1/reactions/%3Aparty%3A",
+            "/v1/platform/sessions/session_1/messages/message_1/reactions/%3Aparty%3A",
         ))
         .respond_with(
             ResponseTemplate::new(200).set_body_json(reaction_change_json(":party:", false, false)),
@@ -2255,7 +2263,7 @@ async fn test_reactions_lists_summaries() {
     let client = Everruns::with_base_url("evr_test_key", &server.uri()).expect("client");
 
     Mock::given(method("GET"))
-        .and(path("/v1/sessions/session_1/reactions"))
+        .and(path("/v1/platform/sessions/session_1/reactions"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([{
             "message_id": "message_1",
             "reactions": [{
