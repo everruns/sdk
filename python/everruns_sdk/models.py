@@ -36,6 +36,8 @@ class Agent(BaseModel):
     max_iterations: Optional[int] = None
     max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    model_preset: Optional[str] = None
+    model_role: Optional[Any] = None
     name: str
     network_access: Optional[NetworkAccessList] = None
     owner_agent_id: Optional[str] = None
@@ -314,6 +316,8 @@ class CreateAgentRequest(BaseModel):
     max_iterations: Optional[int] = None
     max_output_tokens: Optional[int] = None
     mcp_servers: Optional[Any] = Field(default=None, alias="mcpServers")
+    model_preset: Optional[str] = None
+    model_role: Optional[Any] = None
     name: str
     network_access: Optional[NetworkAccessList] = None
     owner_agent_id: Optional[str] = None
@@ -686,7 +690,7 @@ class Harness(BaseModel):
 
 
 class HarnessExample(BaseModel):
-    """A read-only harness example defined in code."""
+    """A read-only harness example defined in code, adoptable as an org harness."""
 
     capabilities: list[AgentCapabilityConfig]
     description: str
@@ -914,6 +918,7 @@ class ModelProfile(BaseModel):
     attachment: bool
     cost: Optional[ModelCost] = None
     decisions: Optional[Any] = None
+    deprecation: Optional[Any] = None
     description: Optional[str] = None
     family: str
     images: Optional[Any] = None

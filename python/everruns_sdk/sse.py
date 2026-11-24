@@ -95,8 +95,8 @@ class EventStream:
     ):
         self._client = client
         # Route relative to the client's base URL. The management client serves
-        # `v1/sessions/{id}/sse`; the agent client passes `sessions/{id}/sse`.
-        self._sse_path = sse_path or f"v1/sessions/{session_id}/sse"
+        # `v1/platform/sessions/{id}/sse`; the agent client passes `sessions/{id}/sse`.
+        self._sse_path = sse_path or f"v1/platform/sessions/{session_id}/sse"
         self._session_id = session_id
         self._options = options
         self._last_event_id: Optional[str] = None

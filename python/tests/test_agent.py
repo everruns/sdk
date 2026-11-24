@@ -295,7 +295,7 @@ async def test_run_raises_on_turn_failed():
 @respx.mock
 async def test_management_client_warns_once(monkeypatch):
     monkeypatch.setattr(client_module, "_warned_deprecations", set())
-    api = "https://api.test/api/v1"
+    api = "https://api.test/api/v1/platform"
     respx.post(f"{api}/sessions").mock(return_value=httpx.Response(500, json={}))
     respx.post(f"{api}/sessions/s/messages").mock(return_value=httpx.Response(500, json={}))
     client = Everruns(api_key="evr_pat_x", base_url="https://api.test/api")

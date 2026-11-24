@@ -283,7 +283,7 @@ class Everruns:
         # Use relative path (no leading slash) for correct joining with base URL.
         # The path parameter starts with "/" (e.g., "/agents"), so we strip it.
         path_without_slash = path.lstrip("/")
-        return f"v1/{path_without_slash}"
+        return f"v1/platform/{path_without_slash}"
 
     def _auth_headers(self, *, content_type: Optional[str] = "application/json") -> dict[str, str]:
         headers = {"Authorization": self._api_key.value}

@@ -113,7 +113,7 @@ describe("Everruns", () => {
   it("should default to Everruns Cloud", () => {
     const client = new Everruns({ apiKey: "evr_test_key" });
     expect(client.getStreamUrl("/agents")).toBe(
-      "https://app.everruns.com/api/v1/agents",
+      "https://app.everruns.com/api/v1/platform/agents",
     );
   });
 
@@ -123,7 +123,7 @@ describe("Everruns", () => {
       baseUrl: "https://custom.api.com",
     });
     // URLs include the /v1 prefix for API versioning
-    expect(client.getStreamUrl("/test")).toBe("https://custom.api.com/v1/test");
+    expect(client.getStreamUrl("/test")).toBe("https://custom.api.com/v1/platform/test");
   });
 
   it("should normalize base URL with trailing slash", () => {
@@ -133,7 +133,7 @@ describe("Everruns", () => {
     });
     // Trailing slash is removed, /v1 prefix is added
     expect(client.getStreamUrl("/agents")).toBe(
-      "https://custom.api.com/api/v1/agents",
+      "https://custom.api.com/api/v1/platform/agents",
     );
   });
 
@@ -143,7 +143,7 @@ describe("Everruns", () => {
       baseUrl: "https://custom.api.com/api///",
     });
     expect(client.getStreamUrl("/agents")).toBe(
-      "https://custom.api.com/api/v1/agents",
+      "https://custom.api.com/api/v1/platform/agents",
     );
   });
 
@@ -182,7 +182,7 @@ describe("Everruns", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions",
+      "https://app.everruns.com/api/v1/platform/sessions",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -227,7 +227,7 @@ describe("Everruns", () => {
     await client.agents.list();
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/agents",
+      "https://app.everruns.com/api/v1/platform/agents",
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: "evr_test_key",
@@ -247,7 +247,7 @@ describe("Everruns", () => {
       .agents.delete("agent_1");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/agents/agent_1",
+      "https://app.everruns.com/api/v1/platform/agents/agent_1",
       expect.objectContaining({
         method: "DELETE",
         headers: expect.objectContaining({
@@ -344,7 +344,7 @@ describe("Everruns", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/agents",
+      "https://app.everruns.com/api/v1/platform/agents",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -389,7 +389,7 @@ describe("Everruns", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions",
+      "https://app.everruns.com/api/v1/platform/sessions",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -419,7 +419,7 @@ describe("Everruns", () => {
     await client.agents.importExample("dad-jokes-agent");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/agents/import?from-example=dad-jokes-agent",
+      "https://app.everruns.com/api/v1/platform/agents/import?from-example=dad-jokes-agent",
       expect.objectContaining({
         method: "POST",
         body: "",
@@ -462,7 +462,7 @@ describe("Everruns", () => {
     expect(response.session_count).toBe(4);
     expect(response.execution_count).toBe(7);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/agents/agent_123/stats",
+      "https://app.everruns.com/api/v1/platform/agents/agent_123/stats",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -538,7 +538,7 @@ describe("Everruns", () => {
     expect(triggered.status).toBe("pending");
     expect(triggered.summary == null).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/agents/agent_123/health-checks",
+      "https://app.everruns.com/api/v1/platform/agents/agent_123/health-checks",
       expect.objectContaining({ method: "POST" }),
     );
   });
@@ -575,7 +575,7 @@ describe("Everruns", () => {
     expect(response.offset).toBe(20);
     expect(response.limit).toBe(10);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/capabilities?search=web&offset=20&limit=10",
+      "https://app.everruns.com/api/v1/platform/capabilities?search=web&offset=20&limit=10",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -605,7 +605,7 @@ describe("Everruns", () => {
 
     expect(response.findings[0].rule_id).toBe("prompt.empty");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/agents/analyze",
+      "https://app.everruns.com/api/v1/platform/agents/analyze",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -657,12 +657,12 @@ describe("Everruns", () => {
     expect(dryRun.blocked).toBe(false);
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      "https://app.everruns.com/api/v1/capabilities/guardrails/examples",
+      "https://app.everruns.com/api/v1/platform/capabilities/guardrails/examples",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
-      "https://app.everruns.com/api/v1/capabilities/guardrails/dry-run",
+      "https://app.everruns.com/api/v1/platform/capabilities/guardrails/dry-run",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -816,12 +816,12 @@ describe("Everruns", () => {
     expect(stat.path).toBe("/notes.md");
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      "https://app.everruns.com/api/v1/workspaces/wsp_123",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123",
       expect.objectContaining({ headers: expect.anything() }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
-      "https://app.everruns.com/api/v1/memories",
+      "https://app.everruns.com/api/v1/platform/memories",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ name: "design-docs", description: "Docs" }),
@@ -829,27 +829,27 @@ describe("Everruns", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       3,
-      "https://app.everruns.com/api/v1/memories/mem_123/sync",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/sync",
       expect.objectContaining({ method: "POST" }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       4,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       5,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/notes.md",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/notes.md",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       6,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/_/download/notes.md",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/_/download/notes.md",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       7,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/new.md",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/new.md",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ content: "new", encoding: "text" }),
@@ -857,7 +857,7 @@ describe("Everruns", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       8,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/folder",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/folder",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ is_directory: true }),
@@ -865,7 +865,7 @@ describe("Everruns", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       9,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/notes.md",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/notes.md",
       expect.objectContaining({
         method: "PUT",
         body: JSON.stringify({ content: "updated", encoding: "text" }),
@@ -873,12 +873,12 @@ describe("Everruns", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       10,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/old.md",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/old.md",
       expect.objectContaining({ method: "DELETE" }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       11,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/_/grep",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/_/grep",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ pattern: "hello" }),
@@ -886,7 +886,7 @@ describe("Everruns", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       12,
-      "https://app.everruns.com/api/v1/memories/mem_123/fs/_/stat",
+      "https://app.everruns.com/api/v1/platform/memories/mem_123/fs/_/stat",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ path: "/notes.md" }),
@@ -913,7 +913,7 @@ describe("Everruns", () => {
     expect(response.accepted).toBe(1);
     expect(response.status).toBe("active");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/session_123/tool-results",
+      "https://app.everruns.com/api/v1/platform/sessions/session_123/tool-results",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -1442,7 +1442,7 @@ describe("EventsClient URL building", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/sess_123/events?since_id=event_001&types=turn.started&types=tool.completed&exclude=output.message.delta&limit=25&before_sequence=100&after_sequence=50&around=event_anchor&window=10&from_ts=2026-06-01T00%3A00%3A00Z&to_ts=2026-06-02T00%3A00%3A00Z&turn_id=turn_123&exec_id=exec_123&trace_id=trace_123&tags=alpha&tags=beta&tool_name=bash&q=failed+tool&order_desc=true",
+      "https://app.everruns.com/api/v1/platform/sessions/sess_123/events?since_id=event_001&types=turn.started&types=tool.completed&exclude=output.message.delta&limit=25&before_sequence=100&after_sequence=50&around=event_anchor&window=10&from_ts=2026-06-01T00%3A00%3A00Z&to_ts=2026-06-02T00%3A00%3A00Z&turn_id=turn_123&exec_id=exec_123&trace_id=trace_123&tags=alpha&tags=beta&tool_name=bash&q=failed+tool&order_desc=true",
       expect.any(Object),
     );
     expect(events).toEqual([event]);
@@ -1726,7 +1726,7 @@ describe("WorkspaceFilesClient", () => {
 
     expect(response.data).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs?recursive=true",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs?recursive=true",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -1743,7 +1743,7 @@ describe("WorkspaceFilesClient", () => {
     await client.workspaceFiles.list("wsp_123", { path: "/workspace" });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/workspace",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -1764,7 +1764,7 @@ describe("WorkspaceFilesClient", () => {
 
     expect(file.content).toBe("hello");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/workspace/hello.txt",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -1786,7 +1786,7 @@ describe("WorkspaceFilesClient", () => {
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/new.txt",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/workspace/new.txt",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ content: "hello", encoding: "text" }),
@@ -1806,7 +1806,7 @@ describe("WorkspaceFilesClient", () => {
     await client.workspaceFiles.createDir("wsp_123", "/workspace/subdir");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/subdir",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/workspace/subdir",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ is_directory: true }),
@@ -1830,7 +1830,7 @@ describe("WorkspaceFilesClient", () => {
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/workspace/hello.txt",
       expect.objectContaining({
         method: "PUT",
         body: JSON.stringify({ content: "updated" }),
@@ -1854,7 +1854,7 @@ describe("WorkspaceFilesClient", () => {
 
     expect(resp.deleted).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/hello.txt",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/workspace/hello.txt",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -1873,7 +1873,7 @@ describe("WorkspaceFilesClient", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/workspace/dir?recursive=true",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/workspace/dir?recursive=true",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -1894,7 +1894,7 @@ describe("WorkspaceFilesClient", () => {
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/move",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/_/move",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -1921,7 +1921,7 @@ describe("WorkspaceFilesClient", () => {
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/copy",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/_/copy",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -1962,7 +1962,7 @@ describe("WorkspaceFilesClient", () => {
     expect(results).toHaveLength(1);
     expect(results[0].matches).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/grep",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/_/grep",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ pattern: "TODO" }),
@@ -1994,7 +1994,7 @@ describe("WorkspaceFilesClient", () => {
 
     expect(stat.name).toBe("hello.txt");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/workspaces/wsp_123/fs/_/stat",
+      "https://app.everruns.com/api/v1/platform/workspaces/wsp_123/fs/_/stat",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ path: "/workspace/hello.txt" }),
@@ -2069,7 +2069,7 @@ describe("ConnectionsClient", () => {
 
     expect(conn.provider).toBe("daytona");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/user/connections/daytona",
+      "https://app.everruns.com/api/v1/platform/user/connections/daytona",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ api_key: "dtn_secret_key" }),
@@ -2096,7 +2096,7 @@ describe("ConnectionsClient", () => {
     expect(connections).toHaveLength(1);
     expect(connections[0].provider).toBe("daytona");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/user/connections",
+      "https://app.everruns.com/api/v1/platform/user/connections",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2113,7 +2113,7 @@ describe("ConnectionsClient", () => {
     await client.connections.remove("daytona");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/user/connections/daytona",
+      "https://app.everruns.com/api/v1/platform/user/connections/daytona",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -2137,7 +2137,7 @@ describe("SessionsClient.setSecrets", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/sess_123/storage/secrets",
+      "https://app.everruns.com/api/v1/platform/sessions/sess_123/storage/secrets",
       expect.objectContaining({
         method: "PUT",
         body: JSON.stringify({
@@ -2162,7 +2162,7 @@ describe("SessionsClient.setSecrets", () => {
     await client.sessions.setSecrets("sess_123", {});
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/sess_123/storage/secrets",
+      "https://app.everruns.com/api/v1/platform/sessions/sess_123/storage/secrets",
       expect.objectContaining({
         method: "PUT",
         body: JSON.stringify({ secrets: {} }),
@@ -2212,7 +2212,7 @@ describe("BudgetsClient", () => {
 
     expect(budget.id).toBe("bdgt_001");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets",
+      "https://app.everruns.com/api/v1/platform/budgets",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -2239,7 +2239,7 @@ describe("BudgetsClient", () => {
 
     expect(budget.id).toBe("bdgt_001");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets/bdgt_001",
+      "https://app.everruns.com/api/v1/platform/budgets/bdgt_001",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2257,7 +2257,7 @@ describe("BudgetsClient", () => {
 
     expect(budgets).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets?subject_type=session",
+      "https://app.everruns.com/api/v1/platform/budgets?subject_type=session",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2275,7 +2275,7 @@ describe("BudgetsClient", () => {
 
     expect(budget.limit).toBe(20.0);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets/bdgt_001",
+      "https://app.everruns.com/api/v1/platform/budgets/bdgt_001",
       expect.objectContaining({
         method: "PATCH",
         body: JSON.stringify({ limit: 20.0 }),
@@ -2295,7 +2295,7 @@ describe("BudgetsClient", () => {
     await client.budgets.delete("bdgt_001");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets/bdgt_001",
+      "https://app.everruns.com/api/v1/platform/budgets/bdgt_001",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -2316,7 +2316,7 @@ describe("BudgetsClient", () => {
 
     expect(budget.balance).toBe(15.0);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets/bdgt_001/top-up",
+      "https://app.everruns.com/api/v1/platform/budgets/bdgt_001/top-up",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ amount: 5.0, description: "manual" }),
@@ -2345,7 +2345,7 @@ describe("BudgetsClient", () => {
 
     expect(entries).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets/bdgt_001/ledger?limit=10",
+      "https://app.everruns.com/api/v1/platform/budgets/bdgt_001/ledger?limit=10",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2363,7 +2363,7 @@ describe("BudgetsClient", () => {
 
     expect(result.action).toBe("continue");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/budgets/bdgt_001/check",
+      "https://app.everruns.com/api/v1/platform/budgets/bdgt_001/check",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2385,7 +2385,7 @@ describe("Session budget shortcuts", () => {
 
     expect(budgets).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/sess_123/budgets",
+      "https://app.everruns.com/api/v1/platform/sessions/sess_123/budgets",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2410,7 +2410,7 @@ describe("Session budget shortcuts", () => {
     expect(result.action).toBe("warn");
     expect(result.balance).toBe(1.5);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/sess_123/budget-check",
+      "https://app.everruns.com/api/v1/platform/sessions/sess_123/budget-check",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2431,7 +2431,7 @@ describe("Session budget shortcuts", () => {
 
     expect(result.resumed_budgets).toBe(2);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/sess_123/resume",
+      "https://app.everruns.com/api/v1/platform/sessions/sess_123/resume",
       expect.objectContaining({ method: "POST" }),
     );
   });
@@ -2453,7 +2453,7 @@ describe("Session budget shortcuts", () => {
     expect(result).toContain("msg_001");
     expect(result).toContain("msg_002");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/sessions/sess_123/export",
+      "https://app.everruns.com/api/v1/platform/sessions/sess_123/export",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2490,7 +2490,7 @@ describe("HarnessesClient", () => {
     expect(response.data).toHaveLength(1);
     expect(response.total).toBe(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/harnesses",
+      "https://app.everruns.com/api/v1/platform/harnesses",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2512,7 +2512,7 @@ describe("HarnessesClient", () => {
     await client.harnesses.search("deep research");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/harnesses?search=deep%20research",
+      "https://app.everruns.com/api/v1/platform/harnesses?search=deep%20research",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2535,7 +2535,7 @@ describe("HarnessesClient", () => {
     expect(harness.default_model_id).toBe("mod_1");
     expect(harness.created_at).toBe("2026-07-01T00:00:00Z");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/harnesses/harness_123",
+      "https://app.everruns.com/api/v1/platform/harnesses/harness_123",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2570,7 +2570,7 @@ describe("HarnessesClient", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/harnesses",
+      "https://app.everruns.com/api/v1/platform/harnesses",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -2623,7 +2623,7 @@ describe("HarnessesClient", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/harnesses/harness_123",
+      "https://app.everruns.com/api/v1/platform/harnesses/harness_123",
       expect.objectContaining({
         method: "PATCH",
         body: JSON.stringify({
@@ -2647,7 +2647,7 @@ describe("HarnessesClient", () => {
     await client.harnesses.delete("harness_123");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/harnesses/harness_123",
+      "https://app.everruns.com/api/v1/platform/harnesses/harness_123",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -2674,7 +2674,7 @@ describe("HarnessesClient", () => {
     expect(examples).toHaveLength(1);
     expect(examples[0].name).toBe("deep-research");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/harness-examples",
+      "https://app.everruns.com/api/v1/platform/harness-examples",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2719,7 +2719,7 @@ describe("ModelsClient", () => {
     expect(response.data[0].provider_type).toBe("openai");
     expect(response.data[0].model_id).toBe("gpt-4");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/models",
+      "https://app.everruns.com/api/v1/platform/models",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
@@ -2740,12 +2740,12 @@ describe("ModelsClient", () => {
     expect(model.display_name).toBe("GPT-4");
     expect(model.is_favorite).toBe(false);
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://app.everruns.com/api/v1/models/model_123",
+      "https://app.everruns.com/api/v1/platform/models/model_123",
       expect.objectContaining({ headers: expect.any(Object) }),
     );
   });
   describe("message reactions", () => {
-    const base = "https://app.everruns.com/api/v1/sessions/session_1";
+    const base = "https://app.everruns.com/api/v1/platform/sessions/session_1";
     const change = (emoji: string, reacted: boolean, changed = true) => ({
       message_id: "message_1",
       emoji,

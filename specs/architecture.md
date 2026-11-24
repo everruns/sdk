@@ -58,8 +58,8 @@ All SDKs normalize base URLs and paths to ensure correct URL construction:
 ### The Problem
 
 RFC 3986 URL joining has a common pitfall:
-- Without trailing slash on base: `http://host/api` + `v1/agents` = `http://host/v1/agents` (loses `/api`)
-- With trailing slash on base: `http://host/api/` + `v1/agents` = `http://host/api/v1/agents` (correct)
+- Without trailing slash on base: `http://host/api` + `v1/platform/agents` = `http://host/v1/platform/agents` (loses `/api`)
+- With trailing slash on base: `http://host/api/` + `v1/platform/agents` = `http://host/api/v1/platform/agents` (correct)
 
 ### The Solution
 
@@ -67,22 +67,22 @@ Each SDK normalizes URLs at client construction:
 
 | SDK | Base URL | Path Format | Strategy |
 |-----|----------|-------------|----------|
-| Rust | Add trailing `/` | `v1/{path}` (relative) | `Url::join()` with normalized base |
-| Python | Add trailing `/` | `v1/{path}` (relative) | httpx `base_url` param |
-| TypeScript | Remove trailing `/` | `/v1/{path}` (absolute) | String concatenation |
+| Rust | Add trailing `/` | `v1/platform/{path}` (relative) | `Url::join()` with normalized base |
+| Python | Add trailing `/` | `v1/platform/{path}` (relative) | httpx `base_url` param |
+| TypeScript | Remove trailing `/` | `/v1/platform/{path}` (absolute) | String concatenation |
 
 ### Implementation Pattern
 
 ```
 // Rust/Python: ensure trailing slash, use relative paths
 base = "http://host/api/"  // normalized
-path = "v1/agents"         // no leading slash
-result = join(base, path)  // "http://host/api/v1/agents"
+path = "v1/platform/agents"         // no leading slash
+result = join(base, path)  // "http://host/api/v1/platform/agents"
 
 // TypeScript: remove trailing slash, use absolute paths
 base = "http://host/api"   // normalized (no trailing slash)
-path = "/v1/agents"        // with leading slash
-result = base + path       // "http://host/api/v1/agents"
+path = "/v1/platform/agents"        // with leading slash
+result = base + path       // "http://host/api/v1/platform/agents"
 ```
 
 ### Testing Custom Base URLs
@@ -116,3 +116,10 @@ All public structs must have `#[non_exhaustive]`:
 - Request structs should provide builder methods for ergonomic construction
 
 Reference: https://doc.rust-lang.org/reference/attributes/type_system.html#the-non_exhaustive-attribute
+
+## Platform namespace
+
+The `Everruns` platform client keeps its configured base URL (normally
+`https://app.everruns.com/api`) and appends `/v1/platform` to resource paths.
+SSE uses the same prefix. `AgentClient` continues using the caller-provided
+agent URL directly; its execution paths and credentials do not change.
