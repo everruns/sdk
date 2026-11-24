@@ -918,6 +918,7 @@ class ModelProfile(BaseModel):
     attachment: bool
     cost: Optional[ModelCost] = None
     decisions: Optional[Any] = None
+    deprecation: Optional[Any] = None
     description: Optional[str] = None
     family: str
     images: Optional[Any] = None

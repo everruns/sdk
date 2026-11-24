@@ -701,6 +701,7 @@ export interface ModelProfile {
   attachment: boolean;
   cost?: ModelCost | null;
   decisions?: unknown | null;
+  deprecation?: unknown | null;
   description?: string | null;
   family: string;
   images?: unknown | null;

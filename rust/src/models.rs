@@ -2052,6 +2052,8 @@ pub struct ModelProfile {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub decisions: Option<serde_json::Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deprecation: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub family: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
